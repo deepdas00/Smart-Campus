@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
+import Footer from '../Components/Footer';
+import Navbar from '../Components/Navbar/Navbar';
 
 
 export default function CampusReporterHome() {
@@ -60,64 +62,9 @@ export default function CampusReporterHome() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div id='home' className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-blue-700 bg-clip-text text-transparent">
-                Smart Campus
-              </span>
-            </div>
-            
-            <div className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-blue-600 transition">Features</a>
-              <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition">How It Works</a>
-              <a href="#impact" className="text-gray-700 hover:text-blue-600 transition">Impact</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 transition">Contact</a>
-            </div>
-
-            <div className="hidden md:flex space-x-4">
-              <Link
-              to='/login'
-              className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                Login
-              </Link>
-              <button className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:shadow-lg transition">
-                Report Issue
-              </button>
-            </div>
-
-            <button 
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t">
-            <div className="px-4 py-4 space-y-3">
-              <a href="#features" className="block text-gray-700 hover:text-blue-600">Features</a>
-              <a href="#how-it-works" className="block text-gray-700 hover:text-blue-600">How It Works</a>
-              <a href="#impact" className="block text-gray-700 hover:text-blue-600">Impact</a>
-              <a href="#contact" className="block text-gray-700 hover:text-blue-600">Contact</a>
-              <button className="w-full px-4 py-2 text-blue-600 border border-blue-600 rounded-lg">
-                Login
-              </button>
-              <button className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg">
-                Report Issue
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
+      <Navbar/>
 
       {/* Hero Section */}
       <section className="pt-32 pb-20 px-4">
@@ -343,52 +290,7 @@ export default function CampusReporterHome() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-12 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-white font-bold">Smart Campus</span>
-              </div>
-              <p className="text-sm">Making campuses safer and better with AI-powered issue reporting.</p>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Product</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Features</a></li>
-                <li><a href="#" className="hover:text-white transition">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition">Demo</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">About</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
-              </ul>
-            </div>
-            
-            <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition">Security</a></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>© 2025 Smart Campus Issue Reporter. Powered by Google AI. All rights reserved.</p>
-          </div>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   );
 }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { AlertCircle, Building2, GraduationCap, Mail, Lock, User, Phone, MapPin, ArrowLeft, Check, Eye, EyeOff } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import Footer from '../Components/Footer';
 
 export default function SignUpPage() {
   const [userType, setUserType] = useState(null);
@@ -70,29 +72,33 @@ export default function SignUpPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200">
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full z-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
-                Smart Campus
-              </span>
+              <Link to={"/"} className="flex items-center space-x-2">
+                <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
+                  <AlertCircle className="w-6 h-6 text-white" />
+                </div>
+                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                  Smart Campus
+                </span>
+              </Link>
             </div>
             
             <div className="flex items-center space-x-4">
               <span className="text-gray-600 hidden sm:inline">Already have an account?</span>
-              <button className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium">
+              <Link
+              to={"/login"}
+              className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium">
                 Login
-              </button>
+              </Link>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="py-25 max-w-6xl mx-auto px-4 py-12">
         <div className="mb-12">
           <div className="flex items-center justify-center space-x-4">
             <div className={`flex items-center space-x-2 ${!userType ? 'text-blue-600' : 'text-gray-400'}`}>
@@ -223,7 +229,7 @@ export default function SignUpPage() {
                     <div className="grid md:grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Department
+                          Department 
                         </label>
                         <select
                           name="department"
@@ -483,15 +489,21 @@ export default function SignUpPage() {
               <div className="mt-6 text-center">
                 <p className="text-gray-600">
                   Already have an account?{' '}
-                  <a href="#" className="text-blue-600 hover:underline font-medium">
+                  <Link 
+                  to={"/login"}
+                  className="text-blue-600 hover:underline font-medium">
                     Login here
-                  </a>
+                  </Link>
                 </p>
               </div>
             </div>
           </div>
         )}
       </div>
+      
+
+      {/* Footer */}
+      <Footer/>
     </div>
   );
 }

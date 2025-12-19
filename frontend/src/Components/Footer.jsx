@@ -1,4 +1,4 @@
-import React from 'react'
+import React from "react";
 import {
   AlertCircle,
   Camera,
@@ -10,9 +10,9 @@ import {
   Bell,
   ArrowRight,
   Menu,
-  X
+  X,
 } from "lucide-react";
-
+import logo from "../assets/logo.png";
 
 function Footer() {
   return (
@@ -22,49 +22,93 @@ function Footer() {
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
-                  <AlertCircle className="w-5 h-5 text-white" />
-                </div>
+                <img
+                  src={logo}
+                  alt="Smart Campus Logo"
+                  className="w-16 h-16 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                />
                 <span className="text-white font-bold">Smart Campus</span>
               </div>
-              <p className="text-sm">Making campuses safer and better with AI-powered issue reporting.</p>
+              <p className="text-sm">
+                Making campuses safer and better with AI-powered issue
+                reporting.
+              </p>
             </div>
-            
+
             <div>
               <h4 className="text-white font-semibold mb-4">Product</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Features</a></li>
-                <li><a href="#" className="hover:text-white transition">Pricing</a></li>
-                <li><a href="#" className="hover:text-white transition">Demo</a></li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Demo
+                  </a>
+                </li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-white font-semibold mb-4">Company</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">About</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    About
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Contact
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Careers
+                  </a>
+                </li>
               </ul>
             </div>
-            
+
             <div>
               <h4 className="text-white font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition">Security</a></li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Terms
+                  </a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition">
+                    Security
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
-          
+
           <div className="border-t border-gray-800 pt-8 text-center text-sm">
-            <p>© 2025 Smart Campus Issue Reporter. Powered by Google AI. All rights reserved.</p>
+            <p>
+              © 2025 Smart Campus Issue Reporter. Powered by Google AI. All
+              rights reserved.
+            </p>
           </div>
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
-export default Footer
+export default Footer;

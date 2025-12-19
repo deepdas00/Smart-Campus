@@ -3,6 +3,7 @@ import { AlertCircle, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
+import logo from "../../assets/logo.png";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,18 +24,21 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm">
+    <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm py-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-
           {/* Logo */}
           <button
             onClick={handleLogoClick}
             className="flex items-center space-x-2 focus:outline-none"
           >
-            <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
-              <AlertCircle className="w-6 h-6 text-white" />
-            </div>
+            
+              <img
+                src={logo}
+                alt="Smart Campus Logo"
+                className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+              />
+            
             <span className="text-xl font-bold bg-blue-700 bg-clip-text text-transparent">
               Smart Campus
             </span>

@@ -21,6 +21,7 @@ import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";
 import profile from "../assets/profile.png";
 import { Link } from "react-router-dom";
+import ProfileSidebar from "../Components/ProfileSidebar";
 
 export default function Library() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -206,6 +207,8 @@ export default function Library() {
     },
   ];
 
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
   const issueBook = (book) => {
     const booking = {
       id: `LIB${Date.now().toString().slice(-6)}`,
@@ -270,36 +273,40 @@ export default function Library() {
               </Link>
             </div>
 
-            
-
             <div className="flex items-center space-x-4">
               <button
-              onClick={() => setShowMyBooks(true)}
-              className="relative px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
-            >
-              <BookMarked className="w-5 h-5" />
-              <span className="hidden sm:inline">My Books</span>
-              {issuedBooks.length > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs flex items-center justify-center font-bold">
-                  {issuedBooks.length}
-                </span>
-              )}
-            </button>
+                onClick={() => setShowMyBooks(true)}
+                className="relative px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
+              >
+                <BookMarked className="w-5 h-5" />
+                <span className="hidden sm:inline">My Books</span>
+                {issuedBooks.length > 0 && (
+                  <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs flex items-center justify-center font-bold">
+                    {issuedBooks.length}
+                  </span>
+                )}
+              </button>
               <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
                 Logout
               </span>
-              <Link to={"/profile"} className="flex items-center space-x-2">
+              <Link className="flex items-center space-x-2">
                 <img
                   src={profile}
-                  alt="Smart Campus Logo"
+                  alt="Profile"
+                  onClick={() => setShowProfileMenu(true)}
                   className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                 />
-                
               </Link>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Profile menu side bar */}
+      <ProfileSidebar
+        isOpen={showProfileMenu}
+        onClose={() => setShowProfileMenu(false)}
+      />
 
       {/*Banner*/}
       <CollegeInfo />

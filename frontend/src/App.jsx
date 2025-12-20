@@ -7,6 +7,7 @@ import Profile from "./Page/Profile";
 import LoginPage from "./Page/LoginPage";
 import Canteen from "./Page/Canteen";
 import Library from "./Page/Library";
+import CanteenOrders from "./Page/CanteenOrders";
 
 export default function App() {
   return (
@@ -19,6 +20,8 @@ export default function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/canteen" element={<Canteen />} />
         <Route path="/library" element={<Library />} />
+        <Route path="/orders" element={<CanteenOrders />} />
+
       </Routes>
     </>
   );

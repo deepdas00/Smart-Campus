@@ -1,0 +1,1 @@
+export const MASTER_DB_NAME = "master_db"

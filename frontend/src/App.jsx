@@ -53,7 +53,7 @@ export default function App() {
         <Route path="/canteen" element={<Canteen />} />
         <Route path="/library" element={<Library />} />
         <Route path="/orders" element={<CanteenOrders />} />
-        <Route path="/report-portal" element={<ReportPortal />} />
+        <Route path="/report" element={<ReportPortal />} />
         {userRole === "ADMIN" && (
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<OfficeOverview />} /> {/* Default Page */}

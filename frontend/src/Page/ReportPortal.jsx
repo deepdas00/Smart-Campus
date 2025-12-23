@@ -1,52 +1,116 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Building2, FlaskConical, Home, Trees, ShieldAlert, 
-  CheckCircle2, ChevronRight, Info, Sparkles, Loader2,
-  FileText, MapPin, Clock, ArrowLeft, SendHorizontal
+  Building2, FlaskConical, Home, Trees, CheckCircle2, 
+  ChevronRight, Loader2, MapPin, ArrowLeft, SendHorizontal,
+  Camera, Wand2, Image as ImageIcon, Zap, ShieldCheck,
+  Globe, Navigation, X
 } from 'lucide-react';
+
+
+
+import profile from "../assets/profile.png";
+import Navbar from '../Components/Navbar/Navbar';
+import Footer from '../Components/Footer';
+import CollegeInfo from '../Components/CollegeInfo';
+import ProfileSidebar from '../Components/ProfileSidebar';
+import { Link } from 'react-router-dom';
+import logo from "../assets/logo.png";
+
 
 export default function EduReportPortal() {
   const [sector, setSector] = useState('Academic');
   const [urgency, setUrgency] = useState('Standard');
-  const [step, setStep] = useState(1); // 1: Info, 2: Details, 3: Success
+  const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAiRefining, setIsAiRefining] = useState(false);
+  
+  // Image Upload Logic
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [uploadStatus, setUploadStatus] = useState('idle');
+
+  // Location Logic
+  const [location, setLocation] = useState({ lat: null, lng: null, address: "Detecting..." });
+  const [isLocating, setIsLocating] = useState(false);
+
   const [formData, setFormData] = useState({
     title: "", description: "", building: "", room: "",
-    zone: "", labId: "", floor: "", wing: ""
+    zone: "", labId: "", floor: "", wing: "", equipmentId: ""
   });
 
-  // --- CONFIGURATION ---
+  // Urgency Background Mapping
+  const urgencyStyles = {
+    Standard: "bg-slate-200 border-slate-400",
+    Medium: "bg-amber-200/50 border-amber-400",
+    Urgent: "bg-red-200/50 border-red-400"
+  };
+
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+
   const sectors = {
     Academic: { 
-      icon: <FlaskConical size={18}/>, 
+      icon: <FlaskConical size={24}/>, 
       label: "Research & Labs",
-      fields: ['building', 'room', 'labId'],
-      desc: "Issues in classrooms, lecture halls, or research facilities."
+      fields: ['building', 'room', 'labId', 'equipmentId'],
+      desc: "Precision equipment, lab safety, or classroom tech issues.",
+      accent: "text-blue-600", bg: "bg-blue-100"
     },
     Residential: { 
-      icon: <Home size={18}/>, 
+      icon: <Home size={24}/>, 
       label: "Housing & Dorms",
       fields: ['building', 'wing', 'floor', 'room'],
-      desc: "Maintenance for student housing and residential complexes."
+      desc: "Living space maintenance, plumbing, or residential security.",
+      accent: "text-emerald-600", bg: "bg-emerald-100"
     },
     Campus: { 
-      icon: <Trees size={18}/>, 
+      icon: <Trees size={24}/>, 
       label: "Grounds & Public",
       fields: ['zone', 'building'],
-      desc: "Report issues in parking, parks, or campus walkways."
+      desc: "Outdoor lighting, walkways, or sports facility repairs.",
+      accent: "text-purple-600", bg: "bg-purple-100"
     }
   };
 
-  const zones = ["North Quad", "South Plaza", "Sports Complex", "Library Walk"];
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setUploadStatus('uploading');
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTimeout(() => {
+          setSelectedImage(reader.result);
+          setUploadStatus('success');
+        }, 1500);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
-  // --- THEME ENGINE ---
-  const getTheme = () => {
-    const themes = {
-      Standard: "bg-slate-50 border-slate-200 text-blue-700 accent-blue-600",
-      Medium: "bg-amber-50 border-amber-200 text-amber-700 accent-amber-600",
-      Urgent: "bg-red-50 border-red-200 text-red-700 accent-red-600"
-    };
-    return themes[urgency];
+  const detectLocation = () => {
+    setIsLocating(true);
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setLocation({
+          lat: position.coords.latitude.toFixed(4),
+          lng: position.coords.longitude.toFixed(4),
+          address: "Main Campus - Sector 4"
+        });
+        setIsLocating(false);
+      });
+    }
+  };
+
+  const refineWithAI = () => {
+    if (!formData.description) return;
+    setIsAiRefining(true);
+    setTimeout(() => {
+      setFormData(prev => ({
+        ...prev,
+        description: `[AI REFINED ASSESSMENT]\nISSUE: ${prev.title}\nSTATUS: ${urgency} priority dispatch required.\nCONTEXT: Structural/Electrical safety check requested for ${prev.building || 'specified site'}.\n\nORIGINAL LOG: ${prev.description}`
+      }));
+      setIsAiRefining(false);
+    }, 1500);
   };
 
   const handleInputChange = (field, val) => setFormData(prev => ({ ...prev, [field]: val }));
@@ -56,177 +120,261 @@ export default function EduReportPortal() {
     setTimeout(() => {
       setIsSubmitting(false);
       setStep(3);
-    }, 2000);
+    }, 2500);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
-      {/* Top Professional Header */}
-      <header className="bg-white border-b border-slate-200 px-6 py-4 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="bg-blue-900 p-2 rounded-lg text-white">
-              <Building2 size={24} />
+    <div className={`min-h-screen transition-colors duration-700 font-sans text-slate-900 ${urgency === 'Urgent' ? 'bg-red-300/50' : urgency === 'Medium' ? 'bg-amber-300/30' : 'bg-[#F8FAFC]'}`}>
+      
+      {/* Navbar */}
+      <div>
+
+        {/* Header */}
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Link to={"/"} className="flex items-center space-x-2">
+                <img
+                  src={logo}
+                  alt="Smart Campus Logo"
+                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                />
+                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                  Smart Campus
+                </span>
+              </Link>
             </div>
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-800 uppercase">Insti<span className="text-blue-600">Fix</span></h1>
-              <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">Official Support Portal</p>
-            </div>
-          </div>
-          <div className="hidden md:flex items-center gap-6">
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              Operations Center Online
+
+            <div className="flex items-center space-x-4">
+            
+              <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
+                Logout
+              </span>
+              <Link className="flex items-center space-x-2">
+                <img
+                  src={profile}
+                  alt="Profile"
+                  onClick={() => setShowProfileMenu(true)}
+                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                />
+              </Link>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto py-12 px-6">
+
+        {/* Profile menu side bar */}
+              <ProfileSidebar
+                isOpen={showProfileMenu}
+                onClose={() => setShowProfileMenu(false)}
+              />
+        <div className=''>
+
+      <CollegeInfo/>
+        </div>
+      </div>
+
+      <main className="max-w-6xl mx-auto py-10 px-6">
         {step < 3 && (
-          <div className="mb-10 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 1 ? 'bg-blue-600 text-white' : 'bg-slate-200'}`}>1</div>
-              <div className={`h-px w-12 bg-slate-200`} />
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${step >= 2 ? 'bg-blue-600 text-white' : 'bg-slate-200'}`}>2</div>
+          <div className=" mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4 ">
+            <div>
+              <h1 className="text-4xl font-black tracking-tight text-slate-900">
+                Submit <span className="text-indigo-600 italic">Report</span>
+              </h1>
+              <p className="text-slate-500 font-medium">Step {step} of 2: Mission Parameters</p>
             </div>
-            <button 
-              onClick={() => setUrgency(urgency === 'Standard' ? 'Medium' : urgency === 'Medium' ? 'Urgent' : 'Standard')}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all border ${getTheme()}`}
-            >
-              Priority: {urgency}
-            </button>
+            <div className="flex gap-2 bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
+                {['Standard', 'Medium', 'Urgent'].map(level => (
+                    <button 
+                        key={level}
+                        onClick={() => setUrgency(level)}
+                        className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all
+                        ${urgency === level 
+                            ? (level === 'Urgent' ? 'bg-red-600 text-white' : level === 'Medium' ? 'bg-amber-500 text-white' : 'bg-indigo-600 text-white') 
+                            : 'bg-transparent text-slate-400 hover:bg-slate-50'}`}
+                    >
+                        {level}
+                    </button>
+                ))}
+            </div>
           </div>
         )}
 
         {step === 1 && (
-          <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="text-center max-w-lg mx-auto mb-12">
-              <h2 className="text-3xl font-bold text-slate-800">What can we help with?</h2>
-              <p className="text-slate-500 mt-2">Select the appropriate department to route your request to the right team.</p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6">
-              {Object.entries(sectors).map(([key, value]) => (
-                <button
-                  key={key}
-                  onClick={() => {setSector(key); setStep(2);}}
-                  className={`p-6 rounded-2xl border text-left transition-all hover:shadow-xl group ${sector === key ? 'border-blue-600 bg-white ring-4 ring-blue-50' : 'bg-white border-slate-200'}`}
-                >
-                  <div className={`w-12 h-12 rounded-xl mb-4 flex items-center justify-center transition-colors ${sector === key ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-500'}`}>
-                    {value.icon}
-                  </div>
-                  <h3 className="font-bold text-slate-800">{value.label}</h3>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed">{value.desc}</p>
-                </button>
-              ))}
-            </div>
-          </section>
+          <div className="grid lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
+            {Object.entries(sectors).map(([key, value]) => (
+              <button
+                key={key}
+                onClick={() => {setSector(key); setStep(2);}}
+                className="group bg-white border border-slate-200 p-8 rounded-[2.5rem] text-left transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1"
+              >
+                <div className={`${value.bg} ${value.accent} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  {value.icon}
+                </div>
+                <h3 className="text-xl font-black mb-2">{value.label}</h3>
+                <p className="text-slate-500 text-sm leading-relaxed mb-6">{value.desc}</p>
+                <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+                  Start Entry <ChevronRight size={16} />
+                </div>
+              </button>
+            ))}
+          </div>
         )}
 
         {step === 2 && (
-          <section className="grid lg:grid-cols-3 gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-6 text-blue-600">
-                  <FileText size={18} />
-                  <h3 className="font-bold uppercase text-xs tracking-widest">Issue Details</h3>
+          <div className="grid lg:grid-cols-12 gap-8 animate-in slide-in-from-bottom-4 duration-500">
+            
+            {/* Media & Location Side */}
+            <div className="lg:col-span-4 space-y-6">
+              
+              {/* FIXED IMAGE UPLOAD */}
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 block">Evidence Attachment</label>
+                <div className="relative group">
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={handleImageChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className={`h-48 border-2 border-dashed rounded-3xl flex flex-col items-center justify-center transition-all ${uploadStatus === 'success' ? 'border-emerald-500 bg-emerald-50' : 'border-slate-200 group-hover:border-indigo-400 group-hover:bg-indigo-50'}`}>
+                    {uploadStatus === 'idle' && (
+                      <div className="text-center">
+                        <Camera className="mx-auto text-slate-400 mb-2" size={32} />
+                        <span className="text-xs font-bold text-slate-500">Upload Photo</span>
+                      </div>
+                    )}
+                    {uploadStatus === 'uploading' && <Loader2 className="animate-spin text-indigo-600" size={32} />}
+                    {uploadStatus === 'success' && (
+                      <div className="relative w-full h-full p-2">
+                        <img src={selectedImage} className="w-full h-full object-cover rounded-2xl" alt="Preview" />
+                        <button onClick={(e) => {e.preventDefault(); setSelectedImage(null); setUploadStatus('idle');}} className="absolute top-4 right-4 bg-red-500 text-white p-1 rounded-full shadow-lg">
+                            <X size={14}/>
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Report Title</label>
+              </div>
+
+              {/* LOCATION TRACKER */}
+              <div className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">GPS Coordinates</label>
+                    <button onClick={detectLocation} className="text-indigo-600 hover:text-indigo-700">
+                        <Navigation size={16} className={isLocating ? 'animate-pulse' : ''} />
+                    </button>
+                </div>
+                <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-4 border border-slate-100">
+                    <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200 text-indigo-600">
+                        <MapPin size={20} />
+                    </div>
+                    <div>
+                        <p className="text-xs font-bold text-slate-800">{location.address}</p>
+                        <p className="text-[10px] text-slate-400 font-mono">{location.lat ? `${location.lat}, ${location.lng}` : 'Ready to scan...'}</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+
+            {/* FORM AREA */}
+            <div className="lg:col-span-8">
+              <div className={`transition-all duration-500 border-2 rounded-[2.5rem] shadow-xl shadow-slate-200/50 overflow-hidden ${urgencyStyles[urgency]}`}>
+                <div className="bg-white/50 px-8 py-4 border-b border-inherit flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-500">Field Report: {sector}</span>
+                    <Zap size={16} className={urgency === 'Urgent' ? 'text-red-500' : 'text-indigo-400'} />
+                </div>
+
+                <div className="p-8 space-y-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Title</label>
                     <input 
-                      className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm focus:ring-2 ring-blue-500/20 outline-none transition-all"
-                      placeholder="Brief headline (e.g. AC leaking)"
+                      className="w-full bg-white/80 border border-slate-200 rounded-2xl p-4 font-bold outline-none focus:ring-4 ring-indigo-500/10 transition-all"
+                      placeholder="Summarize the incident..."
                       value={formData.title}
                       onChange={(e) => handleInputChange('title', e.target.value)}
                     />
                   </div>
+
                   <div className="grid grid-cols-2 gap-4">
                     {sectors[sector].fields.map(field => (
-                      <div key={field}>
-                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">{field.replace('Id', ' ID')}</label>
-                        {field === 'zone' ? (
-                          <select 
-                            className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm outline-none"
-                            onChange={(e) => handleInputChange(field, e.target.value)}
-                          >
-                            <option value="">Select Zone</option>
-                            {zones.map(z => <option key={z} value={z}>{z}</option>)}
-                          </select>
-                        ) : (
-                          <input 
-                            className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm outline-none"
-                            placeholder={field}
-                            onChange={(e) => handleInputChange(field, e.target.value)}
-                          />
-                        )}
+                      <div key={field} className="space-y-2">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">{field}</label>
+                        <input 
+                          className="w-full bg-white/80 border border-slate-200 rounded-xl p-3 text-sm font-semibold outline-none focus:border-indigo-500 transition-all"
+                          placeholder={field}
+                          onChange={(e) => handleInputChange(field, e.target.value)}
+                        />
                       </div>
                     ))}
                   </div>
-                  <div>
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Full Description</label>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                        <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Detailed Description</label>
+                        <button 
+                            onClick={refineWithAI}
+                            disabled={isAiRefining || !formData.description}
+                            className="bg-indigo-600 text-white px-3 py-1.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-2 hover:bg-indigo-700 disabled:opacity-30"
+                        >
+                            {isAiRefining ? <Loader2 size={10} className="animate-spin" /> : <Wand2 size={10} />}
+                            Refine with Gemini
+                        </button>
+                    </div>
                     <textarea 
                       rows="4"
-                      className="w-full mt-1 bg-slate-50 border border-slate-200 rounded-xl p-4 text-sm outline-none"
-                      placeholder="Provide specific details to help our team..."
+                      className="w-full bg-white/80 border border-slate-200 rounded-[1.5rem] p-4 text-sm font-medium outline-none focus:ring-4 ring-indigo-500/10 transition-all"
+                      placeholder="What exactly happened?"
                       value={formData.description}
                       onChange={(e) => handleInputChange('description', e.target.value)}
                     />
                   </div>
+
+                  <div className="pt-4 flex gap-3">
+                    <button 
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-800 transition-all shadow-lg"
+                    >
+                        {isSubmitting ? <Loader2 className="animate-spin" /> : <><SendHorizontal size={18} /> Submit Ticket</>}
+                    </button>
+                    <button onClick={() => setStep(1)} className="p-4 bg-white border border-slate-200 rounded-2xl text-slate-400 hover:text-slate-600 transition-all shadow-sm">
+                        <ArrowLeft size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-
-            <div className="space-y-6">
-              <div className="bg-blue-900 p-8 rounded-3xl text-white shadow-lg">
-                <h4 className="text-xs font-bold uppercase tracking-widest opacity-70 mb-4">Request Summary</h4>
-                <div className="space-y-4 text-sm">
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="opacity-70">Sector</span>
-                    <span className="font-bold">{sector}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-white/10 pb-2">
-                    <span className="opacity-70">Priority</span>
-                    <span className="font-bold text-amber-400">{urgency}</span>
-                  </div>
-                  <div className="flex items-center gap-2 bg-white/10 p-3 rounded-xl">
-                    <Info size={14} />
-                    <span className="text-[10px] leading-tight">Requests are routed to campus security if marked Urgent.</span>
-                  </div>
-                </div>
-              </div>
-
-              <button 
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="w-full bg-blue-600 text-white py-6 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition-all shadow-xl shadow-blue-100"
-              >
-                {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : <><SendHorizontal size={20}/> Submit Report</>}
-              </button>
-              <button onClick={() => setStep(1)} className="w-full text-slate-400 text-xs font-bold uppercase hover:text-slate-600 transition-colors">
-                Go Back
-              </button>
-            </div>
-          </section>
+          </div>
         )}
 
         {step === 3 && (
-          <section className="text-center py-12 animate-in zoom-in duration-500">
-            <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-8">
-              <CheckCircle2 size={48} />
+          <div className="max-w-2xl mx-auto text-center py-20 animate-in zoom-in duration-700">
+            <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 shadow-xl">
+                <CheckCircle2 size={48} />
             </div>
-            <h2 className="text-4xl font-bold text-slate-800 italic uppercase">Report Logged</h2>
-            <p className="text-slate-500 max-w-sm mx-auto mt-4">
-              Your request for <strong>{formData.title || "Facility Issue"}</strong> has been assigned Ticket #EDU-2025-{Math.floor(Math.random()*9000)}.
+            <h2 className="text-5xl font-black text-slate-900 mb-4 tracking-tighter uppercase">Dispatched</h2>
+            <p className="text-slate-500 font-medium mb-10 leading-relaxed">
+                Mission <span className="text-indigo-600 font-bold font-mono">#SENT-2025-09</span> is active. 
+                Our team has received your GPS coordinates and visual data.
             </p>
-            <div className="mt-10 flex gap-4 justify-center">
-              <button onClick={() => {setStep(1); setFormData({});}} className="bg-slate-900 text-white px-8 py-4 rounded-xl font-bold text-sm">New Request</button>
-              <button className="bg-white border border-slate-200 px-8 py-4 rounded-xl font-bold text-sm">View Status</button>
+            <div className="flex gap-4 justify-center">
+                <button onClick={() => {setStep(1); setFormData({}); setUploadStatus('idle'); setUrgency('Standard');}} className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-800 transition-all">
+                    New Report
+                </button>
+                <button className="bg-white border border-slate-200 text-slate-600 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-slate-50 transition-all">
+                    Dashboard
+                </button>
             </div>
-          </section>
+          </div>
         )}
       </main>
+
+      <div>
+        <Footer/>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,11 @@ import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
+import QRCode from "qrcode";
+
+
+
 
 export const createRazorpayOrder = asyncHandler(async (req, res) => {
 
@@ -112,6 +117,7 @@ export const verifyPayment = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const Order = getCanteenOrderModel(collegeConn);
+  const Food = getCanteenFoodModel(collegeConn);
 
   // 4️⃣ Find order
   const order = await Order.findOne({
@@ -127,19 +133,61 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Unauthorized payment verification");
   }
 
+  // 5️⃣ Prevent double payment
+  if (order.paymentStatus === "paid") {
+    throw new ApiError(400, "Order already paid");
+  }
+
   // 6️⃣ Mark payment successful
   order.paymentStatus = "paid";
   order.razorpayPaymentId = razorpay_payment_id;
 
   await order.save({ validateBeforeSave: false });
 
-  // 7️⃣ Response
+  // 7️⃣ 🔥 REDUCE STOCK (VERY IMPORTANT)
+  for (const item of order.items) {
+    const food = await Food.findById(item.foodId);
+
+    if (food) {
+      food.quantityAvailable -= item.quantity;
+
+      if (food.quantityAvailable <= 0) {
+        food.quantityAvailable = 0;
+        food.isAvailable = false;
+      }
+
+      await food.save({ validateBeforeSave: false });
+    }
+  }
+
+
+  // 8️⃣ Generate QR code
+  const qrPayload = JSON.stringify({
+    orderId: order._id,
+    collegeCode
+  });
+
+  const qrCodeBase64 = await QRCode.toDataURL(qrPayload);
+
+  // 9️⃣ Save QR code in order
+  order.qrCode = qrCodeBase64;
+  await order.save({ validateBeforeSave: false });
+
+
+
+
+
+  // 8️⃣ Response
   res.status(200).json(
     new ApiResponse(
       200,
       {
         orderId: order._id,
-        paymentStatus: order.paymentStatus
+        orderStatus: order.orderStatus,
+        razorpayPaymentId: order.razorpayPaymentId,
+        paymentStatus: order.paymentStatus,
+        qrCode: order.qrCode,
+
       },
       "Payment verified successfully"
     )

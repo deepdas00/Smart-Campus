@@ -41,11 +41,12 @@ export const canteenFoodSchema = new mongoose.Schema(
       required: true
     },
 
+    foodType: {
+      type: String,
+      enum: ["veg", "non-veg"],
+      required: true
+    },
 
-
-    ///veg non veg 
-
-    
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "CollegeUser" // canteen staff/admin
@@ -60,3 +61,5 @@ export const getCanteenFoodModel = (conn) => {
   return conn.models.CanteenFood ||
     conn.model("CanteenFood", canteenFoodSchema);
 };
+
+

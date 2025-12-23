@@ -44,6 +44,11 @@ export const registerStudent = asyncHandler(async (req, res) => {
   const CollegeStudent = getStudentModel(collegeConn);
 
 
+
+  ////// verification of student with id
+
+
+
   // 6️⃣ Upload avatar (optional)
   const avatarLocalPath = req.file?.path?.replace(/\\/g, "/");
   if (!avatarLocalPath) {
@@ -65,11 +70,15 @@ export const registerStudent = asyncHandler(async (req, res) => {
     password: hashedPassword,
     avatar: avatarUrl,
   });
+ 
 
+//// error handling for db fail 
+  
   // 9️⃣ Send response
   res.status(201).json(
     new ApiResponse(201, student, "Student registered successfully")
   );
+
 });
 
 

@@ -25,17 +25,15 @@ import ReportPortal from "./Page/ReportPortal";
 // Layout Wrapper
 const AdminLayout = () => (
   <>
-  <div className="flex bg--50 min-h-screen">
-    <Navbar />
-    <Sidebar />
-    <main className="flex-1 p-8 mt-15">
-      <Outlet /> {/* This is where the pages will swap */}
-    </main>
-
-     
-  </div>
-{/* Footer */}
-      <Footer/>
+    <div className="flex bg--50 min-h-screen">
+      <Navbar />
+      <Sidebar />
+      <main className="flex-1 p-8 mt-15">
+        <Outlet /> {/* This is where the pages will swap */}
+      </main>
+    </div>
+    {/* Footer */}
+    <Footer />
   </>
 );
 
@@ -66,13 +64,13 @@ export default function App() {
         )}
 
         {/* Kitchen Access - Operational Tool Only */}
-        {(userRole === "KITCHEN" ||userRole === "ADMIN") && (
+        {(userRole === "KITCHEN" || userRole === "ADMIN") && (
           <Route path="/kitchen" element={<KitchenKDS />} />
         )}
 
-        {(userRole === "LIBRARY" ||userRole === "ADMIN")&& (
-  <Route path="/library-admin" element={<LibraryTeacherHandle />} />
-)}
+        {(userRole === "LIBRARY" || userRole === "ADMIN") && (
+          <Route path="/library-admin" element={<LibraryTeacherHandle />} />
+        )}
       </Routes>
     </>
   );

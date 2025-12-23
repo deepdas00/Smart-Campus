@@ -47,9 +47,9 @@ app.use("/api/v1/library", libraryRouter);
 //
 
 app.use("/api/v1/canteen", canteenRouter);
-//
+//addFood, updateFood, getAllFoods, placeOrder, createRazorpayOrder, verifyPayment, serveOrder
 
-app.use("/api/v1/canteen", adminOfficialRoute);
+app.use("/api/v1/app/administration", adminOfficialRoute);
 //
 
 

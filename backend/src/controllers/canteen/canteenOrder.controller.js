@@ -6,6 +6,8 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 
+
+//order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
 
 
@@ -98,3 +100,122 @@ export const placeOrder = asyncHandler(async (req, res) => {
         )
     );
 });
+
+
+//order serving by canteen staff
+export const serveOrder = asyncHandler(async (req, res) => {
+
+  const { orderId, collegeCode } = req.body;
+
+  if (!orderId || !collegeCode) {
+    throw new ApiError(400, "Invalid QR data");
+  }
+
+  // Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Order = getCanteenOrderModel(collegeConn);
+
+  const order = await Order.findById(orderId);
+
+  if (!order) {
+    throw new ApiError(404, "Order not found");
+  }
+
+  // Ensure payment done
+  if (order.paymentStatus !== "paid") {
+    throw new ApiError(400, "Order not paid");
+  }
+
+  // Prevent double serve
+  if (order.orderStatus === "served") {
+    throw new ApiError(400, "Order already served");
+  }
+
+  // Mark served
+  order.orderStatus = "served";
+  await order.save({ validateBeforeSave: false });
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      null,
+      "Order served successfully"
+    )
+  );
+});
+
+// Dashbord will show this orders
+export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
+
+  const { collegeCode } = req.user;
+  const { range = "daily" } = req.query;
+
+  // 1️⃣ Decide start date
+  const now = new Date();
+  let startDate;
+
+  switch (range) {
+    case "daily":
+      startDate = new Date(now.setHours(0, 0, 0, 0));
+      break;
+
+    case "weekly":
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 7);
+      break;
+
+    case "monthly":
+      startDate = new Date();
+      startDate.setDate(startDate.getDate() - 30);
+      break;
+
+    default:
+      throw new ApiError(400, "Invalid range value");
+  }
+
+  // 2️⃣ Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Order = getCanteenOrderModel(collegeConn);
+
+  // 3️⃣ Fetch filtered orders
+  const orders = await Order.find({
+    paymentStatus: "paid",
+    createdAt: { $gte: startDate }
+  })
+    .sort({ createdAt: -1 })
+    .select("items totalAmount orderStatus createdAt");
+
+  // 4️⃣ Response
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      orders,
+      `Canteen dashboard (${range}) data fetched`
+    )
+  );
+});
+

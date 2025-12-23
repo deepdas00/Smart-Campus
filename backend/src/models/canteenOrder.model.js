@@ -46,7 +46,6 @@ export const canteenOrderSchema = new mongoose.Schema(
                 "preparing",
                 "ready",
                 "served",
-                "cancelled"
             ],
             default: "order_received"
         },

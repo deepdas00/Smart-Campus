@@ -13,23 +13,23 @@ router.post(
   registerStudent
 );
 
-// Protected student-only APIs (templates)
-router.get(
-  "/profile",
-  verifyJWT,
-  authorizeRoles("student"),
-  (req, res) => {
-    res.json({ message: "Student profile API (TODO)" });
-  }
-);
+// // Protected student-only APIs (templates)
+// router.get(
+//   "/profile",
+//   verifyJWT,
+//   authorizeRoles("student"),
+//   (req, res) => {
+//     res.json({ message: "Student profile API (TODO)" });
+//   }
+// );
 
-router.get(
-  "/complaints",
-  verifyJWT,
-  authorizeRoles("student"),
-  (req, res) => {
-    res.json({ message: "Student complaints API (TODO)" });
-  }
-);
+// router.get(
+//   "/complaints",
+//   verifyJWT,
+//   authorizeRoles("student"),
+//   (req, res) => {
+//     res.json({ message: "Student complaints API (TODO)" });
+//   }
+// );
 
 export default router;

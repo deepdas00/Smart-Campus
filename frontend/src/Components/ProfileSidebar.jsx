@@ -10,6 +10,7 @@ import {
   BookDashed,
   BookDashedIcon,
   BookTemplate,
+  ShieldAlert
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -83,6 +84,14 @@ export default function ProfileSidebar({ isOpen, onClose }) {
             icon={<Book className="w-5 h-5" />}
             label="library"
             color="blue"
+            onClose={onClose}
+          />
+          <SidebarItem
+            to="/report"
+            icon={<ShieldAlert className="w-5 h-5" />}
+            label="report"
+            color="red"
+            activeColor="bg-red-50 text-red-600"
             onClose={onClose}
           />
         </div>

@@ -16,8 +16,8 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-white border-r h-screen sticky top-0 flex flex-col shadow-sm">
-      <div className="p-6 border-b">
-        <div className="font-black text-2xl tracking-tighter text-blue-700">SMART<span className="text-gray-900">CAMPUS</span></div>
+      <div className="p-6 border-b py-10">
+        <div className="font-black text-2xl tracking-tighter text-blue-700"><span className="text-gray-900"></span></div>
       </div>
       <nav className="flex-1 p-4 space-y-1">
         {menuItems.map((item) => (

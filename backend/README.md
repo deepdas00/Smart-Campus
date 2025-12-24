@@ -1,5 +1,5 @@
 
-/api/v1/college/college/data => all college name and ccollge code will send in the response
+/api/v1/college/data => all college name and ccollge code will send in the response
 
 
 
@@ -74,3 +74,9 @@ const {
 
     /api/v1/canteen/orders/orders/serve => canteen staff will scan the qr and clck on submit => const { orderId, collegeCode } = req.body;
 
+
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+!! !!changes happened uner app.js all  APIs are there  !! !!

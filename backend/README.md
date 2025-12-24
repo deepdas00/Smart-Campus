@@ -1,5 +1,5 @@
 
-/api/v1/users/college/data => all college name and ccollge code will send in the response
+/api/v1/college/college/data => all college name and ccollge code will send in the response
 
 
 

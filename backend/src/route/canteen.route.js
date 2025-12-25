@@ -3,7 +3,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { getCanteenDashboardOrders, placeOrder, serveOrder } from "../controllers/canteen/canteenOrder.controller.js";
-import { createRazorpayOrder, verifyPayment } from "../controllers/canteen/canteenPayment.controller.js";
+import { canteen_createRazorpayOrder, canteen_verifyPayment } from "../controllers/canteen/canteenPayment.controller.js";
 import { addFood, getAllFoods, updateFood } from "../controllers/canteen/canteenFood.controller.js";
 
 const router = express.Router();
@@ -62,7 +62,7 @@ router.post(
   "/orders/:orderId/pay",
   verifyJWT,
   authorizeRoles("student"),
-  createRazorpayOrder
+  canteen_createRazorpayOrder
 );
 
 // Verify payment
@@ -70,7 +70,7 @@ router.post(
   "/orders/verify-payment",
   verifyJWT,
   authorizeRoles("student"),
-  verifyPayment
+  canteen_verifyPayment
 );
 
 //order serve through qr

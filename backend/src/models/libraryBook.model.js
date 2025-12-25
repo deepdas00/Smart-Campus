@@ -51,7 +51,7 @@ export const libraryBookSchema = new mongoose.Schema(
 
     coverImage: {
       type: String,
-      required: true
+      required: true  
     },
 
     description: String,

@@ -9,7 +9,17 @@ import {
   updateBook,
   deleteBook
 } from "../controllers/library/libraryBook.controller.js";
-import { orderBook } from "../controllers/library/libraryTransaction.controller.js";
+
+import { fetchlibraryTransactionDetails, 
+  finalizeReturn, 
+  getAllLibraryTransactions, 
+  getStudentLibraryHistory, 
+  issueBook, 
+  orderBook, 
+  prepareReturn, 
+  returnBook
+} from "../controllers/library/libraryTransaction.controller.js";
+import { library_createRazorpayOrder, library_verifyPayment } from "../controllers/library/libraryPayment.controller.js";
 
 const router = express.Router();
 
@@ -49,6 +59,7 @@ router.delete(
   authorizeRoles("admin"),
   deleteBook
 );
+
 /* Order Book - (student) */
 router.post(
   "/order",
@@ -56,5 +67,78 @@ router.post(
   authorizeRoles("student"),
   orderBook
 );
+
+/* Issue Book - (librarian / admin) */
+router.post(
+  "/issue",
+  verifyJWT,
+  authorizeRoles("librarian", "admin"),
+  issueBook
+);
+
+// /* Prepare Return - ( student ) */
+// router.post(
+//   "/return/prepare",
+//   verifyJWT,
+//   authorizeRoles("student"),
+//   prepareReturn
+// );
+// fetch one transaction details (student/Librarian/Admin) 
+router.patch(
+  "/transactions/:transactionId",
+  verifyJWT,
+  authorizeRoles("librarian", "admin", "student"),
+  fetchlibraryTransactionDetails
+);
+
+//razorpay payment for library fine
+router.patch(
+  "/return/pay/:transactionId",
+  verifyJWT,
+  authorizeRoles("student"),
+  library_createRazorpayOrder
+);
+// payment verification
+router.post(
+  "/return/verify",
+  verifyJWT,
+  authorizeRoles("student"),
+  library_verifyPayment
+);
+
+//  return finalize state ( SCAN QR ) by librariyan 
+router.post(
+  "/return/finalize",
+  verifyJWT,
+  authorizeRoles("librarian", "admin"),
+  finalizeReturn
+);
+
+// final return ( RETURN CLICKED ) by librariyan 
+router.post(
+  "/return/finalize",
+  verifyJWT,
+  authorizeRoles("librarian", "admin"),
+  returnBook
+);
+
+
+
+/*Fetch student book history  */
+router.get(
+  "/my/history",
+  verifyJWT,
+  authorizeRoles("student"),
+  getStudentLibraryHistory
+);
+
+// Librarian/Admin
+router.get(
+  "/transactions",
+  verifyJWT,
+  authorizeRoles("librarian", "admin"),
+  getAllLibraryTransactions
+);
+
 
 export default router;

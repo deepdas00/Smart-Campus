@@ -69,18 +69,10 @@ console.log(order._id);
       await order.save({ validateBeforeSave: false });
     }
   });
-<<<<<<< HEAD
 
 
   console.log("PAYMENT OF RAZORRRRR",razorpayOrder);
   
-
-  // 6️⃣ Save Razorpay order ID
-  order.razorpayOrderId = razorpayOrder.id;
-  await order.save({ validateBeforeSave: false });
-
-=======
->>>>>>> f5afd90 (library controller,payment structure modified as util)
   // 7️⃣ Send data to frontend
   res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
 

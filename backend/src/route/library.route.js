@@ -16,7 +16,6 @@ import { fetchlibraryTransactionDetails,
   getStudentLibraryHistory, 
   issueBook, 
   orderBook, 
-  prepareReturn, 
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
 import { library_createRazorpayOrder, library_verifyPayment } from "../controllers/library/libraryPayment.controller.js";

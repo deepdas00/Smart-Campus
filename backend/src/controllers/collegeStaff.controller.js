@@ -70,3 +70,37 @@ export const staffLogin = asyncHandler(async (req, res) => {
             )
         );
 });
+
+
+export const currentStaff = asyncHandler(async (req, res) => {
+  try {
+    // verifyJWT middleware should attach 'user' to 'req'
+    console.log("daraaaaaaaaa",req.user);
+    
+    const {userId, collegeCode, role } = req.user; 
+
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
+    const college = await College.findOne({ collegeCode, status: "active" });
+    if (!college) throw new ApiError(404, "College not found");
+
+
+    const collegeConn = getCollegeDB(college.dbName)
+    const Staff = getCollegeUserModel(collegeConn)
+    const currentStaff = await Staff.findById(userId).select("-password -refreshToken");
+    
+      
+    if (!currentStaff) {
+      return res.status(404).json({ success: false, message: "Staff not found" });
+    }
+
+    // Change 'data' to 'user' to match your React AuthContext expectations
+    res.status(200).json(new ApiResponse(
+      200,
+      currentStaff,
+      "GOT STUDENT"
+    ));
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+})

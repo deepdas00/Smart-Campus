@@ -6,13 +6,14 @@ export const verifyJWT = (req, res, next) => {
   const token = req.cookies?.accessToken  || req.header("Authorization")?.replace(/^Bearer\s+/i, "")
 
   if (!token) {
-    throw new ApiError(401, "Unauthorized: No token");
-  }
+      // Instead of throwing, return a response or use next()
+      return res.status(401).json({ success: false, message: "Unauthorized: No token" });
+    }
 
   try {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded;
-    console.log(decoded);
+    console.log("decoded valuesAAA",decoded);
     
     next();
   } catch {

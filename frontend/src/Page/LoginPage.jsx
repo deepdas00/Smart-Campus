@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   Mail,
@@ -13,22 +15,180 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import Footer from "../Components/Footer";
 import logo from "../assets/logo.png";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
+  const navigate = useNavigate();
   const [userType, setUserType] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [loginMethod, setLoginMethod] = useState("email"); // email | mobile
+
+  const [formData, setFormData] = useState({
+    collegeCode: "",
+    email: "",
+    mobileNo: "",
+    password: "",
+  });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleLogin = () => {
-    console.log("Login:", { userType, ...formData });
+  const { setUser } = useAuth();
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const StudentLoginForm = () => (
+    <>
+      {/* Toggle buttons */}
+      <div className="flex bg-gray-100 rounded-lg p-1 mb-4">
+        <button
+          type="button"
+          onClick={() => setLoginMethod("email")}
+          className={`flex-1 py-2 rounded-md text-sm font-medium ${
+            loginMethod === "email"
+              ? "bg-white shadow text-blue-600"
+              : "text-gray-500"
+          }`}
+        >
+          Email
+        </button>
+        <button
+          type="button"
+          onClick={() => setLoginMethod("mobile")}
+          className={`flex-1 py-2 rounded-md text-sm font-medium ${
+            loginMethod === "mobile"
+              ? "bg-white shadow text-blue-600"
+              : "text-gray-500"
+          }`}
+        >
+          Mobile
+        </button>
+      </div>
+
+      {loginMethod === "email" && (
+        <div className="mb-5">
+          <label className="text-sm font-medium text-gray-700">Email</label>
+          <div className="relative mt-2">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="you@campus.edu"
+            />
+          </div>
+        </div>
+      )}
+
+      {loginMethod === "mobile" && (
+        <div className="mb-5">
+          <label className="text-sm font-medium text-gray-700">
+            Mobile Number
+          </label>
+          <div className="relative mt-2">
+            <input
+              type="tel"
+              name="mobileNo"
+              value={formData.mobileNo}
+              onChange={handleChange}
+              className="w-full pl-4 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="9876543210"
+            />
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  // --- INSTITUTION LOGIN FORM ---
+  const InstitutionLoginForm = () => (
+    <div className="mb-5">
+      <label className="text-sm font-medium text-gray-700">Login ID</label>
+      <div className="relative mt-2">
+        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+        <input
+          type="text"
+          name="loginId"
+          value={formData.loginId}
+          onChange={handleChange}
+          className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+          placeholder="Enter your Login ID"
+        />
+      </div>
+    </div>
+  );
+
+  const handleLogin = async () => {
+    if (isSubmitting) return;
+
+    try {
+      setIsSubmitting(true);
+
+      let payload = {
+        collegeCode: formData.collegeCode,
+        password: formData.password,
+      };
+      let url = "";
+
+      if (userType === "student") {
+        payload = {
+          ...payload,
+          ...(loginMethod === "email"
+            ? { email: formData.email }
+            : { mobileNo: formData.mobileNo }),
+        };
+        url = `${API_URL}/api/v1/auth/student/login`;
+      } else if (userType === "institution") {
+        payload = {
+          ...payload,
+          loginId: formData.loginId,
+        };
+        url = `${API_URL}/api/v1/auth/staff/login`;
+      }
+
+      const res = await axios.post(url, payload, { withCredentials: true });
+      const userData = res.data.data || res.data.user;
+
+      console.log(userData.role);
+
+      if (userData) {
+        setUser(userData);
+        toast.success("Welcome back!");
+        navigate(
+          userData.role === "student"
+            ? "/profile"
+            : userData.role === "canteen"
+            ? "/kitchen"
+            : userData.role === "librarian"
+            ? "/library-admin"
+            : userData.role === "admin"
+            ? "/admin"
+            : "/login"
+        );
+      }
+    } catch (error) {
+      console.error("Login Error:", error.response?.data);
+      const message = error.response?.data?.message || "Login failed";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div>
+    <div
+      className={`${
+        isSubmitting
+          ? "blur-xl scale-[0.98] grayscale-[0.5]"
+          : "blur-0 scale-100"
+      }`}
+    >
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full z-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
           <div className="flex items-center justify-between">
@@ -61,6 +221,8 @@ export default function LoginPage() {
       </header>
       <div className="min-h-screen grid lg:grid-cols-2 bg-gradient-to-br from-blue-50 via-white to-purple-50">
         {/* Navbar */}
+
+        {/* Login Page */}
 
         {/* Left Branding */}
         <div className="hidden lg:flex flex-col justify-center px-16 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
@@ -113,21 +275,30 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Email */}
+            {/* College Code */}
             <div className="mb-5">
-              <label className="text-sm font-medium text-gray-700">Email</label>
+              <label className="text-sm font-medium text-gray-700">
+                College Code
+              </label>
               <div className="relative mt-2">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
+                  type="text"
+                  name="collegeCode"
+                  value={formData.collegeCode}
                   onChange={handleChange}
                   className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="you@campus.edu"
+                  placeholder="e.g. 130"
                 />
               </div>
             </div>
+
+            {/* Conditional Forms */}
+            {userType === "student" ? (
+              <StudentLoginForm />
+            ) : (
+              <InstitutionLoginForm />
+            )}
 
             {/* Password */}
             <div className="mb-6">
@@ -154,7 +325,7 @@ export default function LoginPage() {
               </div>
             </div>
 
-            {/* Login */}
+            {/* Login Button */}
             <button
               onClick={handleLogin}
               className="w-full py-4 bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-800 transition"
@@ -174,9 +345,6 @@ export default function LoginPage() {
           </motion.div>
         </div>
       </div>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }

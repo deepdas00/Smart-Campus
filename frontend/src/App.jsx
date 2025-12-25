@@ -21,6 +21,8 @@ import { KitchenKDS } from "./Page/KitchenKDS";
 import Footer from "./Components/Footer";
 import LibraryTeacherHandle from "./Page/LibraryTeacherHandle";
 import ReportPortal from "./Page/ReportPortal";
+import ProtectedRoute from "./Components/ProtectedRoute.jsx";
+import { useAuth } from "./context/AuthContext.jsx";
 
 // Layout Wrapper
 const AdminLayout = () => (
@@ -38,7 +40,13 @@ const AdminLayout = () => (
 );
 
 export default function App() {
-  const userRole = "ADMIN";
+  const { user } = useAuth();
+
+
+  const userRole = user?.role;
+  console.log("USER ROLE HAI...", userRole);
+  
+ 
 
   return (
     <>
@@ -47,30 +55,53 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allow={["student"]}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/canteen" element={<Canteen />} />
         <Route path="/library" element={<Library />} />
         <Route path="/orders" element={<CanteenOrders />} />
         <Route path="/report" element={<ReportPortal />} />
-        {userRole === "ADMIN" && (
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<OfficeOverview />} /> {/* Default Page */}
-            <Route path="issues" element={<CampusIssues />} />
-            <Route path="canteen" element={<CanteenManager />} />
-            <Route path="library" element={<LibraryManager />} />
-            <Route path="lost-found" element={<LostAndFoundManager />} />
-            <Route path="students" element={<StudentManager />} />
-          </Route>
-        )}
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allow={["admin"]}>
+              <AdminLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<OfficeOverview />} /> {/* Default Page */}
+          <Route path="issues" element={<CampusIssues />} />
+          <Route path="canteen" element={<CanteenManager />} />
+          <Route path="library" element={<LibraryManager />} />
+          <Route path="lost-found" element={<LostAndFoundManager />} />
+          <Route path="students" element={<StudentManager />} />
+        </Route>
 
         {/* Kitchen Access - Operational Tool Only */}
-        {(userRole === "KITCHEN" || userRole === "ADMIN") && (
-          <Route path="/kitchen" element={<KitchenKDS />} />
-        )}
+        <Route
+          path="/kitchen"
+          element={
+            <ProtectedRoute allow={["canteen", "admin"]}>
+              <KitchenKDS />
+            </ProtectedRoute>
+          }
+        />
 
-        {(userRole === "LIBRARY" || userRole === "ADMIN") && (
-          <Route path="/library-admin" element={<LibraryTeacherHandle />} />
-        )}
+        <Route
+          path="/library-admin"
+          element={
+            <ProtectedRoute allow={["librarian", "admin"]}>
+              <LibraryTeacherHandle />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </>
   );

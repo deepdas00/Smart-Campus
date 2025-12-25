@@ -9,6 +9,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
 import QRCode from "qrcode";
+import { log } from "console";
 
 
 
@@ -17,6 +18,9 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const { orderId } = req.params;
   const { collegeCode, userId } = req.user;
+
+  console.log(collegeCode, userId, orderId);
+  
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -37,6 +41,9 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
   // 2️⃣ Fetch order
   const order = await Order.findById(orderId);
 
+  console.log("ORDRERRRRRR", order);
+  
+
   if (!order) {
     throw new ApiError(404, "Order not found");
   }
@@ -51,12 +58,18 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Order already paid");
   }
 
+console.log(order._id);
+
   // 5️⃣ Create Razorpay order
   const razorpayOrder = await getRazorpayInstance.orders.create({
     amount: order.totalAmount * 100, // paise
     currency: "INR",
     receipt: `canteen_${order._id}`
   });
+
+
+  console.log("PAYMENT OF RAZORRRRR",razorpayOrder);
+  
 
   // 6️⃣ Save Razorpay order ID
   order.razorpayOrderId = razorpayOrder.id;

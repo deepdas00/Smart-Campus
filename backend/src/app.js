@@ -1,15 +1,22 @@
 import express from "express"
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import dotenv from "dotenv";
+dotenv.config();
+import jwt from "jsonwebtoken"
 
 
 const app = express();
+
+
 
 
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true
 }))
+
+
 
 app.use(express.json({limit: "16kb"})) // to take input from .json
 app.use(express.urlencoded({extended: true, limit:"16kb"}))  // to take input form diffrent types of url
@@ -26,6 +33,8 @@ import adminRouter from "./route/admin.route.js"
 import libraryRouter from "./route/library.route.js"
 import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
+import { getStudentModel } from "./models/collegeStudent.model.js";
+import { getCollegeDB } from "./db/db.index.js";
 
 
 
@@ -48,6 +57,7 @@ app.use("/api/v1/college", collegeRouter);
 
 app.use("/api/v1/auth", authRouter);
 // POST /api/v1/auth/student/login 
+// POST /api/v1/auth/student/me     {Whole details of student}
 // POST /api/v1/auth/staff/login 
 // POST /api/v1/auth/refresh 
 // POST /api/v1/auth/logout -p

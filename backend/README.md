@@ -1,24 +1,24 @@
 
-/api/v1/college/data => all college name and ccollge code will send in the response
+/api/v1/college/data => all college name and ccollge code will send in the response  [DONE]
 
 
 
 /api/v1/users/student/register => student registration => 
 const {
-    collegeCode,
-    studentName,
-    rollNo,
-    mobileNo,
-    email,
-    password,
-  } = req.body;
+    collegeCode, 
+    studentName, 
+    rollNo, 
+    mobileNo, 
+    email, 
+    password, 
+  } = req.body;   [DONE]
 
 
   /api/v1/auth/student/login => student Login =>
-  const { collegeCode, mobileNo, email, password } = req.body
+  const { collegeCode, mobileNo, email, password } = req.body   [DONE]
 
   /api/v1/auth/staff/login => staff login =>
-  const { collegeCode, loginId, password } = req.body;
+  const { collegeCode, loginId, password } = req.body;     [DONE]
 
   /api/v1/auth/refresh => refresh accesstoken (1 day)
 
@@ -33,12 +33,12 @@ const {
     category,
     foodType,        // veg / non-veg
     description
-  } = req.body;
+  } = req.body;   [DONE]
 
 
-  Patch => /api/v1/canteen/foods/:foodId => edit food => const { quantityAvailable, isAvailable (true/false) } = req.body;
+  Patch => /api/v1/canteen/foods/:foodId => edit food => const { quantityAvailable, isAvailable (true/false) } = req.body;  [DONE]
 
-  Get => /api/v1/canteen/foods => food menu => response from server
+  Get => /api/v1/canteen/foods => food menu => response from server [DONE]
 
 
 
@@ -56,7 +56,7 @@ const {
                 "quantity": 1
             }
         ]
-     }
+     }    [DONE]
 
 
 

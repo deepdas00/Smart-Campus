@@ -100,7 +100,7 @@ export const getAllFoods = asyncHandler(async (req, res) => {
   const CanteenFood = getCanteenFoodModel(collegeConn);
 
   // 2️⃣ Fetch food items
-  const foods = await CanteenFood.find({ isAvailable: true })
+  const foods = await CanteenFood.find()
     .sort({ createdAt: -1 })
     .select("-__v");
 

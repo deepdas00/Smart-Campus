@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 import {
   AlertCircle,
   ShoppingCart,
@@ -23,15 +25,17 @@ import Footer from "../Components/Footer";
 import ProfileSidebar from "../Components/ProfileSidebar";
 import FoodGrid from "../Components/Canteen/FoodGrid";
 import SearchAndCategory from "../Components/Canteen/SearchAndCategory";
+import Navbar from "../Components/Navbar/Navbar";
 
 export default function Canteen() {
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState({});
   const [showCart, setShowCart] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderDetails, setOrderDetails] = useState(null);
   const [orderReceived, setOrderReceived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  
 
   const categories = [
     { id: "all", name: "All Items", icon: "🍽️" },
@@ -44,219 +48,175 @@ export default function Canteen() {
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  const menuItems = [
-    {
-      id: 1,
-      name: "Masala Dosa",
-      price: 60,
-      category: "breakfast",
-      rating: 4.5,
-      image: "🥞",
-      veg: true,
-      spicy: true,
-      time: "15 min",
-    },
-    {
-      id: 2,
-      name: "Idli Sambar",
-      price: 40,
-      category: "breakfast",
-      rating: 4.3,
-      image: "🍚",
-      veg: true,
-      spicy: false,
-      time: "10 min",
-    },
-    {
-      id: 3,
-      name: "Poha",
-      price: 35,
-      category: "breakfast",
-      rating: 4.0,
-      image: "🍛",
-      veg: true,
-      spicy: true,
-      time: "10 min",
-    },
-    {
-      id: 4,
-      name: "Veg Thali",
-      price: 120,
-      category: "lunch",
-      rating: 4.7,
-      image: "🍱",
-      veg: true,
-      spicy: false,
-      time: "20 min",
-    },
-    {
-      id: 5,
-      name: "Paneer Butter Masala",
-      price: 140,
-      category: "lunch",
-      rating: 4.6,
-      image: "🍛",
-      veg: true,
-      spicy: true,
-      time: "25 min",
-    },
-    {
-      id: 6,
-      name: "Chole Bhature",
-      price: 80,
-      category: "lunch",
-      rating: 4.4,
-      image: "🫓",
-      veg: true,
-      spicy: true,
-      time: "15 min",
-    },
-    {
-      id: 7,
-      name: "Samosa",
-      price: 20,
-      category: "snacks",
-      rating: 4.2,
-      image: "🥟",
-      veg: true,
-      spicy: true,
-      time: "5 min",
-    },
-    {
-      id: 8,
-      name: "Vada Pav",
-      price: 25,
-      category: "snacks",
-      rating: 4.1,
-      image: "🍔",
-      veg: true,
-      spicy: true,
-      time: "5 min",
-    },
-    {
-      id: 9,
-      name: "Pav Bhaji",
-      price: 70,
-      category: "snacks",
-      rating: 4.5,
-      image: "🍲",
-      veg: true,
-      spicy: true,
-      time: "15 min",
-    },
-    {
-      id: 10,
-      name: "Masala Chai",
-      price: 15,
-      category: "beverages",
-      rating: 4.6,
-      image: "☕",
-      veg: true,
-      spicy: false,
-      time: "5 min",
-    },
-    {
-      id: 11,
-      name: "Cold Coffee",
-      price: 50,
-      category: "beverages",
-      rating: 4.4,
-      image: "🧋",
-      veg: true,
-      spicy: false,
-      time: "5 min",
-    },
-    {
-      id: 12,
-      name: "Fresh Juice",
-      price: 40,
-      category: "beverages",
-      rating: 4.3,
-      image: "🥤",
-      veg: true,
-      spicy: false,
-      time: "5 min",
-    },
-    {
-      id: 13,
-      name: "Gulab Jamun",
-      price: 30,
-      category: "desserts",
-      rating: 4.5,
-      image: "🍡",
-      veg: true,
-      spicy: false,
-      time: "2 min",
-    },
-    {
-      id: 14,
-      name: "Ice Cream",
-      price: 40,
-      category: "desserts",
-      rating: 4.4,
-      image: "🍨",
-      veg: true,
-      spicy: false,
-      time: "2 min",
-    },
-  ];
+  const [menuItems, setMenuItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }, []);
+
+  useEffect(() => {
+    const fetchFoods = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axios.get(
+          `${API_URL}/api/v1/canteen/foods`,
+          { withCredentials: true } // if auth cookies are used
+        );
+
+        setMenuItems(res.data.data); // adjust if response structure differs
+      } catch (err) {
+        setError("Failed to load food menu");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFoods();
+  }, []);
 
   const addToCart = (item) => {
-    const existingItem = cart.find((cartItem) => cartItem.id === item.id);
-    if (existingItem) {
-      setCart(
-        cart.map((cartItem) =>
-          cartItem.id === item.id
-            ? { ...cartItem, quantity: cartItem.quantity + 1 }
-            : cartItem
-        )
-      );
-    } else {
-      setCart([...cart, { ...item, quantity: 1 }]);
-    }
+    setCart((prev) => ({
+      ...prev,
+      [item._id]: {
+        ...item,
+        quantity: (prev[item._id]?.quantity || 0) + 1,
+      },
+    }));
   };
 
-  const removeFromCart = (itemId) => {
-    const existingItem = cart.find((cartItem) => cartItem.id === itemId);
-    if (existingItem.quantity === 1) {
-      setCart(cart.filter((cartItem) => cartItem.id !== itemId));
-    } else {
-      setCart(
-        cart.map((cartItem) =>
-          cartItem.id === itemId
-            ? { ...cartItem, quantity: cartItem.quantity - 1 }
-            : cartItem
-        )
-      );
-    }
+  const removeFromCart = (id) => {
+    setCart((prev) => {
+      if (!prev[id]) return prev;
+
+      const newQty = prev[id].quantity - 1;
+
+      if (newQty <= 0) {
+        const { [id]: _, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [id]: { ...prev[id], quantity: newQty },
+      };
+    });
   };
 
-  const getItemQuantity = (id) => {
-    const item = cart.find((i) => i.id === id);
-    return item ? item.quantity : 0;
+  const orderItems = Object.values(cart).map((item) => ({
+    foodId: item._id,
+    quantity: item.quantity,
+  }));
+
+  const getItemQuantity = (itemId) => cart[itemId]?.quantity || 0;
+
+  // Helper to calculate total items in cart
+  const getTotalItems = () => {
+    return Object.values(cart).reduce(
+      (total, item) => total + item.quantity,
+      0
+    );
   };
 
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+    return Object.values(cart).reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
   };
 
-  const getTotalItems = () => {
-    return cart.reduce((total, item) => total + item.quantity, 0);
+  const placeOrder = async () => {
+    const items = Object.values(cart).map((item) => ({
+      foodId: item._id,
+      quantity: item.quantity,
+    }));
+
+    const res = await axios.post(
+      `${API_URL}/api/v1/canteen/orders`,
+      { items },
+      { withCredentials: true }
+    );
+    console.log(res.data);
+    
+
+    const  {orderId}  = res.data.data;
+    
+    await startPayment(orderId);
   };
 
-  const placeOrder = () => {
-    const order = {
-      id: `ORD${Date.now().toString().slice(-6)}`,
-      items: cart,
-      total: getTotalPrice(),
-      time: new Date().toLocaleTimeString(),
-      date: new Date().toLocaleDateString(),
-      qrCode: `QR${Date.now().toString().slice(-8)}`,
+  const startPayment = async (orderId) => {
+    const res = await axios.post(
+      `${API_URL}/api/v1/canteen/orders/${orderId}/pay`,
+      {},
+      { withCredentials: true }
+    );
+
+    const { razorpayOrderId, amount, currency, key } = res.data.data;
+
+    openRazorpay({
+      razorpayOrderId,
+      amount,
+      currency,
+      key,
+      orderId,
+    });
+  };
+
+  const openRazorpay = ({ razorpayOrderId, amount, currency, key }) => {
+    const options = {
+      key,
+      amount,
+      currency,
+      order_id: razorpayOrderId,
+      name: "College Canteen",
+      description: "Food Order Payment",
+
+      handler: async (response) => {
+        await verifyPayment(response);
+        setCart({});
+        setShowCart(false);
+        setOrderPlaced(true);
+      },
+
+      theme: { color: "#16a34a" },
     };
-    setOrderDetails(order);
-    setOrderPlaced(true);
-    setCart([]);
+
+    const rzp = new window.Razorpay(options);
+
+    rzp.on("payment.failed", () => {
+      toast.error("Payment failed");
+    });
+
+    rzp.open();
+  };
+
+  const verifyPayment = async (response) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      response;
+
+    await axios.post(
+      `${API_URL}/api/v1/canteen/orders/verify-payment`,
+      {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+      },
+      { withCredentials: true }
+    );
+
+    setCart({});
     setShowCart(false);
+    setOrderPlaced(true);
+
+    toast.success("Payment successful!");
   };
 
   const simulateQRScan = () => {
@@ -270,71 +230,19 @@ export default function Canteen() {
 
   const filteredItems = menuItems.filter((item) => {
     const matchesSearch = item.name
-      .toLowerCase()
+      ?.toLowerCase()
       .includes(searchQuery.toLowerCase());
+
     const matchesCategory =
       selectedCategory === "all" || item.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link to={"/"} className="flex items-center space-x-2">
-                <img
-                  src={logo}
-                  alt="Smart Campus Logo"
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
-                />
-                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
-                  Smart Campus
-                </span>
-              </Link>
-            </div>
-
-            <div>
-              <div className="flex items-center gap-2 text-xs text-gray-700 pt-1">
-                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                <Clock className="w-4 h-4 text-gray-500" />
-                <span className="font-medium">Open</span>
-                <span className="text-gray-400">|</span>
-                <span>7 AM – 9 PM</span>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowCart(true)}
-                className="relative px-4 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
-              >
-                <ShoppingCart className="w-5 h-5" />
-                <span className="hidden sm:inline">Cart</span>
-                {getTotalItems() > 0 && (
-                  <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-900 text-white rounded-full text-xs flex items-center justify-center font-bold">
-                    {getTotalItems()}
-                  </span>
-                )}
-              </button>
-
-              <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
-                Logout
-              </span>
-              <Link className="flex items-center space-x-2">
-                <img
-                  src={profile}
-                  alt="Profile"
-                  onClick={() => setShowProfileMenu(true)}
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
-                />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Profile side menu bar */}
       <ProfileSidebar
@@ -425,9 +333,9 @@ export default function Canteen() {
               </div>
 
               <div className="space-y-2">
-                {orderDetails?.items.map((item, idx) => (
+                {Object.values(orderDetails?.items || {}).map((item, idx) => (
                   <div
-                    key={idx}
+                    key={item._id || idx}
                     className="flex justify-between text-sm text-gray-600"
                   >
                     <span>
@@ -458,6 +366,7 @@ export default function Canteen() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
           <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl">
             <div className="flex flex-col h-full">
+              {/* Header */}
               <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6">
                 <div className="flex items-center justify-between">
                   <h2 className="text-2xl font-bold">Your Cart</h2>
@@ -471,19 +380,26 @@ export default function Canteen() {
                 <p className="text-orange-100 mt-2">{getTotalItems()} items</p>
               </div>
 
+              {/* Cart Items */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {cart.length === 0 ? (
+                {Object.keys(cart).length === 0 ? (
                   <div className="text-center py-12">
                     <div className="text-6xl mb-4">🛒</div>
                     <p className="text-gray-500">Your cart is empty</p>
                   </div>
                 ) : (
-                  cart.map((item) => (
+                  Object.entries(cart).map(([id, item]) => (
                     <div
-                      key={item.id}
+                      key={id}
                       className="bg-gray-50 rounded-xl p-4 flex items-center space-x-4"
                     >
-                      <div className="text-4xl">{item.image}</div>
+                      <div className="text-4xl">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-16 h-16 object-cover rounded-xl"
+                        />
+                      </div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-gray-900">
                           {item.name}
@@ -494,7 +410,7 @@ export default function Canteen() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(id)}
                           className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition"
                         >
                           <Minus className="w-4 h-4" />
@@ -514,20 +430,13 @@ export default function Canteen() {
                 )}
               </div>
 
-              {cart.length > 0 && (
+              {/* Cart Totals */}
+              {Object.keys(cart).length > 0 && (
                 <div className="border-t border-gray-200 p-6 space-y-4">
-                  <div className="flex justify-between text-lg">
-                    <span className="font-semibold">Subtotal:</span>
-                    <span className="font-bold">₹{getTotalPrice()}</span>
-                  </div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>GST (5%):</span>
-                    <span>₹{Math.round(getTotalPrice() * 0.05)}</span>
-                  </div>
                   <div className="flex justify-between text-xl border-t border-gray-200 pt-4">
                     <span className="font-bold">Total:</span>
                     <span className="font-bold text-orange-600">
-                      ₹{getTotalPrice() + Math.round(getTotalPrice() * 0.05)}
+                      ₹{getTotalPrice()}
                     </span>
                   </div>
                   <button
@@ -546,6 +455,33 @@ export default function Canteen() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Search and Filter */}
+        <div className="flex justify-between items-center w-full px-5 pb-4">
+          <div className="">
+            <div className="flex items-center gap-2 text-xs text-gray-700 pt-1">
+              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+              <Clock className="w-4 h-4 text-gray-500" />
+              <span className="font-medium">Open</span>
+              <span className="text-gray-400">|</span>
+              <span>7 AM – 9 PM</span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => setShowCart(true)}
+              className="relative px-4 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
+            >
+              <ShoppingCart className="w-5 h-5" />
+              <span className="hidden sm:inline">Cart</span>
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-900 text-white rounded-full text-xs flex items-center justify-center font-bold">
+                  {getTotalItems()}
+                </span>
+              )}
+            </button>
+          </div>
+        </div>
+
         <SearchAndCategory
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}

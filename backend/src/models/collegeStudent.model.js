@@ -10,21 +10,44 @@ import { log } from "console";
 const collegeStudentSchema = new Schema(
   {
     studentName: String,
-    rollNo: { type: String, unique: true },
-    mobileNo: {type: String, unique: true},
-    email: { type: String, unique: true },
+    rollNo:
+    {
+      type: String,
+      unique: true
+    },
+    mobileNo:
+    {
+      type: String,
+      unique: true
+    },
+    email:
+    {
+      type: String,
+      unique: true
+    },
     password: String,
     avatar: String,
-    role: {type: String, default: "student"},
-    refreshToken: { type: String, select: false , default: null},
+    role:
+    {
+      type: String,
+      default: "student"
+    },
+    issuedBooks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "LibraryTransaction"
+      }
+    ],
+
+    refreshToken: { type: String, default: null },
   },
   { timestamps: true }
 );
 
-export const getStudentModel = (conn) => {  
+export const getStudentModel = (conn) => {
   if (!conn) {
     throw new Error(`❌ College DB connection is undefined`);
   }
-  
+
   return conn.models.CollegeStudent || conn.model("CollegeStudent", collegeStudentSchema);
 };

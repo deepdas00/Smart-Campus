@@ -163,3 +163,23 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
 
 })
+
+export const studentProfile = asyncHandler(async (req, res) => {
+
+  const { collegeCode, userId } = req.user;
+  
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
+    const college = await College.findOne({ collegeCode, status: "active" });
+    if (!college) throw new ApiError(404, "College not found");
+
+
+    const collegeConn = getCollegeDB(college.dbName)
+    const Student = getStudentModel(collegeConn)
+    const student = await Student.findById(userId).select("-password -refreshToken");
+
+
+    res.status(200).json(
+    new ApiResponse(200, student, "Student profile fetched")
+  );
+})

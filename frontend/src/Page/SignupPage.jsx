@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AlertCircle,
   Building2,
@@ -12,19 +13,63 @@ import {
   Check,
   Eye,
   EyeOff,
+  Loader2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+
 
 import Footer from "../Components/Footer";
 import logo from "../assets/logo.png";
 
+// Animation Variants
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -20 }
+};
+
+const staggerContainer = {
+  animate: { transition: { staggerChildren: 0.1 } }
+};
+
+
+
 export default function SignUpPage() {
+  const navigate = useNavigate();
   const [userType, setUserType] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [idCardFile, setIdCardFile] = useState(null);
+
+  const [colleges, setColleges] = useState([]);
+const [loadingColleges, setLoadingColleges] = useState(true);
+const [isSubmitting, setIsSubmitting] = useState(false);
+const API_URL = import.meta.env.VITE_API_URL;
+
+useEffect(() => {
+  const fetchColleges = async () => {
+    try {
+      setLoadingColleges(true);
+      const response = await axios.get(
+        `${API_URL}/api/v1/college/data`,
+        { withCredentials: true } // only if needed
+      );
+
+      // Use the correct path to your array
+      
+      setColleges(response.data.data);
+    } catch (error) {
+      console.error("Error fetching colleges:", error);
+    } finally {
+      setLoadingColleges(false);
+    }
+  };
+
+  fetchColleges();
+}, []);
 
 
   const [formData, setFormData] = useState({
@@ -46,110 +91,118 @@ export default function SignUpPage() {
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (!acceptedTerms) {
-        toast.error("Please accept Terms & Conditions");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (!acceptedTerms) {
+    toast.error("Please accept Terms & Conditions");
+    return;
+  }
+
+  if (!userType) {
+    toast.error("Please select account type");
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    toast.error("Passwords do not match");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+    const form = new FormData();
+
+    if (userType === "student") {
+      form.append("collegeCode", formData.institutionName);
+form.append("studentName", formData.name);
+form.append("rollNo", formData.studentId);
+form.append("mobileNo", formData.phone);
+form.append("email", formData.email);
+form.append("password", formData.password);
+
+      if (!idCardFile) {
+        toast.error("Please upload your Student ID Card!");
         return;
       }
-
-      // basic frontend validation
-      if (!userType) {
-        toast.error("Please select account type");
-        return;
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        toast.error("Passwords do not match");
-        return;
-      }
-
-      // API payload
-      const payload = {
-        userType,
-        ...formData,
-      };
-
-      // backend API call
-      const response = await axios.post(
-        "http://localhost:8000/api/v1/users/student/register", // 🔁 change if needed
-        payload,
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      // SUCCESS
-      toast.success(response.data.message || "Account created successfully!");
-
-      // optional: reset form
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-        confirmPassword: "",
-        phone: "",
-        studentId: "",
-        department: "",
-        year: "",
-        institutionName: "",
-      });
-
-      setUserType(null);
-    } catch (error) {
-      // ERROR handling
-      const msg =
-        error.response?.data?.message ||
-        "Something went wrong. Please try again.";
-
-      toast.error(msg);
+      form.append("avatar", idCardFile); // backend expects a file field
     }
-  };
 
-  const UserTypeCard = ({ type, icon, title, description, benefits }) => (
-    <div
+    // Use axios with multipart/form-data
+    const response = await axios.post(
+      `${API_URL}/api/v1/users/student/register`,
+      form
+    );
+
+    toast.success(response.data.message || "Account created successfully!");
+    navigate("/", { replace: true });
+
+    // Reset form
+    setFormData({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      phone: "",
+      studentId: "",
+      institutionName: "",
+    });
+    setIdCardFile(null);
+    setUserType(null);
+  } catch (error) {
+    console.error("Registration error:", error.response?.data || error);
+    const msg =
+      error.response?.data?.message || "Something went wrong. Please try again.";
+    toast.error(msg);
+  }finally {
+    setIsSubmitting(false); // Stop animation
+  }
+};
+
+
+
+
+const UserTypeCard = ({ type, icon, title, description, benefits }) => (
+    <motion.div
+      variants={fadeInUp}
+      whileHover={{ scale: 1.02, translateY: -5 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => setUserType(type)}
-      className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-all duration-300 ${
+      className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-colors duration-300 ${
         userType === type
-          ? "border-blue-600 bg-blue-50 shadow-xl scale-105"
-          : "border-gray-200 bg-white hover:border-blue-300 hover:shadow-lg"
+          ? "border-blue-600 bg-blue-50/50 shadow-2xl shadow-blue-100"
+          : "border-gray-200 bg-white hover:border-blue-300 shadow-sm"
       }`}
     >
       {userType === type && (
-        <div className="absolute -top-3 -right-3 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+        <motion.div 
+          initial={{ scale: 0 }} 
+          animate={{ scale: 1 }} 
+          className="absolute -top-3 -right-3 w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center shadow-lg"
+        >
           <Check className="w-5 h-5 text-white" />
-        </div>
+        </motion.div>
       )}
-
-      <div
-        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
-          userType === type
-            ? "bg-gradient-to-br from-blue-600 to-purple-600 text-white"
-            : "bg-gray-100 text-gray-600"
-        } transition-all`}
-      >
+      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all ${
+        userType === type ? "bg-blue-600 text-white shadow-lg shadow-blue-200" : "bg-gray-100 text-gray-600"
+      }`}>
         {icon}
       </div>
-
       <h3 className="text-2xl font-bold text-gray-900 mb-2">{title}</h3>
       <p className="text-gray-600 mb-4">{description}</p>
-
       <ul className="space-y-2">
         {benefits.map((benefit, idx) => (
-          <li
-            key={idx}
-            className="flex items-start space-x-2 text-sm text-gray-700"
-          >
+          <li key={idx} className="flex items-start space-x-2 text-sm text-gray-700">
             <Check className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
             <span>{benefit}</span>
           </li>
         ))}
       </ul>
-    </div>
+    </motion.div>
   );
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
@@ -321,22 +374,26 @@ export default function SignUpPage() {
                         Institution Name
                       </label>
                       <div className="relative">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                        <select
-                          name="institutionName"
-                          value={formData.institutionName}
-                          onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        >
-                          <option value="">Select Institution</option>
-                          <option value="ABC University">ABC University</option>
-                          <option value="XYZ College">XYZ College</option>
-                          <option value="Tech Institute">Tech Institute</option>
-                          <option value="National University">
-                            National University
-                          </option>
-                        </select>
-                      </div>
+  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+  <select
+  name="institutionName"
+  value={formData.institutionName}
+  onChange={handleInputChange}
+  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+>
+  <option value="">
+    {loadingColleges ? "Loading institutions..." : "Select Institution"}
+  </option>
+
+  {colleges.map((college) => (
+    <option key={college.collegeCode} value={college.collegeCode}>
+      {college.collegeCode}.    {college.collegeName}
+    </option>
+  ))}
+</select>
+
+</div>
+
                     </div>
 
                     <div>
@@ -357,41 +414,10 @@ export default function SignUpPage() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Department
-                        </label>
-                        <select
-                          name="department"
-                          value={formData.department}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        >
-                          <option value="">Select Department</option>
-                          <option value="cse">Computer Science</option>
-                          <option value="ece">Electronics</option>
-                          <option value="mech">Mechanical</option>
-                          <option value="civil">Civil</option>
-                          <option value="other">Other</option>
-                        </select>
-                      </div>
+                      
 
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Year
-                        </label>
-                        <select
-                          name="year"
-                          value={formData.year}
-                          onChange={handleInputChange}
-                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                        >
-                          <option value="">Select Year</option>
-                          <option value="1">1st Year</option>
-                          <option value="2">2nd Year</option>
-                          <option value="3">3rd Year</option>
-                          <option value="4">4th Year</option>
-                        </select>
+                        
                       </div>
                     </div>
 
@@ -630,18 +656,55 @@ export default function SignUpPage() {
                   </label>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={!acceptedTerms}
-                  className={`w-full py-4 rounded-lg font-semibold transition ${
-                    acceptedTerms
-                      ? "bg-blue-900 text-white hover:shadow-xl"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                >
-                  Create Account
-                </button>
+                <AnimatePresence>
+  {isSubmitting && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[1000] flex flex-col items-center justify-center bg-white/20 backdrop-blur-md"
+    >
+      {/* Dynamic Loader Card */}
+      <motion.div 
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        className="bg-white p-8 rounded-3xl shadow-2xl flex flex-col items-center space-y-4 border border-slate-100"
+      >
+        <div className="relative">
+          {/* Outer Spinning Ring */}
+          <div className="w-16 h-16 border-4 border-blue-100 border-t-blue-600 rounded-full animate-spin"></div>
+          {/* Inner Logo/Icon */}
+          <div className="absolute inset-0 flex items-center justify-center">
+             <div className="w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
+          </div>
+        </div>
+        
+        <div className="text-center">
+          <h3 className="text-xl font-bold text-slate-900">Creating Account</h3>
+          <p className="text-sm text-slate-500">Securely setting up your campus profile...</p>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+                <motion.button
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    disabled={!acceptedTerms || isSubmitting}
+                    className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3 transition-all ${
+                        acceptedTerms ? "bg-slate-900 text-white shadow-xl shadow-slate-200" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                    }`}
+                  >
+                    {isSubmitting ? <Loader2 className="animate-spin" /> : <span>Create Account</span>}
+                  </motion.button>
               </form>
+
+
+
+              <div className="fixed w-full h-full bg-gray-700/30">
+
+              </div>
 
               <div className="mt-6 text-center">
                 <p className="text-gray-600">

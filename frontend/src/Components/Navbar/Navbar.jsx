@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
 import logo from "../../assets/logo.png";
+import { useAuth } from "../../context/AuthContext";
+import profile from "../../assets/profile.png";
+import ProfileSidebar from "../ProfileSidebar";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -23,8 +26,75 @@ export default function Navbar() {
     }
   };
 
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+
+  const {user} = useAuth();
+
   return (
-    <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm py-1.5">
+
+    <>
+    {user? (user.role === "student" ? (
+    <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Link to={"/"} className="flex items-center space-x-2">
+                <img
+                  src={logo}
+                  alt="Smart Campus Logo"
+                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                />
+                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                  Smart Campus
+                </span>
+              </Link>
+            </div>
+
+            <div className="flex items-center space-x-4">
+            
+              <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
+                Logout
+              </span>
+              <Link className="flex items-center space-x-2">
+                <img
+                  src={user?.avatar}
+                  alt="Profile"
+                  onClick={() => setShowProfileMenu(true)}
+                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+    ):(<header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Link to={"/"} className="flex items-center space-x-2">
+                <img
+                  src={logo}
+                  alt="Smart Campus Logo"
+                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                />
+                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                  Smart Campus
+                </span>
+              </Link>
+            </div>
+
+            <div className="flex items-center space-x-4">
+            
+              <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
+                Logout
+              </span>
+              
+            </div>
+          </div>
+        </div>
+      </header>)):(
+
+      <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm py-1.5">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
@@ -59,5 +129,15 @@ export default function Navbar() {
 
       {mobileMenuOpen && <MobileMenu />}
     </nav>
+     
+      
+    )}
+
+    {/* Profile menu side bar */}
+                  <ProfileSidebar
+                    isOpen={showProfileMenu}
+                    onClose={() => setShowProfileMenu(false)}
+                  />
+    </>
   );
 }

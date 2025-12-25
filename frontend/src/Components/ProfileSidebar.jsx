@@ -1,4 +1,5 @@
 import React from "react";
+import { useState, useEffect } from "react";
 import {
   X,
   User,
@@ -10,11 +11,34 @@ import {
   BookDashed,
   BookDashedIcon,
   BookTemplate,
-  ShieldAlert
+  ShieldAlert,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProfileSidebar({ isOpen, onClose }) {
+  const { user } = useAuth();
+
+  
+
+  const [studentName, setStudentName] = useState(user?.studentName);
+  const [avatar, setAvatar] = useState(user?.avatar);
+  const [rollNo, setRollNo] = useState(user?.rollNo);
+  const [shortName, setShortName] = useState("");
+
+  useEffect(() => {
+    if (user?.studentName) {
+      const words = user.studentName.trim().split(" "); // split by space
+      if (words.length === 1) {
+        setShortName(words[0]); // only one word
+      } else {
+        setShortName(words[0][0] + words[1][0]); // first letters of first + second word
+      }
+    }
+  }, [user]);
+
+  
+
   return (
     <>
       {/* Backdrop */}
@@ -41,14 +65,23 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
           {/* User Info */}
           <div className="flex items-center gap-4 mt-4">
-            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-xl font-bold">
-              SD
+            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+              {user?.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.studentName}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span className="text-xl font-bold">
+                  {shortName.toUpperCase()}
+                </span>
+              )}
             </div>
+
             <div>
-              <h3 className="text-lg font-semibold">Student Dashboard</h3>
-              <p className="text-sm text-blue-100">
-                Smart Campus
-              </p>
+              <h3 className="text-lg font-semibold">{studentName} Dashboard</h3>
+              <p className="text-sm text-blue-100">{rollNo}</p>
             </div>
           </div>
         </div>
@@ -120,12 +153,8 @@ function SidebarItem({ to, icon, label, color, onClose }) {
       className={`group flex items-center justify-between px-4 py-3 rounded-lg transition ${colors[color]}`}
     >
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-white shadow-sm rounded-md">
-          {icon}
-        </div>
-        <span className="font-medium text-gray-800">
-          {label}
-        </span>
+        <div className="p-2 bg-white shadow-sm rounded-md">{icon}</div>
+        <span className="font-medium text-gray-800">{label}</span>
       </div>
 
       <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition text-gray-400" />

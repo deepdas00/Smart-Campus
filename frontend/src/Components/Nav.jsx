@@ -13,66 +13,46 @@ import {
   X
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from '../context/AuthContext';
 
 function Nav() {
+
+  const [onClose, setOnClose] = useState(second)
+
+  const {user} = useAuth()
   return (
     <div>
-      <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-blue-700 rounded-lg flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-white" />
+      {/* Header */}
+              <div className="relative px-6 pt-6 pb-5 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+                <button
+                  onClick={onClose}
+                  className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+      
+                {/* User Info */}
+                <div className="flex items-center gap-4 mt-4">
+                  <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                    {user?.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.studentName}
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <span className="text-xl font-bold">
+                        {shortName.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+      
+                  <div>
+                    <h3 className="text-lg font-semibold">{studentName} Dashboard</h3>
+                    <p className="text-sm text-blue-100">{rollNo}</p>
+                  </div>
+                </div>
               </div>
-              <span className="text-xl font-bold bg-blue-700 bg-clip-text text-transparent">
-                Smart Campus
-              </span>
-            </div>
-            
-            <div className="hidden md:flex space-x-8">
-              <a href="#features" className="text-gray-700 hover:text-blue-600 transition">Features</a>
-              <a href="#how-it-works" className="text-gray-700 hover:text-blue-600 transition">How It Works</a>
-              <a href="#impact" className="text-gray-700 hover:text-blue-600 transition">Impact</a>
-              <a href="#contact" className="text-gray-700 hover:text-blue-600 transition">Contact</a>
-            </div>
-
-            <div className="hidden md:flex space-x-4">
-              <Link
-              to='/signup'
-              className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                Login
-              </Link>
-              <button className="px-4 py-2 bg-blue-700 text-white rounded-lg hover:shadow-lg transition">
-                Report Issue
-              </button>
-            </div>
-
-            <button 
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? <X /> : <Menu />}
-            </button>
-          </div>
-        </div>
-
-        {mobileMenuOpen && (
-          <div className="md:hidden bg-white border-t">
-            <div className="px-4 py-4 space-y-3">
-              <a href="#features" className="block text-gray-700 hover:text-blue-600">Features</a>
-              <a href="#how-it-works" className="block text-gray-700 hover:text-blue-600">How It Works</a>
-              <a href="#impact" className="block text-gray-700 hover:text-blue-600">Impact</a>
-              <a href="#contact" className="block text-gray-700 hover:text-blue-600">Contact</a>
-              <button className="w-full px-4 py-2 text-blue-600 border border-blue-600 rounded-lg">
-                Login
-              </button>
-              <button className="w-full px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg">
-                Report Issue
-              </button>
-            </div>
-          </div>
-        )}
-      </nav>
     </div>
   )
 }

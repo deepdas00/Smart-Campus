@@ -23,6 +23,7 @@ router.patch(
   "/foods/:foodId",
   verifyJWT,
   authorizeRoles("canteen", "admin"),
+  upload.single("image"), // handle the 'image' field
   updateFood
 );
 

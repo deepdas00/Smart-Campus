@@ -9,7 +9,7 @@ const router = express.Router();
 router.route("/register").post(registerCollege);
 
 // Internal / frontend usage
-router.route("/data").post(getAllColleges);
+router.route("/data").get(getAllColleges);
 
 export default router;
 

@@ -29,25 +29,60 @@ import adminOfficialRoute from "./route/adminOfficial.route.js"
 
 
 
-
+// -p = pending
 
 app.use("/api/v1/users/student", studentRouter) 
-//   /register, /profile, /complaints
+// POST   /api/v1/users/student/register        // Public: student registration with avatar upload
+// GET    /api/v1/users/student/profile         // Protected: fetch student profile (JWT + role check)
 
-app.use("/api/v1/users/college", collegeRouter);
-//   /register, /data
+// PATCH  /api/v1/users/student/profile   -p      // Protected: update student profile
+// DELETE /api/v1/users/student/profile   -p      // Protected: delete/deactivate student account
+// GET    /api/v1/users/student/courses   -p      // Protected: list enrolled courses
+// GET    /api/v1/users/student/library   -p      // Protected: view borrowed books/fines
+
+
+app.use("/api/v1/college", collegeRouter);
+// POST   /api/v1/college/register   (have to make it secure after making adminOfficial )  
+// GET    /api/v1/college/data       (public api)     
+
 
 app.use("/api/v1/auth", authRouter);
-//   /student/login, /staff/login, /refresh, /logout
+// POST /api/v1/auth/student/login 
+// POST /api/v1/auth/staff/login 
+// POST /api/v1/auth/refresh 
+// POST /api/v1/auth/logout -p
+// POST /api/v1/auth/change-password  -p
+// POST /api/v1/auth/forgot-password  -p
+// POST /api/v1/auth/reset-password/:token -p
 
 app.use("/api/v1/admin", adminRouter);
 //
 
 app.use("/api/v1/library", libraryRouter);
-//
+// POST   /api/v1/library/books
+// GET    /api/v1/library/books
+// PATCH  /api/v1/library/books/:bookId
+// DELETE /api/v1/library/books/:bookId
+
 
 app.use("/api/v1/canteen", canteenRouter);
-//addFood, updateFood, getAllFoods, placeOrder, createRazorpayOrder, verifyPayment, serveOrder
+/* ---------- FOOD ---------- */
+
+// POST   /api/v1/canteen/foods              // Add food (canteen, admin only)
+// PATCH  /api/v1/canteen/foods/:foodId      // Update food (canteen, admin only)
+// GET    /api/v1/canteen/foods              // Get all foods (student, canteen, admin)
+
+
+/* ---------- ORDERS ---------- */
+
+// POST   /api/v1/canteen/orders             // Place order (student only)
+// PATCH  /api/v1/canteen/orders/:id/status  // Update order status (canteen only) [TODO]
+// POST   /api/v1/canteen/orders/:orderId/pay // Create Razorpay order (student only)
+// POST   /api/v1/canteen/orders/verify-payment // Verify payment (student only)
+// POST   /api/v1/canteen/orders/serve       // Serve order via QR (canteen only)
+// GET    /api/v1/canteen/orders/dashboard   // Get dashboard orders (canteen, admin) 
+//      !-> fetch(`/canteen/orders/dashboard?range=${selectedRange}`)  selectedRange = ["daily" || "weekly" || "monthly"]
+
 
 app.use("/api/v1/app/administration", adminOfficialRoute);
 //

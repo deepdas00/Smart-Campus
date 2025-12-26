@@ -26,6 +26,7 @@ import ProfileSidebar from "../Components/ProfileSidebar";
 import FoodGrid from "../Components/Canteen/FoodGrid";
 import SearchAndCategory from "../Components/Canteen/SearchAndCategory";
 import Navbar from "../Components/Navbar/Navbar";
+import { Toaster } from "react-hot-toast";
 
 export default function Canteen() {
   const [cart, setCart] = useState({});
@@ -137,7 +138,15 @@ export default function Canteen() {
     );
   };
 
-  const placeOrder = async () => {
+const placeOrder = async () => {
+  try {
+    if (Object.keys(cart).length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    toast.loading("Placing your order...", { id: "place-order" });
+
     const items = Object.values(cart).map((item) => ({
       foodId: item._id,
       quantity: item.quantity,
@@ -148,12 +157,26 @@ export default function Canteen() {
       { items },
       { withCredentials: true }
     );
-    console.log(res.data);
+
+    console.log(res);
+
+    toast.success("Order created! Redirecting to payment…", {
+      id: "place-order",
+    });
 
     const { orderId } = res.data.data;
 
     await startPayment(orderId);
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error(
+      err.response?.data?.message || "Failed to place order",
+      { id: "place-order" }
+    );
+  }
+};
+
+
 
   const startPayment = async (orderId) => {
     const res = await axios.post(
@@ -274,6 +297,8 @@ export default function Canteen() {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
       {/* Header */}
       <Navbar />
+
+      <Toaster position="top-right" />
 
       {/* Profile side menu bar */}
       <ProfileSidebar

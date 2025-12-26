@@ -1,5 +1,5 @@
 import express from "express";
-import { registerStudent } from "../controllers/collegeStudent.controller.js";
+import { registerStudent, studentProfile } from "../controllers/collegeStudent.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -18,7 +18,7 @@ router.get(
   "/profile",
   verifyJWT,
   authorizeRoles("student"),
-  //studentProfile
+  studentProfile
 );
 
 

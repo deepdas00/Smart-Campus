@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import toast from "react-hot-toast";
+
 import {
   Search,
   Plus,
+  BookOpen,
+  Upload,
   CheckCircle,
   X,
   Library,
@@ -27,14 +33,38 @@ import StatsGrid from "../Components/StatsGrid";
 import TransactionsTable from "../Components/TransactionsTable";
 
 export default function LibraryTeacherHandle() {
+  const [isAddingBook, setIsAddingBook] = useState(false);
+  const [isUpdatingBook, setIsUpdatingBook] = useState(false);
+ const [editingBook, setEditingBook] = useState(null);
+
+const isEditMode = Boolean(editingBook);
+
+const [isDeletingBook, setIsDeletingBook] = useState(false);
+const [bookToDelete, setBookToDelete] = useState(null);
+
   // --- STATE SECTIONS ---
   const [activeTab, setActiveTab] = useState("transactions");
   const [showIssueModal, setShowIssueModal] = useState(false);
   const [showAddBookModal, setShowAddBookModal] = useState(false);
-  const [editingBook, setEditingBook] = useState(null); // Track book being edited
+  // Track book being edited
   const [searchQuery, setSearchQuery] = useState("");
   const [showReturnConfirm, setShowReturnConfirm] = useState(null);
   const [selectedDept, setSelectedDept] = useState(null);
+  const [visibleTransactions, setVisibleTransactions] = useState(5); // initially show 5
+
+  const [newBook, setNewBook] = useState({
+    title: "",
+    author: "",
+    category: "",
+    totalCopies: "",
+    availableCopies: "",
+    shelf: "",
+    isbn: "",
+    publisher: "",
+    publishedYear: "",
+    description: "",
+    coverImage: null,
+  });
 
   const [newIssue, setNewIssue] = useState({
     student: "",
@@ -43,497 +73,90 @@ export default function LibraryTeacherHandle() {
     specificBookId: "",
   });
 
-  const [newBook, setNewBook] = useState({
-    title: "",
-    author: "",
-    stock: "",
-    category: "",
-    id: "",
+  const [books, setBooks] = useState([]);
+
+  const [loadingBooks, setLoadingBooks] = useState(true);
+  useEffect(() => {
+    setSearchQuery("");
+  }, [activeTab]);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoadingBooks(true);
+        const token = Cookies.get("accessToken");
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/library/books`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+            withCredentials: true,
+          }
+        );
+        console.log("All BOOKS AREREEEEE", res.data);
+
+        setBooks(res.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingBooks(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  const [transactions, setTransactions] = useState([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(true);
+  const [transactionError, setTransactionError] = useState(null);
+
+  const normalizeTransaction = (tx) => ({
+    id: tx._id,
+    student: tx.studentId?.studentName || "Unknown",
+    roll: tx.studentId?.rollNo || "-",
+
+    book: tx.bookId?.title || "Unknown",
+    coverImage: tx.bookId?.coverImage || null, // ✅ ADD THIS
+    author: tx.bookId?.author || "", // optional
+
+    date: new Date(tx.createdAt).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+    }),
+    status: tx.transactionStatus,
   });
 
-  const [books, setBooks] = useState([
-    {
-      id: "B-101",
-      title: "Data Structures",
-      author: "N. Karumanchi",
-      stock: 5,
-      category: "Tech",
-    },
-    {
-      id: "B-102",
-      title: "Atomic Habits",
-      author: "James Clear",
-      stock: 2,
-      category: "Self-Help",
-    },
-    {
-      id: "B-103",
-      title: "Modern Psychology",
-      author: "S. Freud",
-      stock: 0,
-      category: "Science",
-    },
-    {
-      id: "B-104",
-      title: "Clean Code",
-      author: "Robert Martin",
-      stock: 3,
-      category: "Tech",
-    },
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        setLoadingTransactions(true);
 
-    {
-      id: "B-105",
-      title: "Introduction to Algorithms",
-      author: "CLRS",
-      stock: 4,
-      category: "Tech",
-    },
-    {
-      id: "B-106",
-      title: "You Don't Know JS",
-      author: "Kyle Simpson",
-      stock: 6,
-      category: "Tech",
-    },
-    {
-      id: "B-107",
-      title: "The Pragmatic Programmer",
-      author: "Andrew Hunt",
-      stock: 5,
-      category: "Tech",
-    },
-    {
-      id: "B-108",
-      title: "Deep Work",
-      author: "Cal Newport",
-      stock: 3,
-      category: "Self-Help",
-    },
-    {
-      id: "B-109",
-      title: "Thinking, Fast and Slow",
-      author: "Daniel Kahneman",
-      stock: 2,
-      category: "Psychology",
-    },
-    {
-      id: "B-110",
-      title: "Sapiens",
-      author: "Yuval Noah Harari",
-      stock: 7,
-      category: "History",
-    },
+        const token = Cookies.get("accessToken");
 
-    {
-      id: "B-111",
-      title: "The Alchemist",
-      author: "Paulo Coelho",
-      stock: 6,
-      category: "Fiction",
-    },
-    {
-      id: "B-112",
-      title: "Rich Dad Poor Dad",
-      author: "Robert Kiyosaki",
-      stock: 4,
-      category: "Finance",
-    },
-    {
-      id: "B-113",
-      title: "The Lean Startup",
-      author: "Eric Ries",
-      stock: 3,
-      category: "Business",
-    },
-    {
-      id: "B-114",
-      title: "Design Patterns",
-      author: "Erich Gamma",
-      stock: 2,
-      category: "Tech",
-    },
-    {
-      id: "B-115",
-      title: "Refactoring",
-      author: "Martin Fowler",
-      stock: 5,
-      category: "Tech",
-    },
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/library/transactions`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
 
-    {
-      id: "B-116",
-      title: "Zero to One",
-      author: "Peter Thiel",
-      stock: 4,
-      category: "Business",
-    },
-    {
-      id: "B-117",
-      title: "The Psychology of Money",
-      author: "Morgan Housel",
-      stock: 6,
-      category: "Finance",
-    },
-    {
-      id: "B-118",
-      title: "Eloquent JavaScript",
-      author: "Marijn Haverbeke",
-      stock: 5,
-      category: "Tech",
-    },
-    {
-      id: "B-119",
-      title: "Cracking the Coding Interview",
-      author: "Gayle Laakmann",
-      stock: 3,
-      category: "Tech",
-    },
-    {
-      id: "B-120",
-      title: "Grokking Algorithms",
-      author: "Aditya Bhargava",
-      stock: 7,
-      category: "Tech",
-    },
+        console.log("THE RESPONSEEEEEEEE", res);
 
-    {
-      id: "B-121",
-      title: "The Power of Habit",
-      author: "Charles Duhigg",
-      stock: 4,
-      category: "Self-Help",
-    },
-    {
-      id: "B-122",
-      title: "AI Superpowers",
-      author: "Kai-Fu Lee",
-      stock: 2,
-      category: "AI",
-    },
-    {
-      id: "B-123",
-      title: "Life 3.0",
-      author: "Max Tegmark",
-      stock: 3,
-      category: "AI",
-    },
-    {
-      id: "B-124",
-      title: "Introduction to Machine Learning",
-      author: "Ethem Alpaydin",
-      stock: 2,
-      category: "AI",
-    },
-    {
-      id: "B-125",
-      title: "Hands-On Machine Learning",
-      author: "Aurélien Géron",
-      stock: 4,
-      category: "AI",
-    },
+        const normalized = res.data.data.map(normalizeTransaction);
 
-    {
-      id: "B-126",
-      title: "The Art of Computer Programming",
-      author: "Donald Knuth",
-      stock: 1,
-      category: "Tech",
-    },
-    {
-      id: "B-127",
-      title: "Structure and Interpretation of Computer Programs",
-      author: "Harold Abelson",
-      stock: 2,
-      category: "Tech",
-    },
-    {
-      id: "B-128",
-      title: "Operating System Concepts",
-      author: "Silberschatz",
-      stock: 3,
-      category: "Tech",
-    },
-    {
-      id: "B-129",
-      title: "Computer Networks",
-      author: "Andrew Tanenbaum",
-      stock: 4,
-      category: "Tech",
-    },
-    {
-      id: "B-130",
-      title: "Database System Concepts",
-      author: "Abraham Silberschatz",
-      stock: 5,
-      category: "Tech",
-    },
+        setTransactions(normalized);
+      } catch (err) {
+        console.error("Failed to fetch transactions", err);
+        setTransactionError("Unable to load transactions");
+      } finally {
+        setLoadingTransactions(false);
+      }
+    };
 
-    {
-      id: "B-131",
-      title: "The Hobbit",
-      author: "J.R.R. Tolkien",
-      stock: 6,
-      category: "Fiction",
-    },
-    {
-      id: "B-132",
-      title: "1984",
-      author: "George Orwell",
-      stock: 4,
-      category: "Fiction",
-    },
-    {
-      id: "B-133",
-      title: "To Kill a Mockingbird",
-      author: "Harper Lee",
-      stock: 3,
-      category: "Fiction",
-    },
-    {
-      id: "B-134",
-      title: "The Great Gatsby",
-      author: "F. Scott Fitzgerald",
-      stock: 5,
-      category: "Fiction",
-    },
-    {
-      id: "B-135",
-      title: "Harry Potter",
-      author: "J.K. Rowling",
-      stock: 8,
-      category: "Fiction",
-    },
-
-    {
-      id: "B-136",
-      title: "Brief History of Time",
-      author: "Stephen Hawking",
-      stock: 2,
-      category: "Science",
-    },
-    {
-      id: "B-137",
-      title: "Cosmos",
-      author: "Carl Sagan",
-      stock: 4,
-      category: "Science",
-    },
-    {
-      id: "B-138",
-      title: "Astrophysics for People in a Hurry",
-      author: "Neil deGrasse Tyson",
-      stock: 3,
-      category: "Science",
-    },
-    {
-      id: "B-139",
-      title: "Thinking in Bets",
-      author: "Annie Duke",
-      stock: 2,
-      category: "Psychology",
-    },
-    {
-      id: "B-140",
-      title: "Man's Search for Meaning",
-      author: "Viktor Frankl",
-      stock: 5,
-      category: "Psychology",
-    },
-  ]);
-
-  const [transactions, setTransactions] = useState([
-    {
-      id: "TX-9921",
-      student: "Arjun Mehta",
-      roll: "CS-204",
-      book: "Data Structures",
-      specificId: "DS-001",
-      date: "22 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9922",
-      student: "Karan Singh",
-      roll: "ME-102",
-      book: "Atomic Habits",
-      specificId: "AH-042",
-      date: "18 Dec",
-      status: "overdue",
-    },
-
-    {
-      id: "TX-9923",
-      student: "Riya Sharma",
-      roll: "CS-110",
-      book: "Clean Code",
-      specificId: "CC-014",
-      date: "20 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9924",
-      student: "Aman Verma",
-      roll: "IT-221",
-      book: "Introduction to Algorithms",
-      specificId: "CLRS-009",
-      date: "17 Dec",
-      status: "returned",
-    },
-    {
-      id: "TX-9925",
-      student: "Sneha Patel",
-      roll: "CS-305",
-      book: "You Don't Know JS",
-      specificId: "JS-121",
-      date: "21 Dec",
-      status: "issued",
-    },
-
-    {
-      id: "TX-9926",
-      student: "Rahul Nair",
-      roll: "AI-101",
-      book: "Hands-On Machine Learning",
-      specificId: "ML-077",
-      date: "15 Dec",
-      status: "overdue",
-    },
-    {
-      id: "TX-9927",
-      student: "Pooja Gupta",
-      roll: "CS-402",
-      book: "Grokking Algorithms",
-      specificId: "GA-033",
-      date: "19 Dec",
-      status: "returned",
-    },
-    {
-      id: "TX-9928",
-      student: "Vikram Joshi",
-      roll: "EE-210",
-      book: "Deep Work",
-      specificId: "DW-056",
-      date: "16 Dec",
-      status: "issued",
-    },
-
-    {
-      id: "TX-9929",
-      student: "Ananya Roy",
-      roll: "HS-115",
-      book: "Sapiens",
-      specificId: "SP-091",
-      date: "14 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9930",
-      student: "Mohit Bansal",
-      roll: "CS-501",
-      book: "Cracking the Coding Interview",
-      specificId: "CCI-118",
-      date: "13 Dec",
-      status: "overdue",
-    },
-
-    {
-      id: "TX-9931",
-      student: "Neha Kapoor",
-      roll: "AI-203",
-      book: "Life 3.0",
-      specificId: "AI-045",
-      date: "18 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9932",
-      student: "Sahil Khan",
-      roll: "CS-330",
-      book: "Refactoring",
-      specificId: "RF-022",
-      date: "12 Dec",
-      status: "returned",
-    },
-
-    {
-      id: "TX-9933",
-      student: "Ishita Malhotra",
-      roll: "BA-109",
-      book: "The Psychology of Money",
-      specificId: "PM-064",
-      date: "20 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9934",
-      student: "Aditya Kulkarni",
-      roll: "CS-222",
-      book: "Eloquent JavaScript",
-      specificId: "EJS-087",
-      date: "19 Dec",
-      status: "issued",
-    },
-
-    {
-      id: "TX-9935",
-      student: "Nikhil Arora",
-      roll: "CS-150",
-      book: "Operating System Concepts",
-      specificId: "OS-031",
-      date: "11 Dec",
-      status: "overdue",
-    },
-    {
-      id: "TX-9936",
-      student: "Kritika Jain",
-      roll: "PH-108",
-      book: "Brief History of Time",
-      specificId: "BH-010",
-      date: "10 Dec",
-      status: "returned",
-    },
-
-    {
-      id: "TX-9937",
-      student: "Rohit Iyer",
-      roll: "CS-410",
-      book: "Computer Networks",
-      specificId: "CN-055",
-      date: "21 Dec",
-      status: "issued",
-    },
-    {
-      id: "TX-9938",
-      student: "Simran Kaur",
-      roll: "EN-202",
-      book: "1984",
-      specificId: "FIC-1984-12",
-      date: "18 Dec",
-      status: "issued",
-    },
-
-    {
-      id: "TX-9939",
-      student: "Harsh Vardhan",
-      roll: "CS-399",
-      book: "Design Patterns",
-      specificId: "DP-019",
-      date: "15 Dec",
-      status: "returned",
-    },
-    {
-      id: "TX-9940",
-      student: "Aditi Chawla",
-      roll: "PS-101",
-      book: "Man's Search for Meaning",
-      specificId: "MSM-027",
-      date: "17 Dec",
-      status: "issued",
-    },
-  ]);
-
-
-  
+    fetchTransactions();
+  }, []);
 
   // Derived departments
   const departments = [...new Set(books.map((b) => b.category))];
@@ -541,9 +164,10 @@ export default function LibraryTeacherHandle() {
   // --- LOGIC SECTION ---
   const stats = {
     totalBooksInLibrary: books.reduce(
-      (acc, book) => acc + parseInt(book.stock || 0),
+      (acc, book) => acc + (book.stock ?? book.availableCopies ?? 0),
       0
     ),
+
     activeIssues: transactions.length,
     overdueCount: transactions.filter((t) => t.status === "overdue").length,
     totalTitles: books.length,
@@ -582,30 +206,161 @@ export default function LibraryTeacherHandle() {
     setNewIssue({ student: "", roll: "", bookTitleId: "", specificBookId: "" });
   };
 
-  const handleAddBook = () => {
-    if (!newBook.title || !newBook.category || !newBook.id) {
-      alert("Please fill title, category, and book ID");
+  const handleAddBook = async () => {
+    try {
+      if (
+        !newBook.title ||
+        !newBook.author ||
+        !newBook.category ||
+        !newBook.totalCopies ||
+        !newBook.shelf ||
+        !newBook.coverImage
+      ) {
+        toast.error("Please fill all required fields");
+        return;
+      }
+
+      setIsAddingBook(true);
+
+      const token = Cookies.get("accessToken");
+
+      const formData = new FormData();
+      Object.entries(newBook).forEach(([key, value]) => {
+        if (value !== "" && value !== null) {
+          formData.append(key, value);
+        }
+      });
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/api/v1/library/books`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          withCredentials: true,
+        }
+      );
+
+      // update UI instantly
+      setBooks((prev) => [res.data.data, ...prev]);
+
+      setShowAddBookModal(false);
+      setNewBook({
+        title: "",
+        author: "",
+        category: "",
+        rating: "",
+        totalCopies: "",
+        availableCopies: "",
+        shelf: "",
+        isbn: "",
+        publisher: "",
+        publishedYear: "",
+        description: "",
+        coverImage: null,
+      });
+
+      toast.success("Book added successfully!"); // <-- Success toast
+      setShowAddBookModal(false);
+setEditingBook(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to add book");
+    }finally{
+      setIsAddingBook(false)
+    }
+  };
+
+ const handleUpdateBook = async () => {
+  try {
+    if (!newBook.title || !newBook.author || !newBook.category) {
+      toast.error("Required fields cannot be empty");
       return;
     }
-    setBooks([...books, { ...newBook, stock: parseInt(newBook.stock) || 0 }]);
-    setShowAddBookModal(false);
-    setNewBook({ title: "", author: "", stock: "", category: "", id: "" });
-  };
 
-  const handleUpdateBook = () => {
-    setBooks(books.map((b) => (b.id === editingBook.id ? editingBook : b)));
-    setEditingBook(null);
-  };
+    setIsUpdatingBook(true);
 
-  const handleDeleteBook = (id) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this book title from inventory?"
+    const token = Cookies.get("accessToken");
+
+    const payload = {
+      title: newBook.title,
+      author: newBook.author,
+      category: newBook.category,
+      totalCopies: Number(newBook.totalCopies),
+      availableCopies: Number(newBook.availableCopies),
+      shelf: newBook.shelf,
+      rating: Number(newBook.rating),
+      isbn: newBook.isbn,
+      publisher: newBook.publisher,
+      publishedYear: Number(newBook.publishedYear),
+      description: newBook.description,
+    };
+
+    const res = await axios.patch(
+      `${import.meta.env.VITE_API_URL}/api/v1/library/books/${editingBook._id}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
+
+    console.log("Updated:", res.data);
+
+    // 🔥 Update UI instantly
+    setBooks((prev) =>
+      prev.map((b) =>
+        b._id === editingBook._id ? res.data.data : b
       )
-    ) {
-      setBooks(books.filter((b) => b.id !== id));
-    }
-  };
+    );
+
+    toast.success("Book updated successfully");
+    setShowAddBookModal(false);
+    setEditingBook(null);
+
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to update book");
+  } finally {
+    setIsUpdatingBook(false);
+  }
+};
+
+
+  const handleDeleteBook = async (bookId) => {
+  try {
+    setIsDeletingBook(true);
+
+    const token = Cookies.get("accessToken");
+
+    await axios.delete(
+      `${import.meta.env.VITE_API_URL}/api/v1/library/books/${bookId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
+
+    // 🔥 Remove book instantly from UI
+    setBooks((prev) => prev.filter((b) => b._id !== bookId));
+
+    toast.success("Book deleted successfully");
+    setBookToDelete(null);
+
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to delete book");
+  } finally {
+    setIsDeletingBook(false);
+  }
+};
+
 
   const confirmReturn = () => {
     if (!showReturnConfirm) return;
@@ -622,25 +377,35 @@ export default function LibraryTeacherHandle() {
   // --- SEARCH FILTER LOGIC ---
 
   // 1. Filter Transactions (Active Issues)
-  const filteredTransactions = transactions.filter(
-    (tx) =>
-      tx.student.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.book.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.roll.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredTransactions =
+    activeTab === "transactions"
+      ? transactions.filter((tx) => {
+          const query = searchQuery?.toLowerCase() || "";
+          return (
+            tx?.student?.toLowerCase().includes(query) ||
+            tx?.book?.toLowerCase().includes(query) ||
+            tx?.roll?.toLowerCase().includes(query)
+          );
+        })
+      : transactions;
 
   // 2. Filter Books (Inventory)
-  const filteredBooks = books.filter(
-    (book) =>
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBooks =
+    activeTab === "inventory"
+      ? books.filter((book) => {
+          const query = searchQuery?.toLowerCase() || "";
+          return (
+            book?.title?.toLowerCase().includes(query) ||
+            book?.author?.toLowerCase().includes(query) ||
+            book?.category?.toLowerCase().includes(query)
+          );
+        })
+      : books;
 
   return (
     <>
       <Navbar />
-      <div className="pt-15">
+      <div className="">
         <CollegeInfo />
         <div className="min-h-screen bg-[#F0F4F8] p-4 md:p-8 font-sans text-slate-900 ">
           {/* --- TOP NAVIGATION BAR --- */}
@@ -649,22 +414,31 @@ export default function LibraryTeacherHandle() {
             setSearchQuery={setSearchQuery}
           />
 
-          <main className="max-w-7xl mx-auto grid lg:grid-cols-12 gap-8">
+          <main className="max-w-full mx-auto flex gap- flex-col">
             {/* --- LEFT SIDEBAR --- */}
-            <LibrarySidebar
-              activeTab={activeTab}
-              setActiveTab={setActiveTab}
-              setSelectedDept={setSelectedDept}
-              setShowIssueModal={setShowIssueModal}
-            />
+            <div className="w-full flex gap-8 items-start">
+              {/* Sidebar */}
+              <div className="w-64 shrink-0">
+                <LibrarySidebar
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  setSelectedDept={setSelectedDept}
+                  setShowIssueModal={setShowIssueModal}
+                />
+              </div>
+
+              {/* Stats */}
+              <div className="flex-1">
+                <StatsGrid stats={stats} />
+              </div>
+            </div>
 
             {/* --- MAIN CONTENT --- */}
-            <div className="lg:col-span-9 space-y-6">
+            <div className="lg:col-span-9 space-y-6 mt-6">
               {/* STATS SECTION */}
-              <StatsGrid stats={stats} />
 
               <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center  bg-blue-200">
+                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center  bg-blue-200 ">
                   <div className="flex items-center gap-2 ">
                     {selectedDept && (
                       <ArrowLeft
@@ -692,10 +466,51 @@ export default function LibraryTeacherHandle() {
                 </div>
 
                 {activeTab === "transactions" ? (
-                  <TransactionsTable
-                    transactions={filteredTransactions}
-                    setShowReturnConfirm={setShowReturnConfirm}
-                  />
+                  loadingTransactions ? (
+                    <div className="p-12 text-center font-bold text-slate-400">
+                      Loading transactions...
+                    </div>
+                  ) : transactionError ? (
+                    <div className="p-12 text-center text-red-500 font-bold">
+                      {transactionError}
+                    </div>
+                  ) : (
+                    <>
+                      <TransactionsTable
+                        transactions={filteredTransactions.slice(
+                          0,
+                          visibleTransactions
+                        )}
+                        setShowReturnConfirm={setShowReturnConfirm}
+                      />
+
+                      {visibleTransactions < filteredTransactions.length && (
+                        <div className="flex justify-center mb-4">
+                          <button
+                            onClick={() =>
+                              setVisibleTransactions((prev) => prev + 5)
+                            }
+                            className="group flex items-center gap-2 px-8 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-full text-sm font-semibold hover:border-indigo-600 hover:text-indigo-600 hover:shadow-sm transition-all duration-200 active:scale-95"
+                          >
+                            <span>View More Transactions</span>
+                            <svg
+                              className="w-4 h-4 group-hover:translate-y-0.5 transition-transform"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M19 9l-7 7-7-7"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                    </>
+                  )
                 ) : (
                   <div className="p-8">
                     {!selectedDept ? (
@@ -720,49 +535,156 @@ export default function LibraryTeacherHandle() {
                         ))}
                       </div>
                     ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {books
+                      <div className="flex flex-col gap-4">
+                        {filteredBooks
                           .filter((b) => b.category === selectedDept)
                           .map((book) => (
                             <div
-                              key={book.id}
-                              className="p-6 bg-white rounded-3xl border border-slate-200/60 shadow-sm flex justify-between items-center group"
+                              key={book._id}
+                              className="group relative bg-white border border-slate-200 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-indigo-500/10 hover:border-indigo-400 transition-all duration-300"
                             >
-                              <div>
-                                <h4 className="font-black text-slate-800">
-                                  {book.title}
-                                </h4>
-                                <p className="text-[10px] font-bold text-slate-400 uppercase">
-                                  {book.author}
-                                </p>
-                                <div className="flex gap-2 mt-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button
-                                    onClick={() => setEditingBook(book)}
-                                    className="p-1.5 bg-slate-100 rounded-lg text-slate-600 hover:bg-indigo-100 hover:text-indigo-600"
-                                  >
-                                    <Edit3 size={14} />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDeleteBook(book.id)}
-                                    className="p-1.5 bg-slate-100 rounded-lg text-slate-600 hover:bg-red-100 hover:text-red-600"
-                                  >
-                                    <Trash2 size={14} />
-                                  </button>
+                              {/* Left Color Accent - Changes based on stock */}
+                              <div
+                                className={`absolute left-0 top-0 bottom-0 w-1.5 ${
+                                  book.availableCopies > 5
+                                    ? "bg-indigo-500"
+                                    : "bg-red-500"
+                                }`}
+                              />
+
+                              <div className="flex flex-col lg:flex-row p-5 gap-6">
+                                {/* Section 1: Visual Identity */}
+                                <div className="flex gap-4 shrink-0">
+                                  <div className="relative">
+                                    <img
+                                      src={book.coverImage}
+                                      alt={book.title}
+                                      className="w-20 lg:w-20 lg:mt-7 object-cover rounded-lg shadow-sm border border-slate-100 group-hover:rotate-1 transition-transform"
+                                    />
+                                    <div className="absolute -bottom-2 -right-2 bg-white shadow-lg border border-slate-100 rounded-lg px-2 py-1 flex items-center gap-1">
+                                      <span className="text-amber-400 text-xs">
+                                        ★
+                                      </span>
+                                      <span className="text-[11px] font-bold text-slate-700">
+                                        {book.rating}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex flex-col justify-center lg:hidden">
+                                    <h4 className="font-bold text-slate-900 text-lg leading-tight">
+                                      {book.title}
+                                    </h4>
+                                    <p className="text-sm text-indigo-600 font-medium">
+                                      {book.author}
+                                    </p>
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="text-right">
-                                <span
-                                  className={`text-lg font-black block ${
-                                    book.stock > 0
-                                      ? "text-slate-800"
-                                      : "text-red-400"
-                                  }`}
-                                >
-                                  {book.stock} left
-                                </span>
-                                <span className="text-[9px] font-black bg-slate-100 px-2 py-0.5 rounded text-slate-500 uppercase">
-                                  #{book.id}
-                                </span>
+
+                                {/* Section 2: Core Info */}
+                                <div className="flex-1 flex flex-col justify-between">
+                                  <div className="hidden lg:block">
+                                    <div className="flex justify-between items-start">
+                                      <div>
+                                        <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full uppercase tracking-widest">
+                                          {book.category}
+                                        </span>
+                                        <h4 className="mt-2 text-xl font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                                          {book.title}
+                                        </h4>
+                                        <p className="text-slate-500 font-medium">
+                                          by {book.author}
+                                        </p>
+                                      </div>
+
+                                      {/* Actions Integrated into Top Right */}
+                                      <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                          onClick={() => {
+  setEditingBook(book);
+  setNewBook({
+    title: book.title || "",
+    author: book.author || "",
+    category: book.category || "",
+    rating: book.rating || "",
+    totalCopies: book.totalCopies || "",
+    availableCopies: book.availableCopies || "",
+    shelf: book.shelf || "",
+    isbn: book.isbn || "",
+    publisher: book.publisher || "",
+    publishedYear: book.publishedYear || "",
+    description: book.description || "",
+    coverImage: null, // optional (don’t preload file)
+  });
+  setEditingBook(book);
+setNewBook(book);
+setShowAddBookModal(true);
+
+}}
+
+                                          className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-lg shadow-sm transition-all"
+                                        >
+                                          <Edit3 size={16} />
+                                        </button>
+                                        <button
+                                          onClick={() => setBookToDelete(book)}
+                                          className="p-2 text-slate-500 hover:text-red-600 hover:bg-white rounded-lg shadow-sm transition-all"
+                                        >
+                                          <Trash2 size={16} />
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <p className="mt-3 text-sm text-slate-500 line-clamp-2 max-w-2xl leading-relaxed">
+                                    {book.description}
+                                  </p>
+
+                                  {/* Section 3: Professional Data Points */}
+                                  <div className="mt-4 flex flex-wrap items-center gap-y-4 gap-x-8 pt-4 border-t border-slate-100">
+                                    <div className="flex items-center gap-2">
+                                      <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                                        <span className="text-[10px] font-bold uppercase">
+                                          Shelf
+                                        </span>
+                                      </div>
+                                      <p className="text-xs font-bold text-slate-700">
+                                        {book.shelf}
+                                      </p>
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                      <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                                        <span className="text-[10px] font-bold uppercase">
+                                          Status
+                                        </span>
+                                      </div>
+                                      <div
+                                        className={`text-xs font-bold flex items-center gap-1.5 ${
+                                          book.availableCopies > 5
+                                            ? "text-emerald-600"
+                                            : "text-red-500"
+                                        }`}
+                                      >
+                                        <span
+                                          className={`w-1.5 h-1.5 rounded-full animate-pulse ${
+                                            book.availableCopies > 5
+                                              ? "bg-emerald-500"
+                                              : "bg-red-500"
+                                          }`}
+                                        />
+                                        {book.availableCopies} of{" "}
+                                        {book.totalCopies} Available
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 ml-auto">
+                                      <span className="text-[10px] font-mono text-slate-300">
+                                        ID: {book._id.slice(-6).toUpperCase()}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}
@@ -774,166 +696,326 @@ export default function LibraryTeacherHandle() {
             </div>
           </main>
 
-          {/* --- MODAL: EDIT BOOK --- */}
-          {editingBook && (
-            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-6">
-              <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden border-4 border-indigo-500">
-                <div className="bg-indigo-600 p-8 text-white flex justify-between items-center">
-                  <h3 className="text-xl font-black uppercase">
-                    Edit Book Details
-                  </h3>
-                  <X
-                    onClick={() => setEditingBook(null)}
-                    className="cursor-pointer"
-                  />
-                </div>
-                <div className="p-8 space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={editingBook.title}
-                      onChange={(e) =>
-                        setEditingBook({
-                          ...editingBook,
-                          title: e.target.value,
-                        })
-                      }
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                        Author
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                        value={editingBook.author}
-                        onChange={(e) =>
-                          setEditingBook({
-                            ...editingBook,
-                            author: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                        Category
-                      </label>
-                      <input
-                        type="text"
-                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                        value={editingBook.category}
-                        onChange={(e) =>
-                          setEditingBook({
-                            ...editingBook,
-                            category: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-2">
-                      Available Stock
-                    </label>
-                    <input
-                      type="number"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={editingBook.stock}
-                      onChange={(e) =>
-                        setEditingBook({
-                          ...editingBook,
-                          stock: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </div>
-                  <button
-                    onClick={handleUpdateBook}
-                    className="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2"
-                  >
-                    <Save size={16} /> Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
-          {/* --- MODAL: ADD NEW BOOK --- */}
+
+
+          {/*DELETE CONFIRM MODEL */}
+
+
+          {bookToDelete && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+    <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-6">
+      
+      <h3 className="text-xl font-black text-red-600">
+        Confirm Deletion
+      </h3>
+
+      <p className="text-sm text-slate-600 font-medium">
+        Are you sure you want to delete  
+        <span className="font-black"> "{bookToDelete.title}"</span>?
+      </p>
+
+      <div className="flex gap-4">
+        <button
+          onClick={() => setBookToDelete(null)}
+          className="flex-1 py-3 rounded-xl font-black text-xs uppercase
+                     bg-slate-100 hover:bg-slate-200"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={() => handleDeleteBook(bookToDelete._id)}
+          disabled={isDeletingBook}
+          className="flex-1 py-3 rounded-xl font-black text-xs uppercase
+                     bg-red-600 text-white hover:bg-red-700
+                     disabled:bg-slate-400"
+        >
+          {isDeletingBook ? "Deleting…" : "Delete"}
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
+
+
+          {/* --- MODAL: ADD AND EDITE NEW BOOK --- */}
           {showAddBookModal && (
-            <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-50 p-6">
-              <div className="bg-white rounded-[2.5rem] w-full max-w-lg shadow-2xl overflow-hidden">
-                <div className="bg-slate-900 p-8 text-white flex justify-between items-center">
-                  <h3 className="text-xl font-black uppercase">
-                    Add New Asset
-                  </h3>
-                  <X
-                    onClick={() => setShowAddBookModal(false)}
-                    className="cursor-pointer"
-                  />
+            <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in duration-300">
+              {/* Main Container with subtle glass border */}
+              <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/20 flex flex-col md:flex-row min-h-[650px]">
+                {/* LEFT ACCENT PANEL: Visual Identity */}
+                <div className="md:w-72 bg-gradient-to-b from-blue-600 via-blue-900 to-black p-10 flex flex-col justify-between text-white relative">
+                  {/* Animated Mesh Gradient Overlay */}
+                  <div className="absolute inset-0 opacity-30 mix-blend-overlay">
+                    <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_50%_50%,#fff_0%,transparent_50%)] animate-pulse"></div>
+                  </div>
+
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center mb-8 border border-white/30 shadow-xl">
+                      <BookOpen size={28} strokeWidth={2.5} />
+                    </div>
+                    <h3 className="text-4xl font-black leading-[0.9] tracking-tighter italic">
+                      {" "}
+                      {isEditMode ? (
+    <>
+      UPDATE <br /> BOOK
+    </>
+  ) : (
+    <>
+      ADD <br /> NEW BOOK
+    </>
+  )}
+                    </h3>
+                    <div className="h-1 w-12 bg-indigo-300 mt-6 rounded-full"></div>
+                  </div>
+
+                  <div className="relative z-10">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 opacity-100">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                          Live Registry
+                        </span>
+                      </div>
+                      <p className="text-indigo-100/60 text-[10px] leading-relaxed font-medium">
+                        Ensure all mandatory fields are verified before
+                        authorizing the database entry.
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-8 space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Book Title"
-                    className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                    value={newBook.title}
-                    onChange={(e) =>
-                      setNewBook({ ...newBook, title: e.target.value })
-                    }
-                  />
-                  <div className="grid grid-cols-2 gap-4">
-                    <input
-                      type="text"
-                      placeholder="Author"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={newBook.author}
-                      onChange={(e) =>
-                        setNewBook({ ...newBook, author: e.target.value })
-                      }
-                    />
-                    <input
-                      type="text"
-                      placeholder="Category/Dept"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={newBook.category}
-                      onChange={(e) =>
-                        setNewBook({ ...newBook, category: e.target.value })
-                      }
-                    />
+
+                {/* RIGHT CONTENT PANEL: Interactive Form */}
+                <div className="flex-1 bg-[#f8fafc] flex flex-col relative">
+                  {/* Elegant Close Button */}
+                  <div className="absolute top-8 right-8 z-20">
+                    <button
+                      onClick={() => setShowAddBookModal(false)}
+                      className="p-3 bg-white text-slate-400 hover:text-indigo-600 hover:shadow-2xl hover:shadow-indigo-100 rounded-2xl transition-all duration-300 active:scale-90 border border-slate-100"
+                    >
+                      <X size={20} strokeWidth={3} />
+                    </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+
+                  {/* Scrollable Container */}
+                  <div className="px-12 pt-16 pb-10 space-y-10 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                    {/* Group 1: Identity */}
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-black rounded-lg">
+                          01
+                        </span>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                          Identity & Origin
+                        </h4>
+                      </div>
+
+                      <div className="grid gap-6">
+                        <div className="relative group">
+                          <input
+                            type="text"
+                            placeholder="Official Publication Title *"
+                            className="w-full bg-white border-2 border-slate-100 rounded-[1.5rem] px-8 py-5 outline-none transition-all focus:border-indigo-500 focus:shadow-[0_15px_30px_-10px_rgba(79,70,229,0.15)] font-bold text-slate-700 placeholder:text-slate-300"
+                            value={newBook.title}
+                            onChange={(e) =>
+                              setNewBook({ ...newBook, title: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="Primary Author *"
+                            className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none transition-all focus:border-indigo-500 font-bold text-slate-700"
+                            value={newBook.author}
+                            onChange={(e) =>
+                              setNewBook({ ...newBook, author: e.target.value })
+                            }
+                          />
+                          <input
+                            type="text"
+                            placeholder="Department/Category *"
+                            className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none transition-all focus:border-indigo-500 font-bold text-slate-700"
+                            value={newBook.category}
+                            onChange={(e) =>
+                              setNewBook({
+                                ...newBook,
+                                category: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Group 2: Quantitative Data */}
+                    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg">
+                          02
+                        </span>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                          Logistics & Stock
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {[
+                          {
+                            label: "Total Stock",
+                            val: newBook.totalCopies,
+                            key: "totalCopies",
+                            type: "number",
+                          },
+                          {
+                            label: "Available",
+                            val: newBook.availableCopies,
+                            key: "availableCopies",
+                            type: "number",
+                          },
+                          {
+                            label: "Shelf Ref",
+                            val: newBook.shelf,
+                            key: "shelf",
+                            type: "text",
+                          },
+                        ].map((field) => (
+                          <div key={field.key} className="group flex flex-col">
+                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest ml-4 mb-2">
+                              {field.label}
+                            </span>
+                            <input
+                              type={field.type}
+                              className="w-full bg-slate-50 border-2 border-transparent group-hover:bg-slate-100 rounded-2xl px-5 py-3 outline-none focus:bg-white focus:border-indigo-500 transition-all font-black text-slate-700"
+                              value={field.val}
+                              onChange={(e) =>
+                                setNewBook({
+                                  ...newBook,
+                                  [field.key]: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Group 3: Archival Details */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <input
+                        type="number"
+                        placeholder="Rating (1-5)"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.rating}
+                        onChange={(e) =>
+                          setNewBook({ ...newBook, rating: e.target.value })
+                        }
+                      />
+                      <input
+                        type="text"
+                        placeholder="ISBN"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.isbn}
+                        onChange={(e) =>
+                          setNewBook({ ...newBook, isbn: e.target.value })
+                        }
+                      />
+                      <input
+                        type="number"
+                        placeholder="Pub. Year"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.publishedYear}
+                        onChange={(e) =>
+                          setNewBook({
+                            ...newBook,
+                            publishedYear: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
                     <input
                       type="text"
-                      placeholder="Asset ID (e.g. B-105)"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={newBook.id}
+                      placeholder="Publisher Name"
+                      className="w-full bg-white border-2 border-slate-100 rounded-2xl px-8 py-4 outline-none focus:border-indigo-500 font-bold text-slate-700"
+                      value={newBook.publisher}
                       onChange={(e) =>
-                        setNewBook({ ...newBook, id: e.target.value })
+                        setNewBook({ ...newBook, publisher: e.target.value })
                       }
                     />
-                    <input
-                      type="number"
-                      placeholder="Total Stock"
-                      className="w-full p-4 bg-slate-50 rounded-2xl outline-none font-bold text-sm"
-                      value={newBook.stock}
+
+                    <textarea
+                      placeholder="Technical Abstract / Description..."
+                      rows={3}
+                      className="w-full bg-white border-2 border-slate-100 rounded-[2rem] px-8 py-6 outline-none focus:border-indigo-500 font-medium text-slate-600 transition-all resize-none shadow-sm"
+                      value={newBook.description}
                       onChange={(e) =>
-                        setNewBook({ ...newBook, stock: e.target.value })
+                        setNewBook({ ...newBook, description: e.target.value })
                       }
                     />
+
+                    {/* Upload Interactive Card */}
+                    <label className="relative group flex flex-col items-center justify-center w-full h-40 bg-indigo-50/30 border-2 border-dashed border-indigo-200 rounded-[2.5rem] cursor-pointer hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-300">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="p-3 bg-white rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
+                          <Upload size={20} className="text-indigo-600" />
+                        </div>
+                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                          {newBook.coverImage
+                            ? newBook.coverImage.name
+                            : "Drop Cover Asset"}
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          setNewBook({
+                            ...newBook,
+                            coverImage: e.target.files[0],
+                          })
+                        }
+                      />
+                    </label>
                   </div>
-                  <button
-                    onClick={handleAddBook}
-                    className="w-full bg-slate-900 text-white py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest shadow-lg"
-                  >
-                    Register Book
-                  </button>
+
+                  {/* Action Footer */}
+                  <div className="p-10 bg-gradient-to-b from-black to-black border-t border-slate-50 flex items-center justify-between">
+                    <div className="hidden sm:block">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">
+                        Auth Level: Librarian
+                      </span>
+                    </div>
+                    <button
+  onClick={isEditMode ? handleUpdateBook : handleAddBook}
+  disabled={isAddingBook || isUpdatingBook}
+  className={`w-full sm:w-auto px-14 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] transition-all 
+    ${
+      isEditMode
+        ? "bg-emerald-600 hover:bg-emerald-700"
+        : "bg-[#30299c] text-white hover:bg-indigo-600"
+    }
+    ${(isAddingBook || isUpdatingBook) && "bg-slate-400 cursor-not-allowed"}
+  `}
+>
+  {(isAddingBook || isUpdatingBook) ? (
+    <span className="flex items-center gap-3">
+      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" />
+      {isEditMode ? "Updating…" : "Registering…"}
+    </span>
+  ) : (
+    isEditMode ? "Update Book" : "Register Entry"
+  )}
+</button>
+
+                  </div>
                 </div>
               </div>
             </div>

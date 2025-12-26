@@ -16,7 +16,12 @@ const libraryTransactionSchema = new mongoose.Schema(
       enum: ["none", "pending", "paid"],
       default: "none"
     },
-
+    razorpayOrderId: {
+      type: String
+    },
+    razorpayPaymentId: {
+      type: String
+    },
     issueDate: Date,
     dueDate: Date,
     returnDate: Date,
@@ -30,5 +35,5 @@ const libraryTransactionSchema = new mongoose.Schema(
 
 export const getLibraryTransactionModel = (conn) => {
   return conn.models.LibraryTransaction ||
-         conn.model("LibraryTransaction", libraryTransactionSchema);
+    conn.model("LibraryTransaction", libraryTransactionSchema);
 };

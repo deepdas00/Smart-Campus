@@ -4,31 +4,46 @@ export default function TransactionsTable({
   transactions,
   setShowReturnConfirm,
 }) {
+
+
+  console.log("HUYAAAAA",transactions);
+  
   return (
-    <div className="px-6 pb-6 overflow-x-auto">
+    <div className="px-6 pb-6 overflow-x-auto w-full">
       <table className="w-full border-separate border-spacing-y-3">
         <thead>
           <tr className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-            <th className="px-6 py-4 text-left">Borrower</th>
-            <th className="px-6 py-4 text-left">Asset</th>
-            <th className="px-6 py-4 text-left">Timeline</th>
-            <th className="px-6 py-4 text-left">Status</th>
-            <th className="px-6 py-4 text-right"></th>
+            <th className="px-6 py-4 text-center">Borrower</th>
+           
+            <th className="px-6 py-4 text-center">Asset</th>
+            <th className="px-6 py-4 text-center">Timeline</th>
+            <th className="px-6 py-4 text-center">Status</th>
+            <th className="px-6 py-4 text-center">Action</th>
           </tr>
         </thead>
         <tbody>
           {transactions.map((tx) => (
             <tr key={tx.id} className="group hover:bg-indigo-50/30">
-              <td className="px-6 py-5">
+              <td className="px-6 py-5 text-center">
                 <p className="font-bold">{tx.student}</p>
                 <p className="text-[10px] text-slate-400">#{tx.roll}</p>
               </td>
-              <td className="px-6 py-5">
-                <p className="font-semibold">{tx.book}</p>
-                <p className="text-[10px] text-indigo-400">{tx.specificId}</p>
-              </td>
-              <td className="px-6 py-5">{tx.date}</td>
-              <td className="px-6 py-5">
+              
+              <td className="flex items-center text-center gap-3">
+      {tx.coverImage ? (
+        <img
+          src={tx.coverImage}
+          alt={tx.book}
+          className="w-10 h-14 object-cover rounded-md border"
+        />
+      ) : (
+        <div className="w-10 h-14 bg-slate-100 rounded-md" />
+      )}
+
+      <span className="font-semibold">{tx.book}</span>
+    </td>
+              <td className="px-6 py-5 text-center">{tx.date}</td>
+              <td className="px-6 py-5 text-center">
   <h4
     className={`inline-block px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider
       ${
@@ -43,7 +58,7 @@ export default function TransactionsTable({
   </h4>
 </td>
 
-              <td className="px-6 py-5 text-right">
+              <td className="px-6 py-5 t text-center">
                 <button
                   onClick={() =>
                     setShowReturnConfirm({

@@ -66,7 +66,7 @@ export const addBook = asyncHandler(async (req, res) => {
   res.status(201).json(new ApiResponse(201, book, "Book added successfully"));
 });
 
-
+//for menu
 export const getAllBooks = asyncHandler(async (req, res) => {
 
   const { collegeCode } = req.user;

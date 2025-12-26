@@ -1,6 +1,6 @@
 
 import crypto from "crypto";
-import { getRazorpayInstance } from "../../utils/razorpay.js";
+import { getRazorpayInstance } from "../../utils/razorpayPayment.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
@@ -14,7 +14,7 @@ import { log } from "console";
 
 
 
-export const createRazorpayOrder = asyncHandler(async (req, res) => {
+export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const { orderId } = req.params;
   const { collegeCode, userId } = req.user;
@@ -61,36 +61,20 @@ export const createRazorpayOrder = asyncHandler(async (req, res) => {
 console.log(order._id);
 
   // 5️⃣ Create Razorpay order
-  const razorpayOrder = await getRazorpayInstance.orders.create({
-    amount: order.totalAmount * 100, // paise
-    currency: "INR",
-    receipt: `canteen_${order._id}`
+  const paymentData = await createRazorpayOrderUtil({
+    amount: order.totalAmount,
+    receipt: `canteen_${order._id}`,
+    saveOrderIdFn: async (orderId) => {
+      order.razorpayOrderId = orderId;
+      await order.save({ validateBeforeSave: false });
+    }
   });
-
-
-  console.log("PAYMENT OF RAZORRRRR",razorpayOrder);
-  
-
-  // 6️⃣ Save Razorpay order ID
-  order.razorpayOrderId = razorpayOrder.id;
-  await order.save({ validateBeforeSave: false });
-
   // 7️⃣ Send data to frontend
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      {
-        razorpayOrderId: razorpayOrder.id,
-        amount: razorpayOrder.amount,
-        currency: razorpayOrder.currency,
-        key: process.env.RAZORPAY_KEY_ID
-      },
-      "Razorpay order created"
-    )
-  );
+  res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
+
 });
 
-export const verifyPayment = asyncHandler(async (req, res) => {
+export const canteen_verifyPayment = asyncHandler(async (req, res) => {
 
   const {
     razorpay_order_id,
@@ -98,22 +82,28 @@ export const verifyPayment = asyncHandler(async (req, res) => {
     razorpay_signature
   } = req.body;
 
+  await verifyRazorpayPaymentUtil({
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature
+  }); //it will return true then only farther code will be run
+
   const { collegeCode, userId } = req.user;
 
-  if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-    throw new ApiError(400, "Payment verification data missing");
-  }
+  // if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+  //   throw new ApiError(400, "Payment verification data missing");
+  // }
 
-  // 1️⃣ Generate signature on backend
-  const generatedSignature = crypto
-    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
-    .update(`${razorpay_order_id}|${razorpay_payment_id}`)
-    .digest("hex");
+  // // 1️⃣ Generate signature on backend
+  // const generatedSignature = crypto
+  //   .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+  //   .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+  //   .digest("hex");
 
-  // 2️⃣ Compare signatures
-  if (generatedSignature !== razorpay_signature) {
-    throw new ApiError(400, "Invalid payment signature");
-  }
+  // // 2️⃣ Compare signatures
+  // if (generatedSignature !== razorpay_signature) {
+  //   throw new ApiError(400, "Invalid payment signature");
+  // }
 
   // 3️⃣ Resolve college DB
   const masterConn = connectMasterDB();

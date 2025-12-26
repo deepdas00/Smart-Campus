@@ -35,6 +35,11 @@ export default function Canteen() {
   const [orderReceived, setOrderReceived] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [qrCodeForDetails, setQrCodeForDetails] = useState(null);
+const [razorpayPaymentId, setRazorpayPaymentId] = useState(null)
+const [orderId, setOrderId] = useState(null)
+const [orderStatus, setOrderStatus] = useState(null)
+const [paymentStatus, setPaymentStatus] = useState(null)
   
 
   const categories = [
@@ -111,7 +116,7 @@ export default function Canteen() {
     });
   };
 
-  const orderItems = Object.values(cart).map((item) => ({
+  const orderItemsNow = Object.values(cart).map((item) => ({
     foodId: item._id,
     quantity: item.quantity,
   }));
@@ -202,7 +207,10 @@ export default function Canteen() {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       response;
 
-    await axios.post(
+      console.log("huhhuhuh",razorpay_order_id);
+      
+
+    const res = await axios.post(
       `${API_URL}/api/v1/canteen/orders/verify-payment`,
       {
         razorpay_order_id,
@@ -211,6 +219,33 @@ export default function Canteen() {
       },
       { withCredentials: true }
     );
+
+    const {
+    qrCode,
+    razorpayPaymentId,
+    orderId,
+    orderStatus,
+    paymentStatus,
+    items,
+    totalAmount,
+    createdAt,
+  } = res.data.data;
+
+  setQrCodeForDetails(qrCode);
+  setRazorpayPaymentId(razorpayPaymentId)
+  setOrderId(orderId)
+  setOrderStatus(orderStatus)
+  setPaymentStatus(paymentStatus)
+
+  // ✅ THIS WAS MISSING
+  setOrderDetails({
+    items,
+    total: totalAmount,
+    time: new Date(createdAt).toLocaleTimeString(),
+  });
+
+    console.log(res.data.data);
+    
 
     setCart({});
     setShowCart(false);
@@ -278,41 +313,62 @@ export default function Canteen() {
       {/* Order Success & QR Code */}
       {orderPlaced && !orderReceived && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6 rounded-t-2xl">
-              <div className="flex items-center justify-between">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full ">
+            <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3">
+              <div className="flex items-center justify-between ">
                 <h2 className="text-2xl font-bold">Order Placed!</h2>
                 <button
                   onClick={() => setOrderPlaced(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
+                  className="text-white hover:bg-white/20 rounded-full p-1 transition"
                 >
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-orange-100 mt-2">
+              <p className="text-orange-100">
                 Show this QR code at the counter
               </p>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-6 border-2 border-dashed border-gray-300">
+            <div className="px-6 py-3 space-y-4">
+              <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-6 py-2 border-2 border-dashed border-gray-300 bg">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📱</div>
-                  <div className="bg-white p-4 rounded-lg shadow-inner mb-4">
-                    <div className="text-4xl font-bold text-gray-800">
-                      {orderDetails?.qrCode}
+                  {qrCodeForDetails && (
+  <img
+    src={qrCodeForDetails}
+    alt="Order QR Code"
+    className="w-56 h-56 mx-auto rounded-xl border-4 border-green-500 shadow-lg"
+  />
+)}
+
+                  <div className=" px-2 pt-2 rounded-lg  mb-2">
+                    <div
+                      className={`text-2xl font-bold ${
+  
+                      paymentStatus === "paid"
+                        ? "text-green-800"
+                        : paymentStatus === "failed"
+                        ? "text-red-700"
+                        : "text-orange-600"
+                      }`}
+                    >
+                      {paymentStatus?.toUpperCase()}
                     </div>
+
                   </div>
                   <p className="text-xs text-gray-500">
-                    QR Code for Order #{orderDetails?.id}
+                    QR Code for Order #{orderId}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 space-y-2">
+              <div className="bg-gray-50 rounded-xl p-4 py-2 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Order ID:</span>
-                  <span className="font-semibold">{orderDetails?.id}</span>
+                  <span className="font-semibold">{orderId}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Order Status:</span>
+                  <span className="font-semibold">{orderStatus}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Time:</span>
@@ -321,9 +377,14 @@ export default function Canteen() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Items:</span>
                   <span className="font-semibold">
-                    {orderDetails?.items.length}
+                    {orderDetails?.items?.reduce(
+                      (sum, item) => sum + item.quantity,
+                      0
+                    )}
                   </span>
                 </div>
+
+
                 <div className="flex justify-between text-lg pt-2 border-t border-gray-200">
                   <span className="font-semibold">Total:</span>
                   <span className="font-bold text-orange-600">
@@ -348,12 +409,12 @@ export default function Canteen() {
 
               <button
                 onClick={simulateQRScan}
-                className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:shadow-lg transition"
+                className="w-full py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:shadow-lg transition"
               >
                 Simulate QR Scan (Demo)
               </button>
 
-              <p className="text-xs text-center text-gray-500">
+              <p className="text-xs text-center text-gray-500 md:mt mt-[-3px]">
                 Estimated preparation time: 15-20 minutes
               </p>
             </div>

@@ -12,6 +12,7 @@ import {
   BookDashedIcon,
   BookTemplate,
   ShieldAlert,
+  LogIn 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -51,7 +52,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <div
-        className={`fixed right-0 top-0 h-full w-80 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out
+        className={`z-900 fixed right-0 top-0 h-full w-80 bg-white z-50 shadow-2xl transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Header */}
@@ -123,8 +124,16 @@ export default function ProfileSidebar({ isOpen, onClose }) {
             to="/report"
             icon={<ShieldAlert className="w-5 h-5" />}
             label="report"
-            color="red"
+            color="#ff0000"
             activeColor="bg-red-50 text-red-600"
+            onClose={onClose}
+          />
+        
+          <SidebarItem
+            to="/login"
+            icon={<LogIn  className="w-5 h-5" />}
+            label="login"
+            color="blue"
             onClose={onClose}
           />
         </div>

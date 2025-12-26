@@ -23,22 +23,32 @@ import LibraryTeacherHandle from "./Page/LibraryTeacherHandle";
 import ReportPortal from "./Page/ReportPortal";
 import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
+import CollegeInfo from "./Components/CollegeInfo.jsx";
 
 // Layout Wrapper
-const AdminLayout = () => (
-  <>
-    <div className="flex bg--50 min-h-screen">
+const AdminLayout = () => {
+  return (
+    <div className="min-h-screen flex flex-col ">
+      {/* Top Navbar */}
       <Navbar />
-      <Sidebar />
-      <main className="flex-1 p-8 mt-15">
-        <Outlet /> {/* This is where the pages will swap */}
-      </main>
-    </div>
-    {/* Footer */}
-    <Footer />
-  </>
-);
+      <CollegeInfo/>
 
+      {/* Body */}
+      <div className="flex flex-1">
+        {/* Sidebar */}
+        <Sidebar />
+
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <Outlet /> {/* Pages render here */}
+        </main>
+      </div>
+
+      {/* Footer */}
+      <Footer />
+    </div>
+  );
+};
 export default function App() {
   const { user } = useAuth();
 

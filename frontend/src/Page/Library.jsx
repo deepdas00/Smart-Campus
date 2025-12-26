@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie"
 import {
   BookOpen,
   Search,
@@ -22,8 +24,11 @@ import logo from "../assets/logo.png";
 import profile from "../assets/profile.png";
 import { Link } from "react-router-dom";
 import ProfileSidebar from "../Components/ProfileSidebar";
+import Navbar from "../Components/Navbar/Navbar";
 
 export default function Library() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedBook, setSelectedBook] = useState(null);
@@ -34,6 +39,102 @@ export default function Library() {
   const [showMyBooks, setShowMyBooks] = useState(false);
   const [bookReceived, setBookReceived] = useState(false);
 
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [history, setHistory] = useState([]);
+const [loadingHistory, setLoadingHistory] = useState(true);
+const [showQRPreview, setShowQRPreview] = useState(false);
+const [activeTransaction, setActiveTransaction] = useState(null);
+
+
+
+const normalizeTransaction = (tx) => ({
+  id: tx._id,
+  qrCode: tx.qrCode,
+  issueDate: new Date(tx.createdAt).toLocaleDateString(),
+  dueDate: new Date(tx.dueDate).toLocaleDateString(),
+  status: tx.transactionStatus,
+  book: tx.bookId, // 👈 KEY FIX
+});
+
+
+
+
+
+const fetchTransactionDetails = async (transactionId) => {
+  try {
+    setLoading(true);
+
+    const token = Cookies.get("accessToken");
+
+    const { data } = await axios.get(
+      `${API_URL}/api/v1/library/transactions/${transactionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
+
+    console.log(data);
+    
+
+    if (data?.success) {
+      setBookingDetails(normalizeTransaction(data.data));
+      setBookingSuccess(true);
+      setBookReceived(false);
+    }
+  } catch (error) {
+    console.error(error.response || error);
+    alert("Failed to fetch transaction details");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+
+
+
+const fetchLibraryHistory = async () => {
+  try {
+    const token = Cookies.get("accessToken"); // or localStorage.getItem("token")
+
+    console.log("Tokennnnn",token);
+    
+
+    const res = await axios.get(
+      `${API_URL}/api/v1/library/my/history`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true,
+      }
+    );
+
+    // console.log("History:", res.data);
+    setHistory(res.data.data);
+  } catch (error) {
+    console.error("Failed to fetch history", error);
+  } finally {
+    setLoadingHistory(false);
+  }
+};
+
+
+useEffect(() => {
+  fetchLibraryHistory();
+}, []);
+
+
+
+
+
   const categories = [
     { id: "all", name: "All Books", icon: "📚" },
     { id: "programming", name: "Programming", icon: "💻" },
@@ -43,190 +144,61 @@ export default function Library() {
     { id: "history", name: "History", icon: "🏛️" },
     { id: "engineering", name: "Engineering", icon: "⚙️" },
   ];
+  const normalizeBooks = (apiBooks) => {
+    return apiBooks.map((b) => ({
+      id: b._id,
+      title: b.title,
+      author: b.author,
+      category: b.category.toLowerCase(), // filter compatibility
+      rating: b.rating,
+      available: b.availableCopies,
+      total: b.totalCopies,
+      shelf: b.shelf,
+      isbn: b.isbn,
+      publisher: b.publisher,
+      year: b.publishedYear,
+      description: b.description,
+      coverImage: b.coverImage, // image URL
+    }));
+  };
 
-  const books = [
-    {
-      id: 1,
-      title: "Clean Code",
-      author: "Robert C. Martin",
-      category: "programming",
-      rating: 4.8,
-      available: 5,
-      total: 10,
-      shelf: "A-23",
-      isbn: "978-0132350884",
-      publisher: "Prentice Hall",
-      year: 2008,
-      pages: 464,
-      cover: "📘",
-      description: "A handbook of agile software craftsmanship",
-    },
-    {
-      id: 2,
-      title: "Introduction to Algorithms",
-      author: "Thomas H. Cormen",
-      category: "programming",
-      rating: 4.9,
-      available: 3,
-      total: 8,
-      shelf: "A-15",
-      isbn: "978-0262033848",
-      publisher: "MIT Press",
-      year: 2009,
-      pages: 1292,
-      cover: "📕",
-      description: "Comprehensive text on algorithms",
-    },
-    {
-      id: 3,
-      title: "The Pragmatic Programmer",
-      author: "Andrew Hunt",
-      category: "programming",
-      rating: 4.7,
-      available: 7,
-      total: 12,
-      shelf: "A-18",
-      isbn: "978-0135957059",
-      publisher: "Addison-Wesley",
-      year: 2019,
-      pages: 352,
-      cover: "📗",
-      description: "Your journey to mastery",
-    },
-    {
-      id: 4,
-      title: "A Brief History of Time",
-      author: "Stephen Hawking",
-      category: "science",
-      rating: 4.6,
-      available: 8,
-      total: 15,
-      shelf: "B-12",
-      isbn: "978-0553380163",
-      publisher: "Bantam",
-      year: 1988,
-      pages: 256,
-      cover: "📙",
-      description: "From Big Bang to black holes",
-    },
-    {
-      id: 5,
-      title: "Sapiens",
-      author: "Yuval Noah Harari",
-      category: "history",
-      rating: 4.8,
-      available: 4,
-      total: 10,
-      shelf: "C-08",
-      isbn: "978-0062316097",
-      publisher: "Harper",
-      year: 2015,
-      pages: 464,
-      cover: "📔",
-      description: "A brief history of humankind",
-    },
-    {
-      id: 6,
-      title: "Calculus: Early Transcendentals",
-      author: "James Stewart",
-      category: "mathematics",
-      rating: 4.5,
-      available: 6,
-      total: 12,
-      shelf: "D-05",
-      isbn: "978-1285741550",
-      publisher: "Cengage",
-      year: 2015,
-      pages: 1368,
-      cover: "📓",
-      description: "Comprehensive calculus textbook",
-    },
-    {
-      id: 7,
-      title: "1984",
-      author: "George Orwell",
-      category: "literature",
-      rating: 4.9,
-      available: 2,
-      total: 8,
-      shelf: "E-11",
-      isbn: "978-0451524935",
-      publisher: "Signet",
-      year: 1949,
-      pages: 328,
-      cover: "📖",
-      description: "Dystopian social science fiction",
-    },
-    {
-      id: 8,
-      title: "Design Patterns",
-      author: "Gang of Four",
-      category: "programming",
-      rating: 4.7,
-      available: 4,
-      total: 9,
-      shelf: "A-20",
-      isbn: "978-0201633610",
-      publisher: "Addison-Wesley",
-      year: 1994,
-      pages: 416,
-      cover: "📘",
-      description: "Elements of reusable object-oriented software",
-    },
-    {
-      id: 9,
-      title: "Fundamentals of Engineering",
-      author: "Michael R. Lindeburg",
-      category: "engineering",
-      rating: 4.6,
-      available: 5,
-      total: 10,
-      shelf: "F-03",
-      isbn: "978-1591264422",
-      publisher: "PPI",
-      year: 2018,
-      pages: 1456,
-      cover: "📕",
-      description: "Complete engineering reference",
-    },
-    {
-      id: 10,
-      title: "The Origin of Species",
-      author: "Charles Darwin",
-      category: "science",
-      rating: 4.8,
-      available: 6,
-      total: 10,
-      shelf: "B-16",
-      isbn: "978-0451529060",
-      publisher: "Signet",
-      year: 1859,
-      pages: 576,
-      cover: "📗",
-      description: "Foundation of evolutionary biology",
-    },
-  ];
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
 
-  const [showProfileMenu, setShowProfileMenu] = useState(false);
+        
+const token = Cookies.get("accessToken");
 
-  const issueBook = (book) => {
-    const booking = {
-      id: `LIB${Date.now().toString().slice(-6)}`,
-      book: book,
-      issueDate: new Date().toLocaleDateString(),
-      issueTime: new Date().toLocaleTimeString(),
-      dueDate: new Date(
-        Date.now() + 14 * 24 * 60 * 60 * 1000
-      ).toLocaleDateString(),
-      qrCode: `QR${Date.now().toString().slice(-8)}`,
-      status: "pending",
+        console.log("from the fetched Book", token);
+        
+
+        const res = await axios.get(`${API_URL}/api/v1/library/books`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        });
+
+        const rawBooks = res.data?.data || [];
+
+        console.log(rawBooks);
+
+        const formattedBooks = normalizeBooks(rawBooks);
+
+        setBooks(formattedBooks);
+      } catch (err) {
+        console.error(err);
+        setBooks([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setBookingDetails(booking);
-    setBookingSuccess(true);
-    setShowIssueModal(false);
-    setIssuedBooks([...issuedBooks, booking]);
-  };
+    fetchBooks();
+  }, []);
+
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const simulateBookCollection = () => {
     setBookReceived(true);
@@ -242,65 +214,67 @@ export default function Library() {
     }, 5000);
   };
 
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch =
-      book.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      book.author.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || book.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  const filteredBooks = Array.isArray(books)
+    ? books.filter((book) => {
+        const title = book.title?.toLowerCase() || "";
+        const author = book.author?.toLowerCase() || "";
+        const category = book.category || "";
+
+        const search = searchQuery.toLowerCase();
+
+        const matchesSearch = title.includes(search) || author.includes(search);
+
+        const matchesCategory =
+          selectedCategory === "all" || category === selectedCategory;
+
+        return matchesSearch && matchesCategory;
+      })
+    : [];
 
   const pendingBooks = issuedBooks.filter((b) => b.status === "pending");
   const collectedBooks = issuedBooks.filter((b) => b.status === "collected");
 
+const issueBook = async (book) => {
+  try {
+    const token = Cookies.get("accessToken");
+    console.log("Token:", token);
+    console.log("Issuing book ID:", book.id);
+
+    const res = await axios.post(
+      `${API_URL}/api/v1/library/order`,
+      { bookId: book.id },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        withCredentials: true,
+      }
+    );
+
+    const transaction = res.data.data;
+
+    const booking = {
+      id: transaction._id,
+      book: book,
+      issueDate: new Date().toLocaleDateString(),
+      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString(),
+      qrCode: transaction.qrCode,
+      status: "pending",
+    };
+
+    setBookingDetails(booking);
+    setBookingSuccess(true);
+    setShowIssueModal(false);
+    setIssuedBooks([...issuedBooks, booking]);
+  } catch (err) {
+    console.error(err);
+    alert(err.response?.data?.message || "Failed to issue book");
+  }
+};
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Link to={"/"} className="flex items-center space-x-2">
-                <img
-                  src={logo}
-                  alt="Smart Campus Logo"
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
-                />
-                <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
-                  Smart Campus
-                </span>
-              </Link>
-            </div>
-
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => setShowMyBooks(true)}
-                className="relative px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
-              >
-                <BookMarked className="w-5 h-5" />
-                <span className="hidden sm:inline">My Books</span>
-                {issuedBooks.length > 0 && (
-                  <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-600 text-white rounded-full text-xs flex items-center justify-center font-bold">
-                    {issuedBooks.length}
-                  </span>
-                )}
-              </button>
-              <span className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
-                Logout
-              </span>
-              <Link className="flex items-center space-x-2">
-                <img
-                  src={profile}
-                  alt="Profile"
-                  onClick={() => setShowProfileMenu(true)}
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
-                />
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Navbar/>
 
       {/* Profile menu side bar */}
       <ProfileSidebar
@@ -310,6 +284,15 @@ export default function Library() {
 
       {/*Banner*/}
       <CollegeInfo />
+
+      <button
+                onClick={() => setShowMyBooks(true)}
+                className="fixed top-3 right-[20%] px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2 z-100"
+              >
+                <BookMarked className="w-5 h-5" />
+                <span className="hidden sm:inline">My Books</span>
+                
+              </button>
 
       {/* Book Collection Success */}
       {bookReceived && (
@@ -338,9 +321,9 @@ export default function Library() {
 
       {/* Booking Success Modal */}
       {bookingSuccess && !bookReceived && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="bg-blue-700 text-white p-6 rounded-t-2xl">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 z-1000">
+          <div className="bg-white  shadow-2xl max-w-md w-full">
+            <div className="bg-blue-700 text-white  px-6 py-2">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold">Booking Confirmed!</h2>
                 <button
@@ -350,18 +333,24 @@ export default function Library() {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-indigo-100 mt-2">
+              <p className="text-indigo-100 mt-1">
                 Show this QR code at the library counter
               </p>
             </div>
 
-            <div className="p-6 space-y-4">
-              <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-6 border-2 border-dashed border-gray-300">
+            <div className="p-6 py-4 space-y-4">
+              <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-2 border-2 border-dashed border-gray-300">
                 <div className="text-center">
-                  <div className="text-6xl mb-4">📱</div>
-                  <div className="bg-white p-4 rounded-lg shadow-inner mb-4">
-                    <div className="text-4xl font-bold text-gray-800">
-                      {bookingDetails?.qrCode}
+                  
+                  <div className="bg-white p-4 py-2 rounded-lg shadow-inner mb-1">
+                    <div className="text-1xl font-bold text-gray-800">
+                      {bookingDetails?.qrCode && (
+                        <img
+                          src={bookingDetails.qrCode}
+                          alt="QR Code"
+                          className="mx-auto w-32 h-32"
+                        />
+                      )}
                     </div>
                   </div>
                   <p className="text-xs text-gray-500">
@@ -370,18 +359,45 @@ export default function Library() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-                <div className="flex items-center space-x-3">
-                  <div className="text-3xl">{bookingDetails?.book.cover}</div>
-                  <div>
-                    <h3 className="font-bold text-gray-900">
-                      {bookingDetails?.book.title}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {bookingDetails?.book.author}
-                    </p>
-                  </div>
-                </div>
+              <div className="bg-gray-50 rounded-xl space-y-3">
+                <div className="flex items-center gap-6 p-4 bg-slate-50/80 border border-slate-200 group hover:bg-white hover:shadow-xl hover:border-indigo-100 transition-all duration-300">
+  {/* Left: Book Cover with Reflection Effect */}
+  <div className="relative shrink-0">
+    <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500/20 to-transparent blur-lg rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+    <img
+      src={bookingDetails?.book.coverImage}
+      alt={bookingDetails?.book.title}
+      className="relative w-20 h-28 object-cover rounded-xl shadow-md transform group-hover:-rotate-2 group-hover:scale-105 transition-all duration-500"
+    />
+  </div>
+
+  {/* Center: Content Divider Line */}
+  <div className="h-16 w-px bg-slate-200 group-hover:bg-indigo-200 transition-colors hidden sm:block" />
+
+  {/* Right: Textual Information */}
+  <div className="flex-1 min-w-0">
+    <div className="flex flex-col gap-1">
+        
+      <h3 className="font-extrabold text-slate-900 text-lg leading-tight truncate group-hover:text-indigo-600 transition-colors">
+        {bookingDetails?.book.title}
+      </h3>
+      
+      <div className="flex items-center gap-2">
+        <div className="w-4 h-px bg-slate-300" />
+        <p className="text-sm font-medium text-slate-500 italic">
+          {bookingDetails?.book.author}
+        </p>
+      </div>
+    </div>
+
+    {/* Footer Detail (e.g., ID or Shelf) */}
+    <div className="mt-3 flex items-center gap-3">
+      <div className="px-2 py-1 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-400">
+        ISBN: {bookingDetails?.book.isbn?.slice(-4) || '7432'}
+      </div>
+    </div>
+  </div>
+</div>
 
                 <div className="border-t border-gray-200 pt-3 space-y-2">
                   <div className="flex justify-between text-sm">
@@ -405,13 +421,13 @@ export default function Library() {
                 </div>
               </div>
 
-              <button
+              {/* <button
                 onClick={simulateBookCollection}
                 className="w-full py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center space-x-2"
               >
                 <QrCode className="w-5 h-5" />
                 <span>Simulate QR Scan (Demo)</span>
-              </button>
+              </button> */}
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-xs text-yellow-800">
@@ -425,235 +441,275 @@ export default function Library() {
       )}
 
       {/* My Books Sidebar */}
-      {showMyBooks && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl overflow-hidden flex flex-col">
-            <div className="bg-blue-700 text-white p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">My Books</h2>
-                <button
-                  onClick={() => setShowMyBooks(false)}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <p className="text-indigo-100 mt-2">
-                {issuedBooks.length} books issued
+     {showMyBooks && (
+  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[250] transition-all animate-in fade-in duration-300">
+    <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white/90 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col animate-in slide-in-from-right duration-500">
+      
+      {/* Header: Minimalist & Bold */}
+      <div className="relative p-8 pb-6 mb-5 bg-blue-600">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-3xl text-white font-bold ">My Book</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="flex h-2 w-2 rounded-full bg-green-400"></span>
+              <p className="text-xs font-bold text-slate-100 uppercase tracking-widest">
+                {history.length} active sessions
               </p>
             </div>
-
-            <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {issuedBooks.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📚</div>
-                  <p className="text-gray-500">No books issued yet</p>
-                  <p className="text-sm text-gray-400 mt-2">
-                    Browse and issue books to see them here
-                  </p>
-                </div>
-              ) : (
-                <>
-                  {pendingBooks.length > 0 && (
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-3 flex items-center space-x-2">
-                        <Clock className="w-5 h-5 text-yellow-600" />
-                        <span>Pending Collection ({pendingBooks.length})</span>
-                      </h3>
-                      {pendingBooks.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-3"
-                        >
-                          <div className="flex items-center space-x-3 mb-3">
-                            <div className="text-3xl">{booking.book.cover}</div>
-                            <div className="flex-1">
-                              <h4 className="font-bold text-gray-900">
-                                {booking.book.title}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {booking.book.author}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                            <span>Booking ID: {booking.id}</span>
-                            <span>Shelf: {booking.book.shelf}</span>
-                          </div>
-                          <div className="bg-white rounded-lg p-2 text-center">
-                            <div className="text-lg font-bold text-gray-800">
-                              {booking.qrCode}
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              Show at counter
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {collectedBooks.length > 0 && (
-                    <div>
-                      <h3 className="font-bold text-gray-900 mb-3 flex items-center space-x-2">
-                        <Check className="w-5 h-5 text-green-600" />
-                        <span>Collected ({collectedBooks.length})</span>
-                      </h3>
-                      {collectedBooks.map((booking) => (
-                        <div
-                          key={booking.id}
-                          className="bg-green-50 border-2 border-green-200 rounded-xl p-4 mb-3"
-                        >
-                          <div className="flex items-center space-x-3 mb-2">
-                            <div className="text-3xl">{booking.book.cover}</div>
-                            <div className="flex-1">
-                              <h4 className="font-bold text-gray-900">
-                                {booking.book.title}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {booking.book.author}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-2 text-center">
-                            <p className="text-xs text-red-600">
-                              Due: <strong>{booking.dueDate}</strong>
-                            </p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
           </div>
+          <button
+            onClick={() => setShowMyBooks(false)}
+            className="group bg-slate-100 hover:bg-slate-900 text-slate-500 hover:text-white rounded-full p-3 transition-all duration-300"
+          >
+            <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* Content Area */}
+      <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-10 scrollbar-hide">
+        {loadingHistory ? (
+          <div className="flex flex-col items-center justify-center h-40 space-y-4">
+            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-slate-400 text-sm font-medium">Syncing your records...</p>
+          </div>
+        ) : history.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+              <BookOpen className="w-10 h-10 text-slate-200" />
+            </div>
+            <p className="text-slate-400 font-medium">Your shelf is empty.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {history.map((item) => {
+      
+              
+              const isFined = item.fineAmount > 0;
+              const isPending = item.transactionStatus === "pending";
+
+              return (
+                <div
+                  key={item._id}
+                 onClick={() => fetchTransactionDetails(item._id)}
+
+                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
+                    isFined 
+                      ? "bg-rose-50/40 border-rose-100" 
+                      : "bg-white border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
+                  }`}
+                >
+                  {/* The Layout Container - Forced Vertical on Mobile to avoid X-scroll */}
+                  <div className="p-4 flex flex-col gap-4">
+                    
+                    {/* Top Section: Cover and Title */}
+                    <div className="flex items-start gap-4">
+                      <div className="relative shrink-0">
+                        <img
+                          src={item.bookId.coverImage}
+                          alt={item.bookId.title}
+                          className="w-16 h-22 object-cover rounded-xl shadow-lg ring-1 ring-black/5"
+                        />
+                        {isFined && (
+                          <div className="absolute -top-2 -left-2 bg-rose-500 text-white p-1 rounded-lg shadow-lg">
+                            <AlertCircle className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="min-w-0 flex-1">
+                        <h3 className={`font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors ${isFined ? 'text-rose-900' : ''}`}>
+                          {item.bookId.title}
+                        </h3>
+                        <p className="text-xs font-semibold text-slate-400 mt-1 italic uppercase tracking-tighter">
+                          {item.bookId.author}
+                        </p>
+                        
+                        {/* Inline Status Badge */}
+                        <div className="flex items-center gap-2 mt-3">
+                          <span className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
+                            isPending ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                          }`}>
+                            {item.transactionStatus}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Section: Details Grid (2-column grid for compactness) */}
+                    <div className={`grid grid-cols-2 gap-2 p-3 rounded-xl ${isFined ? 'bg-rose-100/50' : 'bg-slate-50'}`}>
+                      <div>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Issue Date</p>
+                        <p className="text-xs font-bold text-slate-700">
+                          {new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Fine Accrued</p>
+                        <p className={`text-xs font-black ${isFined ? 'text-rose-600' : 'text-emerald-600'}`}>
+                          {isFined ? `$${item.fineAmount}` : 'None'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Red Accent for Fines */}
+                  {isFined && (
+                    <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-rose-500/10 rounded-full blur-xl" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Footer Branding */}
+      <div className="p-6 border-t border-slate-50 text-center bg-blue-500">
+        <p className="text-[10px] text-slate-200 font-bold uppercase tracking-[0.3em]">
+          College Library Management
+        </p>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Book Details Modal */}
-      {showIssueModal && selectedBook && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-blue-700 text-white p-6 rounded-t-2xl">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Book Details</h2>
-                <button
-                  onClick={() => {
-                    setShowIssueModal(false);
-                    setSelectedBook(null);
-                  }}
-                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+      {showIssueModal  && (
+        <div className="z-1000 fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row ring-1 ring-black/5">
+            {/* Left Panel: Visual & Identity */}
+            <div className="md:w-5/12 bg-slate-50 p-8 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-slate-100">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full" />
+                <img
+                  src={selectedBook.coverImage}
+                  alt={selectedBook.title}
+                  className="relative w-48 h-64 object-cover rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] transform group-hover:scale-[1.02] transition-transform duration-500"
+                />
+              </div>
+
+              <div className="mt-8 text-center">
+                <div className="inline-flex items-center gap-1.5 bg-amber-50 px-3 py-1 rounded-full mb-3">
+                  <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span className="text-sm font-bold text-amber-700">
+                    {selectedBook.rating}
+                  </span>
+                </div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-[0.2em]">
+                  Reference ID
+                </p>
+                <p className="text-sm font-mono text-slate-600">
+                  #{selectedBook.isbn?.slice(-6) || "N/A"}
+                </p>
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="flex items-start space-x-6 mb-6">
-                <div className="text-8xl">{selectedBook.cover}</div>
-                <div className="flex-1">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    {selectedBook.title}
-                  </h3>
-                  <p className="text-lg text-gray-600 mb-3">
-                    {selectedBook.author}
-                  </p>
-                  <div className="flex items-center space-x-4 mb-3">
-                    <div className="flex items-center space-x-1 bg-yellow-50 px-3 py-1 rounded">
-                      <Star className="w-4 h-4 text-yellow-500 fill-current" />
-                      <span className="font-semibold">
-                        {selectedBook.rating}
-                      </span>
-                    </div>
-                    <div
-                      className={`px-3 py-1 rounded font-semibold ${
+            {/* Right Panel: Information & Action */}
+            <div className="md:w-7/12 p-8 flex flex-col relative">
+              {/* Close Button */}
+              <button
+                onClick={() => {
+                  setShowIssueModal(false);
+                  setSelectedBook(null);
+                }}
+                className="absolute top-6 right-6 text-slate-400 hover:text-slate-900 hover:bg-slate-100 p-2 rounded-xl transition-all"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="mb-6 pr-8">
+                <span className="text-indigo-600 text-xs font-bold uppercase tracking-widest">
+                  Educational Resource
+                </span>
+                <h2 className="text-3xl font-extrabold text-slate-900 mt-1 mb-2 leading-tight">
+                  {selectedBook.title}
+                </h2>
+                <p className="text-lg font-medium text-slate-500">
+                  By {selectedBook.author}
+                </p>
+              </div>
+
+              <div className="space-y-6 flex-1">
+                {/* Metadata Grid */}
+                <div className="grid grid-cols-2 gap-y-4 gap-x-8 border-y border-slate-100 py-6">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Status
+                    </p>
+                    <p
+                      className={`text-sm font-bold ${
                         selectedBook.available > 0
-                          ? "bg-green-50 text-green-700"
-                          : "bg-red-50 text-red-700"
+                          ? "text-emerald-600"
+                          : "text-rose-500"
                       }`}
                     >
                       {selectedBook.available > 0
-                        ? `${selectedBook.available} Available`
-                        : "Not Available"}
-                    </div>
+                        ? "Available for Issue"
+                        : "Out of Stock"}
+                    </p>
                   </div>
-                  <p className="text-gray-600">{selectedBook.description}</p>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-600 text-sm">ISBN:</span>
-                    <span className="font-semibold text-sm">
-                      {selectedBook.isbn}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Publisher:</span>
-                    <span className="font-semibold text-sm">
-                      {selectedBook.publisher}
-                    </span>
-                  </div>
-                  <div className="flex justify-between mb-2">
-                    <span className="text-gray-600 text-sm">Year:</span>
-                    <span className="font-semibold text-sm">
-                      {selectedBook.year}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600 text-sm">Pages:</span>
-                    <span className="font-semibold text-sm">
-                      {selectedBook.pages}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="bg-indigo-50 rounded-lg p-4">
-                  <div className="flex items-center space-x-2 mb-2">
-                    <MapPin className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm text-gray-600">
-                      Shelf Location:
-                    </span>
-                    <span className="font-semibold text-sm">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Shelf Location
+                    </p>
+                    <p className="text-sm font-bold text-slate-800">
                       {selectedBook.shelf}
-                    </span>
+                    </p>
                   </div>
-                  <div className="flex items-center space-x-2 mb-2">
-                    <BookOpen className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm text-gray-600">Total Copies:</span>
-                    <span className="font-semibold text-sm">
-                      {selectedBook.total}
-                    </span>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Issue Duration
+                    </p>
+                    <p className="text-sm font-bold text-slate-800">
+                      14 Business Days
+                    </p>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Calendar className="w-4 h-4 text-indigo-600" />
-                    <span className="text-sm text-gray-600">Issue Period:</span>
-                    <span className="font-semibold text-sm">14 Days</span>
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                      Total Stock
+                    </p>
+                    <p className="text-sm font-bold text-slate-800">
+                      {selectedBook.total} Copies
+                    </p>
                   </div>
+                </div>
+
+                <div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                    Description
+                  </p>
+                  <p className="text-sm text-slate-600 leading-relaxed line-clamp-4">
+                    {selectedBook.description}
+                  </p>
                 </div>
               </div>
 
-              <button
-                onClick={() => issueBook(selectedBook)}
-                disabled={selectedBook.available === 0}
-                className={`w-full py-4 rounded-lg font-semibold transition ${
-                  selectedBook.available > 0
-                    ? "bg-blue-700 text-white hover:shadow-xl"
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                {selectedBook.available > 0
-                  ? "Issue This Book"
-                  : "Currently Unavailable"}
-              </button>
+              {/* Action Button */}
+              <div className="mt-8">
+                <button
+                  onClick={() => issueBook(selectedBook)}
+                  disabled={selectedBook.available === 0}
+                  className={`w-full py-4 rounded-2xl font-bold tracking-wide transition-all duration-300 flex items-center justify-center gap-3 shadow-lg active:scale-[0.98] ${
+                    selectedBook.available > 0
+                      ? "bg-slate-900 text-white hover:bg-indigo-600 shadow-indigo-100"
+                      : "bg-slate-100 text-slate-400 cursor-not-allowed"
+                  }`}
+                >
+                  <BookOpen className="w-5 h-5" />
+                  {selectedBook.available > 0
+                    ? "CONFIRM DIGITAL ISSUE"
+                    : "CURRENTLY UNAVAILABLE"}
+                </button>
+                <p className="text-center text-[10px] text-slate-400 mt-4 uppercase tracking-tighter">
+                  By confirming, you agree to the library's terms of digital
+                  lending.
+                </p>
+              </div>
             </div>
           </div>
         </div>
       )}
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Stats Banner */}
@@ -745,83 +801,111 @@ export default function Library() {
             ))}
           </div>
         </div>
+        {loading && (
+          <div className="text-center py-20 text-lg font-semibold text-gray-500">
+            Loading books...
+          </div>
+        )}
 
+        {error && (
+          <div className="text-center py-20 text-red-600 font-semibold">
+            {error}
+          </div>
+        )}
         {/* Books Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
           {filteredBooks.map((book) => (
             <div
               key={book.id}
-              className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 group"
+              className="group relative flex flex-col bg-white border border-slate-200 rounded-2xl overflow-hidden transition-all duration-300 hover:border-indigo-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] "
             >
-              {/* Card Header */}
-              <div className="p-6 border-b">
-                <div className="flex items-start justify-between">
-                  <div className="text-5xl">{book.cover}</div>
-                  <div
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
+              {/* Top Section: Visual Impact */}
+              <div className="relative h-44 overflow-hidden bg-slate-100">
+                <img
+                  src={book.coverImage}
+                  alt={book.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                {/* Floating Status Badge */}
+                <div className="absolute top-4 left-4">
+                  <span
+                    className={`px-3 py-1 text-[11px] font-bold tracking-wider uppercase rounded-md backdrop-blur-md shadow-sm ${
                       book.available > 0
-                        ? "bg-green-100 text-green-700"
-                        : "bg-red-100 text-red-700"
+                        ? "bg-white/90 text-emerald-600"
+                        : "bg-white/90 text-rose-600"
                     }`}
                   >
-                    {book.available > 0 ? "Available" : "Unavailable"}
-                  </div>
+                    {book.available > 0 ? "● Available" : "● Issued"}
+                  </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 mt-4 group-hover:text-indigo-600 transition">
-                  {book.title}
-                </h3>
-                <p className="text-sm text-gray-600">{book.author}</p>
+                {/* Floating Rating Badge */}
+                <div className="absolute bottom-4 left-4 flex items-center gap-1.5 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-lg text-white">
+                  <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-xs font-bold">{book.rating}</span>
+                </div>
               </div>
 
-              {/* Card Body */}
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1 text-yellow-500">
-                    <Star className="w-4 h-4 fill-current" />
-                    <span className="font-semibold text-gray-800">
-                      {book.rating}
-                    </span>
+              {/* Content Section */}
+              <div className="flex-1 p-6 flex flex-col">
+                <div className="mb-4">
+                  <div className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest mb-1">
+                    Section {book.shelf}
                   </div>
-                  <div className="text-gray-600">
-                    Shelf: <span className="font-semibold">{book.shelf}</span>
-                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 leading-tight mb-2 group-hover:text-indigo-600 transition-colors">
+                    {book.title}
+                  </h3>
+                  <p className="text-sm font-medium text-slate-500">
+                    By {book.author}
+                  </p>
                 </div>
 
-                <p className="text-sm text-gray-600 line-clamp-2">
+                <p className="text-sm text-slate-600 line-clamp-2 mb-6 leading-relaxed">
                   {book.description}
                 </p>
 
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4 text-xs text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <BookOpen className="w-4 h-4" />
-                    {book.total} Copies
+                {/* Stats Row */}
+                <div className="mt-auto pt-6 border-t border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                        Copies
+                      </span>
+                      <span className="text-sm font-bold text-slate-700">
+                        {book.available}/{book.total}
+                      </span>
+                    </div>
+                    <div className="w-px h-6 bg-slate-200" />
+                    <div className="flex flex-col">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
+                        Limit
+                      </span>
+                      <span className="text-sm font-bold text-slate-700">
+                        14d
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4" />
-                    14 Days
-                  </div>
-                </div>
-              </div>
 
-              {/* Card Footer */}
-              <div className="p-6 pt-0">
-                <button
-                  onClick={() => {
-                    setSelectedBook(book);
-                    setShowIssueModal(true);
-                  }}
-                  disabled={book.available === 0}
-                  className={`w-full py-3 rounded-xl font-semibold transition flex items-center justify-center gap-2 ${
-                    book.available > 0
-                      ? "bg-blue-700 text-white hover:shadow-lg cursor-pointer"
-                      : "bg-gray-200 text-gray-500 cursor-not-allowed"
-                  }`}
-                >
-                  <QrCode className="w-5 h-5" />
-                  {book.available > 0 ? "Issue Digitally" : "Out of Stock"}
-                </button>
+                  <button
+                    onClick={() => {
+                      setSelectedBook(book);
+                      setShowIssueModal(true);
+                    }}
+                    disabled={book.available === 0}
+                    className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${
+                      book.available > 0
+                        ? "bg-slate-900 text-white hover:bg-indigo-600 hover:rotate-12 shadow-lg"
+                        : "bg-slate-100 text-slate-300 cursor-not-allowed"
+                    }`}
+                    title={
+                      book.available > 0 ? "Issue Digitally" : "Unavailable"
+                    }
+                  >
+                    <QrCode className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
             </div>
           ))}

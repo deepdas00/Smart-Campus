@@ -11,23 +11,6 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
 
-
-
-
-// input from FRONTEND
-    // {
-    //     "items": [
-    //         {
-    //             "foodId": "64fa....",
-    //             "quantity": 2
-    //         },
-    //         {
-    //             "foodId": "64fb....",
-    //             "quantity": 1
-    //         }
-    //     ]
-    // }
-
     const { items } = req.body;
     const { userId, collegeCode } = req.user;
 

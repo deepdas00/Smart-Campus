@@ -36,11 +36,10 @@ export default function Canteen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [qrCodeForDetails, setQrCodeForDetails] = useState(null);
-const [razorpayPaymentId, setRazorpayPaymentId] = useState(null)
-const [orderId, setOrderId] = useState(null)
-const [orderStatus, setOrderStatus] = useState(null)
-const [paymentStatus, setPaymentStatus] = useState(null)
-  
+  const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  const [orderStatus, setOrderStatus] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
   const categories = [
     { id: "all", name: "All Items", icon: "🍽️" },
@@ -150,10 +149,9 @@ const [paymentStatus, setPaymentStatus] = useState(null)
       { withCredentials: true }
     );
     console.log(res.data);
-    
 
-    const  {orderId}  = res.data.data;
-    
+    const { orderId } = res.data.data;
+
     await startPayment(orderId);
   };
 
@@ -207,8 +205,7 @@ const [paymentStatus, setPaymentStatus] = useState(null)
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       response;
 
-      console.log("huhhuhuh",razorpay_order_id);
-      
+    console.log("huhhuhuh", razorpay_order_id);
 
     const res = await axios.post(
       `${API_URL}/api/v1/canteen/orders/verify-payment`,
@@ -221,31 +218,30 @@ const [paymentStatus, setPaymentStatus] = useState(null)
     );
 
     const {
-    qrCode,
-    razorpayPaymentId,
-    orderId,
-    orderStatus,
-    paymentStatus,
-    items,
-    totalAmount,
-    createdAt,
-  } = res.data.data;
+      qrCode,
+      razorpayPaymentId,
+      orderId,
+      orderStatus,
+      paymentStatus,
+      items,
+      totalAmount,
+      createdAt,
+    } = res.data.data;
 
-  setQrCodeForDetails(qrCode);
-  setRazorpayPaymentId(razorpayPaymentId)
-  setOrderId(orderId)
-  setOrderStatus(orderStatus)
-  setPaymentStatus(paymentStatus)
+    setQrCodeForDetails(qrCode);
+    setRazorpayPaymentId(razorpayPaymentId);
+    setOrderId(orderId);
+    setOrderStatus(orderStatus);
+    setPaymentStatus(paymentStatus);
 
-  // ✅ THIS WAS MISSING
-  setOrderDetails({
-    items,
-    total: totalAmount,
-    time: new Date(createdAt).toLocaleTimeString(),
-  });
+    // ✅ THIS WAS MISSING
+    setOrderDetails({
+      items,
+      total: totalAmount,
+      time: new Date(createdAt).toLocaleTimeString(),
+    });
 
     console.log(res.data.data);
-    
 
     setCart({});
     setShowCart(false);
@@ -333,27 +329,25 @@ const [paymentStatus, setPaymentStatus] = useState(null)
               <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-6 py-2 border-2 border-dashed border-gray-300 bg">
                 <div className="text-center">
                   {qrCodeForDetails && (
-  <img
-    src={qrCodeForDetails}
-    alt="Order QR Code"
-    className="w-56 h-56 mx-auto rounded-xl border-4 border-green-500 shadow-lg"
-  />
-)}
+                    <img
+                      src={qrCodeForDetails}
+                      alt="Order QR Code"
+                      className="w-56 h-56 mx-auto rounded-xl border-4 border-green-500 shadow-lg"
+                    />
+                  )}
 
                   <div className=" px-2 pt-2 rounded-lg  mb-2">
                     <div
                       className={`text-2xl font-bold ${
-  
-                      paymentStatus === "paid"
-                        ? "text-green-800"
-                        : paymentStatus === "failed"
-                        ? "text-red-700"
-                        : "text-orange-600"
+                        paymentStatus === "paid"
+                          ? "text-green-800"
+                          : paymentStatus === "failed"
+                          ? "text-red-700"
+                          : "text-orange-600"
                       }`}
                     >
                       {paymentStatus?.toUpperCase()}
                     </div>
-
                   </div>
                   <p className="text-xs text-gray-500">
                     QR Code for Order #{orderId}
@@ -384,7 +378,6 @@ const [paymentStatus, setPaymentStatus] = useState(null)
                   </span>
                 </div>
 
-
                 <div className="flex justify-between text-lg pt-2 border-t border-gray-200">
                   <span className="font-semibold">Total:</span>
                   <span className="font-bold text-orange-600">
@@ -407,12 +400,7 @@ const [paymentStatus, setPaymentStatus] = useState(null)
                 ))}
               </div>
 
-              <button
-                onClick={simulateQRScan}
-                className="w-full py-2.5 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:shadow-lg transition"
-              >
-                Simulate QR Scan (Demo)
-              </button>
+              
 
               <p className="text-xs text-center text-gray-500 md:mt mt-[-3px]">
                 Estimated preparation time: 15-20 minutes

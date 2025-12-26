@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-import { createRazorpayOrderUtil, getRazorpayInstance, verifyRazorpayPaymentUtil } from "../../utils/razorpayPayment.js";
-=======
 
-import crypto from "crypto";
-import { getRazorpayInstance } from "../../utils/razorpayPayment.js";
->>>>>>> f5afd903d0194f71cfccb705000c4ad7428d12f8
+import { createRazorpayOrderUtil, verifyRazorpayPaymentUtil } from "../../utils/razorpayPayment.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";

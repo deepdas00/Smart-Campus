@@ -1,6 +1,6 @@
 
 import crypto from "crypto";
-import { getRazorpayInstance } from "../../utils/razorpayPayment.js";
+import { createRazorpayOrderUtil, getRazorpayInstance, verifyRazorpayPaymentUtil } from "../../utils/razorpayPayment.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
@@ -9,9 +9,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
 import QRCode from "qrcode";
-import { log } from "console";
-
-
+// import { log } from "console";
 
 
 export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
@@ -71,7 +69,7 @@ console.log(order._id);
   });
 
 
-  console.log("PAYMENT OF RAZORRRRR",razorpayOrder);
+  // console.log("PAYMENT OF RAZORRRRR",razorpayOrder);/
   
   // 7️⃣ Send data to frontend
   res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
@@ -171,6 +169,7 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   // 8️⃣ Generate QR code
   const qrPayload = JSON.stringify({
     orderId: order._id,
+    transactionId: order.transactionCode,
     collegeCode
   });
 
@@ -190,10 +189,14 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
       200,
       {
         orderId: order._id,
+        transactionCode:order.transactionCode,
         orderStatus: order.orderStatus,
-        razorpayPaymentId: order.razorpayPaymentId,
+        createdAt:order.createdAt,
+        totalAmount:order.totalAmount,
         paymentStatus: order.paymentStatus,
+        razorpayPaymentId: order.razorpayPaymentId,
         qrCode: order.qrCode,
+
 
       },
       "Payment verified successfully"

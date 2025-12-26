@@ -33,8 +33,7 @@ import adminRouter from "./route/admin.route.js"
 import libraryRouter from "./route/library.route.js"
 import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
-import { getStudentModel } from "./models/collegeStudent.model.js";
-import { getCollegeDB } from "./db/db.index.js";
+
 
 
 
@@ -60,7 +59,7 @@ app.use("/api/v1/auth", authRouter);
 // POST /api/v1/auth/student/me     {Whole details of student}
 // POST /api/v1/auth/staff/login 
 // POST /api/v1/auth/refresh 
-// POST /api/v1/auth/logout -p
+// POST /api/v1/auth/logout
 // POST /api/v1/auth/change-password  -p
 // POST /api/v1/auth/forgot-password  -p
 // POST /api/v1/auth/reset-password/:token -p
@@ -83,6 +82,7 @@ app.use("/api/v1/canteen", canteenRouter);
 // POST   /api/v1/canteen/foods              // Add food (canteen, admin only)
 // PATCH  /api/v1/canteen/foods/:foodId      // Update food (canteen, admin only)
 // GET    /api/v1/canteen/foods              // Get all foods (student, canteen, admin)
+// DELETE    /api/v1/canteen//food/:foodId              // Get all foods (student, canteen, admin)
 
 
 /* ---------- ORDERS ---------- */

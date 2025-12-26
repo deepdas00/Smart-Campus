@@ -19,12 +19,21 @@ import { fetchlibraryTransactionDetails,
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
 import { library_createRazorpayOrder, library_verifyPayment } from "../controllers/library/libraryPayment.controller.js";
+import { setLibraryPolicy } from "../controllers/library/libraryPolicy.controller.js";
 
 const router = express.Router();
 
 /* ===============================
    📚 BOOK MANAGEMENT ROUTES
 ================================ */
+
+/*Policy set and update */
+router.post(
+  "/policy",
+  verifyJWT,
+  authorizeRoles("admin"),
+  setLibraryPolicy
+);
 
 /* ➕ Add new book (Librarian / Admin) */
 router.post(
@@ -82,6 +91,7 @@ router.post(
 //   authorizeRoles("student"),
 //   prepareReturn
 // );
+
 // fetch one transaction details (student/Librarian/Admin) 
 router.patch(
   "/transactions/:transactionId",

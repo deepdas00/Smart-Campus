@@ -7,6 +7,8 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js"
+import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
+
 export const orderBook = asyncHandler(async (req, res) => {
 
   const { bookId } = req.body;
@@ -30,15 +32,23 @@ export const orderBook = asyncHandler(async (req, res) => {
   if (book.availableCopies <= 0)
     throw new ApiError(400, "Book not available");
 
+  //generateTransactionCode
+  const transactionCode = await generateTransactionCode(collegeCode, "L", Transaction)
+  // console.log(transactionCode);
+  
+
+
   // Create transaction
   const transaction = await Transaction.create({
     studentId: userId,
-    bookId
+    bookId,
+    transactionCode
   });
 
   // Generate QR
   const qrData = JSON.stringify({
     transactionId: transaction._id,
+    transactionCode: transaction.transactionCode,
     collegeCode
   });
 
@@ -160,7 +170,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const today = new Date();
   let fine = 0;
 
-  if (transaction.paymentStatus === "none"){
+  if (transaction.paymentStatus === "none") {
 
     if (today > transaction.dueDate) {
       const overdueDays = Math.ceil(
@@ -173,7 +183,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
     transaction.fineAmount = fine;
     transaction.paymentStatus = fine > 0 ? "pending" : "paid";
     await transaction.save({ validateBeforeSave: false });
-    
+
   }
 
 
@@ -190,7 +200,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
 });
 
 //mam click on return
-export const returnBook = asyncHandler(async(req,res)=>{
+export const returnBook = asyncHandler(async (req, res) => {
 
 
   const { transactionId } = req.body;
@@ -213,7 +223,7 @@ export const returnBook = asyncHandler(async(req,res)=>{
 
 
 
-  
+
   const book = await Book.findById(transaction.bookId);
   const student = await Student.findById(transaction.studentId);
 
@@ -268,7 +278,7 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   const history = await Transaction.find({ studentId: userId })
-    .populate({ path: "bookId", select: "title author" })
+    .populate({ path: "bookId", select: "title author coverImage" })
     .sort({ createdAt: -1 });
 
   res.status(200).json(
@@ -290,7 +300,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
   const transactions = await Transaction.find()
     .populate({ path: "bookId", select: "title author" })
-    .populate({ path: "studentId", select: "name email" })
+    .populate({ path: "studentId", select: "name email rollNo" })
     .sort({ createdAt: -1 });
 
   res.status(200).json(

@@ -1,5 +1,7 @@
 import Razorpay from "razorpay";
 import { ApiError } from "./apiError.js";
+
+import crypto from "crypto"
 export const getRazorpayInstance = () => {
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw new Error("Razorpay keys are missing in .env");

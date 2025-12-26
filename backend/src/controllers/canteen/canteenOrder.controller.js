@@ -5,6 +5,7 @@ import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 
 
 //order placing by student
@@ -80,13 +81,20 @@ export const placeOrder = asyncHandler(async (req, res) => {
         });
     }
 
+
+    //generateTransactionCode
+    const transactionCode = await generateTransactionCode(collegeCode,"C",Order)
+
+    //  console.log(transactionCode);
+     
     // 3️⃣ Create order (NO PAYMENT YET)
     const order = await Order.create({
         studentId: userId,
         items: orderItems,
         totalAmount,
         paymentStatus: "pending",
-        orderStatus: "order_received"
+        orderStatus: "order_received",
+        transactionCode
     });
 
     res.status(201).json(
@@ -94,7 +102,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
             201,
             {
                 orderId: order._id,
-                totalAmount
+                totalAmount,
+                transactionCode
             },
             "Order placed successfully"
         )
@@ -216,6 +225,39 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
       orders,
       `Canteen dashboard (${range}) data fetched`
     )
+  );
+});
+
+
+//get individuals order history
+export const getMyOrderHistory = asyncHandler(async (req, res) => {
+
+  const { userId, collegeCode } = req.user;
+
+  // 1️⃣ Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Order = getCanteenOrderModel(collegeConn);
+
+  // 2️⃣ Fetch user's order history
+  const history = await Order
+    .find({ userId })
+    .sort({ createdAt: -1 });
+
+  // 3️⃣ Response
+  return res.status(200).json(
+    new ApiResponse(200, history, "Order history fetched successfully")
   );
 });
 

@@ -1,6 +1,12 @@
 import Razorpay from "razorpay";
 import { ApiError } from "./apiError.js";
+import crypto from "crypto";
+
+
+
+
 export const getRazorpayInstance = () => {
+  
   if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
     throw new Error("Razorpay keys are missing in .env");
   }
@@ -11,35 +17,33 @@ export const getRazorpayInstance = () => {
   });
 };
 
-
-
 // =======================
 // CREATE RAZORPAY ORDER
 // =======================
 export const createRazorpayOrderUtil = async ({
   amount,
   receipt,
-  saveOrderIdFn
+  saveOrderIdFn,
 }) => {
-
+  
   if (amount <= 0) throw new ApiError(400, "Invalid payment amount");
-
+  
   const razorpayOrder = await getRazorpayInstance().orders.create({
     amount: amount * 100,
     currency: "INR",
-    receipt
+    receipt,
   });
-
+  
+  
   await saveOrderIdFn(razorpayOrder.id);
 
   return {
     razorpayOrderId: razorpayOrder.id,
     amount: razorpayOrder.amount,
     currency: razorpayOrder.currency,
-    key: process.env.RAZORPAY_KEY_ID
+    key: process.env.RAZORPAY_KEY_ID,
   };
 };
-
 
 // =======================
 // VERIFY RAZORPAY PAYMENT
@@ -47,9 +51,8 @@ export const createRazorpayOrderUtil = async ({
 export const verifyRazorpayPaymentUtil = async ({
   razorpay_order_id,
   razorpay_payment_id,
-  razorpay_signature
+  razorpay_signature,
 }) => {
-
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     throw new ApiError(400, "Payment verification data missing");
   }

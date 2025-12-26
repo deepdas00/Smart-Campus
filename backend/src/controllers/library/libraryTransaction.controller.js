@@ -7,6 +7,8 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js"
+
+
 export const orderBook = asyncHandler(async (req, res) => {
 
   const { bookId } = req.body;
@@ -238,6 +240,7 @@ export const returnBook = asyncHandler(async(req,res)=>{
 export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const { transactionId } = req.params
   const { collegeCode } = req.user
+  
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -247,8 +250,12 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
 
   const Transaction = getLibraryTransactionModel(collegeConn);
-  const transaction = Transaction.findById(transactionId)
-    .populate({ path: "bookId", select: "title author shelf" })
+  const transaction = await Transaction.findById(transactionId)
+    .populate({ path: "bookId", select: "title author shelf transactionId" })
+    console.log("The transaction is", transaction);
+    
+
+
 
   res.status(200).json(
     new ApiResponse(200, transaction, "Transaction fetched")
@@ -268,8 +275,11 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   const history = await Transaction.find({ studentId: userId })
-    .populate({ path: "bookId", select: "title author" })
+    .populate({ path: "bookId", select: "title author coverImage " })
     .sort({ createdAt: -1 });
+
+    console.log("The His tory is ", history);
+    
 
   res.status(200).json(
     new ApiResponse(200, history, "Library history fetched")
@@ -280,19 +290,24 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
   const { collegeCode } = req.user;
 
+  
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) throw new ApiError(404, "College not found");
-
+  
   const collegeConn = getCollegeDB(college.dbName);
   const Transaction = getLibraryTransactionModel(collegeConn);
 
+  const LibraryBooks = getLibraryBookModel(collegeConn);
+  
   const transactions = await Transaction.find()
-    .populate({ path: "bookId", select: "title author" })
-    .populate({ path: "studentId", select: "name email" })
+    .populate({ path: "bookId", model: LibraryBooks, select: "title author coverImage" })
+    .populate({ path: "studentId", select: "name email rollNo studentName " })
     .sort({ createdAt: -1 });
 
+
+  
   res.status(200).json(
     new ApiResponse(200, transactions, "All library transactions fetched")
   );

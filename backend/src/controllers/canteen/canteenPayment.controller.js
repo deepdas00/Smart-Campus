@@ -1,6 +1,4 @@
-
-import crypto from "crypto";
-import { getRazorpayInstance } from "../../utils/razorpayPayment.js";
+import { createRazorpayOrderUtil, getRazorpayInstance, verifyRazorpayPaymentUtil } from "../../utils/razorpayPayment.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
@@ -9,7 +7,6 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
 import QRCode from "qrcode";
-import { log } from "console";
 
 
 
@@ -58,7 +55,7 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Order already paid");
   }
 
-console.log(order._id);
+console.log("ORDER ID",order._id);
 
   // 5️⃣ Create Razorpay order
   const paymentData = await createRazorpayOrderUtil({

@@ -62,14 +62,14 @@ const {
 
 
 
-     /api/v1/canteen/orders/:orderId/pay => order create => response from server
+     /api/v1/canteen/orders/:orderId/pay => order create => response from server  [DONE]
 
      /api/v1/canteen/orders/verify-payment => order verification (after payment sucess) => 
        const {
     razorpay_order_id,
     razorpay_payment_id,
     razorpay_signature
-  } = req.body;
+  } = req.body;   [DONE]
 
 
     /api/v1/canteen/orders/orders/serve => canteen staff will scan the qr and clck on submit => const { orderId, collegeCode } = req.body;

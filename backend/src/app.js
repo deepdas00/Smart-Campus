@@ -69,11 +69,11 @@ app.use("/api/v1/admin", adminRouter);
 //
 
 app.use("/api/v1/library", libraryRouter);
-// POST   /api/v1/library/books
-// GET    /api/v1/library/books
-// PATCH  /api/v1/library/books/:bookId
-// DELETE /api/v1/library/books/:bookId
-// POST   /api/v1/library/order   
+// POST   /api/v1/library/books   //BOOK ADD
+// GET    /api/v1/library/books   //BOOK ALL FETCHED
+// PATCH  /api/v1/library/books/:bookId  //SINGLE BOOK UPDATE
+// DELETE /api/v1/library/books/:bookId   //DELETE ONE BOOK
+// POST   /api/v1/library/order   // ORDER A BOOK {STUDENT}
 
 
 

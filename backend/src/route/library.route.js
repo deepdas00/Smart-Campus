@@ -16,7 +16,6 @@ import { fetchlibraryTransactionDetails,
   getStudentLibraryHistory, 
   issueBook, 
   orderBook, 
-  prepareReturn, 
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
 import { library_createRazorpayOrder, library_verifyPayment } from "../controllers/library/libraryPayment.controller.js";
@@ -56,7 +55,7 @@ router.patch(
 router.delete(
   "/books/:bookId",
   verifyJWT,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", "librarian"),
   deleteBook
 );
 
@@ -84,7 +83,7 @@ router.post(
 //   prepareReturn
 // );
 // fetch one transaction details (student/Librarian/Admin) 
-router.patch(
+router.get(
   "/transactions/:transactionId",
   verifyJWT,
   authorizeRoles("librarian", "admin", "student"),
@@ -124,7 +123,7 @@ router.post(
 
 
 
-/*Fetch student book history  */
+/*Fetch student book history  */   //for current student
 router.get(
   "/my/history",
   verifyJWT,

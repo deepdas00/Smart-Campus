@@ -219,3 +219,44 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   );
 });
 
+
+//Fetched single order
+
+export const fetchedSingleOrder = asyncHandler(async (req, res) => {
+  const { collegeCode } = req.user;
+  const { orderId } = req.body;
+
+
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Order = getCanteenOrderModel(collegeConn);
+
+  // 3️⃣ Fetch filtered orders
+  const orders = await Order.findOne(orderId)
+    .select("items totalAmount orderStatus createdAt paymentStatus razorpayPaymentId");
+
+  // 4️⃣ Response
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      orders,
+      `Order fetched successfully`
+    )
+  );
+
+
+
+})
+

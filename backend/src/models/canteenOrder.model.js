@@ -20,7 +20,12 @@ export const canteenOrderSchema = new mongoose.Schema(
                 quantity: Number
             }
         ],
-
+        transactionCode: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true
+        },
         totalAmount: {
             type: Number,
             required: true

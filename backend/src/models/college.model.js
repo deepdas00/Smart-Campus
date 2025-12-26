@@ -18,11 +18,28 @@ const collegeSchema = new Schema(
       required: true,
       unique: true
     },
+    registrationNumber: {
+      type: String,
+      required: true,
+      unique: true
+    },
+    address: {
+      type: String,
+      required: true
+    },
 
+    contactPersonName: {
+      type: String,
+      required: true
+    },
+    contactNumber: {
+      type: String,
+      required: true
+    },
     dbName: {
       type: String,
       required: true,
-      
+
     },
 
     status: {
@@ -41,3 +58,4 @@ export const getCollegeModel = (conn) => {
   }
   return conn.models.College || conn.model("College", collegeSchema);
 };
+

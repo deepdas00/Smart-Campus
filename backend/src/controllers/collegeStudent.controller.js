@@ -72,10 +72,10 @@ export const registerStudent = asyncHandler(async (req, res) => {
     password: hashedPassword,
     avatar: avatarUrl,
   });
- 
 
-//// error handling for db fail 
-  
+
+  //// error handling for db fail 
+
   // 9️⃣ Send response
   res.status(201).json(
     new ApiResponse(201, student, "Student registered successfully")
@@ -124,7 +124,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
     console.log("DONEEEEEEE");
-    
+
     throw new ApiError(401, "Invalid credentials");
   }
 
@@ -137,8 +137,8 @@ export const studentLogin = asyncHandler(async (req, res) => {
       collegeCode
     });
 
-    console.log(" GENERATION SUCCESSFULL",accessToken, refreshToken);
-    
+  console.log(" GENERATION SUCCESSFULL", accessToken, refreshToken);
+
 
   // 6️⃣ Save refresh token
   student.refreshToken = refreshToken;
@@ -175,35 +175,31 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
 
 export const currentStudent = asyncHandler(async (req, res) => {
-  try {
-    // verifyJWT middleware should attach 'user' to 'req'
-    const { userId, collegeCode } = req.user; 
 
-    const masterConn = connectMasterDB();
-    const College = getCollegeModel(masterConn);
-    const college = await College.findOne({ collegeCode, status: "active" });
-    if (!college) throw new ApiError(404, "College not found");
+  // verifyJWT middleware should attach 'user' to 'req'
+  const { collegeCode, userId } = req.user;
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) throw new ApiError(404, "College not found");
 
 
-    const collegeConn = getCollegeDB(college.dbName)
-    const Student = getStudentModel(collegeConn)
-    const student = await Student.findById(userId).select("-password -refreshToken");
-    
-      
-    if (!student) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
+  const collegeConn = getCollegeDB(college.dbName)
+  const Student = getStudentModel(collegeConn)
+  const student = await Student.findById(userId).select("-password -refreshToken");
 
-    // Change 'data' to 'user' to match your React AuthContext expectations
-    res.status(200).json(new ApiResponse(
-      200,
-      student,
-      "GOT STUDENT"
-    ));
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+
+  if (!student) {
+    return res.status(404).json({ success: false, message: "User not found" });
   }
+
+  // Change 'data' to 'user' to match your React AuthContext expectations
+  res.status(200).json(new ApiResponse(
+    200,
+    student,
+    "GOT STUDENT"
+  ));
+
 })
-
-
 

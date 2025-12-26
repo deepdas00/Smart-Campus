@@ -1,3 +1,4 @@
+
 import QRCode from "qrcode";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
@@ -6,7 +7,8 @@ import { getLibraryTransactionModel } from "../../models/libraryTransaction.mode
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
-import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js"
+import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js";
+import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 
 
 export const orderBook = asyncHandler(async (req, res) => {
@@ -32,15 +34,23 @@ export const orderBook = asyncHandler(async (req, res) => {
   if (book.availableCopies <= 0)
     throw new ApiError(400, "Book not available");
 
+  //generateTransactionCode
+  const transactionCode = await generateTransactionCode(collegeCode, "L", Transaction)
+  // console.log(transactionCode);
+  
+
+
   // Create transaction
   const transaction = await Transaction.create({
     studentId: userId,
-    bookId
+    bookId,
+    transactionCode
   });
 
   // Generate QR
   const qrData = JSON.stringify({
     transactionId: transaction._id,
+    transactionCode: transaction.transactionCode,
     collegeCode
   });
 
@@ -162,7 +172,9 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const today = new Date();
   let fine = 0;
 
+
   if (transaction.paymentStatus === "none"){
+
 
     if (today > transaction.dueDate) {
       const overdueDays = Math.ceil(
@@ -175,7 +187,6 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
     transaction.fineAmount = fine;
     transaction.paymentStatus = fine > 0 ? "pending" : "paid";
     await transaction.save({ validateBeforeSave: false });
-    
   }
 
 
@@ -192,8 +203,8 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
 });
 
 //mam click on return
-export const returnBook = asyncHandler(async(req,res)=>{
 
+export const returnBook = asyncHandler(async (req, res) => {
 
   const { transactionId } = req.body;
   const { collegeCode } = req.user;
@@ -216,6 +227,7 @@ export const returnBook = asyncHandler(async(req,res)=>{
 
 
   
+
   const book = await Book.findById(transaction.bookId);
   const student = await Student.findById(transaction.studentId);
 
@@ -241,7 +253,6 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const { transactionId } = req.params
   const { collegeCode } = req.user
   
-
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
@@ -253,9 +264,6 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const transaction = await Transaction.findById(transactionId)
     .populate({ path: "bookId", select: "title author shelf transactionId" })
     console.log("The transaction is", transaction);
-    
-
-
 
   res.status(200).json(
     new ApiResponse(200, transaction, "Transaction fetched")
@@ -278,8 +286,6 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
     .populate({ path: "bookId", select: "title author coverImage " })
     .sort({ createdAt: -1 });
 
-    console.log("The His tory is ", history);
-    
 
   res.status(200).json(
     new ApiResponse(200, history, "Library history fetched")
@@ -307,7 +313,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
     .sort({ createdAt: -1 });
 
 
-  
+
   res.status(200).json(
     new ApiResponse(200, transactions, "All library transactions fetched")
   );

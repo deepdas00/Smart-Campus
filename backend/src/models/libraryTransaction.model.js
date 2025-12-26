@@ -4,7 +4,12 @@ const libraryTransactionSchema = new mongoose.Schema(
   {
     studentId: { type: mongoose.Schema.Types.ObjectId, ref: "CollegeStudent", required: true },
     bookId: { type: mongoose.Schema.Types.ObjectId, ref: "LibraryBook", required: true },
-
+    transactionCode: {
+            type: String,
+            required: true,
+            unique: true,
+            index: true
+        },
     transactionStatus: {
       type: String,
       enum: ["pending", "issued", "returned"],

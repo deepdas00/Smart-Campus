@@ -4,9 +4,22 @@ import { authorizeRoles } from "../middlewares/authorize.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
 import { getCanteenDashboardOrders, placeOrder, serveOrder } from "../controllers/canteen/canteenOrder.controller.js";
 import { canteen_createRazorpayOrder, canteen_verifyPayment } from "../controllers/canteen/canteenPayment.controller.js";
-import { addFood, getAllFoods, updateFood } from "../controllers/canteen/canteenFood.controller.js";
+import { addFood, deleteFood, getAllFoods, updateFood } from "../controllers/canteen/canteenFood.controller.js";
+import { setCanteenPolicy } from "../controllers/canteen/canteenPolicy.controller.js";
 
 const router = express.Router();
+
+
+
+
+/*------Policy set and update------*/
+router.post(
+  "/policy",
+  verifyJWT,
+  authorizeRoles("admin"),
+  setCanteenPolicy
+);
+
 
 /* ---------- FOOD ---------- */
 
@@ -33,6 +46,14 @@ router.get(
   verifyJWT,
   authorizeRoles("student", "canteen", "admin"),
   getAllFoods
+);
+
+//Delete Food
+router.delete(
+  "/food/:foodId",
+  verifyJWT,
+  authorizeRoles("admin"),
+  deleteFood
 );
 
 

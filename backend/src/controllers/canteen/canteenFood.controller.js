@@ -181,3 +181,40 @@ export const updateFood = asyncHandler(async (req, res) => {
     )
   );
 });
+
+export const deleteFood = asyncHandler(async (req, res) => {
+
+  const { foodId } = req.params;
+  const { collegeCode } = req.user;
+
+  // 1️⃣ Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const CanteenFood = getCanteenFoodModel(collegeConn);
+
+  // 2️⃣ Find food item
+  const food = await CanteenFood.findById(foodId);
+
+  if (!food) {
+    throw new ApiError(404, "Food item not found");
+  }
+
+  // 🗑️ 3️⃣ Permanently delete food
+  await food.deleteOne();
+
+  // 4️⃣ Response
+  return res.status(200).json(
+    new ApiResponse(200, {}, "Food item permanently deleted")
+  );
+});

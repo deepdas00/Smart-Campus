@@ -9,6 +9,7 @@ import jwt from "jsonwebtoken";
 import { connect } from "mongoose";
 import { getCollegeModel } from "../models/college.model.js";
 import { ApiResponse } from "../utils/apiResponse.js";
+import { logoutUser } from "../controllers/logout.controller.js";
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.post("/staff/login", staffLogin);
 router.post("/refresh", refreshAccessToken);
 
 // LOGOUT (future)
- // router.post("/logout", verifyJWT, logout);
+ router.post("/logout", verifyJWT, logoutUser);
 
 
 

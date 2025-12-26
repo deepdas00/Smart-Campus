@@ -11,7 +11,6 @@ import QRCode from "qrcode";
 
 
 
-
 export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const { orderId } = req.params;
@@ -67,6 +66,7 @@ console.log("ORDER ID",order._id);
       await order.save({ validateBeforeSave: false });
     }
   });
+  
   // 7️⃣ Send data to frontend
   res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
 
@@ -165,6 +165,7 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   // 8️⃣ Generate QR code
   const qrPayload = JSON.stringify({
     orderId: order._id,
+    transactionId: order.transactionCode,
     collegeCode
   });
 
@@ -184,10 +185,14 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
       200,
       {
         orderId: order._id,
+        transactionCode:order.transactionCode,
         orderStatus: order.orderStatus,
-        razorpayPaymentId: order.razorpayPaymentId,
+        createdAt:order.createdAt,
+        totalAmount:order.totalAmount,
         paymentStatus: order.paymentStatus,
+        razorpayPaymentId: order.razorpayPaymentId,
         qrCode: order.qrCode,
+
 
       },
       "Payment verified successfully"

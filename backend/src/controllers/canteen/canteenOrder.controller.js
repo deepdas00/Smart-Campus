@@ -5,6 +5,7 @@ import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 
 
 //order placing by student
@@ -80,13 +81,20 @@ export const placeOrder = asyncHandler(async (req, res) => {
         });
     }
 
+
+    //generateTransactionCode
+    const transactionCode = await generateTransactionCode(collegeCode,"C",Order)
+
+    //  console.log(transactionCode);
+     
     // 3️⃣ Create order (NO PAYMENT YET)
     const order = await Order.create({
         studentId: userId,
         items: orderItems,
         totalAmount,
         paymentStatus: "pending",
-        orderStatus: "order_received"
+        orderStatus: "order_received",
+        transactionCode
     });
 
     res.status(201).json(
@@ -94,7 +102,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
             201,
             {
                 orderId: order._id,
-                totalAmount
+                totalAmount,
+                transactionCode
             },
             "Order placed successfully"
         )
@@ -221,13 +230,11 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
 
 
 //Fetched single order
-
 export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
   const { orderId } = req.body;
 
-
-
+  // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
 

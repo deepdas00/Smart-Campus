@@ -20,12 +20,14 @@ const libraryPolicySchema = new mongoose.Schema({
     {
         type: Number,
         default: 50,
-    }
+    },
+    updatedBy: {type: mongoose.Schema.Types.ObjectId, ref: "CollegeUser", required: true},
 },
 {
     timestamps: true
 });
 
+    
 export const getLibraryPolicyModel = (conn) => {
     return conn.models.LibraryPolicy ||
         conn.model("LibraryPolicy", libraryPolicySchema);

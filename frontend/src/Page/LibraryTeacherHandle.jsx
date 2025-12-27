@@ -278,67 +278,62 @@ export default function LibraryTeacherHandle() {
     }
   };
 
-  const handleUpdateBook = async () => {
-    try {
-      if (!newBook.title || !newBook.author || !newBook.category) {
-        toast.error("Required fields cannot be empty");
-        return;
-      }
-
-      setIsUpdatingBook(true);
-
-      const token = Cookies.get("accessToken");
-      console.log("newwwwwBook", newBook);
-      
-
-      const payload = {
-        title: newBook.title,
-        author: newBook.author,
-        category: newBook.category,
-        totalCopies: Number(newBook.totalCopies),
-        availableCopies: Number(newBook.availableCopies),
-        shelf: newBook.shelf,
-        rating: Number(newBook.rating),
-        isbn: newBook.isbn,
-        publisher: newBook.publisher,
-        publishedYear: Number(newBook.publishedYear),
-        description: newBook.description,
-        coverImage : newBook.coverImage,
-      };
-
-      console.log("PAYLOADDD", payload);
-      
-
-      const res = await axios.patch(
-        `${import.meta.env.VITE_API_URL}/api/v1/library/books/${
-          editingBook._id
-        }`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }
-      );
-
-      console.log("Updated:", res.data);
-
-      // 🔥 Update UI instantly
-      setBooks((prev) =>
-        prev.map((b) => (b._id === editingBook._id ? res.data.data : b))
-      );
-
-      toast.success("Book updated successfully");
-      setShowAddBookModal(false);
-      setEditingBook(null);
-    } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "Failed to update book");
-    } finally {
-      setIsUpdatingBook(false);
+ const handleUpdateBook = async () => {
+  try {
+    if (!newBook.title || !newBook.author || !newBook.category) {
+      toast.error("Required fields cannot be empty");
+      return;
     }
-  };
+
+    setIsUpdatingBook(true);
+
+    const token = Cookies.get("accessToken");
+
+    const formData = new FormData();
+
+    formData.append("title", newBook.title);
+    formData.append("author", newBook.author);
+    formData.append("category", newBook.category);
+    formData.append("totalCopies", Number(newBook.totalCopies));
+    formData.append("availableCopies", Number(newBook.availableCopies));
+    formData.append("shelf", newBook.shelf);
+    formData.append("rating", Number(newBook.rating));
+    formData.append("isbn", newBook.isbn);
+    formData.append("publisher", newBook.publisher);
+    formData.append("publishedYear", Number(newBook.publishedYear));
+    formData.append("description", newBook.description);
+
+    if (newBook.coverImage) {
+      formData.append("coverImage", newBook.coverImage);
+    }
+
+    const res = await axios.patch(
+      `${import.meta.env.VITE_API_URL}/api/v1/library/books/${editingBook._id}`,
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+          // ❗ Do NOT set Content-Type manually
+        },
+        withCredentials: true
+      }
+    );
+
+    setBooks((prev) =>
+      prev.map((b) => (b._id === editingBook._id ? res.data.data : b))
+    );
+
+    toast.success("Book updated successfully");
+    setShowAddBookModal(false);
+    setEditingBook(null);
+  } catch (err) {
+    console.error(err);
+    toast.error(err.response?.data?.message || "Failed to update book");
+  } finally {
+    setIsUpdatingBook(false);
+  }
+};
+
 
   const handleDeleteBook = async (bookId) => {
     try {

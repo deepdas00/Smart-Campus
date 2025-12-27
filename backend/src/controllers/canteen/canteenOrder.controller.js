@@ -10,9 +10,10 @@ import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
-
   const { items } = req.body;
   const { userId, collegeCode } = req.user;
+
+
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     throw new ApiError(400, "Order items are required");
@@ -24,7 +25,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -34,8 +35,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
-  const canteenPolicy = await CanteenPolicyModel.find();
-  canteenStatus = canteenPolicy.isActive
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+  const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
     res.status(401).json({ message: "Canteen Is Offline!!" });
   }
@@ -55,10 +56,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     }
 
     if (food.quantityAvailable < item.quantity) {
-      throw new ApiError(
-        400,
-        `Insufficient quantity for ${food.name}`
-      );
+      throw new ApiError(400, `Insufficient quantity for ${food.name}`);
     }
 
     const itemTotal = food.price * item.quantity;
@@ -74,7 +72,11 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 
   //generateTransactionCode
-  const transactionCode = await generateTransactionCode(collegeCode, "C", Order)
+  const transactionCode = await generateTransactionCode(
+    collegeCode,
+    "C",
+    Order
+  );
 
   //  console.log(transactionCode);
 
@@ -85,7 +87,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     totalAmount,
     paymentStatus: "pending",
     orderStatus: "order_received",
-    transactionCode
+    transactionCode,
   });
 
   res.status(201).json(
@@ -94,7 +96,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
       {
         orderId: order._id,
         totalAmount,
-        transactionCode
+        transactionCode,
       },
       "Order placed successfully"
     )
@@ -103,8 +105,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 //order serving by canteen staff
 export const serveOrder = asyncHandler(async (req, res) => {
-
-  const { orderId, collegeCode } = req.body;
+  const { orderId } = req.body;
+  const { collegeCode } = req.user;
 
   if (!orderId || !collegeCode) {
     throw new ApiError(400, "Invalid QR data");
@@ -116,7 +118,7 @@ export const serveOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -126,8 +128,8 @@ export const serveOrder = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
-  const canteenPolicy = await CanteenPolicyModel.find();
-  canteenStatus = canteenPolicy.isActive
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+  const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
     res.status(401).json({ message: "Canteen Is Offline!!" });
   }
@@ -154,18 +156,11 @@ export const serveOrder = asyncHandler(async (req, res) => {
   order.orderStatus = "served";
   await order.save({ validateBeforeSave: false });
 
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      null,
-      "Order served successfully"
-    )
-  );
+  res.status(200).json(new ApiResponse(200, null, "Order served successfully"));
 });
 
 // Dashbord will show this orders
 export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
-
   const { collegeCode } = req.user;
   const { range = "daily" } = req.query;
 
@@ -198,7 +193,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -211,27 +206,26 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   // 3️⃣ Fetch filtered orders
   const orders = await Order.find({
     paymentStatus: "paid",
-    createdAt: { $gte: startDate }
+    createdAt: { $gte: startDate },
   })
     .sort({ createdAt: -1 })
     .populate({ path: "studentId", select: "studentName rollNo mobileNo" })
-    .select("_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId studentName");
+    .select(
+      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+    );
 
   // 4️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      `Canteen dashboard (${range}) data fetched`
-    )
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, orders, `Canteen dashboard (${range}) data fetched`)
+    );
 });
-
 
 //Fetched single order
 export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
-  const { orderId } = req.body;
+  const { orderId } = req.params;
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -239,7 +233,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -250,25 +244,24 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const Order = getCanteenOrderModel(collegeConn);
 
   // 3️⃣ Fetch filtered orders
-  const orders = await Order.findOne(orderId)
-    .select("_id transactionCode items totalAmount orderStatus createdAt paymentStatus razorpayPaymentId");
+  const orders = await Order.findOne({
+    paymentStatus: "paid",
+    orderId
+  })
+    .sort({ createdAt: -1 })
+    .populate("studentId", "studentName rollNo mobileNo")
+    .select(
+      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+    );
 
   // 4️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      `Order fetched successfully`
-    )
-  );
-
-
-
-})
+  res
+    .status(200)
+    .json(new ApiResponse(200, orders, `Order fetched successfully`));
+});
 
 // Get logged-in student's order history
 export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
-
   const { userId, collegeCode } = req.user;
 
   // 1️⃣ Resolve college DB
@@ -277,7 +270,7 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -290,24 +283,22 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
   // 2️⃣ Fetch student's orders
   const orders = await Order.find({ studentId: userId })
     .sort({ createdAt: -1 })
-    .select("_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId");
+    .select(
+      "_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
+    );
 
   // 3️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      "Student order history fetched successfully"
-    )
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, orders, "Student order history fetched successfully")
+    );
 });
 
 
 // to set online and offline status (toggle btn)
 export const canteenIsActive = asyncHandler(async (req, res) => {
-
   const { isActive } = req.body; ///true or false
-
   const { collegeCode } = req.user;
 
 
@@ -317,7 +308,7 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -333,7 +324,7 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 
   await canteenPolicy.save({ validateBeforeSave: false })
 
- res.status(200).json(
+  res.status(200).json(
     new ApiResponse(
       200,
       isActive,
@@ -345,10 +336,32 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 });
 
 
+// export const canteenSatusFetch = asyncHandler(async (req, res) => {
+
+//   const { collegeCode } = req.user;
+
+
+//   const canteenPolicy = await CanteenPolcyModel.findOne();
+
+//   if (!canteenPolicy) {
+//     throw new ApiError(404, "Canteen policy not found");
+//   }
+
+//   canteenPolicy.isActive = isActive;
+
+//   console.log(canteenPolicy.isActive);
+
+//   await canteenPolicy.save({ validateBeforeSave: false });
+
+//   res
+//     .status(200)
+//     .json(
+//       new ApiResponse(200, isActive, "Canteen Status fetched successfully")
+//     );
+// });
+
 export const canteenSatusFetch = asyncHandler(async (req, res) => {
-
   const { collegeCode } = req.user;
-
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -372,7 +385,7 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
 
 
 
- res.status(200).json(
+  res.status(200).json(
     new ApiResponse(
       200,
       canteenStatus,

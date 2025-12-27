@@ -101,9 +101,12 @@ export const getAllFoods = asyncHandler(async (req, res) => {
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
 
-  const canteenPolicy = await CanteenPolicyModel.find();
+  
+  const canteenPolicy = await CanteenPolicyModel.findOne();
 
   const canteenSatus = canteenPolicy.isActive;
+  console.log(canteenPolicy);
+  
   const CanteenFood = getCanteenFoodModel(collegeConn);
   // res.status(200).json(
   //   new ApiResponse(
@@ -164,6 +167,15 @@ export const updateFood = asyncHandler(async (req, res) => {
   if (!food) {
     throw new ApiError(404, "Food item not found");
   }
+
+  // console.log(req.file)
+  //   // 2️⃣ Image validation
+    if (req.file?.path){
+      const imagePath = req.file?.path?.replace(/\\/g, "/");
+      const uploadResult = await uploadOnCloudinary(imagePath);
+      food.image  = uploadResult.url
+    }
+
 
   // 4️⃣ Update fields safely
   if (quantityAvailable !== undefined) {

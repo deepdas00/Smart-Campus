@@ -79,7 +79,7 @@ export const staffLogin = asyncHandler(async (req, res) => {
 export const currentStaff = asyncHandler(async (req, res) => {
   try {
     // verifyJWT middleware should attach 'user' to 'req'
-    console.log("daraaaaaaaaa",req.user);
+    // console.log("daraaaaaaaaa",req.user);
     
     const {userId, collegeCode, role } = req.user; 
 

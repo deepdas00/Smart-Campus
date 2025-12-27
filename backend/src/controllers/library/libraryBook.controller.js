@@ -88,7 +88,8 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 export const updateBook = asyncHandler(async (req, res) => {
 
   const { bookId } = req.params;
-  const updates = req.body;
+  const {description,publishedYear,publisher,title,author,category,rating,totalCopies,shelf,isbn,availableCopies} = req.body;
+
 
   const { collegeCode } = req.user;
 
@@ -104,23 +105,46 @@ export const updateBook = asyncHandler(async (req, res) => {
   const existingBook = await LibraryBook.findById(bookId);
   if (!existingBook) throw new ApiError(404, "Book not found");
 
+ 
+  
+  if (req.file?.path){
+      const imagePath = req.file?.path?.replace(/\\/g, "/");
+      console.log(imagePath);
+      
+      const uploadResult = await uploadOnCloudinary(imagePath);
+      existingBook.coverImage  = uploadResult.url
+    }
 
-  // 🖼️ If new cover image is provided
-  if (req.file) {
-    const coverPath = req.file.path.replace(/\\/g, "/");
+    existingBook.description = description?description:existingBook.description
+    existingBook.publishedYear = publishedYear?publishedYear:existingBook.publishedYear
+    existingBook.publisher = publisher?publisher:existingBook.publisher
+    existingBook.title = title?title:existingBook.title
+    existingBook.author = author?author:existingBook.author
+    existingBook.category = category?category:existingBook.category
+    existingBook.rating = rating?rating:existingBook.rating
+    existingBook.totalCopies = totalCopies?totalCopies:existingBook.totalCopies
+    existingBook.shelf = shelf?shelf:existingBook.shelf
+    existingBook.isbn = isbn?isbn:existingBook.isbn
+    existingBook.availableCopies = availableCopies?availableCopies:existingBook.availableCopies
+  // // 🖼️ If new cover image is provided
+  // if (req.file) {
+  //   const coverPath = req.file.path.replace(/\\/g, "/");
 
-    const uploadedCover = await uploadOnCloudinary(coverPath);
-    updates.coverImage = uploadedCover.url;
-  }
+  //   const uploadedCover = await uploadOnCloudinary(coverPath);
+  //   updates.coverImage = uploadedCover.url;
+  // }
 
     // 🔄 Apply updates
-  const updatedBook = await LibraryBook.findByIdAndUpdate(
-    bookId,
-    updates,
-    { new: true }
-  );
 
-  res.status(200).json(new ApiResponse(200, updatedBook, "Book updated"));
+    existingBook.save()
+  // const updatedBook = await LibraryBook.findByIdAndUpdate(
+  //   bookId,
+  //   updates,
+  //   { new: true }
+  // );
+
+
+  res.status(200).json(new ApiResponse(200, existingBook, "Book updated"));
 });
 
 

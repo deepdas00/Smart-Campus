@@ -119,8 +119,8 @@ app.use("/api/v1/canteen", canteenRouter);
 
 # ---------- POLICY ----------
 POST    /api/v1/canteen/policy                 # Set / Update canteen policy (admin)
-POST    /api/v1/canteen/isActive               # To set Canteen Status///////////////////////////////////////////////////////////
 GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status///////////////////////////////////////////////////////////
+POST    /api/v1/canteen/isActive               # To set Canteen Status ////////////////////////////////////////////////////////////////
 
 # ---------- FOOD ----------
 POST    /api/v1/canteen/foods                  # Add food (canteen, admin)
@@ -132,11 +132,12 @@ DELETE  /api/v1/canteen/food/:foodId           # Permanently delete food (admin)
 POST    /api/v1/canteen/orders                 # Place order (student)
 POST    /api/v1/canteen/orders/:orderId/pay    # Create Razorpay order (student)
 POST    /api/v1/canteen/orders/verify-payment  # Verify payment (student)
-POST    /api/v1/canteen/orders/serve           # Serve order via QR (canteen)//////////////////////////////////////////////////////
+POST    /api/v1/canteen/orders/serve           # Serve order via QR (canteen)  //form qr we get data     //////////////////////////////////////////////////////
 GET     /api/v1/canteen/orders/dashboard       # Dashboard orders (canteen, admin)
 #         Query: ?range=daily|weekly|monthly
 GET     /api/v1/canteen/orders/my-history      # Get one student's order history///////////////////////////////////////////////////
-
+GET     /api/v1/canteen/orders/details         # Get single order detals for qr submitting (order id) ///////////////////////////////////////////////////
+    
 # =============================================================
 */
 

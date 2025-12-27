@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 
 export const addFood = asyncHandler(async (req, res) => {
 
@@ -97,8 +98,19 @@ export const getAllFoods = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
-  const CanteenFood = getCanteenFoodModel(collegeConn);
 
+  const CanteenPolcyModel = getCanteenPolicyModel(collegeConn);
+
+  const canteenPolicy = await CanteenPolcyModel.find();
+
+  const canteenSatus = canteenPolicy.isActive;
+  const CanteenFood = getCanteenFoodModel(collegeConn);
+  // res.status(200).json(
+  //   new ApiResponse(
+  //     200,
+  //     foods,
+  //     "Canteen food list fetched successfully"
+  //   )
   // 2️⃣ Fetch food items
   const foods = await CanteenFood.find()
     .sort({ createdAt: -1 })
@@ -108,7 +120,7 @@ export const getAllFoods = asyncHandler(async (req, res) => {
   res.status(200).json(
     new ApiResponse(
       200,
-      foods,
+      {foods,canteenSatus},
       "Canteen food list fetched successfully"
     )
   );

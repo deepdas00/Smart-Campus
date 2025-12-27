@@ -37,7 +37,7 @@ export const orderBook = asyncHandler(async (req, res) => {
   //generateTransactionCode
   const transactionCode = await generateTransactionCode(collegeCode, "L", Transaction)
   // console.log(transactionCode);
-  
+
 
 
   // Create transaction
@@ -102,6 +102,10 @@ export const issueBook = asyncHandler(async (req, res) => {
   transaction.transactionStatus = "issued";
   transaction.issueDate = new Date();
   transaction.dueDate = new Date(Date.now() + policy.returnPeriodDays * (24 * 60 * 60 * 1000));
+  transaction.expiresAt = null;// prevents auto delelte from db after 24h
+
+
+
 
   student.issuedBooks.push(transaction._id);
   await student.save({ validateBeforeSave: false });
@@ -173,7 +177,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   let fine = 0;
 
 
-  if (transaction.paymentStatus === "none"){
+  if (transaction.paymentStatus === "none") {
 
 
     if (today > transaction.dueDate) {
@@ -226,7 +230,7 @@ export const returnBook = asyncHandler(async (req, res) => {
 
 
 
-  
+
 
   const book = await Book.findById(transaction.bookId);
   const student = await Student.findById(transaction.studentId);
@@ -252,7 +256,7 @@ export const returnBook = asyncHandler(async (req, res) => {
 export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const { transactionId } = req.params
   const { collegeCode } = req.user
-  
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
@@ -263,7 +267,7 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
   const transaction = await Transaction.findById(transactionId)
     .populate({ path: "bookId", select: "title author shelf transactionId" })
-    console.log("The transaction is", transaction);
+  console.log("The transaction is", transaction);
 
   res.status(200).json(
     new ApiResponse(200, transaction, "Transaction fetched")
@@ -296,20 +300,20 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
   const { collegeCode } = req.user;
 
-  
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) throw new ApiError(404, "College not found");
-  
+
   const collegeConn = getCollegeDB(college.dbName);
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   const LibraryBooks = getLibraryBookModel(collegeConn);
-  
+
   const transactions = await Transaction.find()
     .populate({ path: "bookId", model: LibraryBooks, select: "title author coverImage" })
-    .populate({ path: "studentId", select: "name email rollNo studentName " })
+    .populate({ path: "studentId", select: "studentName email rollNo " })
     .sort({ createdAt: -1 });
 
 

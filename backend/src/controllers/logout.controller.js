@@ -1,15 +1,50 @@
+import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
+import { getCollegeModel } from "../models/college.model.js";
+import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeUserModel } from "../models/collegeUser.model.js"
 
 export const logoutUser = asyncHandler(async (req, res) => {
 
-  const user = req.user;  // set by verifyJWT middleware
+  const { userId, role, collegeCode } = req.user;
 
-  // 🔥 Invalidate refresh token in DB
-  user.refreshToken = null;
-  await user.save({ validateBeforeSave: false });
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
 
-  // 🍪 Clear cookies
+  const college = await College.findOne({
+    collegeCode,
+    status: "active"
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+
+  let userDoc = null;
+
+
+  if (role === "student") {
+    const Student = getStudentModel(collegeConn);
+    userDoc = await Student.findById(userId);
+  } 
+  else {
+    const CollegeUser = getCollegeUserModel(collegeConn);
+    userDoc = await CollegeUser.findById(userId);
+  }
+
+  if (!userDoc) {
+    throw new ApiError(404, "User not found");
+  }
+
+
+  userDoc.refreshToken = null;
+  await userDoc.save({ validateBeforeSave: false });
+
+
   const options = {
     httpOnly: true,
     secure: true,

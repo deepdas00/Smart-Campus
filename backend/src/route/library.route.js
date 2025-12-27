@@ -57,6 +57,7 @@ router.patch(
   "/books/:bookId",
   verifyJWT,
   authorizeRoles("librarian", "admin"),
+  upload.single("coverImage"),
   updateBook
 );
 
@@ -126,7 +127,7 @@ router.post(
 
 // final return ( RETURN CLICKED ) by librariyan 
 router.post(
-  "/return/finalize",
+  "/return",
   verifyJWT,
   authorizeRoles("librarian", "admin"),
   returnBook

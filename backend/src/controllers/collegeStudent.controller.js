@@ -90,8 +90,11 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   console.log(req.body)
 
-  if (!(mobileNo || email)) {
-    throw new ApiError(400, "Mobile No. or Email is required!!")
+  if (!collegeCode) {
+    res.status(400).json({ message: "Select College!!" });
+  }else if(!(mobileNo || email)){
+    res.status(400).json({ message: "Mobile No. or Email is required!!" });
+
   }
 
   // 1️⃣ Resolve college
@@ -123,9 +126,8 @@ export const studentLogin = asyncHandler(async (req, res) => {
   // 4️⃣ Verify password
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
-    console.log("DONEEEEEEE");
+    res.status(401).json({ message: "Invalid Password!!" });
 
-    throw new ApiError(401, "Invalid credentials");
   }
 
 
@@ -137,7 +139,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
       collegeCode
     });
 
-  console.log(" GENERATION SUCCESSFULL", accessToken, refreshToken);
+  // console.log(" GENERATION SUCCESSFULL", accessToken, refreshToken);
 
 
   // 6️⃣ Save refresh token

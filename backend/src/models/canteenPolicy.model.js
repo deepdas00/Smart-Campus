@@ -11,12 +11,13 @@ const CanteenPolicySchema = new mongoose.Schema({
   },
   isActive: {
     type: Boolean, // true = canteen open, false = canteen disabled
-    default: true
+    default: false
   },
   createdAt: {
     type: Date,
     default: Date.now
   },
+
   updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: "CollegeUser", required: true },
 },
   {

@@ -101,11 +101,26 @@ export const updateBook = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
   const LibraryBook = getLibraryBookModel(collegeConn);
 
-  const book = await LibraryBook.findByIdAndUpdate(bookId, updates, { new: true }); //new: true means return updated document(book) not old one
+  const existingBook = await LibraryBook.findById(bookId);
+  if (!existingBook) throw new ApiError(404, "Book not found");
 
-  if (!book) throw new ApiError(404, "Book not found");
 
-  res.status(200).json(new ApiResponse(200, book, "Book updated"));
+  // 🖼️ If new cover image is provided
+  if (req.file) {
+    const coverPath = req.file.path.replace(/\\/g, "/");
+
+    const uploadedCover = await uploadOnCloudinary(coverPath);
+    updates.coverImage = uploadedCover.url;
+  }
+
+    // 🔄 Apply updates
+  const updatedBook = await LibraryBook.findByIdAndUpdate(
+    bookId,
+    updates,
+    { new: true }
+  );
+
+  res.status(200).json(new ApiResponse(200, updatedBook, "Book updated"));
 });
 
 

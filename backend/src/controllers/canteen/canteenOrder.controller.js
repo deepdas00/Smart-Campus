@@ -102,7 +102,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 //order serving by canteen staff
 export const serveOrder = asyncHandler(async (req, res) => {
-  const { orderId, collegeCode } = req.body;
+  const { orderId } = req.body;
+  const { collegeCode } = req.user;
 
   if (!orderId || !collegeCode) {
     throw new ApiError(400, "Invalid QR data");
@@ -125,7 +126,7 @@ export const serveOrder = asyncHandler(async (req, res) => {
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
   const canteenPolicy = await CanteenPolicyModel.findOne();
-  canteenStatus = canteenPolicy.isActive;
+  const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
     res.status(401).json({ message: "Canteen Is Offline!!" });
   }

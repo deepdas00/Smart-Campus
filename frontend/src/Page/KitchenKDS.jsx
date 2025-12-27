@@ -31,6 +31,8 @@ import Footer from "../Components/Footer";
 import CollegeInfo from "../Components/CollegeInfo";
 
 export function KitchenKDS() {
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
   const [swipeProgress, setSwipeProgress] = useState(0); // 0 to 100
   const isDragging = useRef(false);
@@ -75,37 +77,35 @@ export function KitchenKDS() {
   const [loadingOrder, setLoadingOrder] = useState(false);
 
   const handleMouseMove = (e) => {
-  if (!isDragging.current) return;
-  const track = document.getElementById('swipe-track');
-  if (!track) return;
-  
-  const rect = track.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const progress = Math.min(Math.max((x / rect.width) * 100, 0), 100);
-  
-  setSwipeProgress(progress);
-  if (progress > 95) {
-    isDragging.current = false;
-    setSwipeProgress(100);
-    handleServeOrder(); // Trigger the actual function
-  }
-};
+    if (!isDragging.current) return;
+    const track = document.getElementById("swipe-track");
+    if (!track) return;
 
+    const rect = track.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const progress = Math.min(Math.max((x / rect.width) * 100, 0), 100);
 
-const stopDrag = () => {
-  isDragging.current = false;
-  if (swipeProgress < 95) setSwipeProgress(0);
-};
-
-useEffect(() => {
-  window.addEventListener('mouseup', stopDrag);
-  window.addEventListener('mousemove', handleMouseMove);
-  return () => {
-    window.removeEventListener('mouseup', stopDrag);
-    window.removeEventListener('mousemove', handleMouseMove);
+    setSwipeProgress(progress);
+    if (progress > 95) {
+      isDragging.current = false;
+      setSwipeProgress(100);
+      handleServeOrder(); // Trigger the actual function
+    }
   };
-}, [swipeProgress]);
 
+  const stopDrag = () => {
+    isDragging.current = false;
+    if (swipeProgress < 95) setSwipeProgress(0);
+  };
+
+  useEffect(() => {
+    window.addEventListener("mouseup", stopDrag);
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mouseup", stopDrag);
+      window.removeEventListener("mousemove", handleMouseMove);
+    };
+  }, [swipeProgress]);
 
   const fetchCanteenStatus = async () => {
     try {
@@ -182,8 +182,9 @@ useEffect(() => {
 
   const handleQRResult = (qrData) => {
     try {
+      stopCamera();
+      setShowQRScanner(false);
       const parsed = JSON.parse(qrData);
-      
 
       if (!parsed.orderId) {
         toast.error("Invalid QR code");
@@ -191,7 +192,6 @@ useEffect(() => {
       }
 
       console.log("hele", parsed.orderId);
-      
 
       fetchOrderDetails(parsed.orderId);
     } catch (err) {
@@ -201,18 +201,14 @@ useEffect(() => {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      console.log("final",orderId);
-     
-
-      
+      console.log("final", orderId);
 
       const res = await axios.get(`${API_URL}/api/v1/canteen/orders/details`, {
         params: { orderId },
         withCredentials: true,
       });
 
-      console.log("response",res.data.data);
-      
+      console.log("response", res.data.data);
 
       setScannedOrder(res.data.data);
       setShowConfirmModal(true);
@@ -224,17 +220,34 @@ useEffect(() => {
 
   const handleServeOrder = async () => {
     try {
+      setIsProcessing(true); // Start loading state
+
       await axios.post(
         `${API_URL}/api/v1/canteen/orders/serve`,
         { orderId: scannedOrder._id },
         { withCredentials: true }
       );
 
-      toast.success("Order served successfully");
+      // 1. Close the Confirmation/Swipe window
       setShowConfirmModal(false);
-      setScannedOrder(null);
+      setSwipeProgress(0); // Reset swipe for next time
+
+      // 2. Open the Success Window
+      setShowSuccessModal(true);
+      toast.success("Order served successfully");
+
+      // 3. Optional: Auto-close success window after 3 seconds
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        setScannedOrder(null);
+      }, 3000);
     } catch (err) {
-      toast.error("Failed to serve order");
+      toast.error(
+        err.response?.data?.message || err.message || "Failed to serve order"
+      );
+      setSwipeProgress(0);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -1810,108 +1823,203 @@ useEffect(() => {
         </div>
       )}
 
-    {showConfirmModal && scannedOrder && (
-  <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl flex items-center justify-center z-[110] p-4">
-    <div className="bg-white rounded-[3rem] w-full max-w-[420px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-12 duration-500">
-      
-      {/* Top Banner: Status & User */}
-      <div className="relative bg-slate-50 pt-12 pb-8 px-10 text-center">
-        {/* Floating Paid Badge */}
-        <div className="absolute top-6 right-8">
-          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
-            scannedOrder.paymentStatus === 'paid' 
-              ? 'bg-emerald-500 text-white' 
-              : 'bg-red-500 text-white'
-          }`}>
-            {scannedOrder.paymentStatus || 'Unpaid'}
-          </span>
-        </div>
-
-        {/* User Avatar & Info */}
-        <div className="w-20 h-20 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-4 overflow-hidden">
-          <div className="bg-blue-100 text-blue-600 w-full h-full flex items-center justify-center text-2xl font-black">
-            {scannedOrder.userName?.charAt(0) || 'U'}
-          </div>
-        </div>
-
-        <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
-          {scannedOrder.userName || "Student User"}
-        </h3>
-        <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
-          ID: {scannedOrder.rollNumber || "Not Provided"}
-        </p>
-      </div>
-
-      <div className="px-10 pb-10 pt-6">
-        {/* Order Details Grid */}
-        <div className="bg-slate-50 rounded-[2rem] p-6 mb-8 border border-slate-100">
-          <div className="space-y-4">
-            {scannedOrder.items.map((item, i) => (
-              <div key={i} className="flex justify-between items-start">
-                <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-700">{item.name}</p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Qty: {item.quantity}</p>
-                </div>
-                <p className="text-sm font-black text-slate-800">₹{item.price * item.quantity}</p>
+      {showConfirmModal && scannedOrder && (
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl flex items-center justify-center z-[110] p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-[420px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-12 duration-500">
+            {/* Top Banner: Status & User */}
+            <div className="relative bg-slate-50 pt-12 pb-8 px-10 text-center">
+              {/* Floating Paid Badge */}
+              <div className="absolute top-6 right-8">
+                <span
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+                    scannedOrder.paymentStatus === "paid"
+                      ? "bg-emerald-500 text-white"
+                      : "bg-red-500 text-white"
+                  }`}
+                >
+                  {scannedOrder.paymentStatus || "Unpaid"}
+                </span>
               </div>
-            ))}
-            
-            <div className="pt-4 mt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</span>
-              <span className="text-2xl font-black text-blue-600">₹{scannedOrder.totalAmount}</span>
+
+              {/* User Avatar & Info */}
+
+              
+              
+                <div className="px-0 pb-0 -mt-1 text-center">
+                  <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
+                    <Check
+                      className="text-emerald-600"
+                      size={32}
+                      strokeWidth={3}
+                    />
+                  </div>
+                </div>
+             
+
+              <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+                {scannedOrder.studentId.studentName || "Student User"}
+              </h3>
+              <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
+                ID: {scannedOrder.studentId.rollNo || "Not Provided"}
+              </p>
+            </div>
+
+            <div className="px-10 pb-10 pt-6">
+              {/* Order Details Grid */}
+              <div className="bg-slate-50 rounded-[2rem] p-6 mb-8 border border-slate-100">
+                <div className="space-y-4">
+                  {scannedOrder.items.map((item, i) => (
+                    <div key={i} className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <p className="text-sm font-bold text-slate-700">
+                          {item.name}
+                        </p>
+                        <p className="text-[10px] text-slate-400 font-bold uppercase">
+                          Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <p className="text-sm font-black text-slate-800">
+                        ₹{item.price * item.quantity}
+                      </p>
+                    </div>
+                  ))}
+
+                  <div className="pt-4 mt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                      Grand Total
+                    </span>
+                    <span className="text-2xl font-black text-blue-600">
+                      ₹{scannedOrder.totalAmount}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Transaction Reference Footer */}
+              <div className="text-center mb-8 ">
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+                  Transaction Code :-
+                </p>
+                <p className="text-[11px] text-slate-600 font-mono mt-1">
+                  {scannedOrder.transactionCode || "CASH_TRANSACTION"}
+                </p>
+              </div>
+              <div className="text-center mb-8 ">
+                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+                  Transaction Reference :-
+                </p>
+                <p className="text-[11px] text-slate-600 font-mono mt-1">
+                  {scannedOrder.razorpayPaymentId || "CASH_TRANSACTION"}
+                </p>
+              </div>
+
+              {/* --- THE MODERN SWIPE SLIDER --- */}
+
+              {scannedOrder.orderStatus !== "served" && (
+                <div
+                  id="swipe-track"
+                  className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
+                >
+                  <div
+                    className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
+                    style={{ width: `${swipeProgress}%` }}
+                  />
+
+                  <p
+                    className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
+            ${swipeProgress > 20 ? "opacity-0" : "opacity-40 text-slate-600"}`}
+                  >
+                    Swipe to Confirm
+                  </p>
+
+                  <div
+                    onMouseDown={() =>
+                      !isProcessing && (isDragging.current = true)
+                    }
+                    className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
+    ${
+      isProcessing
+        ? "bg-slate-200 cursor-wait"
+        : "bg-white cursor-grab active:cursor-grabbing"
+    }`}
+                    style={{
+                      position: "absolute",
+                      left: `calc(${swipeProgress}% - ${
+                        swipeProgress > 85 ? "52px" : "0px"
+                      })`,
+                      transition: isDragging.current
+                        ? "none"
+                        : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    }}
+                  >
+                    {isProcessing ? (
+                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ChevronRight
+                        className="text-emerald-500"
+                        size={24}
+                        strokeWidth={3}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {scannedOrder.orderStatus === "served" && (
+                <div
+                  id="swipe-track"
+                  className="relative h-16 bg-green-700 rounded-full p-2 flex items-center select-none overflow-hidden"
+                >
+                  <p
+                    className={`absolute inset-0 flex items-center justify-center text-xs text-white font-black uppercase`}
+                  >
+                    Already Served
+                  </p>
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="w-full mt-6 text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-[0.2em]"
+              >
+                Discard Verification
+              </button>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Transaction Reference Footer */}
-        <div className="text-center mb-8">
-            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Transaction Reference</p>
-            <p className="text-[11px] text-slate-600 font-mono mt-1">{scannedOrder.razorpayPaymentId || "CASH_TRANSACTION"}</p>
-        </div>
+      {showSuccessModal && (
+        <div className="fixed inset-0 bg-emerald-500/20 backdrop-blur-md flex items-center justify-center z-[120] p-4">
+          <div className="bg-white rounded-[3rem] w-full max-w-[350px] shadow-2xl p-10 text-center animate-in zoom-in-95 duration-300">
+            {/* Animated Checkmark Circle */}
+            <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-200/50">
+              <CheckCircle2
+                className="text-emerald-500 animate-bounce"
+                size={48}
+                strokeWidth={3}
+              />
+            </div>
 
-        {/* --- THE MODERN SWIPE SLIDER --- */}
-        <div 
-          id="swipe-track"
-          className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
-        >
-          <div 
-            className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
-            style={{ width: `${swipeProgress}%` }}
-          />
+            <h3 className="text-2xl font-black text-slate-800 tracking-tight">
+              Order Served!
+            </h3>
+            <p className="text-sm text-slate-400 font-medium mt-2">
+              The order has been moved to the{" "}
+              <span className="text-emerald-500 font-bold">Served</span> list.
+            </p>
 
-          <p className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
-            ${swipeProgress > 20 ? 'opacity-0' : 'opacity-40 text-slate-600'}`}>
-            Swipe to Confirm Serve
-          </p>
-
-          <div
-            onMouseDown={() => (isDragging.current = true)}
-            onPointerDown={() => (isDragging.current = true)}
-            className="relative z-10 h-12 w-12 bg-white rounded-full shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
-            style={{ 
-                position: 'absolute',
-                left: `calc(${swipeProgress}% - ${swipeProgress > 80 ? '50px' : '0px'})`,
-                transition: isDragging.current ? 'none' : 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
-            }}
-          >
-            <div className="flex gap-0.5">
-              <div className="w-1 h-4 bg-emerald-200 rounded-full" />
-              <div className="w-1 h-4 bg-emerald-400 rounded-full" />
-              <div className="w-1 h-4 bg-emerald-600 rounded-full" />
+            <div className="mt-8 space-y-3">
+              <button
+                onClick={() => setShowSuccessModal(false)}
+                className="w-full py-4 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-emerald-200 transition-all active:scale-95"
+              >
+                Great, Next!
+              </button>
             </div>
           </div>
         </div>
-
-        <button
-          onClick={() => setShowConfirmModal(false)}
-          className="w-full mt-6 text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-[0.2em]"
-        >
-          Discard Verification
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {/* Footer */}
       <Footer />

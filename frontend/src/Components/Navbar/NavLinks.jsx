@@ -3,12 +3,37 @@ import { useAuth } from "../../context/AuthContext";
 import profile from "../../assets/profile.png";
 import { useState } from "react";
 import ProfileSidebar from "../ProfileSidebar";
+import axios from "axios";
+import { toast } from "react-hot-toast";
 
 export default function NavLinks() {
+  const { user, logout } = useAuth();
+  
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleLogout = async () => {
+    try {
+      toast.loading("Logging out...", { id: "logout" });
+
+      await axios.post(
+        `${API_URL}/api/v1/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+
+      logout(); // clears user from context
+      toast.success("Logged out successfully", { id: "logout" });
+
+      navigate("/login");
+    } catch (err) {
+      console.error(err);
+      toast.error("Logout failed", { id: "logout" });
+    }
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
-    const [showProfileMenu, setShowProfileMenu] = useState(false);
-  
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   const handleScroll = (id) => {
     if (location.pathname !== "/") {
@@ -25,9 +50,25 @@ export default function NavLinks() {
     }
   };
 
-  const { user } = useAuth();
+
+    function LogoutItem({ icon, label, onLogout }) {
+    return (
+      <button
+        onClick={onLogout}
+        className="w-full group flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-red-50 text-red-600"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white shadow-sm rounded-md">{icon}</div>
+          <span className="font-medium">{label}</span>
+        </div>
+
+        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition" />
+      </button>
+    );
+  }
+
+
   console.log(user, "hai re bahi");
-  
 
   return (
     <>
@@ -58,7 +99,7 @@ export default function NavLinks() {
           onClick={() => handleScroll("contact")}
           className="text-gray-700 hover:text-blue-600 transition"
         >
-          Contact
+          Contact  
         </button>
       </div>
 
@@ -82,12 +123,13 @@ export default function NavLinks() {
               />
             </Link>
           ) : (
-            <Link
+            <button
+            onClick={handleLogout}
               to="/profile"
               className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition"
             >
-              Logout
-            </Link>
+              Logout  
+            </button>
           )
         ) : (
           <Link
@@ -99,10 +141,10 @@ export default function NavLinks() {
         )}
 
         {/* Profile menu side bar */}
-                      <ProfileSidebar
-                        isOpen={showProfileMenu}
-                        onClose={() => setShowProfileMenu(false)}
-                      />
+        <ProfileSidebar
+          isOpen={showProfileMenu}
+          onClose={() => setShowProfileMenu(false)}
+        />
       </div>
     </>
   );

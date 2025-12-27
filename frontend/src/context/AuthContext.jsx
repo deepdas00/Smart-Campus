@@ -47,6 +47,11 @@ export const AuthProvider = ({ children }) => {
 };
 
 
+const logout = () => {
+    setUser(null);
+  };
+
+
   useEffect(() => {
     // Inside AuthContext.jsx
 
@@ -54,7 +59,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, setUser, loading }}>
+    <AuthContext.Provider value={{ user, setUser, loading, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -59,7 +59,7 @@ router.get(
 router.delete(
   "/food/:foodId",
   verifyJWT,
-  authorizeRoles("admin"),
+  authorizeRoles("admin", 'canteen'),
   deleteFood
 );
 

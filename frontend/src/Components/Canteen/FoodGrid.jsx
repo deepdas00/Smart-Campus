@@ -77,7 +77,7 @@ export default function FoodGrid({
 
               {/* Image Section */}
               <div
-                className={`relative group overflow-hidden p-8 flex flex-col items-center justify-center min-h-[300px] transition-all duration-500 rounded-xl ${
+                className={`relative group overflow-hidden p- flex flex-col items-center justify-center min-h-[300px] transition-all duration-500 rounded-xl ${
                   isUnavailable
                     ? "bg-slate-200 grayscale cursor-not-allowed"
                     : "bg-slate-950 hover:shadow-[0_0_50px_-12px_rgba(59,130,246,0.5)]"
@@ -111,7 +111,7 @@ export default function FoodGrid({
                 >
                   {/* Real-time Reflection/Sheen */}
                   {!isUnavailable && (
-                    <div className="absolute inset-0 z-20 opacity-0 group-hover:opacity-30 transition-opacity bg-gradient-to-tr from-transparent via-white to-transparent translate-x-[-100%] group-hover:translate-x-[100%] duration-1000" />
+                    <div className="absolute inset-0  opacity-0 group-hover:opacity-30 transition-opacity group-hover:translate-x-[100%] duration-1000" />
                   )}
 
                   <img

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-
+import jsQR from "jsqr";
 import {
   CheckCircle2,
   Clock,
@@ -24,14 +24,17 @@ import {
   UploadCloud,
   CheckCircle,
   X,
+  Check,
 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
 import CollegeInfo from "../Components/CollegeInfo";
 
 export function KitchenKDS() {
-  const [isCanteenOpen, setIsCanteenOpen] = useState(true);
-  const [isOpen, setIsOpen] = useState(true);
+  const [showQRScanner, setShowQRScanner] = useState(false);
+  const [swipeProgress, setSwipeProgress] = useState(0); // 0 to 100
+  const isDragging = useRef(false);
+  const videoRef = useRef(null);
   const [activeTab, setActiveTab] = useState("pending");
   const [editingFood, setEditingFood] = useState(null); // null = adding, otherwise editing
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -55,7 +58,6 @@ export function KitchenKDS() {
   const [lastFetchedAt, setLastFetchedAt] = useState();
   const [startFetchedAt, setStartFetchedAt] = useState(16);
   const currentHour = new Date().getHours(); // 0–23
-  const [statusText, setStatusText] = useState(isOpen ? "Online" : "Offline");
 
   const isOnline = currentHour >= lastFetchedAt && currentHour < startFetchedAt;
 
@@ -64,27 +66,243 @@ export function KitchenKDS() {
   const [deleteTarget, setDeleteTarget] = useState(null); // food item to delete
   const [deleting, setDeleting] = useState(false);
 
+  const [isOpen, setIsOpen] = useState(false);
+  const [toggleLoading, setToggleLoading] = useState(false);
 
+  const canvasRef = useRef(null);
+  const [scannedOrder, setScannedOrder] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [loadingOrder, setLoadingOrder] = useState(false);
 
-
-const deleteFood = async (foodId) => {
-  try {
-    console.log("Deleting food", foodId);
-
-    const res = await axios.delete(
-      `${API_URL}/api/v1/canteen/food/${foodId}`,
-      {
-        withCredentials: true, // sends cookies automatically
-      }
-    );
-
-    console.log("Delete response:", res.data);
-    toast.success("Food deleted successfully!");
-  } catch (err) {
-    console.error("Delete failed:", err.response || err);
-    toast.error("Failed to delete food.");
+  const handleMouseMove = (e) => {
+  if (!isDragging.current) return;
+  const track = document.getElementById('swipe-track');
+  if (!track) return;
+  
+  const rect = track.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const progress = Math.min(Math.max((x / rect.width) * 100, 0), 100);
+  
+  setSwipeProgress(progress);
+  if (progress > 95) {
+    isDragging.current = false;
+    setSwipeProgress(100);
+    handleServeOrder(); // Trigger the actual function
   }
 };
+
+
+const stopDrag = () => {
+  isDragging.current = false;
+  if (swipeProgress < 95) setSwipeProgress(0);
+};
+
+useEffect(() => {
+  window.addEventListener('mouseup', stopDrag);
+  window.addEventListener('mousemove', handleMouseMove);
+  return () => {
+    window.removeEventListener('mouseup', stopDrag);
+    window.removeEventListener('mousemove', handleMouseMove);
+  };
+}, [swipeProgress]);
+
+
+  const fetchCanteenStatus = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/canteen/canteenStatus`, {
+        withCredentials: true,
+      });
+
+      setIsOpen(res.data.data);
+    } catch (err) {
+      console.error("Failed to fetch canteen status", err);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment" },
+      });
+
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+        scanQRCode(); // 🚀 start scanning loop
+      }
+    } catch (err) {
+      console.error("Camera access denied", err);
+      toast.error("Camera permission required");
+    }
+  };
+
+  useEffect(() => {
+    if (showQRScanner && videoRef.current && canvasRef.current) {
+      startCamera();
+    }
+  }, [showQRScanner]);
+
+  const scanQRCode = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    const scan = () => {
+      if (!video || video.readyState !== 4) {
+        requestAnimationFrame(scan);
+        return;
+      }
+
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+      if (code) {
+        stopCamera();
+        handleQRResult(code.data);
+      } else {
+        requestAnimationFrame(scan);
+      }
+    };
+
+    scan();
+  };
+
+  const stopCamera = () => {
+    const stream = videoRef.current?.srcObject;
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  const handleQRResult = (qrData) => {
+    try {
+      const parsed = JSON.parse(qrData);
+      
+
+      if (!parsed.orderId) {
+        toast.error("Invalid QR code");
+        return;
+      }
+
+      console.log("hele", parsed.orderId);
+      
+
+      fetchOrderDetails(parsed.orderId);
+    } catch (err) {
+      toast.error("Invalid QR format");
+    }
+  };
+
+  const fetchOrderDetails = async (orderId) => {
+    try {
+      console.log("final",orderId);
+     
+
+      
+
+      const res = await axios.get(`${API_URL}/api/v1/canteen/orders/details`, {
+        params: { orderId },
+        withCredentials: true,
+      });
+
+      console.log("response",res.data.data);
+      
+
+      setScannedOrder(res.data.data);
+      setShowConfirmModal(true);
+      stopCamera();
+    } catch (err) {
+      toast.error("Order not found or already served");
+    }
+  };
+
+  const handleServeOrder = async () => {
+    try {
+      await axios.post(
+        `${API_URL}/api/v1/canteen/orders/serve`,
+        { orderId: scannedOrder._id },
+        { withCredentials: true }
+      );
+
+      toast.success("Order served successfully");
+      setShowConfirmModal(false);
+      setScannedOrder(null);
+    } catch (err) {
+      toast.error("Failed to serve order");
+    }
+  };
+
+  useEffect(() => {
+    fetchCanteenStatus();
+  }, []);
+
+  const toggleOnlineStatus = async () => {
+    if (toggleLoading) return;
+
+    const nextStatus = !isOpen;
+    console.log("hiiii");
+
+    try {
+      setToggleLoading(true);
+
+      // 1️⃣ Optimistic UI (instant transition)
+      setIsOpen(nextStatus);
+
+      // 2️⃣ Backend update
+      try {
+        console.log("1️⃣ BEFORE API");
+
+        const res = await axios.post(
+          `${API_URL}/api/v1/canteen/isActive`,
+          { isActive: nextStatus },
+          { withCredentials: true }
+        );
+
+        console.log("2️⃣ AFTER API", res.data.data);
+      } catch (err) {
+        console.error("❌ ERROR:", err?.response || err.message);
+      } finally {
+        console.log("3️⃣ FINALLY");
+      }
+
+      console.log("heeloooooooooooooo");
+
+      toast.success(
+        nextStatus ? "Canteen is now OPEN" : "Canteen is now CLOSED"
+      );
+    } catch (err) {
+      // 3️⃣ Rollback if API fails
+      setIsOpen((prev) => !prev);
+      toast.error("Failed to update canteen status");
+    } finally {
+      setToggleLoading(false);
+    }
+  };
+
+  const deleteFood = async (foodId) => {
+    try {
+      console.log("Deleting food", foodId);
+
+      const res = await axios.delete(
+        `${API_URL}/api/v1/canteen/food/${foodId}`,
+        {
+          withCredentials: true, // sends cookies automatically
+        }
+      );
+
+      console.log("Delete response:", res.data);
+      toast.success("Food deleted successfully!");
+    } catch (err) {
+      console.error("Delete failed:", err.response || err);
+      toast.error("Failed to delete food.");
+    }
+  };
 
   const confirmDeleteFood = async () => {
     if (!deleteTarget) return;
@@ -121,7 +339,7 @@ const deleteFood = async (foodId) => {
 
         console.log("agayaaa food", res.data.data);
 
-        setMenuItems(res.data.data); // adjust if response structure differs
+        setMenuItems(res.data?.data?.foods); // adjust if response structure differs
       } catch (err) {
         setError("Failed to load food menu");
         console.error(err);
@@ -182,38 +400,36 @@ const deleteFood = async (foodId) => {
     }
   };
 
-const toggleAvailability = async (item) => {
-  try {
-    console.log("Toggling item:", item._id);
+  const toggleAvailability = async (item) => {
+    try {
+      console.log("Toggling item:", item._id);
 
-    const res = await axios.patch(
-      `${API_URL}/api/v1/canteen/foods/${item._id}`, // <-- 'foods' plural
-      { isAvailable: !item.isAvailable },
-      { withCredentials: true }
-    );
+      const res = await axios.patch(
+        `${API_URL}/api/v1/canteen/foods/${item._id}`, // <-- 'foods' plural
+        { isAvailable: !item.isAvailable },
+        { withCredentials: true }
+      );
 
-    console.log("Updated in DB:", res.data);
+      console.log("Updated in DB:", res.data);
 
-    // Update UI
-    setMenuItems(
-      menuItems.map((m) =>
-        m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m
-      )
-    );
-  } catch (err) {
-    console.error("Failed to update availability:", err);
-    toast.error("Could not update availability. Try again.");
+      // Update UI
+      setMenuItems(
+        menuItems.map((m) =>
+          m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m
+        )
+      );
+    } catch (err) {
+      console.error("Failed to update availability:", err);
+      toast.error("Could not update availability. Try again.");
 
-    // Revert UI
-    setMenuItems(
-      menuItems.map((m) =>
-        m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m
-      )
-    );
-  }
-};
-
-
+      // Revert UI
+      setMenuItems(
+        menuItems.map((m) =>
+          m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m
+        )
+      );
+    }
+  };
 
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
@@ -404,7 +620,7 @@ const toggleAvailability = async (item) => {
                 <div className="flex items-center gap-3 mt-1">
                   <span
                     className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                      isOnline
+                      isOpen
                         ? "bg-emerald-100 text-emerald-600"
                         : "bg-slate-200 text-slate-500"
                     }`}
@@ -427,15 +643,17 @@ const toggleAvailability = async (item) => {
 
             {/* The Modern Toggle Switch */}
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={toggleOnlineStatus}
+              disabled={toggleLoading}
               className={`
     relative group inline-flex h-12 w-44 items-center rounded-full
     transition-all duration-500 ease-in-out outline-none overflow-hidden
     ${
       isOpen
-        ? "bg-gradient-to-r from-emerald-500 to-green-600 shadow-[0_4px_15px_rgba(16,185,129,0.3)]"
-        : "bg-gradient-to-r from-slate-700 to-slate-800 shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
+        ? "bg-gradient-to-r from-emerald-500 to-green-600"
+        : "bg-gradient-to-r from-slate-700 to-slate-800"
     }
+    ${toggleLoading ? "opacity-60 cursor-not-allowed" : ""}
   `}
             >
               {/* Inner Subtle Bevel Effect */}
@@ -561,12 +779,12 @@ const toggleAvailability = async (item) => {
                     {/* Main Container */}
                     <div
                       className={`
-    relative h-full w-full 
-    bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 
-    flex items-center justify-center 
-    rounded-full border border-blue-400/30 shadow-[0_0_20px_rgba(37,99,235,0.4)]
-    transition-all duration-500 group-hover:rotate-[360deg] group-hover:scale-110
-  `}
+                        relative h-full w-full 
+                        bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 
+                        flex items-center justify-center 
+                        rounded-full border border-blue-400/30 shadow-[0_0_20px_rgba(37,99,235,0.4)]
+                        transition-all duration-500 group-hover:rotate-[360deg] group-hover:scale-110
+                      `}
                     >
                       {/* Inner Reflection Shine */}
                       <div className="absolute top-1 left-1 w-1/2 h-1/2 bg-white/10 rounded-full blur-[2px]" />
@@ -590,6 +808,75 @@ const toggleAvailability = async (item) => {
                   </p>
                 </div>
               </div>
+
+              {/* SERVE ORDER BUTTON */}
+              <button
+                onClick={() => {
+                  setShowQRScanner(true);
+                }}
+                className="group relative flex items-center gap-4 
+    bg-green-700 text-white px-7 py-3.5 rounded-xl
+    font-semibold text-[13px] tracking-tight
+    transition-all duration-300 hover:bg-blue-200 active:scale-[0.98]
+    shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] 
+    border border-slate-200 overflow-hidden hover:text-black"
+              >
+                {/* Professional Scan Animation: A subtle blue line that drops down on hover */}
+                <div
+                  className="absolute top-0 left-0 w-full h-[2px] bg-blue-500 opacity-0 
+    group-hover:opacity-100 group-hover:animate-scan-move z-10"
+                />
+
+                {/* Left Side: Minimalist Camera/Scanner Icon */}
+                <div className="relative flex items-center justify-center w-10 h-10 bg-slate-100 rounded-lg group-hover:bg-blue-50 transition-colors">
+                  <svg
+                    className="w-5 h-5 text-slate-500 group-hover:text-blue-600 transition-colors"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1V5a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1V5a1 1 0 011-1h2"
+                    />
+                  </svg>
+
+                  {/* Subtle status dot */}
+                  <span className="absolute top-2 right-2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                  </span>
+                </div>
+
+                {/* Text Content */}
+                <div className="flex flex-col items-start">
+                  <span className="text-orange-200 font-bold tracking-wide group-hover:text-blue-700 transition-colors">
+                    Serve Order
+                  </span>
+                  <span className="text-[10px] text-white font-medium uppercase tracking-widest group-hover:text-black">
+                    Verify via QR
+                  </span>
+                </div>
+
+                {/* Right Arrow: Shows only on hover to invite the click */}
+                <div className="ml-auto opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+                  <svg
+                    className="w-4 h-4 text-blue-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9 5l7 7-7 7"
+                    />
+                  </svg>
+                </div>
+              </button>
 
               {/* ACTION BUTTON */}
               <button
@@ -1453,6 +1740,178 @@ const toggleAvailability = async (item) => {
           </div>
         </div>
       )}
+
+      {showQRScanner && (
+        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden relative border border-white/20">
+            {/* Top Decoration Bar */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600" />
+
+            <div className="p-8">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 tracking-tight">
+                    Order Scanner
+                  </h2>
+                  <p className="text-[11px] text-slate-400 uppercase tracking-widest font-semibold mt-1">
+                    Point camera at customer QR
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    stopCamera();
+                    setShowQRScanner(false);
+                  }}
+                  className="p-2 rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500 transition-colors shadow-sm"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Camera View Container */}
+              <div className="relative rounded-3xl overflow-hidden bg-slate-950 aspect-square shadow-inner border-[6px] border-slate-50">
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover opacity-90"
+                />
+
+                <canvas ref={canvasRef} className="hidden" />
+
+                {/* Professional Overlay */}
+                <div className="absolute inset-0 pointer-events-none">
+                  {/* Corner Brackets */}
+                  <div className="absolute inset-12 border-2 border-transparent">
+                    <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg" />
+                    <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg" />
+                    <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg" />
+                    <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg" />
+                  </div>
+
+                  {/* The Animated Laser Line */}
+                  <div className="absolute left-1/2 -translate-x-1/2 w-[60%] h-[2px] bg-gradient-to-r from-transparent via-blue-400 to-transparent animate-scan-line shadow-[0_0_15px_rgba(59,130,246,0.8)]" />
+                </div>
+
+                {/* Subtle Dark Vignette */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_40%,rgba(0,0,0,0.3)_100%)]" />
+              </div>
+
+              {/* Footer Info */}
+              <div className="mt-6 flex items-center justify-center gap-3 py-3 px-4 bg-blue-50 rounded-2xl border border-blue-100">
+                <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-blue-700">
+                  System Ready: Awaiting QR...
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+    {showConfirmModal && scannedOrder && (
+  <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl flex items-center justify-center z-[110] p-4">
+    <div className="bg-white rounded-[3rem] w-full max-w-[420px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-12 duration-500">
+      
+      {/* Top Banner: Status & User */}
+      <div className="relative bg-slate-50 pt-12 pb-8 px-10 text-center">
+        {/* Floating Paid Badge */}
+        <div className="absolute top-6 right-8">
+          <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+            scannedOrder.paymentStatus === 'paid' 
+              ? 'bg-emerald-500 text-white' 
+              : 'bg-red-500 text-white'
+          }`}>
+            {scannedOrder.paymentStatus || 'Unpaid'}
+          </span>
+        </div>
+
+        {/* User Avatar & Info */}
+        <div className="w-20 h-20 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-center mx-auto mb-4 overflow-hidden">
+          <div className="bg-blue-100 text-blue-600 w-full h-full flex items-center justify-center text-2xl font-black">
+            {scannedOrder.userName?.charAt(0) || 'U'}
+          </div>
+        </div>
+
+        <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+          {scannedOrder.userName || "Student User"}
+        </h3>
+        <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
+          ID: {scannedOrder.rollNumber || "Not Provided"}
+        </p>
+      </div>
+
+      <div className="px-10 pb-10 pt-6">
+        {/* Order Details Grid */}
+        <div className="bg-slate-50 rounded-[2rem] p-6 mb-8 border border-slate-100">
+          <div className="space-y-4">
+            {scannedOrder.items.map((item, i) => (
+              <div key={i} className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-700">{item.name}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">Qty: {item.quantity}</p>
+                </div>
+                <p className="text-sm font-black text-slate-800">₹{item.price * item.quantity}</p>
+              </div>
+            ))}
+            
+            <div className="pt-4 mt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Grand Total</span>
+              <span className="text-2xl font-black text-blue-600">₹{scannedOrder.totalAmount}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Transaction Reference Footer */}
+        <div className="text-center mb-8">
+            <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Transaction Reference</p>
+            <p className="text-[11px] text-slate-600 font-mono mt-1">{scannedOrder.razorpayPaymentId || "CASH_TRANSACTION"}</p>
+        </div>
+
+        {/* --- THE MODERN SWIPE SLIDER --- */}
+        <div 
+          id="swipe-track"
+          className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
+        >
+          <div 
+            className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
+            style={{ width: `${swipeProgress}%` }}
+          />
+
+          <p className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
+            ${swipeProgress > 20 ? 'opacity-0' : 'opacity-40 text-slate-600'}`}>
+            Swipe to Confirm Serve
+          </p>
+
+          <div
+            onMouseDown={() => (isDragging.current = true)}
+            onPointerDown={() => (isDragging.current = true)}
+            className="relative z-10 h-12 w-12 bg-white rounded-full shadow-xl flex items-center justify-center cursor-grab active:cursor-grabbing transition-transform hover:scale-105"
+            style={{ 
+                position: 'absolute',
+                left: `calc(${swipeProgress}% - ${swipeProgress > 80 ? '50px' : '0px'})`,
+                transition: isDragging.current ? 'none' : 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+            }}
+          >
+            <div className="flex gap-0.5">
+              <div className="w-1 h-4 bg-emerald-200 rounded-full" />
+              <div className="w-1 h-4 bg-emerald-400 rounded-full" />
+              <div className="w-1 h-4 bg-emerald-600 rounded-full" />
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => setShowConfirmModal(false)}
+          className="w-full mt-6 text-[10px] font-black text-slate-400 hover:text-red-500 transition-colors uppercase tracking-[0.2em]"
+        >
+          Discard Verification
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Footer */}
       <Footer />

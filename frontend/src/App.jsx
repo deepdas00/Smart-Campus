@@ -25,9 +25,8 @@ import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
+import CollegeHome from "./Page/CollegeHome.jsx";
 // import { Toaster } from "react-hot-toast";
-
-
 
 // Layout Wrapper
 const AdminLayout = () => {
@@ -35,7 +34,7 @@ const AdminLayout = () => {
     <div className="min-h-screen flex flex-col ">
       {/* Top Navbar */}
       <Navbar />
-      <CollegeInfo/>
+      <CollegeInfo />
 
       {/* Body */}
       <div className="flex flex-1">
@@ -56,17 +55,14 @@ const AdminLayout = () => {
 export default function App() {
   const { user } = useAuth();
 
-
   const userRole = user?.role;
   console.log("USER ROLE HAI...", userRole);
-  
- 
 
   return (
     <>
       <Toaster position="top-right" reverseOrder={false} />
       <Routes>
-        <Route path="/home" element={<HomeLogin/>} />
+        <Route path="/home" element={<HomeLogin />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -82,6 +78,7 @@ export default function App() {
         <Route path="/library" element={<Library />} />
         <Route path="/orders" element={<CanteenOrders />} />
         <Route path="/report" element={<ReportPortal />} />
+        <Route path="/collegeHome" element={<CollegeHome />} />
 
         <Route
           path="/admin"

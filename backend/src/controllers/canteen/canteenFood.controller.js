@@ -99,11 +99,18 @@ export const getAllFoods = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
 
-  const CanteenPolcyModel = getCanteenPolicyModel(collegeConn);
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
 
-  const canteenPolicy = await CanteenPolcyModel.find();
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+
+  if (!canteenPolicy) {
+    console.log('HElooo'); 
+  }
+  
 
   const canteenSatus = canteenPolicy.isActive;
+  console.log(canteenPolicy);
+  
   const CanteenFood = getCanteenFoodModel(collegeConn);
   // res.status(200).json(
   //   new ApiResponse(

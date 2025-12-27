@@ -41,14 +41,15 @@ export default function Canteen() {
   const [orderId, setOrderId] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
-
+  const [isCanteenOpen, setIsCanteenOpen] = useState(null); // null = loading
   const categories = [
+
+    // "snacks", "meal", "drink", "sweet"
     { id: "all", name: "All Items", icon: "🍽️" },
-    { id: "breakfast", name: "Breakfast", icon: "🌅" },
-    { id: "lunch", name: "Lunch", icon: "🍛" },
+    { id: "meal", name: "meal", icon: "🍛" },
     { id: "snacks", name: "Snacks", icon: "🍟" },
-    { id: "beverages", name: "Beverages", icon: "☕" },
-    { id: "desserts", name: "Desserts", icon: "🍰" },
+    { id: "drink", name: "drink", icon: "☕" },
+    { id: "sweet", name: "sweet", icon: "🍰" },
   ];
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
@@ -58,6 +59,40 @@ export default function Canteen() {
   const [error, setError] = useState(null);
 
   const API_URL = import.meta.env.VITE_API_URL;
+
+  useEffect(() => {
+    const fetchCanteenStatus = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/v1/canteen/canteenStatus`, {
+          withCredentials: true,
+        });
+
+        console.log("hiii",res);
+        
+
+        // assuming backend returns { data: { isActive: true/false } }
+        setIsCanteenOpen(res.data?.data);
+
+        console.log(isCanteenOpen);
+        
+      } catch (err) {
+        console.error("Failed to fetch canteen status", err);
+        setIsCanteenOpen(false); // safest fallback
+      }
+    };
+
+    fetchCanteenStatus();
+
+    const intervalId = setInterval(
+    fetchCanteenStatus,
+    5 * 60 * 1000
+  );
+
+  // 🧹 Cleanup
+  return () => clearInterval(intervalId);
+
+
+  }, []);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -76,7 +111,7 @@ export default function Canteen() {
           { withCredentials: true } // if auth cookies are used
         );
 
-        setMenuItems(res.data.data); // adjust if response structure differs
+        setMenuItems(res.data.data.foods); // adjust if response structure differs
       } catch (err) {
         setError("Failed to load food menu");
         console.error(err);
@@ -89,6 +124,10 @@ export default function Canteen() {
   }, []);
 
   const addToCart = (item) => {
+    if (!isCanteenOpen) {
+      toast.error("Canteen is currently closed");
+      return;
+    }
     setCart((prev) => ({
       ...prev,
       [item._id]: {
@@ -138,45 +177,49 @@ export default function Canteen() {
     );
   };
 
-const placeOrder = async () => {
-  try {
-    if (Object.keys(cart).length === 0) {
-      toast.error("Your cart is empty");
-      return;
-    }
+  const placeOrder = async () => {
 
-    toast.loading("Placing your order...", { id: "place-order" });
-
-    const items = Object.values(cart).map((item) => ({
-      foodId: item._id,
-      quantity: item.quantity,
-    }));
-
-    const res = await axios.post(
-      `${API_URL}/api/v1/canteen/orders`,
-      { items },
-      { withCredentials: true }
-    );
-
-    console.log(res);
-
-    toast.success("Order created! Redirecting to payment…", {
-      id: "place-order",
-    });
-
-    const { orderId } = res.data.data;
-
-    await startPayment(orderId);
-  } catch (err) {
-    console.error(err);
-    toast.error(
-      err.response?.data?.message || "Failed to place order",
-      { id: "place-order" }
-    );
+     if (!isCanteenOpen) {
+    toast.error("Canteen is currently closed");
+    return;
   }
-};
 
 
+    try {
+      if (Object.keys(cart).length === 0) {
+        toast.error("Your cart is empty");
+        return;
+      }
+
+      toast.loading("Placing your order...", { id: "place-order" });
+
+      const items = Object.values(cart).map((item) => ({
+        foodId: item._id,
+        quantity: item.quantity,
+      }));
+
+      const res = await axios.post(
+        `${API_URL}/api/v1/canteen/orders`,
+        { items },
+        { withCredentials: true }
+      );
+
+      console.log(res);
+
+      toast.success("Order created! Redirecting to payment…", {
+        id: "place-order",
+      });
+
+      const { orderId } = res.data.data;
+
+      await startPayment(orderId);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to place order", {
+        id: "place-order",
+      });
+    }
+  };
 
   const startPayment = async (orderId) => {
     const res = await axios.post(
@@ -425,8 +468,6 @@ const placeOrder = async () => {
                 ))}
               </div>
 
-              
-
               <p className="text-xs text-center text-gray-500 md:mt mt-[-3px]">
                 Estimated preparation time: 15-20 minutes
               </p>
@@ -564,6 +605,22 @@ const placeOrder = async () => {
           setSelectedCategory={setSelectedCategory}
         />
 
+
+<div className="relative">
+  {/* 🔵 CLOSED OVERLAY */}
+  {isCanteenOpen === false && (
+    <div className="absolute inset-0 z-20 bg-blue-900/40 backdrop-blur-sm flex items-center justify-center rounded-xl">
+      <div className="text-center text-white px-6">
+        <AlertCircle className="w-12 h-12 mx-auto mb-3" />
+        <h2 className="text-xl font-bold">Canteen Closed</h2>
+        <p className="text-sm text-blue-100">
+          Please come back during working hours
+        </p>
+      </div>
+    </div>
+  )}
+
+
         {/* Menu Items Grid */}
         <FoodGrid
           items={filteredItems}
@@ -571,7 +628,7 @@ const placeOrder = async () => {
           removeFromCart={removeFromCart}
           getItemQuantity={getItemQuantity}
         />
-
+</div>
         {filteredItems.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>

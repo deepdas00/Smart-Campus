@@ -18,8 +18,7 @@ export default function Navbar() {
   const { user } = useAuth();
   const { logout } = useAuth();
 
-
-   const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogout = async () => {
     try {
@@ -41,9 +40,7 @@ export default function Navbar() {
     }
   };
 
-
-
-   function LogoutItem({ icon, label, onLogout }) {
+  function LogoutItem({ icon, label, onLogout }) {
     return (
       <button
         onClick={onLogout}
@@ -59,8 +56,6 @@ export default function Navbar() {
     );
   }
 
-
-
   const handleLogoClick = () => {
     if (location.pathname === "/") {
       // Already on home → smooth scroll
@@ -75,7 +70,6 @@ export default function Navbar() {
   };
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
 
   return (
     <>
@@ -99,9 +93,10 @@ export default function Navbar() {
 
                 <div className="flex items-center space-x-4">
                   <span
-                  onClick={handleLogout}
-                  className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
-                    Logout  
+                    onClick={handleLogout}
+                    className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500"
+                  >
+                    Logout
                   </span>
                   <Link className="flex items-center space-x-2">
                     <img
@@ -131,13 +126,19 @@ export default function Navbar() {
                     </span>
                   </Link>
                 </div>
+                <div>
+                  <div className="flex items-center space-x-4">
+                    <span
+                      onClick={handleLogout}
+                      className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500"
+                    >
+                      Logout
+                    </span>
+                  </div>
+                </div>
 
-                <div className="flex items-center space-x-4">
-                  <span
-                  onClick={handleLogout}
-                  className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500">
-                    Logout
-                  </span>
+                <div>
+                  
                 </div>
               </div>
             </div>

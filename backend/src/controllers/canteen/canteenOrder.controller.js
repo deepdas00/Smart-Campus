@@ -10,96 +10,98 @@ import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
+  const { items } = req.body;
+  const { userId, collegeCode } = req.user;
 
-    const { items } = req.body;
-    const { userId, collegeCode } = req.user;
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    throw new ApiError(400, "Order items are required");
+  }
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-        throw new ApiError(400, "Order items are required");
+  // 1️⃣ Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active",
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+  const canteenStatus = canteenPolicy.isActive;
+  if (!canteenStatus) {
+    res.status(401).json({ message: "Canteen Is Offline!!" });
+  }
+
+  const Food = getCanteenFoodModel(collegeConn);
+  const Order = getCanteenOrderModel(collegeConn);
+
+  let orderItems = [];
+  let totalAmount = 0;
+
+  // 2️⃣ Validate each food item
+  for (const item of items) {
+    const food = await Food.findById(item.foodId);
+
+    if (!food || !food.isAvailable) {
+      throw new ApiError(400, "Food item not available");
     }
 
-    // 1️⃣ Resolve college DB
-    const masterConn = connectMasterDB();
-    const College = getCollegeModel(masterConn);
+    if (food.quantityAvailable < item.quantity) {
+      throw new ApiError(400, `Insufficient quantity for ${food.name}`);
+    }
 
-    const college = await College.findOne({
-        collegeCode,
-        status: "active"
+    const itemTotal = food.price * item.quantity;
+    totalAmount += itemTotal;
+
+    orderItems.push({
+      foodId: food._id,
+      name: food.name,
+      price: food.price,
+      quantity: item.quantity,
     });
+  }
 
-    if (!college) {
-        throw new ApiError(404, "College not found");
-    }
+  //generateTransactionCode
+  const transactionCode = await generateTransactionCode(
+    collegeCode,
+    "C",
+    Order
+  );
 
-    const collegeConn = getCollegeDB(college.dbName);
+  //  console.log(transactionCode);
 
+  // 3️⃣ Create order (NO PAYMENT YET)
+  const order = await Order.create({
+    studentId: userId,
+    items: orderItems,
+    totalAmount,
+    paymentStatus: "pending",
+    orderStatus: "order_received",
+    transactionCode,
+  });
 
-
-    const Food = getCanteenFoodModel(collegeConn);
-    const Order = getCanteenOrderModel(collegeConn);
-
-    let orderItems = [];
-    let totalAmount = 0;
-
-    // 2️⃣ Validate each food item
-    for (const item of items) {
-        const food = await Food.findById(item.foodId);
-
-        if (!food || !food.isAvailable) {
-            throw new ApiError(400, "Food item not available");
-        }
-
-        if (food.quantityAvailable < item.quantity) {
-            throw new ApiError(
-                400,
-                `Insufficient quantity for ${food.name}`
-            );
-        }
-
-        const itemTotal = food.price * item.quantity;
-        totalAmount += itemTotal;
-
-        orderItems.push({
-            foodId: food._id,
-            name: food.name,
-            price: food.price,
-            quantity: item.quantity
-        });
-    }
-
-
-    //generateTransactionCode
-    const transactionCode = await generateTransactionCode(collegeCode,"C",Order)
-
-    //  console.log(transactionCode);
-     
-    // 3️⃣ Create order (NO PAYMENT YET)
-    const order = await Order.create({
-        studentId: userId,
-        items: orderItems,
+  res.status(201).json(
+    new ApiResponse(
+      201,
+      {
+        orderId: order._id,
         totalAmount,
-        paymentStatus: "pending",
-        orderStatus: "order_received",
-        transactionCode
-    });
-
-    res.status(201).json(
-        new ApiResponse(
-            201,
-            {
-                orderId: order._id,
-                totalAmount,
-                transactionCode
-            },
-            "Order placed successfully"
-        )
-    );
+        transactionCode,
+      },
+      "Order placed successfully"
+    )
+  );
 });
-
 
 //order serving by canteen staff
 export const serveOrder = asyncHandler(async (req, res) => {
-
   const { orderId, collegeCode } = req.body;
 
   if (!orderId || !collegeCode) {
@@ -112,7 +114,7 @@ export const serveOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -120,6 +122,14 @@ export const serveOrder = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
+
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+  canteenStatus = canteenPolicy.isActive;
+  if (!canteenStatus) {
+    res.status(401).json({ message: "Canteen Is Offline!!" });
+  }
+
   const Order = getCanteenOrderModel(collegeConn);
 
   const order = await Order.findById(orderId);
@@ -142,18 +152,11 @@ export const serveOrder = asyncHandler(async (req, res) => {
   order.orderStatus = "served";
   await order.save({ validateBeforeSave: false });
 
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      null,
-      "Order served successfully"
-    )
-  );
+  res.status(200).json(new ApiResponse(200, null, "Order served successfully"));
 });
 
 // Dashbord will show this orders
 export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
-
   const { collegeCode } = req.user;
   const { range = "daily" } = req.query;
 
@@ -186,7 +189,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -199,27 +202,26 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   // 3️⃣ Fetch filtered orders
   const orders = await Order.find({
     paymentStatus: "paid",
-    createdAt: { $gte: startDate }
+    createdAt: { $gte: startDate },
   })
     .sort({ createdAt: -1 })
-    .populate({path: "studentId", select: "studentName rollNo mobileNo"})
-    .select("_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId studentName");
+    .populate({ path: "studentId", select: "studentName rollNo mobileNo" })
+    .select(
+      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+    );
 
   // 4️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      `Canteen dashboard (${range}) data fetched`
-    )
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, orders, `Canteen dashboard (${range}) data fetched`)
+    );
 });
-
 
 //Fetched single order
 export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
-  const { orderId } = req.body;
+  const { orderId } = req.params;
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -227,7 +229,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -238,25 +240,24 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const Order = getCanteenOrderModel(collegeConn);
 
   // 3️⃣ Fetch filtered orders
-  const orders = await Order.findOne(orderId)
-    .select("_id transactionCode items totalAmount orderStatus createdAt paymentStatus razorpayPaymentId");
+  const orders = await Order.findOne({
+    paymentStatus: "paid",
+   orderId 
+  })
+    .sort({ createdAt: -1 })
+    .populate("studentId", "studentName rollNo mobileNo")
+    .select(
+      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+    );
 
   // 4️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      `Order fetched successfully`
-    )
-  );
-
-
-
-})
+  res
+    .status(200)
+    .json(new ApiResponse(200, orders, `Order fetched successfully`));
+});
 
 // Get logged-in student's order history
 export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
-
   const { userId, collegeCode } = req.user;
 
   // 1️⃣ Resolve college DB
@@ -265,7 +266,7 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -278,30 +279,27 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
   // 2️⃣ Fetch student's orders
   const orders = await Order.find({ studentId: userId })
     .sort({ createdAt: -1 })
-    .select("_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId");
+    .select(
+      "_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
+    );
 
   // 3️⃣ Response
-  res.status(200).json(
-    new ApiResponse(
-      200,
-      orders,
-      "Student order history fetched successfully"
-    )
-  );
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, orders, "Student order history fetched successfully")
+    );
 });
 
-
-
 export const canteenIsActive = asyncHandler(async (req, res) => {
+  const { isActive } = req.body; ///true or false
 
-const {isActive} = req.body; ///true or false
+  console.log(isActive);
+  const { collegeCode } = req.user;
 
-const { userId, collegeCode } = req.user;
-
-
-if (!isActive){
-    throw new ApiError(400, "state is not given");
-}
+  // if (!isActive){
+  //     throw new ApiError(400, "state is not given");
+  // }
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -309,7 +307,7 @@ if (!isActive){
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -319,13 +317,53 @@ if (!isActive){
   const collegeConn = getCollegeDB(college.dbName);
   const CanteenPolcyModel = getCanteenPolicyModel(collegeConn);
 
-  const canteenPolicy = await CanteenPolcyModel.find();
+  const canteenPolicy = await CanteenPolcyModel.findOne();
+
+  if (!canteenPolicy) {
+    throw new ApiError(404, "Canteen policy not found");
+  }
 
   canteenPolicy.isActive = isActive;
 
-  await canteenPolicy.save({validateBeforeSave: false})
+  console.log(canteenPolicy.isActive);
 
-  
-  
+  await canteenPolicy.save({ validateBeforeSave: false });
 
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, isActive, "Canteen Status fetched successfully")
+    );
+});
+
+export const canteenSatusFetch = asyncHandler(async (req, res) => {
+  const { collegeCode } = req.user;
+
+  // 1️⃣ Resolve college DB
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode,
+    status: "active",
+  });
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
+
+  const canteenPolicy = await CanteenPolicyModel.findOne();
+
+  const canteenStatus = canteenPolicy.isActive;
+
+  console.log("Canteen", canteenStatus);
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, canteenStatus, "Canteen Status fetched successfully")
+    );
 });

@@ -37,7 +37,7 @@ export const canteenFoodSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["snack", "meal", "drink", "sweet"],
+      enum: ["snacks", "meal", "drink", "sweet"],
       required: true
     },
 

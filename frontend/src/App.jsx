@@ -25,6 +25,9 @@ import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
+// import { Toaster } from "react-hot-toast";
+
+
 
 // Layout Wrapper
 const AdminLayout = () => {

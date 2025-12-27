@@ -199,7 +199,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
     createdAt: { $gte: startDate }
   })
     .sort({ createdAt: -1 })
-    .select("items totalAmount orderStatus createdAt");
+    .populate({path: "studentId", select: "studentName rollNo mobileNo"})
+    .select("_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId studentName");
 
   // 4️⃣ Response
   res.status(200).json(

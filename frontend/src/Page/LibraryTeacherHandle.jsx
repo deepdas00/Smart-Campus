@@ -35,12 +35,12 @@ import TransactionsTable from "../Components/TransactionsTable";
 export default function LibraryTeacherHandle() {
   const [isAddingBook, setIsAddingBook] = useState(false);
   const [isUpdatingBook, setIsUpdatingBook] = useState(false);
- const [editingBook, setEditingBook] = useState(null);
+  const [editingBook, setEditingBook] = useState(null);
 
-const isEditMode = Boolean(editingBook);
+  const isEditMode = Boolean(editingBook);
 
-const [isDeletingBook, setIsDeletingBook] = useState(false);
-const [bookToDelete, setBookToDelete] = useState(null);
+  const [isDeletingBook, setIsDeletingBook] = useState(false);
+  const [bookToDelete, setBookToDelete] = useState(null);
 
   // --- STATE SECTIONS ---
   const [activeTab, setActiveTab] = useState("transactions");
@@ -52,19 +52,24 @@ const [bookToDelete, setBookToDelete] = useState(null);
   const [selectedDept, setSelectedDept] = useState(null);
   const [visibleTransactions, setVisibleTransactions] = useState(5); // initially show 5
 
-  const [newBook, setNewBook] = useState({
-    title: "",
-    author: "",
-    category: "",
-    totalCopies: "",
-    availableCopies: "",
-    shelf: "",
-    isbn: "",
-    publisher: "",
-    publishedYear: "",
-    description: "",
-    coverImage: null,
-  });
+  const initialBookState = {
+  title: "",
+  author: "",
+  category: "",
+  rating: "",
+  totalCopies: "",
+  availableCopies: "",
+  shelf: "",
+  isbn: "",
+  publisher: "",
+  publishedYear: "",
+  description: "",
+  coverImage: null,
+};
+
+
+ const [newBook, setNewBook] = useState(initialBookState);
+
 
   const [newIssue, setNewIssue] = useState({
     student: "",
@@ -264,103 +269,105 @@ const [bookToDelete, setBookToDelete] = useState(null);
 
       toast.success("Book added successfully!"); // <-- Success toast
       setShowAddBookModal(false);
-setEditingBook(null);
+      setEditingBook(null);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to add book");
-    }finally{
-      setIsAddingBook(false)
+    } finally {
+      setIsAddingBook(false);
     }
   };
 
- const handleUpdateBook = async () => {
-  try {
-    if (!newBook.title || !newBook.author || !newBook.category) {
-      toast.error("Required fields cannot be empty");
-      return;
-    }
-
-    setIsUpdatingBook(true);
-
-    const token = Cookies.get("accessToken");
-
-    const payload = {
-      title: newBook.title,
-      author: newBook.author,
-      category: newBook.category,
-      totalCopies: Number(newBook.totalCopies),
-      availableCopies: Number(newBook.availableCopies),
-      shelf: newBook.shelf,
-      rating: Number(newBook.rating),
-      isbn: newBook.isbn,
-      publisher: newBook.publisher,
-      publishedYear: Number(newBook.publishedYear),
-      description: newBook.description,
-    };
-
-    const res = await axios.patch(
-      `${import.meta.env.VITE_API_URL}/api/v1/library/books/${editingBook._id}`,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
+  const handleUpdateBook = async () => {
+    try {
+      if (!newBook.title || !newBook.author || !newBook.category) {
+        toast.error("Required fields cannot be empty");
+        return;
       }
-    );
 
-    console.log("Updated:", res.data);
+      setIsUpdatingBook(true);
 
-    // 🔥 Update UI instantly
-    setBooks((prev) =>
-      prev.map((b) =>
-        b._id === editingBook._id ? res.data.data : b
-      )
-    );
+      const token = Cookies.get("accessToken");
+      console.log("newwwwwBook", newBook);
+      
 
-    toast.success("Book updated successfully");
-    setShowAddBookModal(false);
-    setEditingBook(null);
+      const payload = {
+        title: newBook.title,
+        author: newBook.author,
+        category: newBook.category,
+        totalCopies: Number(newBook.totalCopies),
+        availableCopies: Number(newBook.availableCopies),
+        shelf: newBook.shelf,
+        rating: Number(newBook.rating),
+        isbn: newBook.isbn,
+        publisher: newBook.publisher,
+        publishedYear: Number(newBook.publishedYear),
+        description: newBook.description,
+        coverImage : newBook.coverImage,
+      };
 
-  } catch (err) {
-    console.error(err);
-    toast.error(err.response?.data?.message || "Failed to update book");
-  } finally {
-    setIsUpdatingBook(false);
-  }
-};
+      console.log("PAYLOADDD", payload);
+      
 
+      const res = await axios.patch(
+        `${import.meta.env.VITE_API_URL}/api/v1/library/books/${
+          editingBook._id
+        }`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.log("Updated:", res.data);
+
+      // 🔥 Update UI instantly
+      setBooks((prev) =>
+        prev.map((b) => (b._id === editingBook._id ? res.data.data : b))
+      );
+
+      toast.success("Book updated successfully");
+      setShowAddBookModal(false);
+      setEditingBook(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to update book");
+    } finally {
+      setIsUpdatingBook(false);
+    }
+  };
 
   const handleDeleteBook = async (bookId) => {
-  try {
-    setIsDeletingBook(true);
+    try {
+      setIsDeletingBook(true);
 
-    const token = Cookies.get("accessToken");
+      const token = Cookies.get("accessToken");
 
-    await axios.delete(
-      `${import.meta.env.VITE_API_URL}/api/v1/library/books/${bookId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+      await axios.delete(
+        `${import.meta.env.VITE_API_URL}/api/v1/library/books/${bookId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
-    // 🔥 Remove book instantly from UI
-    setBooks((prev) => prev.filter((b) => b._id !== bookId));
+      // 🔥 Remove book instantly from UI
+      setBooks((prev) => prev.filter((b) => b._id !== bookId));
 
-    toast.success("Book deleted successfully");
-    setBookToDelete(null);
-
-  } catch (err) {
-    console.error(err);
-    toast.error(err.response?.data?.message || "Failed to delete book");
-  } finally {
-    setIsDeletingBook(false);
-  }
-};
-
+      toast.success("Book deleted successfully");
+      setBookToDelete(null);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || "Failed to delete book");
+    } finally {
+      setIsDeletingBook(false);
+    }
+  };
 
   const confirmReturn = () => {
     if (!showReturnConfirm) return;
@@ -401,6 +408,13 @@ setEditingBook(null);
           );
         })
       : books;
+
+
+const handleCloseModal = () => {
+  setShowAddBookModal(false); // Close modal
+  setNewBook(initialBookState); // Reset all fields
+  setEditingBook(null); // Reset edit mode
+};
 
   return (
     <>
@@ -601,27 +615,29 @@ setEditingBook(null);
                                       <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
                                           onClick={() => {
-  setEditingBook(book);
-  setNewBook({
-    title: book.title || "",
-    author: book.author || "",
-    category: book.category || "",
-    rating: book.rating || "",
-    totalCopies: book.totalCopies || "",
-    availableCopies: book.availableCopies || "",
-    shelf: book.shelf || "",
-    isbn: book.isbn || "",
-    publisher: book.publisher || "",
-    publishedYear: book.publishedYear || "",
-    description: book.description || "",
-    coverImage: null, // optional (don’t preload file)
-  });
-  setEditingBook(book);
-setNewBook(book);
-setShowAddBookModal(true);
-
-}}
-
+                                            setEditingBook(book);
+                                            setNewBook({
+                                              title: book.title || "",
+                                              author: book.author || "",
+                                              category: book.category || "",
+                                              rating: book.rating || "",
+                                              totalCopies:
+                                                book.totalCopies || "",
+                                              availableCopies:
+                                                book.availableCopies || "",
+                                              shelf: book.shelf || "",
+                                              isbn: book.isbn || "",
+                                              publisher: book.publisher || "",
+                                              publishedYear:
+                                                book.publishedYear || "",
+                                              description:
+                                                book.description || "",
+                                              coverImage: null, // optional (don’t preload file)
+                                            });
+                                            setEditingBook(book);
+                                            setNewBook(book);
+                                            setShowAddBookModal(true);
+                                          }}
                                           className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-white rounded-lg shadow-sm transition-all"
                                         >
                                           <Edit3 size={16} />
@@ -696,56 +712,46 @@ setShowAddBookModal(true);
             </div>
           </main>
 
-
-
-
           {/*DELETE CONFIRM MODEL */}
 
-
           {bookToDelete && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-    <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-6">
-      
-      <h3 className="text-xl font-black text-red-600">
-        Confirm Deletion
-      </h3>
+            <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+              <div className="bg-white rounded-3xl p-8 max-w-sm w-full text-center space-y-6">
+                <h3 className="text-xl font-black text-red-600">
+                  Confirm Deletion
+                </h3>
 
-      <p className="text-sm text-slate-600 font-medium">
-        Are you sure you want to delete  
-        <span className="font-black"> "{bookToDelete.title}"</span>?
-      </p>
+                <p className="text-sm text-slate-600 font-medium">
+                  Are you sure you want to delete
+                  <span className="font-black"> "{bookToDelete.title}"</span>?
+                </p>
 
-      <div className="flex gap-4">
-        <button
-          onClick={() => setBookToDelete(null)}
-          className="flex-1 py-3 rounded-xl font-black text-xs uppercase
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setBookToDelete(null)}
+                    className="flex-1 py-3 rounded-xl font-black text-xs uppercase
                      bg-slate-100 hover:bg-slate-200"
-        >
-          Cancel
-        </button>
+                  >
+                    Cancel
+                  </button>
 
-        <button
-          onClick={() => handleDeleteBook(bookToDelete._id)}
-          disabled={isDeletingBook}
-          className="flex-1 py-3 rounded-xl font-black text-xs uppercase
+                  <button
+                    onClick={() => handleDeleteBook(bookToDelete._id)}
+                    disabled={isDeletingBook}
+                    className="flex-1 py-3 rounded-xl font-black text-xs uppercase
                      bg-red-600 text-white hover:bg-red-700
                      disabled:bg-slate-400"
-        >
-          {isDeletingBook ? "Deleting…" : "Delete"}
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
-
-
-
-
+                  >
+                    {isDeletingBook ? "Deleting…" : "Delete"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* --- MODAL: ADD AND EDITE NEW BOOK --- */}
           {showAddBookModal && (
-            <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in duration-300">
+            <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300 z-110">
               {/* Main Container with subtle glass border */}
               <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/20 flex flex-col md:flex-row min-h-[650px]">
                 {/* LEFT ACCENT PANEL: Visual Identity */}
@@ -762,14 +768,14 @@ setShowAddBookModal(true);
                     <h3 className="text-4xl font-black leading-[0.9] tracking-tighter italic">
                       {" "}
                       {isEditMode ? (
-    <>
-      UPDATE <br /> BOOK
-    </>
-  ) : (
-    <>
-      ADD <br /> NEW BOOK
-    </>
-  )}
+                        <>
+                          UPDATE <br /> BOOK
+                        </>
+                      ) : (
+                        <>
+                          ADD <br /> NEW BOOK
+                        </>
+                      )}
                     </h3>
                     <div className="h-1 w-12 bg-indigo-300 mt-6 rounded-full"></div>
                   </div>
@@ -795,7 +801,9 @@ setShowAddBookModal(true);
                   {/* Elegant Close Button */}
                   <div className="absolute top-8 right-8 z-20">
                     <button
-                      onClick={() => setShowAddBookModal(false)}
+                      onClick={() => {setShowAddBookModal(false);
+                        handleCloseModal();}
+                      }
                       className="p-3 bg-white text-slate-400 hover:text-indigo-600 hover:shadow-2xl hover:shadow-indigo-100 rounded-2xl transition-all duration-300 active:scale-90 border border-slate-100"
                     >
                       <X size={20} strokeWidth={3} />
@@ -994,9 +1002,16 @@ setShowAddBookModal(true);
                       </span>
                     </div>
                     <button
-  onClick={isEditMode ? handleUpdateBook : handleAddBook}
-  disabled={isAddingBook || isUpdatingBook}
-  className={`w-full sm:w-auto px-14 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] transition-all 
+                      onClick={() => {
+  if (isEditMode) {
+    handleUpdateBook();
+  } else {
+    handleAddBook();
+  }
+  handleCloseModal(); // now properly called
+}}
+                      disabled={isAddingBook || isUpdatingBook}
+                      className={`w-full sm:w-auto px-14 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] transition-all 
     ${
       isEditMode
         ? "bg-emerald-600 hover:bg-emerald-700"
@@ -1004,17 +1019,21 @@ setShowAddBookModal(true);
     }
     ${(isAddingBook || isUpdatingBook) && "bg-slate-400 cursor-not-allowed"}
   `}
->
-  {(isAddingBook || isUpdatingBook) ? (
-    <span className="flex items-center gap-3">
-      <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" />
-      {isEditMode ? "Updating…" : "Registering…"}
-    </span>
-  ) : (
-    isEditMode ? "Update Book" : "Register Entry"
-  )}
-</button>
-
+                    >
+                      {isAddingBook || isUpdatingBook ? (
+                        <span className="flex items-center gap-3">
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            viewBox="0 0 24 24"
+                          />
+                          {isEditMode ? "Updating…" : "Registering…"}
+                        </span>
+                      ) : isEditMode ? (
+                        "Update Book"
+                      ) : (
+                        "Register Entry"
+                      )}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -1067,7 +1086,7 @@ setShowAddBookModal(true);
                     Issue Entry
                   </h3>
                   <X
-                    onClick={() => setShowIssueModal(false)}
+                    onClick={() =>{ setShowIssueModal(false)}}
                     className="cursor-pointer"
                   />
                 </div>

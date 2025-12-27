@@ -136,7 +136,7 @@ router.get(
 
 // Single order fetched by qr
 router.get(
-  "/orders/details",
+  "/orders/details/:orderId",
   verifyJWT,
   authorizeRoles("student", "canteen"),
   fetchedSingleOrder,

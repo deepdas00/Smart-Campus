@@ -203,12 +203,13 @@ export function KitchenKDS() {
     try {
       console.log("final", orderId);
 
-      const res = await axios.get(`${API_URL}/api/v1/canteen/orders/details`, {
-        params: { orderId },
-        withCredentials: true,
-      });
+      const res = await axios.get(
+  `${API_URL}/api/v1/canteen/orders/details/${orderId}`,
+  { withCredentials: true }
+);
 
-      console.log("response", res.data.data);
+
+      console.log("response", res);
 
       setScannedOrder(res.data.data);
       setShowConfirmModal(true);
@@ -221,7 +222,8 @@ export function KitchenKDS() {
   const handleServeOrder = async () => {
     try {
       setIsProcessing(true); // Start loading state
-
+      console.log("SCANEERRRR ID ", scannedOrder._id);
+      
       await axios.post(
         `${API_URL}/api/v1/canteen/orders/serve`,
         { orderId: scannedOrder._id },

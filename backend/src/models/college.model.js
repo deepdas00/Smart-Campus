@@ -41,11 +41,16 @@ const collegeSchema = new Schema(
       required: true,
 
     },
+    documents: [
+      {
+        type: String   // Cloudinary URLs
+      }
+    ],
 
     status: {
       type: String,
-      enum: ["pending", "active"],
-      default: "pending",
+      enum: ["inActive", "active"],
+      default: "inActive",
     },
   },
   { timestamps: true }

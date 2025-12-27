@@ -28,4 +28,3 @@ export const getCollegeDB = (dbName) => {
   }
   return connections[dbName];
 };
-261947

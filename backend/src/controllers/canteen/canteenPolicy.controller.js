@@ -5,23 +5,20 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 
-/* ================================
-   CREATE / UPDATE CANTEEN POLICY
-================================ */
+// /* ================================
+//    CREATE / UPDATE CANTEEN POLICY
+// ================================ */
 
 export const setCanteenPolicy = asyncHandler(async (req, res) => {
 
     const { collegeCode, userId } = req.user;
 
-    const {
-        openingTime,
-        closingTime,
-        createdAt
-    } = req.body;
+    const { openingTime, closingTime } = req.body;
 
-    if ( !openingTime || !closingTime || !createdAt ) {
+    if (!openingTime || !closingTime) {
         throw new ApiError(400, "All required policy fields must be provided");
     }
+
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
     const college = await College.findOne({ collegeCode, status: "active" });
@@ -39,15 +36,13 @@ export const setCanteenPolicy = asyncHandler(async (req, res) => {
         policy = await Policy.create({
             openingTime,
             closingTime,
-            createdAt,
             updatedBy: userId
         });
     } else {
         policy.openingTime = openingTime;
         policy.closingTime = closingTime;
-        policy.createdAt = createdAt;
         policy.updatedBy = userId;
-        await policy.save({ validateBeforeSave: false });
+        await policy.save();
     }
 
     res.status(200).json(

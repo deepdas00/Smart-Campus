@@ -2,7 +2,7 @@ import express from "express"
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js"
 import { upload } from "../middlewares/multer.middleware.js"
-import { canteenIsActive, getCanteenDashboardOrders, getMyCanteenOrderHistory, placeOrder, serveOrder } from "../controllers/canteen/canteenOrder.controller.js";
+import { canteenIsActive, canteenSatusFetch, getCanteenDashboardOrders, getMyCanteenOrderHistory, placeOrder, serveOrder } from "../controllers/canteen/canteenOrder.controller.js";
 import { canteen_createRazorpayOrder, canteen_verifyPayment } from "../controllers/canteen/canteenPayment.controller.js";
 import { addFood, deleteFood, getAllFoods, updateFood } from "../controllers/canteen/canteenFood.controller.js";
 import { setCanteenPolicy } from "../controllers/canteen/canteenPolicy.controller.js";
@@ -26,6 +26,13 @@ router.post(
   authorizeRoles("admin","canteen"),
   canteenIsActive
 );
+
+router.get(
+  "/canteenStatus",
+  verifyJWT,
+  authorizeRoles("admin","canteen","student"),
+  canteenSatusFetch
+)
 
 
 /* ---------- FOOD ---------- */

@@ -99,9 +99,9 @@ export const getAllFoods = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
 
-  const CanteenPolcyModel = getCanteenPolicyModel(collegeConn);
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
 
-  const canteenPolicy = await CanteenPolcyModel.find();
+  const canteenPolicy = await CanteenPolicyModel.find();
 
   const canteenSatus = canteenPolicy.isActive;
   const CanteenFood = getCanteenFoodModel(collegeConn);

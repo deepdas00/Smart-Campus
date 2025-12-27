@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { toast } from "react-hot-toast";
+
 import {
   CheckCircle2,
   Clock,
@@ -19,6 +21,8 @@ import {
   Plus,
   Edit3,
   Trash2,
+  UploadCloud,
+  CheckCircle,
   X,
 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
@@ -26,6 +30,8 @@ import Footer from "../Components/Footer";
 import CollegeInfo from "../Components/CollegeInfo";
 
 export function KitchenKDS() {
+  const [isCanteenOpen, setIsCanteenOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(true);
   const [activeTab, setActiveTab] = useState("pending");
   const [editingFood, setEditingFood] = useState(null); // null = adding, otherwise editing
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -36,7 +42,6 @@ export function KitchenKDS() {
   const API_URL = import.meta.env.VITE_API_URL;
   const PREVIEW_COUNT = 2; // change to 3 if you want
   const [showAllMenu, setShowAllMenu] = useState(false);
-
   const [showAddFood, setShowAddFood] = useState(false);
   const [foodForm, setFoodForm] = useState({
     name: "",
@@ -47,12 +52,62 @@ export function KitchenKDS() {
     description: "",
   });
   const [addingFood, setAddingFood] = useState(false);
+  const [lastFetchedAt, setLastFetchedAt] = useState();
+  const [startFetchedAt, setStartFetchedAt] = useState(16);
+  const currentHour = new Date().getHours(); // 0–23
+  const [statusText, setStatusText] = useState(isOpen ? "Online" : "Offline");
+
+  const isOnline = currentHour >= lastFetchedAt && currentHour < startFetchedAt;
+
+  const [range, setRange] = useState(1); // default daily
+  const RANGE_MAP = { 1: "daily", 7: "weekly", 30: "monthly" };
+  const [deleteTarget, setDeleteTarget] = useState(null); // food item to delete
+  const [deleting, setDeleting] = useState(false);
+
+
+
+
+const deleteFood = async (foodId) => {
+  try {
+    console.log("Deleting food", foodId);
+
+    const res = await axios.delete(
+      `${API_URL}/api/v1/canteen/food/${foodId}`,
+      {
+        withCredentials: true, // sends cookies automatically
+      }
+    );
+
+    console.log("Delete response:", res.data);
+    toast.success("Food deleted successfully!");
+  } catch (err) {
+    console.error("Delete failed:", err.response || err);
+    toast.error("Failed to delete food.");
+  }
+};
+
+  const confirmDeleteFood = async () => {
+    if (!deleteTarget) return;
+
+    try {
+      setDeleting(true);
+      await deleteFood(deleteTarget._id);
+
+      setMenuItems((prev) =>
+        prev.filter((item) => item._id !== deleteTarget._id)
+      );
+
+      toast.success("Food item deleted");
+      setDeleteTarget(null);
+    } catch (error) {
+      console.error(error);
+      toast.error(error?.response?.data?.message || "Failed to delete food");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Real-time clock for the HUD
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -64,7 +119,7 @@ export function KitchenKDS() {
           { withCredentials: true } // if auth cookies are used
         );
 
-        console.log(res.data.data);
+        console.log("agayaaa food", res.data.data);
 
         setMenuItems(res.data.data); // adjust if response structure differs
       } catch (err) {
@@ -85,7 +140,7 @@ export function KitchenKDS() {
       !foodForm.category ||
       !foodForm.foodType
     ) {
-      alert("Please fill all required fields");
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -115,85 +170,69 @@ export function KitchenKDS() {
       );
 
       console.log(res.data);
-      alert("Food added successfully!");
+      toast.success("Food added successfully!");
       setShowAddFood(false);
       setFoodForm({}); // reset form
       // Optionally: fetch menu items again to update the list
     } catch (err) {
       console.error(err);
-      alert("Failed to add food. Check console for details.");
+      toast.error("Failed to add food. Check console for details.");
     } finally {
       setAddingFood(false);
     }
   };
 
-  const toggleAvailability = async (item) => {
-    try {
-      // Optimistic UI: immediately toggle in UI (optional)
-      setMenuItems(
-        menuItems.map((m) =>
-          m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m
-        )
-      );
+const toggleAvailability = async (item) => {
+  try {
+    console.log("Toggling item:", item._id);
 
-      // Send PATCH request to backend
-      const res = await axios.patch(
-        `${API_URL}/api/v1/canteen/foods/${item._id}`,
-        {
-          isAvailable: !item.isAvailable,
-        },
+    const res = await axios.patch(
+      `${API_URL}/api/v1/canteen/foods/${item._id}`, // <-- 'foods' plural
+      { isAvailable: !item.isAvailable },
+      { withCredentials: true }
+    );
+
+    console.log("Updated in DB:", res.data);
+
+    // Update UI
+    setMenuItems(
+      menuItems.map((m) =>
+        m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m
+      )
+    );
+  } catch (err) {
+    console.error("Failed to update availability:", err);
+    toast.error("Could not update availability. Try again.");
+
+    // Revert UI
+    setMenuItems(
+      menuItems.map((m) =>
+        m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m
+      )
+    );
+  }
+};
+
+
+
+  const [orders, setOrders] = useState([]);
+  const [stats, setStats] = useState(null);
+
+  const markAsReady = async (id) => {
+    try {
+      await axios.patch(
+        `${API_URL}/api/v1/canteen/orders/${id}/ready`,
+        {},
         { withCredentials: true }
       );
 
-      console.log("Updated in DB:", res.data);
-
-      // Optionally, refresh menu from backend:
-      // fetchFoods();
-    } catch (err) {
-      console.error("Failed to update availability:", err);
-      alert("Could not update availability. Try again.");
-
-      // Revert UI if failed
-      setMenuItems(
-        menuItems.map((m) =>
-          m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m
-        )
+      setOrders(
+        orders.map((o) => (o.id === id ? { ...o, status: "ready" } : o))
       );
+    } catch (err) {
+      console.error("Failed to mark ready", err);
+      toast.error("Failed to update order");
     }
-  };
-
-  const [orders, setOrders] = useState([
-    {
-      id: "ORD-7712",
-      student: "Rahul Verma",
-      items: ["Peri Peri Fries x1", "Lime Soda x2"],
-      total: "180",
-      waitTime: 3,
-      status: "preparing",
-      priority: "high",
-    },
-    {
-      id: "ORD-7713",
-      student: "Sneha Kapur",
-      items: ["Paneer Grill Sandwich x1"],
-      total: "120",
-      waitTime: 1,
-      status: "preparing",
-      priority: "normal",
-    },
-    {
-      id: "ORD-7710",
-      student: "Amit S.",
-      items: ["Veg Burger Combo"],
-      total: "210",
-      waitTime: 12,
-      status: "ready",
-      priority: "normal",
-    },
-  ]);
-
-  const markAsReady = (id) => {
-    setOrders(orders.map((o) => (o.id === id ? { ...o, status: "ready" } : o)));
   };
 
   const handleAddOrEditFood = async () => {
@@ -203,7 +242,7 @@ export function KitchenKDS() {
       !foodForm.category ||
       !foodForm.foodType
     ) {
-      alert("Please fill all required fields");
+      toast.error("Please fill all required fields");
       return;
     }
 
@@ -239,7 +278,7 @@ export function KitchenKDS() {
             item._id === editingFood._id ? res.data.data : item
           )
         );
-        alert("Food updated successfully!");
+        toast.success("Food updated successfully!");
       } else {
         // Add new
         res = await axios.post(`${API_URL}/api/v1/canteen/foods`, formData, {
@@ -247,7 +286,7 @@ export function KitchenKDS() {
           headers: { "Content-Type": "multipart/form-data" },
         });
         setMenuItems([...menuItems, res.data.data]);
-        alert("Food added successfully!");
+        toast.success("Food added successfully!");
       }
 
       setShowAddFood(false);
@@ -263,11 +302,78 @@ export function KitchenKDS() {
       });
     } catch (err) {
       console.error(err);
-      alert("Failed to save food.");
+      toast.error("Failed to save food.");
     } finally {
       setAddingFood(false);
     }
   };
+
+  useEffect(() => {
+    const fetchDashboardOrders = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axios.get(
+          `${API_URL}/api/v1/canteen/orders/dashboard?range=${RANGE_MAP[range]}`,
+          { withCredentials: true }
+        );
+
+        console.log("Dashboard API response:", res.data);
+
+        const rawOrders =
+          res.data?.orders || res.data?.data?.orders || res.data?.data || [];
+
+        if (!Array.isArray(rawOrders)) {
+          console.error("Orders is not array:", rawOrders);
+          setOrders([]);
+          return;
+        }
+
+        console.log("RAWWWWWWWWW", rawOrders);
+
+        const formattedOrders = rawOrders.map((o) => ({
+          id: o.transactionCode,
+          student: o.studentId.studentName || "Student",
+          rollNo: o.studentId.rollNo || "---",
+          items: Array.isArray(o.items)
+            ? o.items.map((i) => `${i.foodName || i.name} x${i.quantity || 1}`)
+            : [],
+          total: o.totalAmount || 0,
+          waitTime: Math.max(
+            1,
+            Math.floor((Date.now() - new Date(o.createdAt)) / 60000)
+          ),
+          // "order_received",
+          //       "preparing",
+          //       "ready",
+          //       "served",
+          status: o.orderStatus === "order_received" ? "preparing" : "ready",
+          paymentStatus: o.paymentStatus,
+        }));
+
+        setOrders(formattedOrders);
+        console.log("order aya", orders);
+
+        setStats(res.data?.stats || null);
+      } catch (err) {
+        console.error("Failed to fetch dashboard orders", err);
+        setError("Failed to load orders");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardOrders();
+  }, [range]);
+
+  const totalItems = menuItems.length;
+
+  const inStockItems = menuItems.filter(
+    (item) => item.quantityAvailable > 0 && item.isAvailable
+  ).length;
+
+  const inStockPercentage =
+    totalItems > 0 ? Math.round((inStockItems / totalItems) * 100) : 0;
 
   return (
     <>
@@ -294,11 +400,21 @@ export function KitchenKDS() {
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">
                   Kitchen Command
                 </h1>
+
                 <div className="flex items-center gap-3 mt-1">
-                  <span className="flex items-center gap-1.5 text-[10px] font-black bg-emerald-100 text-emerald-600 px-3 py-1 rounded-full uppercase tracking-wider">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></div>{" "}
-                    Online
+                  <span
+                    className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
+                      isOnline
+                        ? "bg-emerald-100 text-emerald-600"
+                        : "bg-slate-200 text-slate-500"
+                    }`}
+                  >
+                    {isOpen && (
+                      <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></div>
+                    )}
+                    {isOpen ? "Canteen Open" : "Canteen Close"}
                   </span>
+
                   <p className="text-sm font-bold text-slate-400">
                     {currentTime.toLocaleTimeString([], {
                       hour: "2-digit",
@@ -308,6 +424,95 @@ export function KitchenKDS() {
                 </div>
               </div>
             </div>
+
+            {/* The Modern Toggle Switch */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className={`
+    relative group inline-flex h-12 w-44 items-center rounded-full
+    transition-all duration-500 ease-in-out outline-none overflow-hidden
+    ${
+      isOpen
+        ? "bg-gradient-to-r from-emerald-500 to-green-600 shadow-[0_4px_15px_rgba(16,185,129,0.3)]"
+        : "bg-gradient-to-r from-slate-700 to-slate-800 shadow-[0_4px_15px_rgba(0,0,0,0.2)]"
+    }
+  `}
+            >
+              {/* Inner Subtle Bevel Effect */}
+              <div className="absolute inset-0 rounded-full border-t border-white/20 pointer-events-none" />
+
+              {/* Background Text Labels */}
+              <div className="relative w-full flex justify-between px-4 items-center z-10">
+                <span
+                  className={`
+      text-[15px] font-black uppercase tracking-widest transition-all duration-500
+      ${
+        isOpen
+          ? "text-white opacity-100 translate-x-0"
+          : "text-transparent opacity-0 -translate-x-4"
+      }
+    `}
+                >
+                  Online
+                </span>
+
+                <span
+                  className={`
+      text-[15px] font-black uppercase tracking-widest transition-all duration-500
+      ${
+        !isOpen
+          ? "text-slate-300 opacity-100 translate-x-0"
+          : "text-transparent opacity-0 translate-x-4"
+      }
+    `}
+                >
+                  Offline
+                </span>
+              </div>
+
+              {/* The Knob (Sliding Circle) */}
+              <div
+                className={`
+      absolute flex items-center justify-center
+      h-9 w-9 rounded-full bg-white shadow-[0_2px_8px_rgba(0,0,0,0.3)]
+      transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+      z-20
+      ${isOpen ? "left-[calc(100%-40px)]" : "left-1"}
+    `}
+              >
+                {/* Animated Icon inside Knob */}
+                <div
+                  className={`
+      w-2.5 h-2.5 rounded-full transition-all duration-500
+      ${
+        isOpen
+          ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+          : "bg-slate-400 scale-100"
+      }
+    `}
+                />
+
+                {/* Subtle Ring inside Knob */}
+                <div className="absolute inset-1 rounded-full border border-gray-100/50" />
+              </div>
+
+              {/* Animated Glow Overlay (Pulse) */}
+              {isOpen && (
+                <span className="absolute inset-0 rounded-full bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-[shimmer_2s_infinite] pointer-events-none" />
+              )}
+            </button>
+
+            {/* Add this to your Global CSS or Tailwind Config for the shimmer effect */}
+            <style jsx>{`
+              @keyframes shimmer {
+                0% {
+                  transform: translateX(-100%);
+                }
+                100% {
+                  transform: translateX(100%);
+                }
+              }
+            `}</style>
 
             <div className="flex flex-wrap gap-4 w-full lg:w-auto">
               <div className="flex-1 lg:flex-none bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4 px-6">
@@ -329,7 +534,9 @@ export function KitchenKDS() {
                   <p className="text-[10px] font-bold text-slate-400 uppercase">
                     Avg. Prep
                   </p>
-                  <p className="text-lg font-black text-slate-800">8.2m</p>
+                  <p className="text-lg font-black text-slate-800">
+                    {stats?.avgPrepTime ?? "--"}m
+                  </p>
                 </div>
               </div>
             </div>
@@ -340,13 +547,48 @@ export function KitchenKDS() {
           {/* --- NEW: ENGAGING MENU MANAGEMENT SECTION --- */}
           <section className="relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
-                  <Package className="text-blue-600" /> Live Menu Feed
-                </h2>
-                <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">
-                  Manage your active listings
-                </p>
+              <div className="flex items-center gap-4 p-2">
+                {/* Compact Glowing Icon */}
+                <div className="relative shrink-0">
+                  <div className="absolute inset-0 bg-blue-500/20 blur-md rounded-xl" />
+                  <div className="group relative h-3 w-3 flex items-center justify-center cursor-pointer">
+                    {/* Outer Animated Ring (Sonar Effect) */}
+                    <div className="absolute inset-0 bg-blue-500/30 rounded-full animate-ping group-hover:duration-75" />
+
+                    {/* Glassy Inner Ring */}
+                    <div className="absolute inset-[-4px] rounded-full border-2 border-blue-500/20 group-hover:border-blue-500/50 transition-colors duration-500" />
+
+                    {/* Main Container */}
+                    <div
+                      className={`
+    relative h-full w-full 
+    bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-900 
+    flex items-center justify-center 
+    rounded-full border border-blue-400/30 shadow-[0_0_20px_rgba(37,99,235,0.4)]
+    transition-all duration-500 group-hover:rotate-[360deg] group-hover:scale-110
+  `}
+                    >
+                      {/* Inner Reflection Shine */}
+                      <div className="absolute top-1 left-1 w-1/2 h-1/2 bg-white/10 rounded-full blur-[2px]" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Text Layout */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-lg font-black text-slate-800 tracking-tight leading-none">
+                      Live Menu
+                    </h2>
+                    <span className="px-1.5 py-0.5 rounded-md bg-emerald-100 text-[9px] font-bold text-emerald-600 uppercase tracking-tighter border border-emerald-200">
+                      Active
+                    </span>
+                  </div>
+
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                    Inventory Control
+                  </p>
+                </div>
               </div>
 
               {/* ACTION BUTTON */}
@@ -377,7 +619,9 @@ export function KitchenKDS() {
                   <p className="text-[10px] font-black text-emerald-600 uppercase mb-1">
                     In Stock
                   </p>
-                  <p className="text-3xl font-black text-emerald-700">92%</p>
+                  <p className="text-3xl font-black text-emerald-700">
+                    {inStockPercentage}%
+                  </p>
                 </div>
               </div>
 
@@ -387,25 +631,26 @@ export function KitchenKDS() {
                   <table className="w-full text-left border-collapse">
                     <thead>
                       <tr className="border-b border-slate-50">
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest ">
-                          Dish Image
+                        <th
+                          className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest
+               w-48 max-w-48 truncate whitespace-nowrap overflow-hidden text-center "
+                        >
+                          Dish
                         </th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          Dish Name
-                        </th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest  text-center">
                           Category
                         </th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest  text-center">
                           Price
                         </th>
                         <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest">
                           Quantity
                         </th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">
                           Available
                         </th>
-                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">
+                        <th className="px-8 py-6 text-[10px] font-black text-slate-400 uppercase tracking-widest  text-center">
                           Actions
                         </th>
                       </tr>
@@ -451,27 +696,25 @@ export function KitchenKDS() {
                               </div>
                             </div>
                           </td>
-                          <td className="px-8 py-5 font-bold text-slate-800">
-                            {item.name}
-                          </td>
-                          <td className="px-8 py-5">
+
+                          <td className="px-8 py-5  text-center">
                             <span className="text-[10px] font-black bg-slate-100 text-slate-500 px-3 py-1 rounded-full uppercase">
                               {item.category}
                             </span>
                           </td>
-                          <td className="px-8 py-5 font-black text-slate-900">
+                          <td className="px-8 py-5 font-black text-slate-900  text-center">
                             ₹{item.price}
                           </td>
                           {item.quantityAvailable <= 2 ? (
-                            <td className="px-8 py-5 font-black text-red-800">
+                            <td className="px-8 py-5 font-black text-red-800  text-center">
                               {item.quantityAvailable}
                             </td>
                           ) : (
-                            <td className="px-8 py-5 font-black text-slate-900">
+                            <td className="px-8 py-5 font-black text-slate-900  text-center">
                               {item.quantityAvailable}
                             </td>
                           )}
-                          <td className="px-8 py-5">
+                          <td className="px-8 py-5  text-center">
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={() => toggleAvailability(item)}
@@ -482,11 +725,11 @@ export function KitchenKDS() {
                                     ? "bg-emerald-500 shadow-lg shadow-emerald-200"
                                     : "bg-slate-200"
                                 }
-        ${
-          item.quantityAvailable === 0
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer"
-        }`}
+                                  ${
+                                    item.quantityAvailable === 0
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : "cursor-pointer"
+                                  }`}
                               >
                                 <span
                                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
@@ -534,7 +777,10 @@ export function KitchenKDS() {
                                 <Edit3 size={18} />
                               </button>
 
-                              <button className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition-colors">
+                              <button
+                                onClick={() => setDeleteTarget(item)}
+                                className="p-2 hover:bg-red-50 text-red-500 rounded-xl transition-colors"
+                              >
                                 <Trash2 size={18} />
                               </button>
                             </div>
@@ -584,12 +830,35 @@ export function KitchenKDS() {
                 </button>
               ))}
             </div>
+
+            <div>
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Range:
+                </span>
+                {Object.entries(RANGE_MAP).map(([key, value]) => (
+                  <button
+                    key={key}
+                    onClick={() => setRange(Number(key))}
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${
+                      range === Number(key)
+                        ? "bg-gradient-to-r from-blue-700 to-blue-950 text-white animate-pulse"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {value.charAt(0).toUpperCase() + value.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
             <button className="hidden md:flex items-center gap-2 text-slate-400 font-bold text-xs mr-4 hover:text-slate-600">
               <Printer size={16} /> Auto-Print: ON
             </button>
           </div>
 
-          {/* --- ENHANCED TICKET GRID --- */}
+          {/*Range */}
+
+          {/* --- ENHANCED ORDER GRID --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {orders
               .filter(
@@ -609,10 +878,19 @@ export function KitchenKDS() {
                   <div className="absolute top-0 left-0 w-full h-2 bg-slate-50">
                     <div
                       className={`h-full transition-all duration-1000 ${
-                        order.waitTime > 10 ? "bg-red-500" : "bg-blue-500"
-                      }`}
+                        order.status === "ready"
+                          ? "bg-green-500"
+                          : order.waitTime > 20
+                          ? "bg-red-500"
+                          : "bg-blue-500"
+                      }
+`}
                       style={{
-                        width: `${Math.min(order.waitTime * 10, 100)}%`,
+                        width: `${
+                          order.status === "ready"
+                            ? 100
+                            : Math.min(order.waitTime * 20, 100)
+                        }%`,
                       }}
                     ></div>
                   </div>
@@ -623,19 +901,33 @@ export function KitchenKDS() {
                         <span className="text-[10px] font-black text-blue-600 bg-blue-50 px-3 py-1 rounded-full uppercase tracking-tighter">
                           Ticket #{order.id}
                         </span>
-                        <h4 className="text-sm font-bold text-slate-400 mt-1 italic">
-                          {order.student}
+                        <h4 className="text-sm font-bold text-slate-400 mt-1 italic flex gap-2">
+                          {order.student}{" "}
+                          <span className="text-sm"> ({order.rollNo})</span>
                         </h4>
                       </div>
-                      <div
-                        className={`flex items-center gap-1.5 font-black text-[10px] uppercase px-3 py-1 rounded-full ${
-                          order.waitTime > 5
-                            ? "bg-red-50 text-red-500 animate-pulse"
-                            : "bg-slate-100 text-slate-400"
-                        }`}
-                      >
-                        <Clock size={12} /> {order.waitTime}m ago
-                      </div>
+                      {order.status !== "ready" && (
+                        <div
+                          className={`flex items-center gap-1.5 font-black text-[10px] uppercase px-3 py-1 rounded-full ${
+                            order.waitTime > 15
+                              ? "bg-red-50 text-red-500 animate-pulse"
+                              : "bg-slate-100 text-slate-400"
+                          }`}
+                        >
+                          <Clock size={12} />{" "}
+                          {order.waitTime >= 1440
+                            ? `${Math.floor(
+                                order.waitTime / 1440
+                              )}d ${Math.floor(
+                                (order.waitTime % 1440) / 60
+                              )}h ago`
+                            : order.waitTime >= 60
+                            ? `${Math.floor(order.waitTime / 60)}h ${
+                                order.waitTime % 60
+                              }m ago`
+                            : `${order.waitTime}m ago`}
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-3 mb-8">
@@ -649,7 +941,7 @@ export function KitchenKDS() {
                       ))}
                     </div>
 
-                    <div className="pt-6 border-t border-dashed border-slate-100 flex items-center justify-between">
+                    <div className="pt-6 border-t-3  border-dashed border-slate-200 flex items-center justify-between">
                       <div>
                         <p className="text-[10px] font-black text-slate-300 uppercase">
                           Paid Total
@@ -658,34 +950,10 @@ export function KitchenKDS() {
                           ₹{order.total}
                         </p>
                       </div>
-                      {order.priority === "high" && (
-                        <div className="bg-orange-50 p-2 rounded-xl text-orange-500">
-                          <AlertCircle size={20} />
-                        </div>
-                      )}
                     </div>
                   </div>
 
                   {/*QR MODEL */}
-
-                  <div className="p-5 bg-slate-50/50 backdrop-blur-sm">
-                    {order.status === "preparing" ? (
-                      <button
-                        onClick={() => markAsReady(order.id)}
-                        className="w-full bg-slate-900 text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 hover:bg-blue-600 transition-all active:scale-95 shadow-lg shadow-slate-200"
-                      >
-                        <Play size={16} fill="currentColor" /> Dispatch to
-                        Counter
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setSelectedOrder(order)}
-                        className="w-full bg-emerald-500 text-white py-5 rounded-3xl font-black uppercase tracking-[0.2em] text-[10px] flex items-center justify-center gap-3 hover:bg-emerald-600 transition-all active:scale-95 shadow-lg shadow-emerald-200"
-                      >
-                        <QrCode size={18} /> Verify & Deliver
-                      </button>
-                    )}
-                  </div>
                 </div>
               ))}
           </div>
@@ -752,7 +1020,7 @@ export function KitchenKDS() {
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xl flex items-center justify-center p-6">
           <div className="bg-white rounded-[3rem] max-w-10xl w-full shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
             {/* MODAL HEADER */}
-            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 w-10xl " >
+            <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 w-10xl ">
               <h3 className="text-xl font-black tracking-tight">
                 Full Menu List
               </h3>
@@ -770,11 +1038,9 @@ export function KitchenKDS() {
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="border-b border-slate-100">
                     <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">
-                      Image
+                      DISH
                     </th>
-                    <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">
-                      Dish
-                    </th>
+
                     <th className="px-8 py-4 text-[10px] font-black text-slate-400 uppercase">
                       Category
                     </th>
@@ -836,7 +1102,6 @@ export function KitchenKDS() {
                         </div>
                       </td>
 
-                      <td className="px-8 py-5 font-bold">{item.name}</td>
                       <td className="px-8 py-5">
                         <span className="text-[10px] font-black bg-slate-100 px-3 py-1 rounded-full uppercase">
                           {item.category}
@@ -919,7 +1184,10 @@ export function KitchenKDS() {
                             <Edit3 size={18} />
                           </button>
 
-                          <button className="p-2 hover:bg-red-50 text-red-500 rounded-xl">
+                          <button
+                            onClick={() => setDeleteTarget(item)}
+                            className="p-2 hover:bg-red-50 text-red-500 rounded-xl"
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -933,116 +1201,253 @@ export function KitchenKDS() {
         </div>
       )}
 
-      {/*Add food */}
-      {showAddFood && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-lg rounded-2xl shadow-2xl p-6">
+      {/* Corfirm to delete */}
+      {deleteTarget && (
+        <div className="fixed inset-0 z-[999] bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm shadow-2xl animate-in fade-in zoom-in duration-200">
             {/* Header */}
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Add New Food</h2>
-              <button onClick={() => setShowAddFood(false)}>
-                <X className="w-6 h-6 text-gray-500" />
-              </button>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-4">
-              <input
-                type="text"
-                placeholder="Food Name"
-                value={foodForm.name}
-                onChange={(e) =>
-                  setFoodForm({ ...foodForm, name: e.target.value })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <input
-                type="number"
-                placeholder="Price"
-                value={foodForm.price}
-                onChange={(e) =>
-                  setFoodForm({ ...foodForm, price: e.target.value })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <input
-                type="number"
-                placeholder="Quantity Available"
-                value={foodForm.quantityAvailable}
-                onChange={(e) =>
-                  setFoodForm({
-                    ...foodForm,
-                    quantityAvailable: e.target.value,
-                  })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              <select
-                value={foodForm.category}
-                onChange={(e) =>
-                  setFoodForm({ ...foodForm, category: e.target.value })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              >
-                <option value="snack">Snacks</option>
-                <option value="meal">Meal</option>
-                <option value="drink">Drink</option>
-                <option value="sweet">Sweet</option>
-              </select>
-
-              <select
-                value={foodForm.foodType}
-                onChange={(e) =>
-                  setFoodForm({ ...foodForm, foodType: e.target.value })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              >
-                <option value="veg">Veg</option>
-                <option value="non-veg">Non-Veg</option>
-              </select>
-
-              <textarea
-                placeholder="Description"
-                value={foodForm.description}
-                onChange={(e) =>
-                  setFoodForm({ ...foodForm, description: e.target.value })
-                }
-                className="w-full border rounded-lg px-4 py-2"
-              />
-
-              {/* New Image Upload */}
-              <div>
-                <label className="block text-sm font-bold mb-1">
-                  Upload Image
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setFoodForm({ ...foodForm, image: e.target.files[0] })
-                  }
-                  className="w-full border rounded-lg px-4 py-2"
-                />
-                {foodForm.image && (
-                  <p className="mt-2 text-sm text-gray-500">
-                    Selected: {foodForm.image.name}
-                  </p>
-                )}
+            <div className="p-6 text-center">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-100 text-red-500">
+                <AlertCircle size={28} />
               </div>
 
+              <h3 className="text-lg font-black text-slate-900">
+                Delete Food Item?
+              </h3>
+              <p className="text-sm text-slate-500 mt-2">
+                This will permanently remove
+                <span className="font-bold text-slate-700">
+                  {" "}
+                  {deleteTarget.name}
+                </span>
+                . This action cannot be undone.
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 p-6 pt-0">
+              <button
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 transition"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={confirmDeleteFood}
+                disabled={deleting}
+                className="flex-1 py-2.5 rounded-xl font-bold text-white bg-red-600 hover:bg-red-700 transition flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/*Add food */}
+      {showAddFood && (
+        <div className="fixed inset-0 z-110 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4">
+          {/* Added max-h-[90vh] and flex-col to ensure it stays within screen bounds */}
+          <div className="bg-white w-full max-w-xl max-h-[90vh] flex flex-col rounded-3xl shadow-2xl overflow-hidden border border-gray-100">
+            {/* FIXED HEADER */}
+            <div className="shrink-0 relative bg-gradient-to-r from-green-600 to-green-600 px-8 py-5 text-white">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-xl font-bold tracking-tight">
+                    {editingFood ? "Update Food" : "Add New Food"}
+                  </h2>
+                  <p className="text-green-100 text-xs opacity-90 font-medium">
+                    Update your menu in real-time
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowAddFood(false);
+                    setEditingFood(null);
+                    setFoodForm({
+                      name: "",
+                      price: "",
+                      quantityAvailable: "",
+                      category: "snacks",
+                      foodType: "veg",
+                      description: "",
+                      image: null,
+                    });
+                  }}
+                  className="bg-white/20 hover:bg-white/30 p-2 rounded-full transition-all"
+                >
+                  <X className="w-5 h-5 text-white" />
+                </button>
+              </div>
+            </div>
+
+            {/* SCROLLABLE FORM BODY */}
+            <div className="flex-1 overflow-y-auto p-6 md:p-8 space-y-5 custom-scrollbar">
+              {/* Main Info Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                    Food Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Spicy Paneer Tikka"
+                    value={foodForm.name}
+                    onChange={(e) =>
+                      setFoodForm({ ...foodForm, name: e.target.value })
+                    }
+                    className="w-full mt-1 border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 focus:ring-0 transition-all outline-none bg-gray-50/50 hover:bg-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                    Price (₹)
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="0.00"
+                    value={foodForm.price}
+                    onChange={(e) =>
+                      setFoodForm({ ...foodForm, price: e.target.value })
+                    }
+                    className="w-full mt-1 border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 focus:ring-0 transition-all outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                    Stock Qty
+                  </label>
+                  <input
+                    type="number"
+                    placeholder="Qty"
+                    value={foodForm.quantityAvailable}
+                    onChange={(e) =>
+                      setFoodForm({
+                        ...foodForm,
+                        quantityAvailable: e.target.value,
+                      })
+                    }
+                    className="w-full mt-1 border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 focus:ring-0 transition-all outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Selectors Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                    Category
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={foodForm.category}
+                      onChange={(e) =>
+                        setFoodForm({ ...foodForm, category: e.target.value })
+                      }
+                      className="w-full mt-1 appearance-none border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 transition-all outline-none bg-white cursor-pointer"
+                    >
+                      <option value="snacks">🍿 Snacks</option>
+                      <option value="meal">🍱 Meal</option>
+                      <option value="drink">🥤 Drink</option>
+                      <option value="sweet">🍰 Sweet</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                    Dietary Type
+                  </label>
+                  <select
+                    value={foodForm.foodType}
+                    onChange={(e) =>
+                      setFoodForm({ ...foodForm, foodType: e.target.value })
+                    }
+                    className="w-full mt-1 appearance-none border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 transition-all outline-none bg-white cursor-pointer"
+                  >
+                    <option value="veg">🟢 Veg</option>
+                    <option value="non-veg">🔴 Non-Veg</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                  Description
+                </label>
+                <textarea
+                  placeholder="Describe the taste..."
+                  rows="2"
+                  value={foodForm.description}
+                  onChange={(e) =>
+                    setFoodForm({ ...foodForm, description: e.target.value })
+                  }
+                  className="w-full mt-1 border-gray-200 border-2 rounded-xl px-4 py-2.5 focus:border-green-500 transition-all outline-none resize-none"
+                />
+              </div>
+
+              {/* Compact Image Upload */}
+              <div>
+                <label className="text-[10px] font-black text-gray-400 uppercase tracking-[2px] ml-1">
+                  Food Photo
+                </label>
+                <div className="mt-1 flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-28 border-2 border-gray-300 border-dashed rounded-2xl cursor-pointer bg-gray-50 hover:bg-green-50 hover:border-green-400 transition-all">
+                    <div className="flex flex-col items-center justify-center py-2">
+                      <UploadCloud className="w-6 h-6 text-gray-400 mb-1" />
+                      <p className="text-xs text-gray-500 italic">
+                        {foodForm.image
+                          ? foodForm.image.name
+                          : "PNG, JPG up to 5MB"}
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        setFoodForm({ ...foodForm, image: e.target.files[0] })
+                      }
+                    />
+                  </label>
+                </div>
+                {foodForm.image && (
+                  <div className="mt-2 flex items-center gap-2 text-green-600 text-[11px] font-bold uppercase tracking-wider">
+                    <CheckCircle className="w-3.5 h-3.5" />
+                    File: {foodForm.image.name}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* FIXED FOOTER ACTION */}
+            <div className="shrink-0 p-6 bg-gray-50 border-t border-gray-100">
               <button
                 onClick={handleAddOrEditFood}
                 disabled={addingFood}
-                className="w-full py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700"
+                className="w-full py-3.5 bg-green-600 text-white rounded-2xl font-bold text-base shadow-lg shadow-green-200 hover:bg-green-700 hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:bg-gray-300 disabled:shadow-none"
               >
-                {addingFood
-                  ? "Saving..."
-                  : editingFood
-                  ? "Update Food"
-                  : "Add Food"}
+                {addingFood ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Processing...
+                  </div>
+                ) : editingFood ? (
+                  "Save Changes"
+                ) : (
+                  "Confirm & Add Food"
+                )}
               </button>
             </div>
           </div>

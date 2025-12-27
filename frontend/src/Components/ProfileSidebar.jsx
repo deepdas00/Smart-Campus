@@ -12,15 +12,18 @@ import {
   BookDashedIcon,
   BookTemplate,
   ShieldAlert,
-  LogIn 
+  LogIn,
+  LogOut 
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function ProfileSidebar({ isOpen, onClose }) {
-  const { user } = useAuth();
-
-  
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   const [studentName, setStudentName] = useState(user?.studentName);
   const [avatar, setAvatar] = useState(user?.avatar);
@@ -38,7 +41,44 @@ export default function ProfileSidebar({ isOpen, onClose }) {
     }
   }, [user]);
 
-  
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const handleLogout = async () => {
+    try {
+      toast.loading("Logging out...", { id: "logout" });
+
+      await axios.post(
+        `${API_URL}/api/v1/auth/logout`,
+        {},
+        { withCredentials: true }
+      );
+
+      logout(); // clear context
+      toast.success("Logged out successfully", { id: "logout" });
+
+      onClose();
+      setTimeout(() => navigate("/login"), 100);
+    } catch (error) {
+      console.error(error);
+      toast.error("Logout failed", { id: "logout" });
+    }
+  };
+
+  function LogoutItem({ icon, label, onLogout }) {
+    return (
+      <button
+        onClick={onLogout}
+        className="w-full group flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-red-50 text-red-600"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-white shadow-sm rounded-md">{icon}</div>
+          <span className="font-medium">{label}</span>
+        </div>
+
+        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition" />
+      </button>
+    );
+  }
 
   return (
     <>
@@ -128,14 +168,21 @@ export default function ProfileSidebar({ isOpen, onClose }) {
             activeColor="bg-red-50 text-red-600"
             onClose={onClose}
           />
-        
-          <SidebarItem
-            to="/login"
-            icon={<LogIn  className="w-5 h-5" />}
-            label="login"
-            color="blue"
-            onClose={onClose}
-          />
+          {user ? (
+            <LogoutItem
+              icon={<LogIn className="w-5 h-5" />}
+              label="Logout"
+              onLogout={handleLogout}
+            />
+          ) : (
+            <SidebarItem
+              to="/login"
+              icon={<LogIn className="w-5 h-5" />}
+              label="logout"
+              color="blue"
+              onClose={onClose}
+            />
+          )}
         </div>
 
         {/* Footer */}

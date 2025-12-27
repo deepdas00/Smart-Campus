@@ -7,6 +7,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
+import { getStudentModel } from "../../models/collegeStudent.model.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
@@ -224,7 +225,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
   const { orderId } = req.params;
 
-  console.log("ID", orderId);
+  // console.log("ID", orderId);
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -240,26 +241,26 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
+  // 🔥 Register dependent models on this connection
+  getStudentModel(collegeConn);
   const Order = getCanteenOrderModel(collegeConn);
 
-  console.log(Order);
-
+  // console.log(Order);
   // 3️⃣ Fetch filtered orders
-  const orders = await Order.findOne({
-    paymentStatus: "paid",
-    orderId: orderId,
-  })
-    // .populate("studentId", "studentName rollNo mobileNo")
+  const order = await Order.findById(orderId)
+    .populate("studentId", "studentName rollNo mobileNo")
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
 
-  console.log(orders);
+
+
+  // console.log(order);
 
   // 4️⃣ Response
   res
     .status(200)
-    .json(new ApiResponse(200, orders, `Order fetched successfully`));
+    .json(new ApiResponse(200, order, `Order fetched successfully`));
 });
 
 // Get logged-in student's order history

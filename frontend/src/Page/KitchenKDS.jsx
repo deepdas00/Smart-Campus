@@ -204,9 +204,9 @@ export function KitchenKDS() {
       console.log("final", orderId);
 
       const res = await axios.get(
-  `${API_URL}/api/v1/canteen/orders/details/${orderId}`,
-  { withCredentials: true }
-);
+        `${API_URL}/api/v1/canteen/orders/details/${orderId}`,
+        { withCredentials: true }
+      );
 
 
       console.log("response", res);
@@ -223,7 +223,7 @@ export function KitchenKDS() {
     try {
       setIsProcessing(true); // Start loading state
       console.log("SCANEERRRR ID ", scannedOrder._id);
-      
+
       await axios.post(
         `${API_URL}/api/v1/canteen/orders/serve`,
         { orderId: scannedOrder._id },
@@ -634,11 +634,10 @@ export function KitchenKDS() {
 
                 <div className="flex items-center gap-3 mt-1">
                   <span
-                    className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${
-                      isOpen
+                    className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${isOpen
                         ? "bg-emerald-100 text-emerald-600"
                         : "bg-slate-200 text-slate-500"
-                    }`}
+                      }`}
                   >
                     {isOpen && (
                       <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping"></div>
@@ -663,11 +662,10 @@ export function KitchenKDS() {
               className={`
     relative group inline-flex h-12 w-44 items-center rounded-full
     transition-all duration-500 ease-in-out outline-none overflow-hidden
-    ${
-      isOpen
-        ? "bg-gradient-to-r from-emerald-500 to-green-600"
-        : "bg-gradient-to-r from-slate-700 to-slate-800"
-    }
+    ${isOpen
+                  ? "bg-gradient-to-r from-emerald-500 to-green-600"
+                  : "bg-gradient-to-r from-slate-700 to-slate-800"
+                }
     ${toggleLoading ? "opacity-60 cursor-not-allowed" : ""}
   `}
             >
@@ -679,11 +677,10 @@ export function KitchenKDS() {
                 <span
                   className={`
       text-[15px] font-black uppercase tracking-widest transition-all duration-500
-      ${
-        isOpen
-          ? "text-white opacity-100 translate-x-0"
-          : "text-transparent opacity-0 -translate-x-4"
-      }
+      ${isOpen
+                      ? "text-white opacity-100 translate-x-0"
+                      : "text-transparent opacity-0 -translate-x-4"
+                    }
     `}
                 >
                   Online
@@ -692,11 +689,10 @@ export function KitchenKDS() {
                 <span
                   className={`
       text-[15px] font-black uppercase tracking-widest transition-all duration-500
-      ${
-        !isOpen
-          ? "text-slate-300 opacity-100 translate-x-0"
-          : "text-transparent opacity-0 translate-x-4"
-      }
+      ${!isOpen
+                      ? "text-slate-300 opacity-100 translate-x-0"
+                      : "text-transparent opacity-0 translate-x-4"
+                    }
     `}
                 >
                   Offline
@@ -717,11 +713,10 @@ export function KitchenKDS() {
                 <div
                   className={`
       w-2.5 h-2.5 rounded-full transition-all duration-500
-      ${
-        isOpen
-          ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
-          : "bg-slate-400 scale-100"
-      }
+      ${isOpen
+                      ? "bg-green-500 scale-110 shadow-[0_0_8px_rgba(34,197,94,0.6)]"
+                      : "bg-slate-400 scale-100"
+                    }
     `}
                 />
 
@@ -1020,41 +1015,37 @@ export function KitchenKDS() {
                             <div className="flex items-center gap-3">
                               <button
                                 onClick={() => toggleAvailability(item)}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
-                                  item.quantityAvailable <= 0
+                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${item.quantityAvailable <= 0
                                     ? "bg-gray-400"
                                     : item.isAvailable
-                                    ? "bg-emerald-500 shadow-lg shadow-emerald-200"
-                                    : "bg-slate-200"
-                                }
-                                  ${
-                                    item.quantityAvailable === 0
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : "cursor-pointer"
+                                      ? "bg-emerald-500 shadow-lg shadow-emerald-200"
+                                      : "bg-slate-200"
+                                  }
+                                  ${item.quantityAvailable === 0
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "cursor-pointer"
                                   }`}
                               >
                                 <span
-                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                                    item.isAvailable
+                                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${item.isAvailable
                                       ? "translate-x-6"
                                       : "translate-x-1"
-                                  }`}
+                                    }`}
                                 />
                               </button>
                               <span
-                                className={`text-[10px] font-black uppercase tracking-widest ${
-                                  item.quantityAvailable <= 0
+                                className={`text-[10px] font-black uppercase tracking-widest ${item.quantityAvailable <= 0
                                     ? "text-gray-400"
                                     : item.isAvailable
-                                    ? "text-emerald-600"
-                                    : "text-slate-400"
-                                }`}
+                                      ? "text-emerald-600"
+                                      : "text-slate-400"
+                                  }`}
                               >
                                 {item.quantityAvailable <= 0
                                   ? "Stock Out"
                                   : item.isAvailable
-                                  ? "Available"
-                                  : "Not Available"}
+                                    ? "Available"
+                                    : "Not Available"}
                               </span>
                             </div>
                           </td>
@@ -1114,20 +1105,18 @@ export function KitchenKDS() {
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
-                  className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-500 ${
-                    activeTab === tab
+                  className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-500 ${activeTab === tab
                       ? "bg-slate-900 text-white shadow-2xl shadow-slate-200 scale-105"
                       : "text-slate-400 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   {tab}{" "}
                   {activeTab === tab &&
-                    `(${
-                      orders.filter(
-                        (o) =>
-                          o.status ===
-                          (tab === "pending" ? "preparing" : "ready")
-                      ).length
+                    `(${orders.filter(
+                      (o) =>
+                        o.status ===
+                        (tab === "pending" ? "preparing" : "ready")
+                    ).length
                     })`}
                 </button>
               ))}
@@ -1142,11 +1131,10 @@ export function KitchenKDS() {
                   <button
                     key={key}
                     onClick={() => setRange(Number(key))}
-                    className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${
-                      range === Number(key)
+                    className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${range === Number(key)
                         ? "bg-gradient-to-r from-blue-700 to-blue-950 text-white animate-pulse"
                         : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                    }`}
+                      }`}
                   >
                     {value.charAt(0).toUpperCase() + value.slice(1)}
                   </button>
@@ -1170,29 +1158,26 @@ export function KitchenKDS() {
               .map((order) => (
                 <div
                   key={order.id}
-                  className={`group bg-white rounded-[3rem] border-2 transition-all duration-500 flex flex-col relative overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 ${
-                    order.priority === "high"
+                  className={`group bg-white rounded-[3rem] border-2 transition-all duration-500 flex flex-col relative overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 ${order.priority === "high"
                       ? "border-orange-100 shadow-orange-900/5"
                       : "border-transparent shadow-slate-900/5"
-                  }`}
+                    }`}
                 >
                   {/* Progress Indicator */}
                   <div className="absolute top-0 left-0 w-full h-2 bg-slate-50">
                     <div
-                      className={`h-full transition-all duration-1000 ${
-                        order.status === "ready"
+                      className={`h-full transition-all duration-1000 ${order.status === "ready"
                           ? "bg-green-500"
                           : order.waitTime > 20
-                          ? "bg-red-500"
-                          : "bg-blue-500"
-                      }
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                        }
 `}
                       style={{
-                        width: `${
-                          order.status === "ready"
+                        width: `${order.status === "ready"
                             ? 100
                             : Math.min(order.waitTime * 20, 100)
-                        }%`,
+                          }%`,
                       }}
                     ></div>
                   </div>
@@ -1210,24 +1195,22 @@ export function KitchenKDS() {
                       </div>
                       {order.status !== "ready" && (
                         <div
-                          className={`flex items-center gap-1.5 font-black text-[10px] uppercase px-3 py-1 rounded-full ${
-                            order.waitTime > 15
+                          className={`flex items-center gap-1.5 font-black text-[10px] uppercase px-3 py-1 rounded-full ${order.waitTime > 15
                               ? "bg-red-50 text-red-500 animate-pulse"
                               : "bg-slate-100 text-slate-400"
-                          }`}
+                            }`}
                         >
                           <Clock size={12} />{" "}
                           {order.waitTime >= 1440
                             ? `${Math.floor(
-                                order.waitTime / 1440
-                              )}d ${Math.floor(
-                                (order.waitTime % 1440) / 60
-                              )}h ago`
+                              order.waitTime / 1440
+                            )}d ${Math.floor(
+                              (order.waitTime % 1440) / 60
+                            )}h ago`
                             : order.waitTime >= 60
-                            ? `${Math.floor(order.waitTime / 60)}h ${
-                                order.waitTime % 60
+                              ? `${Math.floor(order.waitTime / 60)}h ${order.waitTime % 60
                               }m ago`
-                            : `${order.waitTime}m ago`}
+                              : `${order.waitTime}m ago`}
                         </div>
                       )}
                     </div>
@@ -1426,41 +1409,37 @@ export function KitchenKDS() {
                           <button
                             onClick={() => toggleAvailability(item)}
                             disabled={item.quantityAvailable === 0}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${
-                              item.quantityAvailable <= 0
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${item.quantityAvailable <= 0
                                 ? "bg-gray-400"
                                 : item.isAvailable
-                                ? "bg-emerald-500 shadow-lg shadow-emerald-200"
-                                : "bg-slate-200"
-                            }
-        ${
-          item.quantityAvailable === 0
-            ? "opacity-50 cursor-not-allowed"
-            : "cursor-pointer"
-        }`}
+                                  ? "bg-emerald-500 shadow-lg shadow-emerald-200"
+                                  : "bg-slate-200"
+                              }
+        ${item.quantityAvailable === 0
+                                ? "opacity-50 cursor-not-allowed"
+                                : "cursor-pointer"
+                              }`}
                           >
                             <span
-                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${
-                                item.isAvailable
+                              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${item.isAvailable
                                   ? "translate-x-6"
                                   : "translate-x-1"
-                              }`}
+                                }`}
                             />
                           </button>
                           <span
-                            className={`text-[10px] font-black uppercase tracking-widest ${
-                              item.quantityAvailable <= 0
+                            className={`text-[10px] font-black uppercase tracking-widest ${item.quantityAvailable <= 0
                                 ? "text-gray-400"
                                 : item.isAvailable
-                                ? "text-emerald-600"
-                                : "text-slate-400"
-                            }`}
+                                  ? "text-emerald-600"
+                                  : "text-slate-400"
+                              }`}
                           >
                             {item.quantityAvailable <= 0
                               ? "Stock Out"
                               : item.isAvailable
-                              ? "Available"
-                              : "Not Available"}
+                                ? "Available"
+                                : "Not Available"}
                           </span>
                         </div>
                       </td>
@@ -1833,11 +1812,10 @@ export function KitchenKDS() {
               {/* Floating Paid Badge */}
               <div className="absolute top-6 right-8">
                 <span
-                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
-                    scannedOrder.paymentStatus === "paid"
+                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${scannedOrder.paymentStatus === "paid"
                       ? "bg-emerald-500 text-white"
                       : "bg-red-500 text-white"
-                  }`}
+                    }`}
                 >
                   {scannedOrder.paymentStatus || "Unpaid"}
                 </span>
@@ -1845,18 +1823,18 @@ export function KitchenKDS() {
 
               {/* User Avatar & Info */}
 
-              
-              
-                <div className="px-0 pb-0 -mt-1 text-center">
-                  <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
-                    <Check
-                      className="text-emerald-600"
-                      size={32}
-                      strokeWidth={3}
-                    />
-                  </div>
+
+
+              <div className="px-0 pb-0 -mt-1 text-center">
+                <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
+                  <Check
+                    className="text-emerald-600"
+                    size={32}
+                    strokeWidth={3}
+                  />
                 </div>
-             
+              </div>
+
 
               <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
                 {scannedOrder.studentId.studentName || "Student User"}
@@ -1939,16 +1917,14 @@ export function KitchenKDS() {
                       !isProcessing && (isDragging.current = true)
                     }
                     className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
-    ${
-      isProcessing
-        ? "bg-slate-200 cursor-wait"
-        : "bg-white cursor-grab active:cursor-grabbing"
-    }`}
+    ${isProcessing
+                        ? "bg-slate-200 cursor-wait"
+                        : "bg-white cursor-grab active:cursor-grabbing"
+                      }`}
                     style={{
                       position: "absolute",
-                      left: `calc(${swipeProgress}% - ${
-                        swipeProgress > 85 ? "52px" : "0px"
-                      })`,
+                      left: `calc(${swipeProgress}% - ${swipeProgress > 85 ? "52px" : "0px"
+                        })`,
                       transition: isDragging.current
                         ? "none"
                         : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",

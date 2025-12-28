@@ -523,7 +523,7 @@ export default function Library() {
                         onClick={() => fetchTransactionDetails(item._id)}
                         className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
                           isFined
-                            ? "bg-rose-50/40 border-rose-100"
+                            ? "bg-rose-100/40 border-rose-100"
                             : "bg-white border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
                         }`}
                       >

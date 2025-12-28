@@ -7,6 +7,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
+import { getStudentModel } from "../../models/collegeStudent.model.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
@@ -102,7 +103,8 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 //order serving by canteen staff
 export const serveOrder = asyncHandler(async (req, res) => {
-  const { orderId, collegeCode } = req.body;
+  const { orderId } = req.body;
+  const { collegeCode } = req.user;
 
   if (!orderId || !collegeCode) {
     throw new ApiError(400, "Invalid QR data");
@@ -125,7 +127,7 @@ export const serveOrder = asyncHandler(async (req, res) => {
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
   const canteenPolicy = await CanteenPolicyModel.findOne();
-  canteenStatus = canteenPolicy.isActive;
+  const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
     res.status(401).json({ message: "Canteen Is Offline!!" });
   }
@@ -223,6 +225,8 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
   const { orderId } = req.params;
 
+  // console.log("ID", orderId);
+
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -237,23 +241,26 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
+  // 🔥 Register dependent models on this connection
+  getStudentModel(collegeConn);
   const Order = getCanteenOrderModel(collegeConn);
 
+  // console.log(Order);
   // 3️⃣ Fetch filtered orders
-  const orders = await Order.findOne({
-    paymentStatus: "paid",
-   orderId 
-  })
-    .sort({ createdAt: -1 })
+  const order = await Order.findById(orderId)
     .populate("studentId", "studentName rollNo mobileNo")
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
 
+
+
+  // console.log(order);
+
   // 4️⃣ Response
   res
     .status(200)
-    .json(new ApiResponse(200, orders, `Order fetched successfully`));
+    .json(new ApiResponse(200, order, `Order fetched successfully`));
 });
 
 // Get logged-in student's order history
@@ -291,15 +298,10 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
     );
 });
 
+// to set online and offline status (toggle btn)
 export const canteenIsActive = asyncHandler(async (req, res) => {
   const { isActive } = req.body; ///true or false
-
-  console.log(isActive);
   const { collegeCode } = req.user;
-
-  // if (!isActive){
-  //     throw new ApiError(400, "state is not given");
-  // }
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -315,17 +317,11 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
-  const CanteenPolcyModel = getCanteenPolicyModel(collegeConn);
+  const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
 
-  const canteenPolicy = await CanteenPolcyModel.findOne();
-
-  if (!canteenPolicy) {
-    throw new ApiError(404, "Canteen policy not found");
-  }
+  const canteenPolicy = await CanteenPolicyModel.findOne();
 
   canteenPolicy.isActive = isActive;
-
-  console.log(canteenPolicy.isActive);
 
   await canteenPolicy.save({ validateBeforeSave: false });
 
@@ -335,6 +331,29 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
       new ApiResponse(200, isActive, "Canteen Status fetched successfully")
     );
 });
+
+// export const canteenSatusFetch = asyncHandler(async (req, res) => {
+
+//   const { collegeCode } = req.user;
+
+//   const canteenPolicy = await CanteenPolcyModel.findOne();
+
+//   if (!canteenPolicy) {
+//     throw new ApiError(404, "Canteen policy not found");
+//   }
+
+//   canteenPolicy.isActive = isActive;
+
+//   console.log(canteenPolicy.isActive);
+
+//   await canteenPolicy.save({ validateBeforeSave: false });
+
+//   res
+//     .status(200)
+//     .json(
+//       new ApiResponse(200, isActive, "Canteen Status fetched successfully")
+//     );
+// });
 
 export const canteenSatusFetch = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
@@ -358,8 +377,6 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
   const canteenPolicy = await CanteenPolicyModel.findOne();
 
   const canteenStatus = canteenPolicy.isActive;
-
-  console.log("Canteen", canteenStatus);
 
   res
     .status(200)

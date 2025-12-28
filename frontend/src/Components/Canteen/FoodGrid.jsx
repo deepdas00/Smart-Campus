@@ -102,7 +102,7 @@ export default function FoodGrid({
 
                 {/* The "Floating" Book Container */}
                 <div
-                  className={`relative z-10 transition-all duration-500 ease-out transform 
+                  className={`relative  transition-all duration-500 ease-out transform 
     ${
       !isUnavailable
         ? "group-hover:scale-110 group-hover:-rotate-3 group-hover:translate-y-[-10px]"

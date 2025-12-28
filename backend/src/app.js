@@ -34,6 +34,7 @@ import libraryRouter from "./route/library.route.js"
 import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
 import reportRouter from "./route/report.route.js";
+import registerCollege from "./route/collegeRequest.route.js";
 
 
 
@@ -50,9 +51,20 @@ app.use("/api/v1/users/student", studentRouter)
 // GET    /api/v1/users/student/library   -p      // Protected: view borrowed books/fines
 
 
+
+app.use("/api/v1/public/registerCollege",registerCollege);
+
+
+//POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////
+
+
+
 app.use("/api/v1/college", collegeRouter);
-// POST   /api/v1/college/register   (have to make it secure after making adminOfficial )  ////////////////////////// model changed need controller edit
-// GET    /api/v1/college/data       (public api)     
+// POST   /api/v1/college/register           //ADMIN OFFICIAL can only register a college////////////////////////////////
+// POST   /api/v1/college/fetchCollgeData    //ADMIN OFFICIAL can only view all college FULL DATA////////////////////////////////////
+// POST    /api/v1/college/satusUpdate       //ADMIN OFFICIAL can Active or InActive college using BTN//////////////////////////////////////////
+// POST    /api/v1/college/update            //ADMIN OFFICIAL can update changes of college///////////////////////////////////////////////////////////////
+// GET    /api/v1/college/data               //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
 
 
 app.use("/api/v1/auth", authRouter);
@@ -107,6 +119,7 @@ app.use("/api/v1/canteen", canteenRouter);
 
 # ---------- POLICY ----------
 POST    /api/v1/canteen/policy                 # Set / Update canteen policy (admin)
+GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status///////////////////////////////////////////////////////////
 POST    /api/v1/canteen/isActive               # To set Canteen Status ////////////////////////////////////////////////////////////////
 
 # ---------- FOOD ----------
@@ -134,6 +147,21 @@ app.use("/api/v1/app/administration", adminOfficialRoute);
 
 
 app.use("/api/v1/reports", reportRouter);
+/*
+# ===================== REPORT MODULE API =====================
+
+# ---------- STUDENT ----------
+POST    /api/v1/reports/createreport            # Create a new report with image (student)
+GET     /api/v1/reports/getMyReports            # Get all reports created by logged-in student
+POST    /api/v1/reports/:reportId/rate          # Submit rating after report resolved (student)
+
+# ---------- ADMIN ----------
+GET     /api/v1/reports/                        # Get all reports (admin)
+PATCH   /api/v1/reports/:reportId/status        # Update report status (admin)
+#         Status: pending | in-progress | resolved | rejected
+
+# =============================================================
+*/
 
 
 

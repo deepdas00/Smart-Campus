@@ -79,8 +79,8 @@ router.post(
 );
 
 /* Issue Book - (librarian / admin) */
-router.post(
-  "/issue",
+router.get(
+  "/issue/:transactionId",
   verifyJWT,
   authorizeRoles("librarian", "admin"),
   issueBook
@@ -118,8 +118,8 @@ router.post(
 );
 
 //  return finalize state ( SCAN QR ) by librariyan 
-router.post(
-  "/return/finalize",
+router.get(
+  "/return/finalize/:transactionId",
   verifyJWT,
   authorizeRoles("librarian", "admin"),
   finalizeReturn

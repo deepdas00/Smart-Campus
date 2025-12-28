@@ -1,3 +1,12 @@
 @import "tailwindcss";
 
 
+@keyframes scan {
+  0% { top: 5%; }
+  50% { top: 90%; }
+  100% { top: 5%; }
+}
+
+.animate-scan {
+  animation: scan 2.2s ease-in-out infinite;
+}

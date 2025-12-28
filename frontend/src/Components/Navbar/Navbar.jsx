@@ -10,10 +10,20 @@ import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-export default function Navbar() {
+import { BookMarked, ChevronRight, ShoppingCart, ChefHat  } from "lucide-react";
+
+export default function Navbar({
+  onMyBooksClick,
+  myBooksCount,
+  onCartClick,
+  cartCount,
+}) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const isLibraryPage = location.pathname === "/library";
+  const isCanteenPage = location.pathname === "/canteen";
+  const isOrderPage = location.pathname === "/orders";
 
   const { user } = useAuth();
   const { logout } = useAuth();
@@ -92,12 +102,58 @@ export default function Navbar() {
                 </div>
 
                 <div className="flex items-center space-x-4">
+                  {isLibraryPage && (
+                    <button
+                      onClick={onMyBooksClick}
+                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      <BookMarked className="w-4 h-4" />
+                      <span className="hidden sm:inline">My Books</span>
+
+                      {myBooksCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          {myBooksCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {isCanteenPage && (
+                    <button
+                      onClick={onCartClick}
+                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span className="hidden sm:inline">Cart</span>
+
+                      {cartCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          {cartCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+
+                  {isOrderPage && (
+                    <Link
+                      to={"/canteen"}
+                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    >
+                      <ChefHat  className="w-4 h-4" />
+                      <span className="hidden sm:inline">Canteen</span>
+
+                      
+                    </Link>
+                  )}
+
                   <span
                     onClick={handleLogout}
                     className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500"
                   >
                     Logout
                   </span>
+
                   <Link className="flex items-center space-x-2">
                     <img
                       src={user?.avatar}
@@ -137,9 +193,7 @@ export default function Navbar() {
                   </div>
                 </div>
 
-                <div>
-                  
-                </div>
+                <div></div>
               </div>
             </div>
           </header>

@@ -582,8 +582,8 @@ export function KitchenKDS() {
           paymentStatus: o.paymentStatus,
         }));
 
+        console.log("order aya", formattedOrders);
         setOrders(formattedOrders);
-        console.log("order aya", orders);
 
         setStats(res.data?.stats || null);
       } catch (err) {

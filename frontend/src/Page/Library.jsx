@@ -18,6 +18,7 @@ import {
   Award,
   Sparkles,
   ChevronRight,
+   Zap, Plus, ArrowRight, Loader2, CreditCard
 } from "lucide-react";
 import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";
@@ -46,6 +47,7 @@ export default function Library() {
 const [loadingHistory, setLoadingHistory] = useState(true);
 const [showQRPreview, setShowQRPreview] = useState(false);
 const [activeTransaction, setActiveTransaction] = useState(null);
+  const [processingId, setProcessingId] = useState(null);
 
 
 
@@ -133,17 +135,51 @@ useEffect(() => {
 
 
 
+const categories = [
+    { id: "all", name: "All Books",  }, // default "All Books"
+  ...Array.from(new Set(books.map((b) => b.category))).map((cat) => ({
+    id: cat,
+    name: cat.charAt(0).toUpperCase() + cat.slice(1), // Capitalize first letter
+   // optional: you can assign different icons if you want
+  })),
+];
+
+  
+// useEffect(() => {
+//   const fetchCategories = async () => {
+//     try {
+//       const token = Cookies.get("accessToken");
+
+//       const res = await axios.get(`${API_URL}/api/v1/library/categories`, {
+//         headers: { Authorization: `Bearer ${token}` },
+//         withCredentials: true,
+//       });
+
+//       const apiCategories = res.data?.data || [];
+
+//       // Normalize to your format
+//       const formattedCategories = apiCategories.map(cat => ({
+//         id: cat._id || cat.name.toLowerCase().replace(/\s+/g, '-'), // ensure unique id
+//         name: cat.name,
+//         icon: cat.icon || "📚", // optional default icon
+//       }));
+
+//       // Add "All Books" option at the beginning
+//       setCategories([{ id: "all", name: "All Books", icon: "📚" }, ...formattedCategories]);
+//     } catch (err) {
+//       console.error("Failed to fetch categories:", err);
+//       // fallback to static if needed
+//       setCategories([{ id: "all", name: "All Books", icon: "📚" }]);
+//     }
+//   };
+
+//   fetchCategories();
+// }, []);
 
 
-  const categories = [
-    { id: "all", name: "All Books", icon: "📚" },
-    { id: "programming", name: "Programming", icon: "💻" },
-    { id: "science", name: "Science", icon: "🔬" },
-    { id: "mathematics", name: "Mathematics", icon: "📐" },
-    { id: "literature", name: "Literature", icon: "📖" },
-    { id: "history", name: "History", icon: "🏛️" },
-    { id: "engineering", name: "Engineering", icon: "⚙️" },
-  ];
+
+
+  
   const normalizeBooks = (apiBooks) => {
     return apiBooks.map((b) => ({
       id: b._id,
@@ -784,22 +820,55 @@ const issueBook = async (book) => {
             />
           </div>
 
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition whitespace-nowrap ${
-                  selectedCategory === category.id
-                    ? "bg-blue-700 text-white shadow-lg"
-                    : "bg-white text-gray-700 hover:bg-gray-50 border-2 border-gray-200"
-                }`}
-              >
-                <span>{category.icon}</span>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
+        <div className="relative mb-8">
+  {/* Modern Category Scroller */}
+  <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
+    {categories.map((category) => {
+      const isActive = selectedCategory === category.id;
+      return (
+        <button
+          key={category.id}
+          onClick={() => setSelectedCategory(category.id)}
+          className={`
+            relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 
+            whitespace-nowrap group
+            ${isActive 
+              ? "bg-blue-700 text-white scale-105 z-10 border border-black-950" 
+              : "bg-blue-200 text-black border border-black  hover:bg-slate-50 border border-black"
+            }
+          `}
+        >
+          {/* Icon with special animation on active */}
+          <span className={`text-xl transition-transform duration-500 ${isActive ? 'scale-125 rotate-12' : 'group-hover:scale-110'}`}>
+            {category.icon}
+          </span>
+          
+          <span className="tracking-tight">{category.name}</span>
+
+          {/* Hidden "Active Glow" behind the button */}
+          {isActive && (
+            <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse" />
+          )}
+        </button>
+      );
+    })}
+  </div>
+
+  {/* Fade effect for scroll indicators */}
+  <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#fcfcfd] to-transparent pointer-events-none" />
+</div>
+
+{/* Global CSS for hiding scrollbars but keeping functionality */}
+<style>{`
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+`}</style>
+
         </div>
         {loading && (
           <div className="text-center py-20 text-lg font-semibold text-gray-500">

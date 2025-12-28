@@ -112,6 +112,8 @@ export const updateBook = asyncHandler(async (req, res) => {
       console.log(imagePath);
       
       const uploadResult = await uploadOnCloudinary(imagePath);
+      console.log(uploadResult);
+      
       existingBook.coverImage  = uploadResult.url
     }
 

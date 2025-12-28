@@ -43,7 +43,6 @@ export default function Canteen() {
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [isCanteenOpen, setIsCanteenOpen] = useState(null); // null = loading
   const categories = [
-
     // "snacks", "meal", "drink", "sweet"
     { id: "all", name: "All Items", icon: "🍽️" },
     { id: "meal", name: "meal", icon: "🍛" },
@@ -67,14 +66,12 @@ export default function Canteen() {
           withCredentials: true,
         });
 
-        console.log("hiii",res);
-        
+        console.log("hiii", res);
 
         // assuming backend returns { data: { isActive: true/false } }
         setIsCanteenOpen(res.data?.data);
 
         console.log(isCanteenOpen);
-        
       } catch (err) {
         console.error("Failed to fetch canteen status", err);
         setIsCanteenOpen(false); // safest fallback
@@ -83,15 +80,10 @@ export default function Canteen() {
 
     fetchCanteenStatus();
 
-    const intervalId = setInterval(
-    fetchCanteenStatus,
-    5 * 60 * 1000
-  );
+    const intervalId = setInterval(fetchCanteenStatus, 5 * 60 * 1000);
 
-  // 🧹 Cleanup
-  return () => clearInterval(intervalId);
-
-
+    // 🧹 Cleanup
+    return () => clearInterval(intervalId);
   }, []);
 
   useEffect(() => {
@@ -178,12 +170,10 @@ export default function Canteen() {
   };
 
   const placeOrder = async () => {
-
-     if (!isCanteenOpen) {
-    toast.error("Canteen is currently closed");
-    return;
-  }
-
+    if (!isCanteenOpen) {
+      toast.error("Canteen is currently closed");
+      return;
+    }
 
     try {
       if (Object.keys(cart).length === 0) {
@@ -339,7 +329,10 @@ export default function Canteen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-yellow-50">
       {/* Header */}
-      <Navbar />
+      <Navbar
+        onCartClick={() => setShowCart(true)}
+        cartCount={getTotalItems()}
+      />
 
       <Toaster position="top-right" />
 
@@ -581,7 +574,7 @@ export default function Canteen() {
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
+          {/* <div className="flex items-center space-x-4">
             <button
               onClick={() => setShowCart(true)}
               className="relative px-4 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
@@ -594,7 +587,7 @@ export default function Canteen() {
                 </span>
               )}
             </button>
-          </div>
+          </div> */}
         </div>
 
         <SearchAndCategory
@@ -605,30 +598,28 @@ export default function Canteen() {
           setSelectedCategory={setSelectedCategory}
         />
 
+        <div className="relative">
+          {/* 🔵 CLOSED OVERLAY */}
+          {isCanteenOpen === false && (
+            <div className="absolute inset-0 z-20 bg-blue-900/40 backdrop-blur-sm flex items-center justify-center rounded-xl">
+              <div className="text-center text-white px-6">
+                <AlertCircle className="w-12 h-12 mx-auto mb-3" />
+                <h2 className="text-xl font-bold">Canteen Closed</h2>
+                <p className="text-sm text-blue-100">
+                  Please come back during working hours
+                </p>
+              </div>
+            </div>
+          )}
 
-<div className="relative">
-  {/* 🔵 CLOSED OVERLAY */}
-  {isCanteenOpen === false && (
-    <div className="absolute inset-0 z-20 bg-blue-900/40 backdrop-blur-sm flex items-center justify-center rounded-xl">
-      <div className="text-center text-white px-6">
-        <AlertCircle className="w-12 h-12 mx-auto mb-3" />
-        <h2 className="text-xl font-bold">Canteen Closed</h2>
-        <p className="text-sm text-blue-100">
-          Please come back during working hours
-        </p>
-      </div>
-    </div>
-  )}
-
-
-        {/* Menu Items Grid */}
-        <FoodGrid
-          items={filteredItems}
-          addToCart={addToCart}
-          removeFromCart={removeFromCart}
-          getItemQuantity={getItemQuantity}
-        />
-</div>
+          {/* Menu Items Grid */}
+          <FoodGrid
+            items={filteredItems}
+            addToCart={addToCart}
+            removeFromCart={removeFromCart}
+            getItemQuantity={getItemQuantity}
+          />
+        </div>
         {filteredItems.length === 0 && (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>

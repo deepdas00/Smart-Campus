@@ -8,6 +8,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
+import { getStudentModel } from "../../models/collegeStudent.model.js";
 
 export const orderBook = asyncHandler(async (req, res) => {
   const { bookId } = req.body;
@@ -63,7 +64,8 @@ export const orderBook = asyncHandler(async (req, res) => {
 });
 
 export const issueBook = asyncHandler(async (req, res) => {
-  const { transactionId, collegeCode } = req.body;
+  const { transactionId } = req.params;
+  const { collegeCode } = req.user;
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -73,6 +75,9 @@ export const issueBook = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
   const Student = getStudentModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
+
+  console.log("TRANSACTION ID  ::: ", transactionId);
+
   const Book = getLibraryBookModel(collegeConn);
   const Policy = getLibraryPolicyModel(collegeConn);
 
@@ -88,12 +93,16 @@ export const issueBook = asyncHandler(async (req, res) => {
   const policy = await Policy.findOne();
 
   if (student.issuedBooks.length >= policy.maxBooksAllowed) {
-    throw new ApiError(400, "Book limit exceeded");
+    return res.status(400).json({message:`Student have already issued ${policy.maxBooksAllowed} books`})
   }
 
   const book = await Book.findById(transaction.bookId);
   if (!book || book.availableCopies <= 0)
-    throw new ApiError(400, "Book not available");
+    return res.status(400).json({message:"Book not available"})
+    
+
+
+
 
   // Issue book
   transaction.transactionStatus = "issued";
@@ -111,9 +120,23 @@ export const issueBook = asyncHandler(async (req, res) => {
   await book.save({ validateBeforeSave: false });
   await transaction.save({ validateBeforeSave: false });
 
+  const responseTransaction = await Transaction.findById(transactionId)
+    .populate({
+      path: "studentId",
+      select: "studentName rollNo mobileNo avatar",
+    })
+    .populate({
+      path: "bookId",
+      select: "coverImage isbn shelf author title",
+    });
+
+  console.log("THE DTA", responseTransaction);
+
   res
     .status(200)
-    .json(new ApiResponse(200, transaction, "Book issued successfully"));
+    .json(
+      new ApiResponse(200, responseTransaction, "Book issued successfully")
+    );
 });
 
 //studetnt click on returnorder
@@ -147,7 +170,7 @@ export const issueBook = asyncHandler(async (req, res) => {
 
 // mam scan the qr
 export const finalizeReturn = asyncHandler(async (req, res) => {
-  const { transactionId } = req.body;
+  const { transactionId } = req.params;
   const { collegeCode } = req.user;
 
   const masterConn = connectMasterDB();
@@ -180,11 +203,17 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
         fine = policy.maxFine;
       }
     }
-
+    
+    fine=800;
     transaction.fineAmount = fine;
+
     transaction.paymentStatus = fine > 0 ? "pending" : "paid";
     await transaction.save({ validateBeforeSave: false });
   }
+
+
+  
+
 
   if (transaction.paymentStatus === "pending")
     throw new ApiError(400, "Fine not paid");
@@ -241,6 +270,7 @@ export const returnBook = asyncHandler(async (req, res) => {
   await book.save({ validateBeforeSave: false });
   await student.save({ validateBeforeSave: false });
   await transaction.save({ validateBeforeSave: false });
+  res.status(200).json({message : `#${transaction.transactionCode} book return succesfully`})
 });
 
 // to see any library transaction
@@ -256,11 +286,15 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
 
   const Transaction = getLibraryTransactionModel(collegeConn);
-  const transaction = await Transaction.findById(transactionId).populate({
-    path: "bookId",
-    select: "title author shelf transactionId",
-  });
-  console.log("The transaction is", transaction);
+  const transaction = await Transaction.findById(transactionId)
+    .populate({
+      path: "bookId",
+      select: "title author shelf transactionId coverImage",
+    })
+    .populate({
+      path: "studentId",
+      select: "studentName rollNo mobileNo avatar",
+    });
 
   res
     .status(200)
@@ -279,10 +313,13 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const Transaction = getLibraryTransactionModel(collegeConn);
+  getLibraryBookModel(collegeConn);
 
   const history = await Transaction.find({ studentId: userId })
     .populate({ path: "bookId", select: "title author coverImage " })
     .sort({ createdAt: -1 });
+
+  console.log(history);
 
   res
     .status(200)
@@ -306,7 +343,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
     .populate({
       path: "bookId",
       model: LibraryBooks,
-      select: "title author coverImage",
+      select: "title author coverImage coverImage",
     })
     .populate({ path: "studentId", select: "studentName email rollNo " })
     .sort({ createdAt: -1 });

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Cookies from "js-cookie"
+import Cookies from "js-cookie";
 import {
   BookOpen,
   Search,
@@ -8,6 +8,7 @@ import {
   Star,
   Clock,
   User,
+  AlertCircle ,
   Calendar,
   MapPin,
   X,
@@ -18,7 +19,11 @@ import {
   Award,
   Sparkles,
   ChevronRight,
-   Zap, Plus, ArrowRight, Loader2, CreditCard
+  Zap,
+  Plus,
+  ArrowRight,
+  Loader2,
+  CreditCard,
 } from "lucide-react";
 import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";
@@ -44,142 +49,145 @@ export default function Library() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [history, setHistory] = useState([]);
-const [loadingHistory, setLoadingHistory] = useState(true);
-const [showQRPreview, setShowQRPreview] = useState(false);
-const [activeTransaction, setActiveTransaction] = useState(null);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [showQRPreview, setShowQRPreview] = useState(false);
+  const [activeTransaction, setActiveTransaction] = useState(null);
   const [processingId, setProcessingId] = useState(null);
 
+  const formatDateTime = (isoDate) => {
+    if (!isoDate) return "Collect the Book";
 
+    const date = new Date(isoDate);
 
-const normalizeTransaction = (tx) => ({
-  id: tx._id,
-  qrCode: tx.qrCode,
-  issueDate: new Date(tx.createdAt).toLocaleDateString(),
-  dueDate: new Date(tx.dueDate).toLocaleDateString(),
-  status: tx.transactionStatus,
-  book: tx.bookId, // 👈 KEY FIX
-});
+    const formattedDate = date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
 
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
 
+    return `${formattedDate} (${formattedTime})`;
+  };
 
+  const normalizeTransaction = (tx) => ({
+    id: tx._id,
+    qrCode: tx.qrCode,
+    issueDate: tx.issueDate ? formatDateTime(tx.issueDate) : "Collect the Book",
+    dueDate: tx.dueDate ? formatDateTime(tx.issueDate) : "Invalid-Date",
+    status: tx.transactionStatus,
+    book: tx.bookId, // 👈 KEY FIX
+  });
 
+  const issueBook = async (book) => {
+    try {
+      const token = Cookies.get("accessToken");
+      console.log("Token:", token);
+      console.log("Issuing book ID:", book.id);
 
-const fetchTransactionDetails = async (transactionId) => {
-  try {
-    setLoading(true);
+      const res = await axios.post(
+        `${API_URL}/api/v1/library/order`,
+        { bookId: book.id },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          withCredentials: true,
+        }
+      );
 
-    const token = Cookies.get("accessToken");
+      const transaction = res.data.data;
+      fetchTransactionDetails(transaction._id);
 
-    const { data } = await axios.get(
-      `${API_URL}/api/v1/library/transactions/${transactionId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true,
-      }
-    );
+      // const booking = {
+      //   id: transaction._id,
+      //   book: book,
+      //   issueDate: new Date().toLocaleDateString(),
+      //   dueDate: "Invalid-Date",
+      //   qrCode: transaction.qrCode,
+      //   status: "pending",
+      // };
 
-    console.log(data);
-    
-
-    if (data?.success) {
-      setBookingDetails(normalizeTransaction(data.data));
+      // setBookingDetails(booking);
       setBookingSuccess(true);
-      setBookReceived(false);
+      setShowIssueModal(false);
+      // setIssuedBooks([...issuedBooks, booking]);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Failed to issue book");
     }
-  } catch (error) {
-    console.error(error.response || error);
-    alert("Failed to fetch transaction details");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
+  const fetchTransactionDetails = async (transactionId) => {
+    try {
+      setLoading(true);
 
+      const token = Cookies.get("accessToken");
 
+      const { data } = await axios.get(
+        `${API_URL}/api/v1/library/transactions/${transactionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }
+      );
 
+      console.log(data);
 
+      if (data?.success) {
+        console.log("BOOKKK ayooo", normalizeTransaction(data.data));
 
+        setBookingDetails(normalizeTransaction(data.data));
+        setBookingSuccess(true);
+        setBookReceived(false);
+      }
+    } catch (error) {
+      console.error(error.response || error);
+      alert("Failed to fetch transaction details");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const fetchLibraryHistory = async () => {
-  try {
-    const token = Cookies.get("accessToken"); // or localStorage.getItem("token")
+  const fetchLibraryHistory = async () => {
+    try {
+      const token = Cookies.get("accessToken"); // or localStorage.getItem("token")
 
-    console.log("Tokennnnn",token);
-    
+      console.log("Tokennnnn", token);
 
-    const res = await axios.get(
-      `${API_URL}/api/v1/library/my/history`,
-      {
+      const res = await axios.get(`${API_URL}/api/v1/library/my/history`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
         withCredentials: true,
-      }
-    );
+      });
 
-    // console.log("History:", res.data);
-    setHistory(res.data.data);
-  } catch (error) {
-    console.error("Failed to fetch history", error);
-  } finally {
-    setLoadingHistory(false);
-  }
-};
+      // console.log("History:", res.data);
+      setHistory(res.data.data);
+    } catch (error) {
+      console.error("Failed to fetch history", error);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
 
+  useEffect(() => {
+    fetchLibraryHistory();
+  }, []);
 
-useEffect(() => {
-  fetchLibraryHistory();
-}, []);
+  const categories = [
+    { id: "all", name: "All Books" }, // default "All Books"
+    ...Array.from(new Set(books.map((b) => b.category))).map((cat) => ({
+      id: cat,
+      name: cat.charAt(0).toUpperCase() + cat.slice(1), // Capitalize first letter
+      // optional: you can assign different icons if you want
+    })),
+  ];
 
-
-
-const categories = [
-    { id: "all", name: "All Books",  }, // default "All Books"
-  ...Array.from(new Set(books.map((b) => b.category))).map((cat) => ({
-    id: cat,
-    name: cat.charAt(0).toUpperCase() + cat.slice(1), // Capitalize first letter
-   // optional: you can assign different icons if you want
-  })),
-];
-
-  
-// useEffect(() => {
-//   const fetchCategories = async () => {
-//     try {
-//       const token = Cookies.get("accessToken");
-
-//       const res = await axios.get(`${API_URL}/api/v1/library/categories`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//         withCredentials: true,
-//       });
-
-//       const apiCategories = res.data?.data || [];
-
-//       // Normalize to your format
-//       const formattedCategories = apiCategories.map(cat => ({
-//         id: cat._id || cat.name.toLowerCase().replace(/\s+/g, '-'), // ensure unique id
-//         name: cat.name,
-//         icon: cat.icon || "📚", // optional default icon
-//       }));
-
-//       // Add "All Books" option at the beginning
-//       setCategories([{ id: "all", name: "All Books", icon: "📚" }, ...formattedCategories]);
-//     } catch (err) {
-//       console.error("Failed to fetch categories:", err);
-//       // fallback to static if needed
-//       setCategories([{ id: "all", name: "All Books", icon: "📚" }]);
-//     }
-//   };
-
-//   fetchCategories();
-// }, []);
-
-
-
-
-  
   const normalizeBooks = (apiBooks) => {
     return apiBooks.map((b) => ({
       id: b._id,
@@ -203,11 +211,9 @@ const categories = [
       try {
         setLoading(true);
 
-        
-const token = Cookies.get("accessToken");
+        const token = Cookies.get("accessToken");
 
         console.log("from the fetched Book", token);
-        
 
         const res = await axios.get(`${API_URL}/api/v1/library/books`, {
           headers: {
@@ -236,20 +242,6 @@ const token = Cookies.get("accessToken");
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
-  const simulateBookCollection = () => {
-    setBookReceived(true);
-    const updatedBooking = { ...bookingDetails, status: "collected" };
-    setIssuedBooks(
-      issuedBooks.map((b) => (b.id === bookingDetails.id ? updatedBooking : b))
-    );
-
-    setTimeout(() => {
-      setBookReceived(false);
-      setBookingSuccess(false);
-      setBookingDetails(null);
-    }, 5000);
-  };
-
   const filteredBooks = Array.isArray(books)
     ? books.filter((book) => {
         const title = book.title?.toLowerCase() || "";
@@ -270,47 +262,13 @@ const token = Cookies.get("accessToken");
   const pendingBooks = issuedBooks.filter((b) => b.status === "pending");
   const collectedBooks = issuedBooks.filter((b) => b.status === "collected");
 
-const issueBook = async (book) => {
-  try {
-    const token = Cookies.get("accessToken");
-    console.log("Token:", token);
-    console.log("Issuing book ID:", book.id);
-
-    const res = await axios.post(
-      `${API_URL}/api/v1/library/order`,
-      { bookId: book.id },
-      {
-        headers: { Authorization: `Bearer ${token}` },
-        withCredentials: true,
-      }
-    );
-
-    const transaction = res.data.data;
-
-    const booking = {
-      id: transaction._id,
-      book: book,
-      issueDate: new Date().toLocaleDateString(),
-      dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toLocaleDateString(),
-      qrCode: transaction.qrCode,
-      status: "pending",
-    };
-
-    setBookingDetails(booking);
-    setBookingSuccess(true);
-    setShowIssueModal(false);
-    setIssuedBooks([...issuedBooks, booking]);
-  } catch (err) {
-    console.error(err);
-    alert(err.response?.data?.message || "Failed to issue book");
-  }
-};
-
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Header */}
-      <Navbar/>
+      <Navbar
+        onMyBooksClick={() => setShowMyBooks(true)}
+        myBooksCount={history.length}
+      />
 
       {/* Profile menu side bar */}
       <ProfileSidebar
@@ -321,14 +279,14 @@ const issueBook = async (book) => {
       {/*Banner*/}
       <CollegeInfo />
 
-      <button
+      {/* <button
                 onClick={() => setShowMyBooks(true)}
                 className="fixed top-3 right-[20%] px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2 z-100"
               >
                 <BookMarked className="w-5 h-5" />
                 <span className="hidden sm:inline">My Books</span>
                 
-              </button>
+              </button> */}
 
       {/* Book Collection Success */}
       {bookReceived && (
@@ -359,9 +317,27 @@ const issueBook = async (book) => {
       {bookingSuccess && !bookReceived && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 z-1000">
           <div className="bg-white  shadow-2xl max-w-md w-full">
-            <div className="bg-blue-700 text-white  px-6 py-2">
+            <div
+              className={`text-white px-6 py-2 font-bold ${
+                bookingDetails?.status === "pending"
+                  ? "bg-blue-700"
+                  : bookingDetails?.status === "issued"
+                  ? "bg-green-600"
+                  : bookingDetails?.status === "returned"
+                  ? "bg-emerald-600"
+                  : "bg-gray-400"
+              }`}
+            >
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-bold">Booking Confirmed!</h2>
+                <h2 className="text-2xl font-bold">
+                  {bookingDetails?.status === "pending"
+                    ? "Booking Confirmed!"
+                    : bookingDetails?.status === "issued"
+                    ? "Issued Book"
+                    : bookingDetails?.status === "returned"
+                    ? "Returned Book"
+                    : ""}
+                </h2>
                 <button
                   onClick={() => setBookingSuccess(false)}
                   className="text-white hover:bg-white/20 rounded-full p-2 transition"
@@ -377,7 +353,6 @@ const issueBook = async (book) => {
             <div className="p-6 py-4 space-y-4">
               <div className="bg-gradient-to-br from-gray-100 to-white rounded-xl p-2 border-2 border-dashed border-gray-300">
                 <div className="text-center">
-                  
                   <div className="bg-white p-4 py-2 rounded-lg shadow-inner mb-1">
                     <div className="text-1xl font-bold text-gray-800">
                       {bookingDetails?.qrCode && (
@@ -397,55 +372,82 @@ const issueBook = async (book) => {
 
               <div className="bg-gray-50 rounded-xl space-y-3">
                 <div className="flex items-center gap-6 p-4 bg-slate-50/80 border border-slate-200 group hover:bg-white hover:shadow-xl hover:border-indigo-100 transition-all duration-300">
-  {/* Left: Book Cover with Reflection Effect */}
-  <div className="relative shrink-0">
-    <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500/20 to-transparent blur-lg rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
-    <img
-      src={bookingDetails?.book.coverImage}
-      alt={bookingDetails?.book.title}
-      className="relative w-20 h-28 object-cover rounded-xl shadow-md transform group-hover:-rotate-2 group-hover:scale-105 transition-all duration-500"
-    />
-  </div>
+                  {/* Left: Book Cover with Reflection Effect */}
+                  <div className="relative shrink-0">
+                    <div className="absolute -inset-1 bg-gradient-to-tr from-indigo-500/20 to-transparent blur-lg rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <img
+                      src={bookingDetails?.book.coverImage}
+                      alt={bookingDetails?.book.title}
+                      className="relative w-20 h-28 object-cover rounded-xl shadow-md transform group-hover:-rotate-2 group-hover:scale-105 transition-all duration-500"
+                    />
+                  </div>
 
-  {/* Center: Content Divider Line */}
-  <div className="h-16 w-px bg-slate-200 group-hover:bg-indigo-200 transition-colors hidden sm:block" />
+                  {/* Center: Content Divider Line */}
+                  <div className="h-16 w-px bg-slate-200 group-hover:bg-indigo-200 transition-colors hidden sm:block" />
 
-  {/* Right: Textual Information */}
-  <div className="flex-1 min-w-0">
-    <div className="flex flex-col gap-1">
-        
-      <h3 className="font-extrabold text-slate-900 text-lg leading-tight truncate group-hover:text-indigo-600 transition-colors">
-        {bookingDetails?.book.title}
-      </h3>
-      
-      <div className="flex items-center gap-2">
-        <div className="w-4 h-px bg-slate-300" />
-        <p className="text-sm font-medium text-slate-500 italic">
-          {bookingDetails?.book.author}
-        </p>
-      </div>
-    </div>
+                  {/* Right: Textual Information */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col gap-1">
+                      <h3 className="font-extrabold text-slate-900 text-lg leading-tight truncate group-hover:text-indigo-600 transition-colors">
+                        {bookingDetails?.book.title}
+                      </h3>
 
-    {/* Footer Detail (e.g., ID or Shelf) */}
-    <div className="mt-3 flex items-center gap-3">
-      <div className="px-2 py-1 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-400">
-        ISBN: {bookingDetails?.book.isbn?.slice(-4) || '7432'}
-      </div>
-    </div>
-  </div>
-</div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-px bg-slate-300" />
+                        <p className="text-sm font-medium text-slate-500 italic">
+                          {bookingDetails?.book.author}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Footer Detail (e.g., ID or Shelf) */}
+                    <div className="mt-3 flex items-center gap-3">
+                      <div className="px-2 py-1 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-400">
+                        ISBN: {bookingDetails?.book.isbn?.slice(-4) || "7432"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
                 <div className="border-t border-gray-200 pt-3 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Issue Date:</span>
-                    <span className="font-semibold">
+                    <span
+                      className={`font-semibold ${
+                        bookingDetails?.issueDate === "Collect the Book"
+                          ? "text-red-500"
+                          : "text-black"
+                      }`}
+                    >
                       {bookingDetails?.issueDate}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Due Date:</span>
-                    <span className="font-semibold text-red-600">
+                    <span
+                      className={`font-semibold ${
+                        bookingDetails?.issueDate === "Collect the Book"
+                          ? "text-red-500"
+                          : "text-black"
+                      }`}
+                    >
                       {bookingDetails?.dueDate}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Order Status:</span>
+                    <span
+                      className={`font-semibold ${
+                        bookingDetails?.status === "pending"
+                          ? "text-red-600"
+                          : bookingDetails?.status === "issued"
+                          ? "text-blue-600"
+                          : bookingDetails?.status === "returned"
+                          ? "text-green-600"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {bookingDetails?.status?.toUpperCase()}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -477,141 +479,166 @@ const issueBook = async (book) => {
       )}
 
       {/* My Books Sidebar */}
-     {showMyBooks && (
-  <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[250] transition-all animate-in fade-in duration-300">
-    <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white/90 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col animate-in slide-in-from-right duration-500">
-      
-      {/* Header: Minimalist & Bold */}
-      <div className="relative p-8 pb-6 mb-5 bg-blue-600">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-3xl text-white font-bold ">My Book</h2>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="flex h-2 w-2 rounded-full bg-green-400"></span>
-              <p className="text-xs font-bold text-slate-100 uppercase tracking-widest">
-                {history.length} active sessions
+      {showMyBooks && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[250] transition-all animate-in fade-in duration-300">
+          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white/90 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col animate-in slide-in-from-right duration-500">
+            {/* Header: Minimalist & Bold */}
+            <div className="relative p-8 pb-6 mb-5 bg-blue-600">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-3xl text-white font-bold ">My Book</h2>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="flex h-2 w-2 rounded-full bg-green-400"></span>
+                    <p className="text-xs font-bold text-slate-100 uppercase tracking-widest">
+                      {history.length} active sessions
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowMyBooks(false)}
+                  className="group bg-slate-100 hover:bg-slate-900 text-slate-500 hover:text-white rounded-full p-3 transition-all duration-300"
+                >
+                  <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-10 scrollbar-hide">
+              {loadingHistory ? (
+                <div className="flex flex-col items-center justify-center h-40 space-y-4">
+                  <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-slate-400 text-sm font-medium">
+                    Syncing your records...
+                  </p>
+                </div>
+              ) : history.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-64 text-center">
+                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                    <BookOpen className="w-10 h-10 text-slate-200" />
+                  </div>
+                  <p className="text-slate-400 font-medium">
+                    Your shelf is empty.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {history.map((item) => {
+                    console.log('okkokookokok', item);
+                    
+                    const isFined = item.fineAmount > 0;
+                    const isPending = item.transactionStatus === "pending";
+                    const isReturn = item.transactionStatus === "return"
+
+                    return (
+                      <div
+                        key={item._id}
+                        onClick={() => fetchTransactionDetails(item._id)}
+                        className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
+                          isFined
+                            ? "bg-rose-50/40 border-rose-100"
+                            : "bg-white border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
+                        }`}
+                      >
+                        {/* The Layout Container - Forced Vertical on Mobile to avoid X-scroll */}
+                        <div className="p-4 flex flex-col gap-4">
+                          {/* Top Section: Cover and Title */}
+                          <div className="flex items-start gap-4">
+                            <div className="relative shrink-0">
+                              <img
+                                src={item.bookId.coverImage}
+                                alt={item.bookId.title}
+                                className="w-16 h-22 object-cover rounded-xl shadow-lg ring-1 ring-black/5"
+                              />
+                              {isFined && (
+                                <div className="absolute -top-2 -left-2 bg-rose-500 text-white p-1 rounded-lg shadow-lg">
+                                  <AlertCircle className="w-3 h-3" />
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <h3
+                                className={`font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors ${
+                                  isFined ? "text-rose-900" : ""
+                                }`}
+                              >
+                                {item.bookId.title}
+                              </h3>
+                              <p className="text-xs font-semibold text-slate-400 mt-1 italic uppercase tracking-tighter">
+                                {item.bookId.author}
+                              </p>
+
+                              {/* Inline Status Badge */}
+                              <div className="flex items-center gap-2 mt-3">
+                                <span
+                                  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
+                                    isPending
+                                      ? "bg-amber-50 text-amber-600 border-amber-200"
+                                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                                  }`}
+                                >
+                                  {item.transactionStatus}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Bottom Section: Details Grid (2-column grid for compactness) */}
+                          <div
+                            className={`grid grid-cols-2 gap-2 p-3 rounded-xl ${
+                              isFined ? "bg-rose-100/50" : "bg-slate-50"
+                            }`}
+                          >
+                            <div>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                Issue Date
+                              </p>
+                              <p className="text-xs font-bold text-slate-700">
+                                {new Date(item.createdAt).toLocaleDateString(
+                                  "en-GB",
+                                  { day: "2-digit", month: "short" }
+                                )}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
+                                Fine Accrued
+                              </p>
+                              <p
+                                className={`text-xs font-black ${
+                                  isFined ? "text-rose-600" : "text-emerald-600"
+                                }`}
+                              >
+                                {isFined ? `$${item.fineAmount}` : "None"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Red Accent for Fines */}
+                        {isFined && (
+                          <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-rose-500/10 rounded-full blur-xl" />
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Footer Branding */}
+            <div className="p-6 border-t border-slate-50 text-center bg-blue-500">
+              <p className="text-[10px] text-slate-200 font-bold uppercase tracking-[0.3em]">
+                College Library Management
               </p>
             </div>
           </div>
-          <button
-            onClick={() => setShowMyBooks(false)}
-            className="group bg-slate-100 hover:bg-slate-900 text-slate-500 hover:text-white rounded-full p-3 transition-all duration-300"
-          >
-            <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-          </button>
         </div>
-      </div>
-
-      {/* Content Area */}
-      <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-10 scrollbar-hide">
-        {loadingHistory ? (
-          <div className="flex flex-col items-center justify-center h-40 space-y-4">
-            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-slate-400 text-sm font-medium">Syncing your records...</p>
-          </div>
-        ) : history.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-64 text-center">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-              <BookOpen className="w-10 h-10 text-slate-200" />
-            </div>
-            <p className="text-slate-400 font-medium">Your shelf is empty.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {history.map((item) => {
-      
-              
-              const isFined = item.fineAmount > 0;
-              const isPending = item.transactionStatus === "pending";
-
-              return (
-                <div
-                  key={item._id}
-                 onClick={() => fetchTransactionDetails(item._id)}
-
-                  className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
-                    isFined 
-                      ? "bg-rose-50/40 border-rose-100" 
-                      : "bg-white border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
-                  }`}
-                >
-                  {/* The Layout Container - Forced Vertical on Mobile to avoid X-scroll */}
-                  <div className="p-4 flex flex-col gap-4">
-                    
-                    {/* Top Section: Cover and Title */}
-                    <div className="flex items-start gap-4">
-                      <div className="relative shrink-0">
-                        <img
-                          src={item.bookId.coverImage}
-                          alt={item.bookId.title}
-                          className="w-16 h-22 object-cover rounded-xl shadow-lg ring-1 ring-black/5"
-                        />
-                        {isFined && (
-                          <div className="absolute -top-2 -left-2 bg-rose-500 text-white p-1 rounded-lg shadow-lg">
-                            <AlertCircle className="w-3 h-3" />
-                          </div>
-                        )}
-                      </div>
-                      
-                      <div className="min-w-0 flex-1">
-                        <h3 className={`font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors ${isFined ? 'text-rose-900' : ''}`}>
-                          {item.bookId.title}
-                        </h3>
-                        <p className="text-xs font-semibold text-slate-400 mt-1 italic uppercase tracking-tighter">
-                          {item.bookId.author}
-                        </p>
-                        
-                        {/* Inline Status Badge */}
-                        <div className="flex items-center gap-2 mt-3">
-                          <span className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
-                            isPending ? "bg-amber-50 text-amber-600 border-amber-200" : "bg-indigo-50 text-indigo-600 border-indigo-200"
-                          }`}>
-                            {item.transactionStatus}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Bottom Section: Details Grid (2-column grid for compactness) */}
-                    <div className={`grid grid-cols-2 gap-2 p-3 rounded-xl ${isFined ? 'bg-rose-100/50' : 'bg-slate-50'}`}>
-                      <div>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Issue Date</p>
-                        <p className="text-xs font-bold text-slate-700">
-                          {new Date(item.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })}
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">Fine Accrued</p>
-                        <p className={`text-xs font-black ${isFined ? 'text-rose-600' : 'text-emerald-600'}`}>
-                          {isFined ? `$${item.fineAmount}` : 'None'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Red Accent for Fines */}
-                  {isFined && (
-                    <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-rose-500/10 rounded-full blur-xl" />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Footer Branding */}
-      <div className="p-6 border-t border-slate-50 text-center bg-blue-500">
-        <p className="text-[10px] text-slate-200 font-bold uppercase tracking-[0.3em]">
-          College Library Management
-        </p>
-      </div>
-    </div>
-  </div>
-)}
+      )}
 
       {/* Book Details Modal */}
-      {showIssueModal  && (
+      {showIssueModal && (
         <div className="z-1000 fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row ring-1 ring-black/5">
             {/* Left Panel: Visual & Identity */}
@@ -820,46 +847,53 @@ const issueBook = async (book) => {
             />
           </div>
 
-        <div className="relative mb-8">
-  {/* Modern Category Scroller */}
-  <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
-    {categories.map((category) => {
-      const isActive = selectedCategory === category.id;
-      return (
-        <button
-          key={category.id}
-          onClick={() => setSelectedCategory(category.id)}
-          className={`
+          <div className="relative mb-8">
+            {/* Modern Category Scroller */}
+            <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
+              {categories.map((category) => {
+                const isActive = selectedCategory === category.id;
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => setSelectedCategory(category.id)}
+                    className={`
             relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 
             whitespace-nowrap group
-            ${isActive 
-              ? "bg-blue-700 text-white scale-105 z-10 border border-black-950" 
-              : "bg-blue-200 text-black border border-black  hover:bg-slate-50 border border-black"
+            ${
+              isActive
+                ? "bg-blue-700 text-white scale-105 z-10 border border-black-950"
+                : "bg-blue-200 text-black border border-black  hover:bg-slate-50 border border-black"
             }
           `}
-        >
-          {/* Icon with special animation on active */}
-          <span className={`text-xl transition-transform duration-500 ${isActive ? 'scale-125 rotate-12' : 'group-hover:scale-110'}`}>
-            {category.icon}
-          </span>
-          
-          <span className="tracking-tight">{category.name}</span>
+                  >
+                    {/* Icon with special animation on active */}
+                    <span
+                      className={`text-xl transition-transform duration-500 ${
+                        isActive
+                          ? "scale-125 rotate-12"
+                          : "group-hover:scale-110"
+                      }`}
+                    >
+                      {category.icon}
+                    </span>
 
-          {/* Hidden "Active Glow" behind the button */}
-          {isActive && (
-            <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse" />
-          )}
-        </button>
-      );
-    })}
-  </div>
+                    <span className="tracking-tight">{category.name}</span>
 
-  {/* Fade effect for scroll indicators */}
-  <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#fcfcfd] to-transparent pointer-events-none" />
-</div>
+                    {/* Hidden "Active Glow" behind the button */}
+                    {isActive && (
+                      <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
 
-{/* Global CSS for hiding scrollbars but keeping functionality */}
-<style>{`
+            {/* Fade effect for scroll indicators */}
+            <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-[#fcfcfd] to-transparent pointer-events-none" />
+          </div>
+
+          {/* Global CSS for hiding scrollbars but keeping functionality */}
+          <style>{`
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -868,7 +902,6 @@ const issueBook = async (book) => {
     scrollbar-width: none;
   }
 `}</style>
-
         </div>
         {loading && (
           <div className="text-center py-20 text-lg font-semibold text-gray-500">

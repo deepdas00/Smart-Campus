@@ -28,7 +28,6 @@ import Navbar from "../Components/Navbar/Navbar";
 import { Link } from "react-router-dom";
 const API_URL = import.meta.env.VITE_API_URL;
 
-
 export default function App() {
   const API_URL = import.meta.env.VITE_API_URL;
   const navigate = useNavigate();
@@ -45,97 +44,76 @@ export default function App() {
   });
   const [canteenFoods, setCanteenFoods] = useState([]);
   const [previewFoods, setPreviewFoods] = useState([]);
-const [orderHistory, setOrderHistory] = useState([]);
-const [loadingHistory, setLoadingHistory] = useState(true);
+  const [orderHistory, setOrderHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [activeOrderCount, setActiveOrderCount] = useState(0);
 
+  useEffect(() => {
+    const fetchMyOrderHistory = async () => {
+      try {
+        setLoadingHistory(true);
 
-useEffect(() => {
-  const fetchMyOrderHistory = async () => {
-    try {
-      setLoadingHistory(true);
+        const res = await axios.get(
+          `${API_URL}/api/v1/canteen/orders/my-history`,
+          { withCredentials: true }
+        );
 
-      const res = await axios.get(
-        `${API_URL}/api/v1/canteen/orders/my-history`,
-        { withCredentials: true }
-      );
+        const history = res.data?.data || [];
 
-      const history = res.data?.data || [];
+        const normalizedHistory = history.map((order) => ({
+          id: order._id,
+          code: order._id.slice(-6).toUpperCase(),
+          items: order.items || [],
+          total: order.totalAmount || 0,
+          status: order.orderStatus,
+          createdAt: order.createdAt,
+        }));
 
-      const normalizedHistory = history.map((order) => ({
-        id: order._id,
-        code: order._id.slice(-6).toUpperCase(),
-        items: order.items || [],
-        total: order.totalAmount || 0,
-        status: order.orderStatus,
-        createdAt: order.createdAt,
-      }));
+        setOrderHistory(normalizedHistory);
+      } catch (err) {
+        console.error("Failed to fetch order history", err);
+        setOrderHistory([]);
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
 
-      setOrderHistory(normalizedHistory);
-    } catch (err) {
-      console.error("Failed to fetch order history", err);
-      setOrderHistory([]);
-    } finally {
-      setLoadingHistory(false);
-    }
+    fetchMyOrderHistory();
+  }, []);
+
+  const isToday = (dateString) => {
+    const now = new Date();
+
+    const startOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      0,
+      0,
+      0,
+      0
+    );
+
+    const endOfDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      23,
+      59,
+      59,
+      999
+    );
+
+    const orderDate = new Date(dateString);
+
+    return orderDate >= startOfDay && orderDate <= endOfDay;
   };
 
-  fetchMyOrderHistory();
-}, []);
+  console.log("TODAY CHECK", isToday(new Date()));
 
-
-
-const isToday = (dateString) => {
-  const now = new Date();
-
-  const startOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    0, 0, 0, 0
-  );
-
-  const endOfDay = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    23, 59, 59, 999
-  );
-
-  const orderDate = new Date(dateString);
-
-  return orderDate >= startOfDay && orderDate <= endOfDay;
-};
-
-
-useEffect(() => {
-  orderHistory.forEach((order) => {
-    console.log(
-      "ORDER DATE:",
-      order.createdAt,
-      "→ IS TODAY?",
-      isToday(order.createdAt)
-    );
-  });
-
-  console.log("TODAY EXPENSE:", todayExpense);
-}, [orderHistory]);
-
-
-
-
-console.log("TODAY CHECK", isToday(new Date()));
-
-
-
-const todayExpense = orderHistory
-  .filter((order) => isToday(order.createdAt))
-  .reduce((sum, order) => sum + (order.total || 0), 0);
-
-
-
-
-
-
+  const todayExpense = orderHistory
+    .filter((order) => isToday(order.createdAt))
+    .reduce((sum, order) => sum + (order.total || 0), 0);
 
   useEffect(() => {
     const fetchFoods = async () => {
@@ -164,6 +142,28 @@ const todayExpense = orderHistory
     // Otherwise, remove .slice(0, 5) to show the full menu
     setPreviewFoods(available.slice(0, 5));
   }, [canteenFoods]);
+
+  useEffect(() => {
+    console.log("ooooooooooo", orderHistory);
+
+    if (orderHistory.length <= 0) {
+      setActiveOrderCount(0);
+      console.log("////////////////////////////////");
+
+      return;
+    }
+
+    // const activeOrders = orderHistory.filter(
+    //   (order) => order.status === "Order_Received"
+    // );
+    const activeOrders = orderHistory.filter(
+      (order) => order.status === "order_received"
+    );
+
+    console.log("AACCTIIIVEEE", activeOrders);
+
+    setActiveOrderCount(activeOrders.length);
+  }, [orderHistory]);
 
   const fetchCurrentStudent = async () => {
     console.log("hiiiii");
@@ -255,8 +255,6 @@ const todayExpense = orderHistory
           withCredentials: true,
         });
 
-        console.log("LIBARRARARRA", res.data);
-
         setHistory(res.data.data || []); // Adjust based on your actual API response structure
       } catch (error) {
         console.error("Failed to fetch library history", error);
@@ -271,7 +269,6 @@ const todayExpense = orderHistory
   const activeBooks = history.filter(
     (b) => b.transactionStatus === "pending" || b.transactionStatus === "issued"
   );
-  const pastBooks = history.filter((b) => b.transactionStatus === "returned");
 
   // 3. Handle Return/Payment Flow
   const handleReturnInitiation = async (transactionId, fineAmount) => {
@@ -499,12 +496,14 @@ const todayExpense = orderHistory
                 ₹{todayExpense.toFixed(2)}
               </p>
             </div>
-            <button className="group relative flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200">
-              <span className="relative z-10 flex items-center gap-2">
-                New Order <Plus size={16} strokeWidth={3} />
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-            </button>
+            <Link to={"/canteen"}>
+              <button className="group relative flex items-center gap-3 bg-slate-900 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95 shadow-xl shadow-slate-200">
+                <span className="relative z-10 flex items-center gap-2">
+                  New Order <Plus size={16} strokeWidth={3} />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-orange-600 to-amber-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              </button>
+            </Link>
           </div>
         </div>
 
@@ -609,17 +608,28 @@ const todayExpense = orderHistory
             />
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-[3rem] p-8 flex flex-col justify-center text-center group hover:bg-white hover:shadow-xl transition-all duration-500">
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-              Active Reports
-            </p>
-            <p className="text-3xl font-black text-slate-900 tracking-tighter leading-none italic">
-              02
-            </p>
-            <p className="text-[9px] font-bold text-slate-400 mt-2">
-              Tickets in progress
-            </p>
-          </div>
+          <Link to={"/orders"}>
+            <div className="bg-slate-50 border border-slate-200 rounded-[3rem] p-8 flex flex-col justify-center text-center group hover:bg-white hover:shadow-xl transition-all duration-500">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                Active Orders
+              </p>
+              {activeOrderCount > 0 && (
+                <span className="px-3 py-1 text-xs font-black rounded-full bg-red-100 text-red-600 animate-pulse">
+                  {activeOrderCount} Active
+                </span>
+              )}
+
+              {activeOrderCount <= 0 && (
+                <p className="text-3xl font-black text-slate-900 tracking-tighter leading-none italic">
+                  00
+                </p>
+              )}
+
+              <p className="text-[9px] font-bold text-slate-400 mt-2">
+                Tickets in progress
+              </p>
+            </div>
+          </Link>
         </div>
       </div>
     );
@@ -649,6 +659,7 @@ const todayExpense = orderHistory
                 Your voice drives campus evolution. Report issues and track
                 resolutions in real-time.
               </p>
+              <Link to={"/report"}>
               <button className="group/btn relative px-8 py-5 bg-white rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95">
                 <span className="relative z-10 flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest">
                   File New Report{" "}
@@ -656,6 +667,7 @@ const todayExpense = orderHistory
                 </span>
                 <div className="absolute inset-0 bg-orange-50 translate-y-full group-hover/btn:translate-y-0 transition-transform"></div>
               </button>
+              </Link>
             </div>
 
             {/* Quick Stats Bento for the Hero */}

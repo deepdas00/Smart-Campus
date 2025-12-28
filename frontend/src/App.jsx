@@ -60,7 +60,7 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-right"   reverseOrder={false} />
       <Routes>
         <Route path="/home" element={<HomeLogin />} />
         <Route path="/" element={<HomePage />} />

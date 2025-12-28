@@ -4,26 +4,13 @@ import Cookies from "js-cookie";
 import {
   BookOpen,
   Search,
-  Filter,
   Star,
   Clock,
   User,
   AlertCircle ,
-  Calendar,
-  MapPin,
   X,
   Check,
   QrCode,
-  BookMarked,
-  TrendingUp,
-  Award,
-  Sparkles,
-  ChevronRight,
-  Zap,
-  Plus,
-  ArrowRight,
-  Loader2,
-  CreditCard,
 } from "lucide-react";
 import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";

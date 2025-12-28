@@ -225,59 +225,6 @@ console.log(filteredOrders);
       </main>
 
 
-      {!loading &&
-  filteredOrders.map((order) => {
-    const status = getOrderStatus(order.orderStatus); // ✅ CORRECT PLACE
-
-    return (
-      <div
-        key={order._id}
-        className="group bg-white border border-slate-200 rounded-[2rem] p-2 hover:shadow-2xl transition-all duration-500 relative overflow-hidden"
-      >
-        {/* ✅ STATUS BAR */}
-        <div
-          className={`absolute left-0 top-8 bottom-8 w-1.5 rounded-r-full ${status.bar}`}
-        />
-
-        <div className="p-4 flex flex-col md:flex-row items-center justify-between gap-6">
-          
-          {/* Left */}
-          <div className="flex items-center gap-5">
-            <div
-              className={`h-16 w-16 rounded-[1.5rem] flex items-center justify-center 
-              ${status.bg} ${status.text}`}
-            >
-              <Receipt size={28} />
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                #{order.transactionCode || "ORD-" + order._id.slice(-5)}
-
-                {/* ✅ STATUS CHIP */}
-                <span
-                  className={`text-[10px] px-2 py-0.5 rounded-md border font-bold uppercase
-                  ${status.bg} ${status.text} ${status.border}`}
-                >
-                  {status.label}
-                </span>
-              </h3>
-
-              <p className="text-sm text-slate-400">
-                {new Date(order.createdAt).toLocaleString()}
-              </p>
-            </div>
-          </div>
-
-          {/* Right */}
-          <div className="text-right">
-            <p className="text-xs text-slate-400">Amount</p>
-            <p className="text-2xl font-black">₹{order.totalAmount}</p>
-          </div>
-        </div>
-      </div>
-    );
-  })}
 
 
 {selectedOrder && (

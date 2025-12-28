@@ -185,8 +185,16 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const Book = getLibraryBookModel(collegeConn);
   const Student = getStudentModel(collegeConn);
 
-  const transaction = await Transaction.findById(transactionId);
+  const transaction = await Transaction.findById(transactionId)
+  .populate({ path: "bookId", select: "title author coverImage " })
+  .populate({ path: "studentId", select: "studentName" })
+
+  
   if (!transaction) throw new ApiError(404, "Transaction not found");
+
+  if (transaction.transactionStatus==="pending") {
+    return res.status(400).json({message : "Order is not issued"})
+  }
 
   const policy = await Policy.findOne();
 
@@ -203,8 +211,9 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
         fine = policy.maxFine;
       }
     }
+
+    fine = 800;
     
-    fine=800;
     transaction.fineAmount = fine;
 
     transaction.paymentStatus = fine > 0 ? "pending" : "paid";
@@ -295,6 +304,9 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
       path: "studentId",
       select: "studentName rollNo mobileNo avatar",
     });
+
+    console.log("TRANSACTION", transaction);
+    
 
   res
     .status(200)

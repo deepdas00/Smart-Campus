@@ -1,13 +1,23 @@
 import { useEffect, useState } from "react";
+import {
+  motion,
+  AnimatePresence,
+  useMotionValue,
+  useTransform,
+} from "framer-motion";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toast, Toaster } from "react-hot-toast";
+
 import {
   BookOpen,
   Search,
   Star,
+  ArrowRight,
+  CheckCircle,
   Clock,
   User,
-  AlertCircle ,
+  AlertCircle,
   X,
   Check,
   QrCode,
@@ -61,13 +71,107 @@ export default function Library() {
     return `${formattedDate} (${formattedTime})`;
   };
 
+  //non : - nothing
+  //paid: - already ache
+  //pending :- fine ache
+
+  const startLibraryFinePayment = async (transactionId) => {
+    try {
+      console.log("TRRARARARA", transactionId);
+
+      const res = await axios.patch(
+        `${API_URL}/api/v1/library/return/pay/${transactionId}`,
+        {},
+        { withCredentials: true }
+      );
+
+      
+      
+
+      const { razorpayOrderId, amount, currency, key } = res.data.data;
+
+      openLibraryRazorpay({
+        razorpayOrderId,
+        amount,
+        currency,
+        key,
+        transactionId,
+      });
+    } catch (err) {
+      console.error(err);
+      toast.error("Unable to start payment");
+    }
+  };
+
+  const openLibraryRazorpay = ({
+    razorpayOrderId,
+    amount,
+    currency,
+    key,
+    transactionId,
+  }) => {
+    const options = {
+      key,
+      amount,
+      currency,
+      order_id: razorpayOrderId,
+
+      name: "Library Fine Payment",
+      description: "Late book return fine",
+
+      handler: async (response) => {
+        await verifyLibraryPayment(response, transactionId);
+        toast.success("Fine paid successfully");
+      },
+
+      theme: { color: "#dc2626" }, // red for fine
+    };
+
+    const rzp = new window.Razorpay(options);
+
+    rzp.on("payment.failed", () => {
+      toast.error("Payment failed");
+    });
+
+    rzp.open();
+  };
+
+  const verifyLibraryPayment = async (response, transactionId) => {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+      response;
+
+    const res = await axios.post(
+      `${API_URL}/api/v1/library/return/verify  `,
+      {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        transactionId,
+      },
+      { withCredentials: true }
+    );
+
+    console.log("RESSSSSSSS", res);
+
+    // Update UI after payment
+    setBookingDetails((prev) => ({
+      ...prev,
+      fineAmount: 0,
+      status: "returned",
+    }));
+  };
+
   const normalizeTransaction = (tx) => ({
+
     id: tx._id,
     qrCode: tx.qrCode,
     issueDate: tx.issueDate ? formatDateTime(tx.issueDate) : "Collect the Book",
     dueDate: tx.dueDate ? formatDateTime(tx.issueDate) : "Invalid-Date",
+    dueDateFr: tx.dueDate ? formatDateTime(tx.dueDate) : "Invalid-Date",
     status: tx.transactionStatus,
     book: tx.bookId, // 👈 KEY FIX
+    fineAmount: tx.fineAmount,
+    paymentStatus: tx.paymentStatus,
   });
 
   const issueBook = async (book) => {
@@ -87,15 +191,6 @@ export default function Library() {
 
       const transaction = res.data.data;
       fetchTransactionDetails(transaction._id);
-
-      // const booking = {
-      //   id: transaction._id,
-      //   book: book,
-      //   issueDate: new Date().toLocaleDateString(),
-      //   dueDate: "Invalid-Date",
-      //   qrCode: transaction.qrCode,
-      //   status: "pending",
-      // };
 
       // setBookingDetails(booking);
       setBookingSuccess(true);
@@ -123,7 +218,7 @@ export default function Library() {
         }
       );
 
-      console.log(data);
+      console.log("/////////////////////////////////", data);
 
       if (data?.success) {
         console.log("BOOKKK ayooo", normalizeTransaction(data.data));
@@ -257,6 +352,8 @@ export default function Library() {
         myBooksCount={history.length}
       />
 
+      <Toaster position="top-center" reverseOrder={false} />
+
       {/* Profile menu side bar */}
       <ProfileSidebar
         isOpen={showProfileMenu}
@@ -293,7 +390,7 @@ export default function Library() {
                 {bookingDetails?.book.title}
               </p>
               <p className="text-green-600 text-sm">
-                Due: {bookingDetails?.dueDate}
+                Due: {bookingDetails?.dueDateFr}
               </p>
             </div>
           </div>
@@ -303,10 +400,12 @@ export default function Library() {
       {/* Booking Success Modal */}
       {bookingSuccess && !bookReceived && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 z-1000">
-          <div className="bg-white  shadow-2xl max-w-md w-full">
+          <div className="bg-white shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-xl custom-scrollbar">
             <div
               className={`text-white px-6 py-2 font-bold ${
-                bookingDetails?.status === "pending"
+                bookingDetails?.paymentStatus === "pending"
+                  ? "bg-red-600"
+                  : bookingDetails?.status === "pending"
                   ? "bg-blue-700"
                   : bookingDetails?.status === "issued"
                   ? "bg-green-600"
@@ -418,7 +517,7 @@ export default function Library() {
                           : "text-black"
                       }`}
                     >
-                      {bookingDetails?.dueDate}
+                      {bookingDetails?.dueDateFr}
                     </span>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -437,11 +536,117 @@ export default function Library() {
                       {bookingDetails?.status?.toUpperCase()}
                     </span>
                   </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Shelf Location:</span>
-                    <span className="font-semibold">
-                      {bookingDetails?.book.shelf}
-                    </span>
+
+                  <div className="space-y-3 mt-4">
+                    {/* --- REMAINING FINE (RED ALERT BOX) --- */}
+                    {["pending", "paid"].includes(
+                      bookingDetails?.paymentStatus
+                    ) && (
+                      <>
+                        <motion.div
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className=" justify-between items-center px-5 py-4 bg-red-50/50 backdrop-blur-sm border border-red-100 flex flex-col gap-2 rounded-[1.5rem]"
+                        >
+                          <div className="flex  w-full justify-between items-center px-5 py-1 bg-red-50/50 backdrop-blur-sm border border-red-100 rounded-[1.5rem]">
+                            <div className="flex items-center gap-3">
+                              <div className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600"></span>
+                              </div>
+                              <span className="text-[10px] font-black text-red-600 uppercase tracking-[0.2em]">
+                                Remaining Fine
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 text-red-600">
+                              <span className="text-xs font-bold opacity-60">
+                                ₹
+                              </span>
+                              <span className="text-xl font-black tracking-tighter">
+                                {bookingDetails?.paymentStatus === "paid" && (0)}
+                                {bookingDetails?.paymentStatus !== "paid" && (bookingDetails.fineAmount)}
+                                
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex w-full justify-between items-center px-5 py-1 bg-green-50/50 backdrop-blur-sm border border-green-100 rounded-[1.5rem]">
+                            <div className="flex items-center gap-3">
+                              <div className="relative flex h-3 w-3">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-600"></span>
+                              </div>
+                              <span className="text-[10px] font-black text-green-600 uppercase tracking-[0.2em]">
+                                Paid Amount
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 text-green-600">
+                              <span className="text-xs font-bold opacity-60">
+                                ₹
+                              </span>
+                              <span className="text-xl font-black tracking-tighter">
+                                {bookingDetails?.paymentStatus !== "paid" && (0)}
+                                {bookingDetails?.paymentStatus === "paid" && (bookingDetails.fineAmount)}
+                              </span>
+                            </div>
+                          </div>
+                        </motion.div>
+
+                        {/* --- NEW MODERN PAY BUTTON --- */}
+
+                        {bookingDetails?.paymentStatus === "pending" &&
+                          bookingDetails?.fineAmount > 0 && (
+                            <motion.button
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => startLibraryFinePayment(bookingDetails?.id)}
+
+                              className="w-full py-4 bg-red-600 text-white rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-colors group"
+                            >
+                              <div className="bg-white/40 p-1.5 rounded-lg group-hover:bg-white/20 transition-colors">
+                                <CheckCircle
+                                  size={18}
+                                  className="text-emerald-400"
+                                />
+                              </div>
+                              <span className="text-xs font-black uppercase tracking-[0.2em]">
+                                Pay Outstanding Fine
+                              </span>
+                              <ArrowRight
+                                size={16}
+                                className="group-hover:translate-x-1 transition-transform"
+                              />
+                            </motion.button>
+                          )}
+                      </>
+                    )}
+
+                    {/* --- PAID FINE (EMERALD SUCCESS) --- */}
+                    {bookingDetails?.paymentStatus === "pending" &&
+                      bookingDetails.paidAmount > 0 && (
+                        <motion.div
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="flex justify-between items-center px-5 py-4 bg-emerald-50/50 backdrop-blur-sm border border-emerald-100 rounded-[1.5rem]"
+                        >
+                          <div className="flex items-center gap-3 text-emerald-700">
+                            <CheckCircle size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                              Paid Amount
+                            </span>
+                          </div>
+                          <div className="text-emerald-700">
+                            <span className="text-xs font-bold opacity-60 mr-1">
+                              ₹
+                            </span>
+                            <span className="text-xl font-black tracking-tighter">
+                              {bookingDetails.paidAmount}
+                            </span>
+                          </div>
+                        </motion.div>
+                      )}
                   </div>
                 </div>
               </div>
@@ -511,11 +716,11 @@ export default function Library() {
               ) : (
                 <div className="space-y-4">
                   {history.map((item) => {
-                    console.log('okkokookokok', item);
+                    const isPending = item.paymentStatus === "pending";
                     
-                    const isFined = item.fineAmount > 0;
-                    const isPending = item.transactionStatus === "pending";
-                    const isReturn = item.transactionStatus === "return"
+                    const isFined = isPending && item.fineAmount > 0;
+                    
+                    const isReturn = item.transactionStatus === "return";
 
                     return (
                       <div
@@ -559,12 +764,14 @@ export default function Library() {
                               {/* Inline Status Badge */}
                               <div className="flex items-center gap-2 mt-3">
                                 <span
-                                  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
-                                    isPending
-                                      ? "bg-amber-50 text-amber-600 border-amber-200"
-                                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
-                                  }`}
-                                >
+  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
+    item.transactionStatus === "pending"
+      ? "bg-amber-50 text-amber-600 border-amber-200"
+      : item.transactionStatus === "issued"
+      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+      : "bg-indigo-50 text-indigo-600 border-indigo-200"
+  }`}
+>
                                   {item.transactionStatus}
                                 </span>
                               </div>

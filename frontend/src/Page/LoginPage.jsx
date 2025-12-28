@@ -2,17 +2,11 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import {
-  AlertCircle,
-  Mail,
-  Lock,
-  Eye,
-  EyeOff,
-  ArrowRight,
-  GraduationCap,
-  Building2,
+  AlertCircle, Mail, Lock, Eye, EyeOff,
+  ArrowRight, GraduationCap, Building2, X
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../Components/Footer";
 import logo from "../assets/logo.png";
 import toast from "react-hot-toast";
@@ -20,331 +14,281 @@ import { useAuth } from "../context/AuthContext";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  // --- STATE ---
   const [userType, setUserType] = useState("student");
   const [showPassword, setShowPassword] = useState(false);
-  const [loginMethod, setLoginMethod] = useState("email"); // email | mobile
+  const [loginMethod, setLoginMethod] = useState("email");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showForgotModal, setShowForgotModal] = useState(false);
 
   const [formData, setFormData] = useState({
     collegeCode: "",
     email: "",
     mobileNo: "",
     password: "",
+    loginId: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [forgotData, setForgotData] = useState({
+    collegeCode: "",
+    loginId: ""
+  });
 
+  // --- HANDLERS ---
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const { setUser } = useAuth();
-
-  const API_URL = import.meta.env.VITE_API_URL;
-
-  const StudentLoginForm = () => (
-    <>
-      {/* Toggle buttons */}
-      <div className="flex bg-gray-100 rounded-lg p-1 mb-4">
-        <button
-          type="button"
-          onClick={() => setLoginMethod("email")}
-          className={`flex-1 py-2 rounded-md text-sm font-medium ${
-            loginMethod === "email"
-              ? "bg-white shadow text-blue-600"
-              : "text-gray-500"
-          }`}
-        >
-          Email
-        </button>
-        <button
-          type="button"
-          onClick={() => setLoginMethod("mobile")}
-          className={`flex-1 py-2 rounded-md text-sm font-medium ${
-            loginMethod === "mobile"
-              ? "bg-white shadow text-blue-600"
-              : "text-gray-500"
-          }`}
-        >
-          Mobile
-        </button>
-      </div>
-
-      {loginMethod === "email" && (
-        <div className="mb-5">
-          <label className="text-sm font-medium text-gray-700">Email</label>
-          <div className="relative mt-2">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="you@campus.edu"
-            />
-          </div>
-        </div>
-      )}
-
-      {loginMethod === "mobile" && (
-        <div className="mb-5">
-          <label className="text-sm font-medium text-gray-700">
-            Mobile Number
-          </label>
-          <div className="relative mt-2">
-            <input
-              type="tel"
-              name="mobileNo"
-              value={formData.mobileNo}
-              onChange={handleChange}
-              className="w-full pl-4 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-              placeholder="9876543210"
-            />
-          </div>
-        </div>
-      )}
-    </>
-  );
-
-  // --- INSTITUTION LOGIN FORM ---
-  const InstitutionLoginForm = () => (
-    <div className="mb-5">
-      <label className="text-sm font-medium text-gray-700">Login ID</label>
-      <div className="relative mt-2">
-        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-        <input
-          type="text"
-          name="loginId"
-          value={formData.loginId}
-          onChange={handleChange}
-          className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-          placeholder="Enter your Login ID"
-        />
-      </div>
-    </div>
-  );
+  const handleForgotChange = (e) => {
+    setForgotData({ ...forgotData, [e.target.name]: e.target.value });
+  };
 
   const handleLogin = async () => {
     if (isSubmitting) return;
-
     try {
       setIsSubmitting(true);
-
-      let payload = {
-        collegeCode: formData.collegeCode,
-        password: formData.password,
-      };
+      let payload = { collegeCode: formData.collegeCode, password: formData.password };
       let url = "";
 
       if (userType === "student") {
         payload = {
           ...payload,
-          ...(loginMethod === "email"
-            ? { email: formData.email }
-            : { mobileNo: formData.mobileNo }),
+          ...(loginMethod === "email" ? { email: formData.email } : { mobileNo: formData.mobileNo }),
         };
         url = `${API_URL}/api/v1/auth/student/login`;
-      } else if (userType === "institution") {
-        payload = {
-          ...payload,
-          loginId: formData.loginId,
-        };
+      } else {
+        payload = { ...payload, loginId: formData.loginId };
         url = `${API_URL}/api/v1/auth/staff/login`;
       }
 
       const res = await axios.post(url, payload, { withCredentials: true });
       const userData = res.data.data || res.data.user;
 
-      console.log(userData.role);
-
       if (userData) {
         setUser(userData);
         toast.success("Welcome back!");
-        navigate(
-          userData.role === "student"
-            ? "/profile"
-            : userData.role === "canteen"
-            ? "/kitchen"
-            : userData.role === "librarian"
-            ? "/library-admin"
-            : userData.role === "admin"
-            ? "/admin"
-            : "/login"
-        );
+        const routes = {
+          student: "/profile",
+          canteen: "/kitchen",
+          librarian: "/library-admin",
+          admin: "/admin"
+        };
+        navigate(routes[userData.role] || "/login");
       }
     } catch (error) {
-      console.error("Login Error:", error.response?.data);
-      const message = error.response?.data?.message || "Login failed";
-      toast.error(message);
+      toast.error(error.response?.data?.message || "Login failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(`${API_URL}/api/v1/college/forgot-password`, {
+        collegeCode: forgotData.collegeCode,
+        loginId: forgotData.loginId
+      });
+      toast.success(res.data.message || "OTP sent to registered email/mobile");
+      setShowForgotModal(false);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to send reset request");
+    }
+  };
+
   return (
-    <div
-      className={`${
-        isSubmitting
-          ? "blur-xl scale-[0.98] grayscale-[0.5]"
-          : "blur-0 scale-100"
-      }`}
-    >
-      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full z-100">
+    <div className={`min-h-screen transition-all duration-300 ${isSubmitting ? "blur-sm grayscale" : ""}`}>
+      {/* Header */}
+       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 fixed w-full z-100">
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
+
           <div className="flex items-center justify-between">
+
             <div className="flex items-center space-x-2">
+
               <Link to={"/"} className="flex items-center space-x-2">
+
                 <img
+
                   src={logo}
+
                   alt="Smart Campus Logo"
+
                   className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+
                 />
+
                 <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+
                   Smart Campus
+
                 </span>
+
               </Link>
+
             </div>
+
+
 
             <div className="flex items-center space-x-4">
+
               <span className="text-gray-600 hidden sm:inline">
+
                 Don’t have an account?
+
               </span>
+
               <Link
+
                 to={"/signup"}
+
                 className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium"
+
               >
+
                 Signup
+
               </Link>
+
             </div>
+
           </div>
+
         </div>
+
       </header>
-      <div className="min-h-screen grid lg:grid-cols-2 bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        {/* Navbar */}
 
-        {/* Login Page */}
-
+      <div className="grid lg:grid-cols-2 pt-16">
         {/* Left Branding */}
-        <div className="hidden lg:flex flex-col justify-center px-16 bg-gradient-to-br from-blue-700 to-blue-900 text-white">
+        <div className="hidden lg:flex flex-col justify-center px-16 bg-gradient-to-br from-blue-700 to-blue-900 text-white min-h-screen">
           <div className="max-w-md">
             <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center mb-6">
-              <AlertCircle className="w-8 h-8" />
+              <GraduationCap className="w-8 h-8" />
             </div>
-            <h1 className="text-4xl font-bold mb-4">Smart Campus</h1>
-            <p className="text-lg text-white/80">
-              Report, track, and resolve campus issues seamlessly with
-              AI-powered insights.
-            </p>
+            <h1 className="text-4xl font-bold mb-4">Smart Campus Portal</h1>
+            <p className="text-lg text-white/80">Manage your academic life, library, and canteen needs in one place.</p>
           </div>
         </div>
 
         {/* Right Login Card */}
-        <div className="flex items-center justify-center px-4 py-25">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8"
-          >
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome Back
-            </h2>
-            <p className="text-gray-600 mb-8">Login to continue</p>
+        <div className="flex items-center justify-center px-4 py-12 bg-gray-50">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Welcome Back</h2>
 
-            {/* Role Switch */}
+            {/* User Type Switcher */}
             <div className="flex bg-gray-100 rounded-xl p-1 mb-6">
-              <button
-                onClick={() => setUserType("student")}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition ${
-                  userType === "student"
-                    ? "bg-white shadow text-blue-600"
-                    : "text-gray-500"
-                }`}
-              >
+              <button onClick={() => setUserType("student")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition ${userType === "student" ? "bg-white shadow text-blue-600" : "text-gray-500"}`}>
                 <GraduationCap className="w-4 h-4" /> Student
               </button>
-              <button
-                onClick={() => setUserType("institution")}
-                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-medium transition ${
-                  userType === "institution"
-                    ? "bg-white shadow text-blue-600"
-                    : "text-gray-500"
-                }`}
-              >
+              <button onClick={() => setUserType("institution")} className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition ${userType === "institution" ? "bg-white shadow text-blue-600" : "text-gray-500"}`}>
                 <Building2 className="w-4 h-4" /> Institution
               </button>
             </div>
 
-            {/* College Code */}
-            <div className="mb-5">
-              <label className="text-sm font-medium text-gray-700">
-                College Code
-              </label>
-              <div className="relative mt-2">
-                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  name="collegeCode"
-                  value={formData.collegeCode}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-4 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="e.g. 130"
-                />
+            {/* College Code Field */}
+            <div className="mb-4">
+              <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">College Code</label>
+              <div className="relative mt-1">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input type="text" name="collegeCode" value={formData.collegeCode} onChange={handleChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Enter College Code" />
               </div>
             </div>
 
-            {/* Conditional Forms */}
-            {userType === "student" ? (
-              <StudentLoginForm />
-            ) : (
-              <InstitutionLoginForm />
+            {/* Student Specific Toggle */}
+            {userType === "student" && (
+              <div className="flex bg-gray-50 rounded-lg p-1 mb-4 border border-gray-100">
+                <button onClick={() => setLoginMethod("email")} className={`flex-1 py-1.5 rounded-md text-xs font-bold transition ${loginMethod === "email" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>EMAIL</button>
+                <button onClick={() => setLoginMethod("mobile")} className={`flex-1 py-1.5 rounded-md text-xs font-bold transition ${loginMethod === "mobile" ? "bg-white text-blue-600 shadow-sm" : "text-gray-400"}`}>MOBILE</button>
+              </div>
             )}
 
-            {/* Password */}
-            <div className="mb-6">
-              <label className="text-sm font-medium text-gray-700">
-                Password
-              </label>
-              <div className="relative mt-2">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="w-full pl-10 pr-12 py-3 border rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
-                >
-                  {showPassword ? <EyeOff /> : <Eye />}
-                </button>
+            {/* Dynamic Input Fields */}
+            <div className="space-y-4">
+              {userType === "student" ? (
+                loginMethod === "email" ? (
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Email Address</label>
+                    <div className="relative mt-1">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input type="email" name="email" value={formData.email} onChange={handleChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="student@college.edu" />
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Mobile Number</label>
+                    <input type="tel" name="mobileNo" value={formData.mobileNo} onChange={handleChange} className="w-full mt-1 px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="10-digit number" />
+                  </div>
+                )
+              ) : (
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Login ID</label>
+                  <div className="relative mt-1">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <input type="text" name="loginId" value={formData.loginId} onChange={handleChange} className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Staff/Admin ID" />
+                  </div>
+                </div>
+              )}
+
+              {/* Password */}
+              <div>
+                <div className="flex justify-between">
+                   <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Password</label>
+                   
+<button 
+  type="button"
+  onClick={() => navigate("/forgot-password")} // Navigate to the new page
+  className="text-xs font-bold text-blue-600 hover:underline"
+>
+  Forgot?
+</button>
+                </div>
+                <div className="relative mt-1">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="••••••••" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* Login Button */}
-            <button
-              onClick={handleLogin}
-              className="w-full py-4 bg-blue-700 text-white rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-blue-800 transition"
-            >
-              Login <ArrowRight className="w-5 h-5" />
+            <button onClick={handleLogin} disabled={isSubmitting} className="w-full mt-8 py-4 bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition disabled:opacity-50">
+              {isSubmitting ? "Authenticating..." : "Login Now"} <ArrowRight className="w-5 h-5" />
             </button>
-
-            <p className="text-center text-sm text-gray-600 mt-6">
-              Don’t have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-blue-600 font-medium hover:underline"
-              >
-                Create one
-              </Link>
-            </p>
           </motion.div>
         </div>
       </div>
+
+      {/* --- FORGOT PASSWORD MODAL --- */}
+      <AnimatePresence>
+        {showForgotModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }} className="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Reset Password</h3>
+                <button onClick={() => setShowForgotModal(false)} className="p-1 hover:bg-gray-100 rounded-full"><X /></button>
+              </div>
+              <p className="text-sm text-gray-500 mb-6">Enter your details to receive a password reset link/OTP.</p>
+              
+              <form onSubmit={handleForgotPassword} className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-gray-400 uppercase">College Code</label>
+                  <input required type="text" name="collegeCode" value={forgotData.collegeCode} onChange={handleForgotChange} className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. 101" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-400 uppercase">Login ID / Email</label>
+                  <input required type="text" name="loginId" value={forgotData.loginId} onChange={handleForgotChange} className="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Your registered ID" />
+                </div>
+                <button type="submit" className="w-full py-3 bg-blue-600 text-white rounded-lg font-bold hover:bg-blue-700 transition">Request Reset</button>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import { Search, Library, ShieldCheck } from "lucide-react";
 
-export default function LibraryHeader({ searchQuery, setSearchQuery }) {
+export default function LibraryHeader({ searchQuery, setSearchQuery, children }) {
   return (
-    <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 mb-10">
+    <header className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 mb-5">
       <div className="flex items-center gap-4">
         <div className="bg-indigo-600 p-3.5 rounded-2xl shadow-lg shadow-indigo-200 text-white">
           <Library size={28} />
@@ -16,6 +16,14 @@ export default function LibraryHeader({ searchQuery, setSearchQuery }) {
           </p>
         </div>
       </div>
+
+
+      <div className="flex flex-1 justify-center">
+        {children}
+      </div>
+
+
+      
 
       <div className="relative w-full md:w-96 group">
         <Search

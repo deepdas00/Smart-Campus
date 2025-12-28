@@ -366,55 +366,6 @@ export function KitchenKDS() {
     fetchFoods();
   }, []);
 
-  const handleAddFood = async () => {
-    if (
-      !foodForm.name ||
-      !foodForm.price ||
-      !foodForm.category ||
-      !foodForm.foodType
-    ) {
-      toast.error("Please fill all required fields");
-      return;
-    }
-
-    try {
-      setAddingFood(true);
-
-      const formData = new FormData();
-      formData.append("name", foodForm.name);
-      formData.append("price", Number(foodForm.price));
-      formData.append("quantityAvailable", Number(foodForm.quantityAvailable));
-      formData.append("category", foodForm.category);
-      formData.append("foodType", foodForm.foodType);
-      formData.append("description", foodForm.description || "");
-      if (foodForm.image) {
-        formData.append("image", foodForm.image); // file upload
-      }
-
-      const res = await axios.post(
-        `${API_URL}/api/v1/canteen/foods`,
-        formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log(res.data);
-      toast.success("Food added successfully!");
-      setShowAddFood(false);
-      setFoodForm({}); // reset form
-      // Optionally: fetch menu items again to update the list
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to add food. Check console for details.");
-    } finally {
-      setAddingFood(false);
-    }
-  };
-
   const toggleAvailability = async (item) => {
     try {
       console.log("Toggling item:", item._id);
@@ -448,23 +399,6 @@ export function KitchenKDS() {
 
   const [orders, setOrders] = useState([]);
   const [stats, setStats] = useState(null);
-
-  const markAsReady = async (id) => {
-    try {
-      await axios.patch(
-        `${API_URL}/api/v1/canteen/orders/${id}/ready`,
-        {},
-        { withCredentials: true }
-      );
-
-      setOrders(
-        orders.map((o) => (o.id === id ? { ...o, status: "ready" } : o))
-      );
-    } catch (err) {
-      console.error("Failed to mark ready", err);
-      toast.error("Failed to update order");
-    }
-  };
 
   const handleAddOrEditFood = async () => {
     if (

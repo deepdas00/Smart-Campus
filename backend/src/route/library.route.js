@@ -79,8 +79,8 @@ router.post(
 );
 
 /* Issue Book - (librarian / admin) */
-router.post(
-  "/issue",
+router.get(
+  "/issue/:transactionId",
   verifyJWT,
   authorizeRoles("librarian", "admin"),
   issueBook

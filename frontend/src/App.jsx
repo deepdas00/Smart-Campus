@@ -26,6 +26,8 @@ import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
 import CollegeHome from "./Page/CollegeHome.jsx";
 import Sidebar from "./components/Sidebar.jsx";
+import AdminOwner from "./Page/AdminOwner.jsx";
+import FounderConsole from "./Page/FounderConsole.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -60,7 +62,7 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-right"   reverseOrder={false} />
       <Routes>
         <Route path="/home" element={<HomeLogin />} />
         <Route path="/" element={<HomePage />} />
@@ -79,6 +81,8 @@ export default function App() {
         <Route path="/orders" element={<CanteenOrders />} />
         <Route path="/report" element={<ReportPortal />} />
         <Route path="/collegeHome" element={<CollegeHome />} />
+        <Route path="/adminowner" element={<AdminOwner />} />
+        <Route path="/founderConsole" element={<FounderConsole />} />
 
         <Route
           path="/admin"

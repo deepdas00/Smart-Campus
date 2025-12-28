@@ -293,7 +293,7 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-
+  const LibraryBooks = getLibraryBookModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
   const transaction = await Transaction.findById(transactionId)
     .populate({

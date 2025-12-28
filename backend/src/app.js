@@ -45,9 +45,16 @@ import { forgotPasswordSendOTP, forgotPasswordVerifyOTP } from "./controllers/au
 
 
 app.post("/api/v1/platform/admin/login", platformAdminLogin);
-app.post("/api/v1/college/forgot-password", forgotPasswordSendOTP);
-app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP);
+app.post("/api/v1/college/forgot-password", forgotPasswordSendOTP); ///user will get a otp (body: collegeId, loginId{if student= > email || user => loginId})
+app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP); // user will submit the otp (body: collegeId,otp,newPassword,loginId)
 // app.post("/api/v1/college/change-password", verifyJWT, changePassword);/////////////////////////////////////////pending
+
+
+
+
+
+
+
 
 app.use("/api/v1/users/student", studentRouter) 
 // POST   /api/v1/users/student/register        // Public: student registration with avatar upload

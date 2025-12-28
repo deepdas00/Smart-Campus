@@ -12,7 +12,7 @@ export const staffLogin = asyncHandler(async (req, res) => {
     const { collegeCode, loginId, password } = req.body;
 
     if(!collegeCode ||!loginId || !password){
-      res.status(400).json({ message: "Missing required fields: college, loginId, or password" });
+      return res.status(400).json({ message: "Missing required fields: college, loginId, or password" });
     }
     // 1️⃣ Resolve college
     const masterConn = connectMasterDB();
@@ -20,7 +20,7 @@ export const staffLogin = asyncHandler(async (req, res) => {
 
     const college = await College.findOne({ collegeCode, status: "active" });
     if (!college) {
-      res.status(404).json({ message: "College not found or inactive!!" });
+      return res.status(404).json({ message: "College not found or inactive!!" });
         // throw new ApiError(404, "College not found or inactive");
     }
 
@@ -31,13 +31,13 @@ export const staffLogin = asyncHandler(async (req, res) => {
     // 3️⃣ Find staff user
     const user = await CollegeUser.findOne({ loginId });
     if (!user) {
-        res.status(500).json({ message: "Invalid User!!" });
+        return res.status(500).json({ message: "Invalid User!!" });
     }
 
     // 4️⃣ Verify password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-        res.status(500).json({ message: "Invalid Password!!" });
+        return res.status(500).json({ message: "Invalid Password!!" });
     }
 
     // 5️⃣ Generate tokens

@@ -91,9 +91,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
   console.log(req.body)
 
   if (!collegeCode) {
-    res.status(400).json({ message: "Select College!!" });
+    return res.status(400).json({ message: "Select College!!" });
   }else if(!(mobileNo || email)){
-    res.status(400).json({ message: "Mobile No. or Email is required!!" });
+    return res.status(400).json({ message: "Mobile No. or Email is required!!" });
 
   }
 
@@ -126,7 +126,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   // 4️⃣ Verify password
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
-    res.status(401).json({ message: "Invalid Password!!" });
+    return res.status(401).json({ message: "Invalid Password!!" });
 
   }
 

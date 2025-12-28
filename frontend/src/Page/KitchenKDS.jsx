@@ -560,7 +560,6 @@ export function KitchenKDS() {
           return;
         }
 
-        console.log("RAWWWWWWWWW", rawOrders);
 
         const formattedOrders = rawOrders.map((o) => ({
           id: o.transactionCode,
@@ -581,9 +580,10 @@ export function KitchenKDS() {
           status: o.orderStatus === "order_received" ? "preparing" : "ready",
           paymentStatus: o.paymentStatus,
         }));
-
+        
         setOrders(formattedOrders);
-        console.log("order aya", orders);
+        console.log("RAWWWWWWWWW", rawOrders);
+        // console.log("order aya", order);
 
         setStats(res.data?.stats || null);
       } catch (err) {

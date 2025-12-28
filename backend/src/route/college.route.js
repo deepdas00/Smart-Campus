@@ -3,6 +3,7 @@ import { registerCollege, updateCollegeDetails, updateCollegeStatus } from "../c
 import { getAllColleges, getAllCollegesFullDetails } from "../controllers/collegeDataFetch.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
+import { upload } from "../middlewares/multer.middleware.js";
 
 
 const router = express.Router();
@@ -11,40 +12,41 @@ const router = express.Router();
 router.route("/register")
     .post(
         verifyJWT,
-        authorizeRoles("officialAdmin"),
+        authorizeRoles("platformAdmin"),
+        upload.single("logo"),
         registerCollege
     );
 
-    
-    //fetch all college full data for ADMIN OFFICIAL Use
-    router.route("/fetchCollgeData")
+
+//fetch all college full data for ADMIN OFFICIAL Use
+router.route("/fetchCollgeData")
     .get(
         verifyJWT,
-        authorizeRoles("officialAdmin"),
+        authorizeRoles("platformAdmin"),
         getAllCollegesFullDetails
     );
-    
-    
-    //inActive or active ADMIN OFFICIAL
-    router.route("/satusUpdate")
+
+
+//inActive or active ADMIN OFFICIAL
+router.route("/satusUpdate")
     .post(
         verifyJWT,
-        authorizeRoles("officialAdmin"),
+        authorizeRoles("platformAdmin"),
         updateCollegeStatus
     );
 
 
-    //clg details update ADMIN OFFICIAL
-    router.route("/update")
+//clg details update ADMIN OFFICIAL
+router.route("/update")
     .post(
         verifyJWT,
-        authorizeRoles("officialAdmin"),
+        authorizeRoles("platformAdmin"),
         updateCollegeDetails
     );
-    
-    
-    // Internal / frontend usage public 
-    router.route("/data").get(getAllColleges);
+
+
+// Internal / frontend usage public 
+router.route("/data").get(getAllColleges);
 
 
 export default router;

@@ -6,7 +6,8 @@ import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeUserModel } from "../models/collegeUser.model.js"
 import { buildCollegeRegistrationMailTemplate } from "../template/collegeRegistrationMail.template.js"
-import { sendCollegeRegistraionMail } from "../utils/sendMail.js"
+import { sendMail } from "../utils/sendMail.js"
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 
 
@@ -32,7 +33,8 @@ export const registerCollege = asyncHandler(async (req, res) => {
     registrationNumber,
     address,
     contactPersonName,
-    contactNumber
+    contactNumber,
+    NAAC
   } = req.body;
   // console.log(collegeName,collegeCode);
 
@@ -58,17 +60,26 @@ export const registerCollege = asyncHandler(async (req, res) => {
     throw new ApiError(409, "College already registered");
   }
 
-  const documents = [];
 
-  if (req.files?.length) {
-    for (const file of req.files) {
-      const uploadResult = await uploadOnCloudinary(file.path.replace(/\\/g, "/"));
-      if (!uploadResult?.url) {
-        throw new ApiError(500, "Document upload failed");
-      }
-      documents.push(uploadResult.url);
-    }
+// upload logo 
+  const logoPath = req.file?.path?.replace(/\\/g, "/");
+  if (!logoPath) {
+    throw new ApiError(400, "Logo File is required!!(local)");
   }
+  let logorUrl = "";
+  const logoUploadResult = await uploadOnCloudinary(logoPath);
+  logorUrl = logoUploadResult.url;
+
+  // const documents = [];
+  // if (req.files?.length) {
+  //   for (const file of req.files) {
+  //     const uploadResult = await uploadOnCloudinary(file.path.replace(/\\/g, "/"));
+  //     if (!uploadResult?.url) {
+  //       throw new ApiError(500, "Document upload failed");
+  //     }
+  //     documents.push(uploadResult.url);
+  //   }
+  // }
 
   // 3️⃣ Generate DB name
   const dbName = `college_${collegeCode.toLowerCase()}_db`;
@@ -84,8 +95,9 @@ export const registerCollege = asyncHandler(async (req, res) => {
     address,
     contactPersonName,
     contactNumber,
-    documents,
+    logo: logorUrl,
     dbName,
+    NAAC,
     status: "active"
   });
 
@@ -124,7 +136,7 @@ export const registerCollege = asyncHandler(async (req, res) => {
 
 
   // 7️⃣ Send credentials email
-  await sendCollegeRegistraionMail({
+  await sendMail({
     to: officialEmail,
     subject: "Smart-Campus System - Login Credentials",
     html: buildCollegeRegistrationMailTemplate(collegeName, credentials),
@@ -185,6 +197,7 @@ export const updateCollegeDetails = asyncHandler(async (req, res) => {
   const updates = req.body;
 
   const allowedFields = [
+    "collegeCode",
     "collegeName",
     "officialEmail",
     "registrationNumber",
@@ -214,9 +227,22 @@ export const updateCollegeDetails = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   );
 
+
   if (!college) {
     throw new ApiError(404, "College not found");
   }
+
+
+  // for now no phot update
+  // if (req.file?.path) {
+  //   for (const file of req.files) {
+  //     const uploadResult = await uploadOnCloudinary(file.path.replace(/\\/g, "/"));
+  //     if (!uploadResult?.url) {
+  //       throw new ApiError(500, "Document upload failed");
+  //     }
+  //     documents.push(uploadResult.url);
+  //   }
+  // }
 
   res.status(200).json(
     new ApiResponse(200, college, "College details updated successfully")

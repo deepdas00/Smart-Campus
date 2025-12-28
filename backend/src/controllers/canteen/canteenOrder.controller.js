@@ -55,7 +55,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     }
 
     if (food.quantityAvailable < item.quantity) {
-      throw new ApiError(400, `Insufficient quantity for ${food.name}`);
+      return res.status(400).json({message:`Insufficient quantity for ${food.name}`})
     }
 
     const itemTotal = food.price * item.quantity;

@@ -580,10 +580,10 @@ export function KitchenKDS() {
           status: o.orderStatus === "order_received" ? "preparing" : "ready",
           paymentStatus: o.paymentStatus,
         }));
-        
+
+
+
         setOrders(formattedOrders);
-        console.log("RAWWWWWWWWW", rawOrders);
-        // console.log("order aya", order);
 
         setStats(res.data?.stats || null);
       } catch (err) {
@@ -635,8 +635,8 @@ export function KitchenKDS() {
                 <div className="flex items-center gap-3 mt-1">
                   <span
                     className={`flex items-center gap-1.5 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider ${isOpen
-                        ? "bg-emerald-100 text-emerald-600"
-                        : "bg-slate-200 text-slate-500"
+                      ? "bg-emerald-100 text-emerald-600"
+                      : "bg-slate-200 text-slate-500"
                       }`}
                   >
                     {isOpen && (
@@ -1016,10 +1016,10 @@ export function KitchenKDS() {
                               <button
                                 onClick={() => toggleAvailability(item)}
                                 className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${item.quantityAvailable <= 0
-                                    ? "bg-gray-400"
-                                    : item.isAvailable
-                                      ? "bg-emerald-500 shadow-lg shadow-emerald-200"
-                                      : "bg-slate-200"
+                                  ? "bg-gray-400"
+                                  : item.isAvailable
+                                    ? "bg-emerald-500 shadow-lg shadow-emerald-200"
+                                    : "bg-slate-200"
                                   }
                                   ${item.quantityAvailable === 0
                                     ? "opacity-50 cursor-not-allowed"
@@ -1028,17 +1028,17 @@ export function KitchenKDS() {
                               >
                                 <span
                                   className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${item.isAvailable
-                                      ? "translate-x-6"
-                                      : "translate-x-1"
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
                                     }`}
                                 />
                               </button>
                               <span
                                 className={`text-[10px] font-black uppercase tracking-widest ${item.quantityAvailable <= 0
-                                    ? "text-gray-400"
-                                    : item.isAvailable
-                                      ? "text-emerald-600"
-                                      : "text-slate-400"
+                                  ? "text-gray-400"
+                                  : item.isAvailable
+                                    ? "text-emerald-600"
+                                    : "text-slate-400"
                                   }`}
                               >
                                 {item.quantityAvailable <= 0
@@ -1106,8 +1106,8 @@ export function KitchenKDS() {
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all duration-500 ${activeTab === tab
-                      ? "bg-slate-900 text-white shadow-2xl shadow-slate-200 scale-105"
-                      : "text-slate-400 hover:bg-slate-100"
+                    ? "bg-slate-900 text-white shadow-2xl shadow-slate-200 scale-105"
+                    : "text-slate-400 hover:bg-slate-100"
                     }`}
                 >
                   {tab}{" "}
@@ -1132,8 +1132,8 @@ export function KitchenKDS() {
                     key={key}
                     onClick={() => setRange(Number(key))}
                     className={`px-3 py-1 rounded-full text-[10px] font-bold transition-colors ${range === Number(key)
-                        ? "bg-gradient-to-r from-blue-700 to-blue-950 text-white animate-pulse"
-                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                      ? "bg-gradient-to-r from-blue-700 to-blue-950 text-white animate-pulse"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                       }`}
                   >
                     {value.charAt(0).toUpperCase() + value.slice(1)}
@@ -1159,24 +1159,24 @@ export function KitchenKDS() {
                 <div
                   key={order.id}
                   className={`group bg-white rounded-[3rem] border-2 transition-all duration-500 flex flex-col relative overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 ${order.priority === "high"
-                      ? "border-orange-100 shadow-orange-900/5"
-                      : "border-transparent shadow-slate-900/5"
+                    ? "border-orange-100 shadow-orange-900/5"
+                    : "border-transparent shadow-slate-900/5"
                     }`}
                 >
                   {/* Progress Indicator */}
                   <div className="absolute top-0 left-0 w-full h-2 bg-slate-50">
                     <div
                       className={`h-full transition-all duration-1000 ${order.status === "ready"
-                          ? "bg-green-500"
-                          : order.waitTime > 20
-                            ? "bg-red-500"
-                            : "bg-blue-500"
+                        ? "bg-green-500"
+                        : order.waitTime > 20
+                          ? "bg-red-500"
+                          : "bg-blue-500"
                         }
 `}
                       style={{
                         width: `${order.status === "ready"
-                            ? 100
-                            : Math.min(order.waitTime * 20, 100)
+                          ? 100
+                          : Math.min(order.waitTime * 20, 100)
                           }%`,
                       }}
                     ></div>
@@ -1196,8 +1196,8 @@ export function KitchenKDS() {
                       {order.status !== "ready" && (
                         <div
                           className={`flex items-center gap-1.5 font-black text-[10px] uppercase px-3 py-1 rounded-full ${order.waitTime > 15
-                              ? "bg-red-50 text-red-500 animate-pulse"
-                              : "bg-slate-100 text-slate-400"
+                            ? "bg-red-50 text-red-500 animate-pulse"
+                            : "bg-slate-100 text-slate-400"
                             }`}
                         >
                           <Clock size={12} />{" "}
@@ -1410,10 +1410,10 @@ export function KitchenKDS() {
                             onClick={() => toggleAvailability(item)}
                             disabled={item.quantityAvailable === 0}
                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 ${item.quantityAvailable <= 0
-                                ? "bg-gray-400"
-                                : item.isAvailable
-                                  ? "bg-emerald-500 shadow-lg shadow-emerald-200"
-                                  : "bg-slate-200"
+                              ? "bg-gray-400"
+                              : item.isAvailable
+                                ? "bg-emerald-500 shadow-lg shadow-emerald-200"
+                                : "bg-slate-200"
                               }
         ${item.quantityAvailable === 0
                                 ? "opacity-50 cursor-not-allowed"
@@ -1422,17 +1422,17 @@ export function KitchenKDS() {
                           >
                             <span
                               className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-300 ${item.isAvailable
-                                  ? "translate-x-6"
-                                  : "translate-x-1"
+                                ? "translate-x-6"
+                                : "translate-x-1"
                                 }`}
                             />
                           </button>
                           <span
                             className={`text-[10px] font-black uppercase tracking-widest ${item.quantityAvailable <= 0
-                                ? "text-gray-400"
-                                : item.isAvailable
-                                  ? "text-emerald-600"
-                                  : "text-slate-400"
+                              ? "text-gray-400"
+                              : item.isAvailable
+                                ? "text-emerald-600"
+                                : "text-slate-400"
                               }`}
                           >
                             {item.quantityAvailable <= 0
@@ -1659,6 +1659,15 @@ export function KitchenKDS() {
                   >
                     <option value="veg">🟢 Veg</option>
                     <option value="non-veg">🔴 Non-Veg</option>
+                    <option value="beverage">🥤 Beverage</option>
+
+                    
+                    {/* <option value="veg"><img src="veg-logo.svg" alt="Veg Logo" /> Veg</option>
+                    <option value="non-veg"><img src="non-veg-logo.svg" alt="Non-Veg Logo" /> Non-Veg </option>
+                    <option value="beverage">🥤 Beverage</option> */}
+
+                   
+
                   </select>
                 </div>
               </div>
@@ -1813,8 +1822,8 @@ export function KitchenKDS() {
               <div className="absolute top-6 right-8">
                 <span
                   className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${scannedOrder.paymentStatus === "paid"
-                      ? "bg-emerald-500 text-white"
-                      : "bg-red-500 text-white"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-red-500 text-white"
                     }`}
                 >
                   {scannedOrder.paymentStatus || "Unpaid"}

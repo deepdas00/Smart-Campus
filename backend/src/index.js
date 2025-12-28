@@ -31,6 +31,7 @@ connectMasterDB()
 
 
 const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
+
+app.listen(PORT, process.env.ALLALLOW, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });

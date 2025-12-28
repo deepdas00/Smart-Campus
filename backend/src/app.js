@@ -35,11 +35,19 @@ import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
 import reportRouter from "./route/report.route.js";
 import registerCollege from "./route/collegeRequest.route.js";
+import { platformAdminLogin } from "./controllers/platformAdmin/platformAuth.controller.js";
+import { forgotPasswordSendOTP, forgotPasswordVerifyOTP } from "./controllers/auth/password.controller.js";
 
 
 
 
 // -p = pending
+
+
+app.post("/api/v1/platform/admin/login", platformAdminLogin);
+app.post("/api/v1/college/forgot-password", forgotPasswordSendOTP);
+app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP);
+// app.post("/api/v1/college/change-password", verifyJWT, changePassword);/////////////////////////////////////////pending
 
 app.use("/api/v1/users/student", studentRouter) 
 // POST   /api/v1/users/student/register        // Public: student registration with avatar upload
@@ -60,10 +68,10 @@ app.use("/api/v1/public/registerCollege",registerCollege);
 
 
 app.use("/api/v1/college", collegeRouter);
-// POST   /api/v1/college/register           //ADMIN OFFICIAL can only register a college////////////////////////////////
-// POST   /api/v1/college/fetchCollgeData    //ADMIN OFFICIAL can only view all college FULL DATA////////////////////////////////////
-// POST    /api/v1/college/satusUpdate       //ADMIN OFFICIAL can Active or InActive college using BTN//////////////////////////////////////////
-// POST    /api/v1/college/update            //ADMIN OFFICIAL can update changes of college///////////////////////////////////////////////////////////////
+// POST   /api/v1/college/register           //ADMIN PLATFORM can only register a college////////////////////////////////
+// POST   /api/v1/college/fetchCollgeData    //ADMIN PLATFORM can only view all college FULL DATA////////////////////////////////////
+// POST    /api/v1/college/satusUpdate       //ADMIN PLATFORM can Active or InActive college using BTN//////////////////////////////////////////
+// POST    /api/v1/college/update            //ADMIN PLATFORM can update changes of college///////////////////////////////////////////////////////////////
 // GET    /api/v1/college/data               //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
 
 
@@ -121,6 +129,7 @@ app.use("/api/v1/canteen", canteenRouter);
 POST    /api/v1/canteen/policy                 # Set / Update canteen policy (admin)
 GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status///////////////////////////////////////////////////////////
 POST    /api/v1/canteen/isActive               # To set Canteen Status ////////////////////////////////////////////////////////////////
+GET     /api/v1/canteen/fetchpolicy            # To fetch policy details
 
 # ---------- FOOD ----------
 POST    /api/v1/canteen/foods                  # Add food (canteen, admin)

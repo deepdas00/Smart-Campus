@@ -7,7 +7,12 @@ const reportSchema = new mongoose.Schema(
       unique: true,
       required: true
     },
-
+    building:{
+      type:String
+    },
+    room:{
+      type:String
+    },
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true
@@ -26,8 +31,13 @@ const reportSchema = new mongoose.Schema(
  
     category: {
       type: String,
-      enum: ["maintenance", "academic", "hostel", "canteen", "library", "other"],
+      enum: ["researchandlab", "housinganddorms", "groundandpublic"],
       required: true
+    },
+
+    priority:{
+      type: String,
+      enum:["standard","medium","urgent"]
     },
 
     image: {

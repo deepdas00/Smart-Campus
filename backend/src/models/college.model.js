@@ -1,4 +1,5 @@
 import mongoose, { Schema } from "mongoose";
+import { stringify } from "querystring";
 
 const collegeSchema = new Schema(
   {
@@ -27,7 +28,9 @@ const collegeSchema = new Schema(
       type: String,
       required: true
     },
-
+    NAAC:{
+      type: String
+    },
     contactPersonName: {
       type: String,
       required: true
@@ -41,11 +44,14 @@ const collegeSchema = new Schema(
       required: true,
 
     },
-    documents: [
-      {
-        type: String   // Cloudinary URLs
-      }
-    ],
+    // documents: [
+    //   {
+    //     type: String   // Cloudinary URLs
+    //   }
+    // ],
+    logo:{
+      type: String
+    },
 
     status: {
       type: String,

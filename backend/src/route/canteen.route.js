@@ -34,6 +34,13 @@ router.get(
   canteenSatusFetch
 )
 
+router.get(
+  "/fetchpolicy",
+  verifyJWT,
+  authorizeRoles("admin","canteen","student"),
+  // fetchPolicy
+)
+
 
 /* ---------- FOOD ---------- */
 

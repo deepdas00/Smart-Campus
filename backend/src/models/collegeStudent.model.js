@@ -38,6 +38,15 @@ const collegeStudentSchema = new Schema(
         ref: "LibraryTransaction"
       }
     ],
+    resetPasswordOTP: {
+      type: String,
+      default: null
+    },
+
+    resetPasswordOTPExpiry: {
+      type: Date,
+      default: null
+    },
 
     refreshToken: { type: String, default: null },
   },

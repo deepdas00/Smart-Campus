@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 
-export const sendCollegeRegistraionMail = async ({ to, subject, html }) => {
+export const sendMail = async ({ to, subject, html }) => {
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,

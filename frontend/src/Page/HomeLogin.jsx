@@ -5,6 +5,7 @@ import {
   Gamepad2, Zap, Shield, BarChart3, ChevronRight,
   ArrowRight, Globe, Layers
 } from "lucide-react";
+import { X, Image as ImageIcon } from 'lucide-react';
 
 import Footer from '../Components/Footer';
 import Navbar from '../Components/Navbar/Navbar';
@@ -13,6 +14,24 @@ import CollegeInfo from '../Components/CollegeInfo';
 export default function HomeLogin() {
   const scrollRef = useRef(null);
   const [scrollProgress, setScrollProgress] = useState(0);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const galleryIds = [
+    "1562774053-701939374585",
+    "1766310549540-2de9da114f2b",
+    "1766365076306-419d3349ba12",
+    "1759338584492-ad1dbbffd96d",
+    "1523240795612-9a054b0db644",
+    "1517245386807-bb43f82c33c4",
+    "1503676260728-1c00da094a0b",
+    "1492538368677-f6e0afe31dcc"
+  ];
+
+  const extendedGallery = galleryIds.map((id, i) => ({
+    id: i,
+    url: `https://images.unsplash.com/photo-${id}?w=800&auto=format&fit=crop`,
+    title: `Campus Space ${i + 1}`
+  }));
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -180,7 +199,7 @@ export default function HomeLogin() {
 
       {/* SECTION 2: SMART CAMPUS GALLERY - HIGH-ENGAGEMENT MOSAIC */}
       <section className="py-20 px-6 bg-[#F8FAFC] relative overflow-hidden">
-        {/* Abstract Background Accent */}
+        {/* Background Accents */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
           <div className="absolute top-10 right-10 w-96 h-96 bg-blue-200 blur-[120px] rounded-full"></div>
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-indigo-200 blur-[120px] rounded-full"></div>
@@ -198,77 +217,114 @@ export default function HomeLogin() {
                 Visual <span className="text-blue-600 underline decoration-blue-200 decoration-8 underline-offset-4">Visions.</span>
               </h2>
             </div>
-            <p className="text-slate-500 text-sm font-medium max-w-xs md:text-right border-l-2 md:border-l-0 md:border-r-2 border-blue-600 px-4">
+            <p className="text-slate-500 text-sm font-medium max-w-xs md:text-right border-r-2 border-blue-600 px-4">
               A curated glimpse into the architecture and energy of our smart ecosystem.
             </p>
           </div>
 
-          {/* THE MOSAIC GRID - Height reduced to 550px for decent showing */}
+          {/* 1. THE MAIN MOSAIC GRID (Standard Zoom Behavior) */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-auto md:h-[550px]">
-
-            {/* 1. Large Feature Card */}
             <div className="md:col-span-4 md:row-span-2 relative group overflow-hidden rounded-[2.5rem] shadow-xl bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1766430677995-a60227a65a3e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzMXx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
-                alt="Main Campus"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="absolute bottom-8 left-8 right-8 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">Architecture</p>
-                <h4 className="text-white text-2xl font-black italic uppercase tracking-tighter">The Innovation Hub</h4>
-              </div>
+              <img src={extendedGallery[0].url} className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110" alt="" />
             </div>
 
-            {/* 2. Top Wide Card */}
             <div className="md:col-span-5 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839257287-3030c9300ece?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzNnx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                alt="Digital Plaza"
-              />
-              <div className="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors"></div>
+              <img src={extendedGallery[1].url} className="w-full h-full object-cover group-hover:scale-105 transition-transform" alt="" />
             </div>
 
-            {/* 3. Top Small Card */}
             <div className="md:col-span-3 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839258239-2be2146f1605?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1MHx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover transition-all duration-700 group-hover:rotate-2 group-hover:scale-110"
-                alt="Study Zone"
-              />
+              <img src={extendedGallery[2].url} className="w-full h-full object-cover group-hover:rotate-2 group-hover:scale-110 transition-transform" alt="" />
             </div>
 
-            {/* 4. Bottom Row - Left (Small Square) */}
             <div className="md:col-span-3 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839262867-af53d08b0eb5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1N3x8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                alt="Tech Library"
-              />
+              <img src={extendedGallery[3].url} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-transform" alt="" />
             </div>
 
-            {/* 5. Bottom Row - Right (Wide Info Card) */}
-            <div className="md:col-span-5 md:row-span-1 bg-blue-600 rounded-[2.5rem] p-8 flex items-center justify-between text-white group cursor-pointer hover:bg-blue-700 transition-all">
-              <div className="space-y-2">
-                <p className="text-4xl font-black italic tracking-tighter">150+</p>
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">Interactive Spaces</p>
+            {/* TRIGGER CARD */}
+            <div
+              onClick={() => setShowPopup(true)}
+              className="md:col-span-5 md:row-span-1 bg-blue-600 rounded-[2.5rem] p-8 flex items-center justify-between text-white group cursor-pointer hover:bg-blue-700 transition-all shadow-xl"
+            >
+              <div className="space-y-1">
+                <p className="text-5xl font-black italic tracking-tighter leading-none">150+</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] opacity-80">Interactive Spaces</p>
               </div>
               <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 group-hover:rotate-12 transition-all">
                 <ArrowRight size={32} />
               </div>
             </div>
-
-          </div>
-
-          {/* Interactive Pagination Look */}
-          <div className="mt-10 flex items-center gap-3 justify-center">
-            <div className="w-8 h-1 bg-blue-600 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
           </div>
         </div>
+
+        {/* --- 2. POPUP WINDOW (Maximum Vertical Separation & Minimal Blur) --- */}
+        {showPopup && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
+            <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-[1px]" onClick={() => setShowPopup(false)}></div>
+
+            <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
+
+              {/* Header */}
+              <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-600 p-2 rounded-1xl text-white">
+                    <ImageIcon size={28} />
+                  </div>
+                  <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
+                    Student <span className="text-blue-600">Gallery</span>
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
+                >
+                  <X size={30} />
+                </button>
+              </div>
+
+              {/* INTERACTIVE POPUP GRID */}
+              <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar group/gallery">
+                {/* We use gap-y-24 for huge vertical gaps and gap-x-12 for horizontal */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
+                  {extendedGallery.map((img) => (
+                    <div
+                      key={img.id}
+                      className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 transition-all duration-700 
+                         group-hover/gallery:blur-[0.4px] group-hover/gallery:opacity-40 group-hover/gallery:scale-[0.95]
+                         hover:!blur-none hover:!scale-110 hover:!opacity-100 hover:z-20 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20"
+                    >
+                      <img
+                        src={img.url}
+                        className="w-full h-full object-cover"
+                        alt={img.title}
+                      />
+
+                      {/* Info Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent opacity-0 hover:opacity-50 transition-all duration-500 flex flex-col justify-end p-3">
+                        <p className="text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] mb-1">Campus Life</p>
+                        <span className="text-white text-sm font-bold uppercase tracking-widest">{img.title}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Extra Bottom Padding to ensure the last row has gap below it */}
+                <div className="h-24"></div>
+              </div>
+
+              <div className="p-6 bg-white border-t border-slate-50 text-center">
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+                  Scroll to Explore • Hover to Focus
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <style dangerouslySetInnerHTML={{
+          __html: `
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #E2E8F0; border-radius: 10px; }
+      `}} />
       </section>
 
       <hr className="border-slate-100" />

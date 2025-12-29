@@ -183,7 +183,7 @@ export const currentStudent = asyncHandler(async (req, res) => {
 
   // verifyJWT middleware should attach 'user' to 'req'
   const { collegeCode, userId } = req.body || req.user;
-
+  
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });

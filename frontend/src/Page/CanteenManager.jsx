@@ -15,7 +15,6 @@ import {
   ArrowUpRight, // <--- Add this
   MoreVertical,
   Search,
-  
 } from "lucide-react";
 
 export function CanteenManager() {
@@ -25,8 +24,8 @@ export function CanteenManager() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [inventoryItems, setInventoryItems] = useState([]);
-const [loadingInventory, setLoadingInventory] = useState(false);
-const [foods, setFoods] = useState([]);
+  const [loadingInventory, setLoadingInventory] = useState(false);
+  const [foods, setFoods] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -35,20 +34,18 @@ const [foods, setFoods] = useState([]);
   const [activeOrders, setActiveOrders] = useState(0);
   const [avgPrepTime, setAvgPrepTime] = useState(0);
 
-
-
-useEffect(() => {
+  useEffect(() => {
     const fetchDashboardOrders = async () => {
       try {
         setLoadingOrders(true);
         const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/v1/canteen/orders/dashboard?range=${selectedRange}`,
+          `${
+            import.meta.env.VITE_API_URL
+          }/api/v1/canteen/orders/dashboard?range=${selectedRange}`,
           { withCredentials: true }
         );
         const data = res.data.data || [];
         setOrders(data);
-
-        
 
         // Compute Daily Revenue
         const todayRevenue = data
@@ -77,8 +74,7 @@ useEffect(() => {
     fetchDashboardOrders();
   }, [selectedRange]);
 
-
- useEffect(() => {
+  useEffect(() => {
     const fetchFoods = async () => {
       try {
         setLoading(true);
@@ -86,7 +82,7 @@ useEffect(() => {
           `${import.meta.env.VITE_API_URL}/api/v1/canteen/foods`,
           { withCredentials: true }
         );
-console.log(res.data.data.foods);
+        console.log(res.data.data.foods);
 
         setFoods(res.data.data.foods || []);
       } catch (error) {
@@ -110,7 +106,7 @@ console.log(res.data.data.foods);
     );
   });
 
-   const filteredFoods = foods.filter((food) => {
+  const filteredFoods = foods.filter((food) => {
     const matchesCategory =
       categoryFilter === "all" || food.category === categoryFilter;
     const matchesSearch =
@@ -121,13 +117,9 @@ console.log(res.data.data.foods);
     return matchesCategory && matchesSearch;
   });
 
-
-
-  
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* Top Header */}
-
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -162,42 +154,40 @@ console.log(res.data.data.foods);
         </div>
       </div>
 
-
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg">
-        <div className="flex justify-between items-center opacity-80 mb-2">
-          <span className="text-sm font-medium">Daily Revenue</span>
-          <IndianRupee className="w-4 h-4" />
-        </div>
-        <h3 className="text-3xl font-bold">₹{dailyRevenue}</h3>
-        {/* <p className="text-xs mt-2 text-blue-100">
+        <div className="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl text-white shadow-lg">
+          <div className="flex justify-between items-center opacity-80 mb-2">
+            <span className="text-sm font-medium">Daily Revenue</span>
+            <IndianRupee className="w-4 h-4" />
+          </div>
+          <h3 className="text-3xl font-bold">₹{dailyRevenue}</h3>
+          {/* <p className="text-xs mt-2 text-blue-100">
           {orders.length ? `+${Math.round(dailyRevenue * 0.18)} from yesterday` : ""}
         </p> */}
-      </div>
-
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center text-gray-500 mb-2">
-          <span className="text-sm font-medium">Active Orders</span>
-          <ShoppingBag className="w-4 h-4 text-orange-500" />
         </div>
-        <h3 className="text-3xl font-bold text-gray-900">{activeOrders}</h3>
-        <p className="text-xs mt-2 text-orange-600 font-medium">
-          {activeOrders > 0 ? `${activeOrders} orders delayed` : "No delays"}
-        </p>
-      </div>
 
-      <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex justify-between items-center text-gray-500 mb-2">
-          <span className="text-sm font-medium">Avg. Prep Time</span>
-          <Clock className="w-4 h-4 text-green-500" />
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center text-gray-500 mb-2">
+            <span className="text-sm font-medium">Active Orders</span>
+            <ShoppingBag className="w-4 h-4 text-orange-500" />
+          </div>
+          <h3 className="text-3xl font-bold text-gray-900">{activeOrders}</h3>
+          <p className="text-xs mt-2 text-orange-600 font-medium">
+            {activeOrders > 0 ? `${activeOrders} orders delayed` : "No delays"}
+          </p>
         </div>
-        <h3 className="text-3xl font-bold text-gray-900">{avgPrepTime}m</h3>
-        <p className="text-xs mt-2 text-green-600 font-medium">
-          Optimized by AI
-        </p>
+
+        <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div className="flex justify-between items-center text-gray-500 mb-2">
+            <span className="text-sm font-medium">Avg. Prep Time</span>
+            <Clock className="w-4 h-4 text-green-500" />
+          </div>
+          <h3 className="text-3xl font-bold text-gray-900">{avgPrepTime}m</h3>
+          <p className="text-xs mt-2 text-green-600 font-medium">
+            Optimized by AI
+          </p>
+        </div>
       </div>
-    </div>
 
       {activeTab === "orders" ? (
         <div className="grid grid-cols-1 gap-6 w-full ">
@@ -221,37 +211,37 @@ console.log(res.data.data.foods);
             </div>
 
             {/* Search Input */}
-<div className="relative flex-1 max-w-sm">
-  {/* Search Icon */}
-  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <div className="relative flex-1 max-w-sm">
+              {/* Search Icon */}
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
 
-  {/* Input */}
-  <input
-    type="text"
-    placeholder="Search Roll No / Transaction ID"
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    className="w-full pl-11 pr-10 py-2.5 text-sm font-medium
+              {/* Input */}
+              <input
+                type="text"
+                placeholder="Search Roll No / Transaction ID"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-11 pr-10 py-2.5 text-sm font-medium
                rounded-xl border border-gray-200 bg-white
                placeholder:text-gray-400
                shadow-sm
                transition-all
                focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500
                hover:border-gray-300"
-  />
+              />
 
-  {/* Clear Button (optional but recommended) */}
-  {searchQuery && (
-    <button
-      onClick={() => setSearchQuery("")}
-      className="absolute right-3 top-1/2 -translate-y-1/2
+              {/* Clear Button (optional but recommended) */}
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2
                  text-gray-400 hover:text-red-500 transition"
-      title="Clear search"
-    >
-      ✕
-    </button>
-  )}
-</div>
+                  title="Clear search"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Live Order Cards */}
@@ -361,7 +351,12 @@ console.log(res.data.data.foods);
                             }`}
                           >
                             <span className="w-1.5 h-1.5 mr-1.5 rounded-full bg-current"></span>
-                            {order.orderStatus.replace("_", " ")}
+
+                            {order.orderStatus === "order_received"
+                              ? "Pending"
+                              : order.orderStatus === "served"
+                              ? "Served"
+                              : order.orderStatus.replace(/_/g, " ")}
                           </span>
                         </td>
 
@@ -400,142 +395,141 @@ console.log(res.data.data.foods);
           </div>
         </div>
       ) : (
-       <div className="space-y-6">
+        <div className="space-y-6">
+          {/* Inventory Table */}
+          <div className="space-y-6">
+            {/* Header & Controls */}
+            <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+              <div className="flex gap-4">
+                <div className="relative">
+                  <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">All Categories</option>
+                    {[...new Set(foods.map((f) => f.category))].map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
 
-
-  {/* Inventory Table */}
- <div className="space-y-6">
-      {/* Header & Controls */}
-      <div className="flex justify-between items-center bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
-        <div className="flex gap-4">
-          <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm font-semibold focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">All Categories</option>
-              {[...new Set(foods.map((f) => f.category))].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat.charAt(0).toUpperCase() + cat.slice(1)}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Search food..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="px-3 py-2 border border-gray-200 rounded-xl shadow-sm text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
-          />
-          {/* <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Search food..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="px-3 py-2 border border-gray-200 rounded-xl shadow-sm text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 w-80"
+                />
+                {/* <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
             <Plus size={18} /> Add New Item
           </button> */}
+              </div>
+            </div>
+
+            {/* Inventory Table */}
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-auto">
+              {loading ? (
+                <div className="p-4 text-gray-500">Loading foods...</div>
+              ) : filteredFoods.length === 0 ? (
+                <div className="p-4 text-gray-400">No foods found</div>
+              ) : (
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Image
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Name
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Type
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Price
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Quantity
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Created At
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                        Updated At
+                      </th>
+                      <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {filteredFoods.map((food) => (
+                      <tr
+                        key={food._id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="p-4">
+                          <img
+                            src={food.image}
+                            alt={food.name}
+                            className="w-12 h-12 rounded-lg object-cover"
+                          />
+                        </td>
+                        <td className="p-4 font-bold text-gray-900">
+                          {food.name}
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full font-medium">
+                            {food.category}
+                          </span>
+                        </td>
+                        <td className="p-4 capitalize">{food.foodType}</td>
+                        <td className="p-4 font-bold">₹{food.price}</td>
+                        <td className="p-4 font-mono">
+                          {food.quantityAvailable}
+                        </td>
+                        <td className="p-4">
+                          {food.isAvailable ? (
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg w-fit">
+                              <CheckCircle size={14} /> Available
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg w-fit">
+                              <AlertCircle size={14} /> Unavailable
+                            </span>
+                          )}
+                        </td>
+                        <td className="p-4 text-xs text-gray-500">
+                          {new Date(food.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-4 text-xs text-gray-500">
+                          {new Date(food.updatedAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-4 text-right">
+                          <button className="text-blue-600 hover:text-blue-800 font-bold text-sm">
+                            Update
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-
-      {/* Inventory Table */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-auto">
-        {loading ? (
-          <div className="p-4 text-gray-500">Loading foods...</div>
-        ) : filteredFoods.length === 0 ? (
-          <div className="p-4 text-gray-400">No foods found</div>
-        ) : (
-          <table className="w-full text-left">
-            <thead className="bg-gray-50 border-b border-gray-100">
-              <tr>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Image
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Type
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Price
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Quantity
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider">
-                  Updated At
-                </th>
-                <th className="p-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filteredFoods.map((food) => (
-                <tr
-                  key={food._id}
-                  className="hover:bg-gray-50 transition-colors"
-                >
-                  <td className="p-4">
-                    <img
-                      src={food.image}
-                      alt={food.name}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                  </td>
-                  <td className="p-4 font-bold text-gray-900">{food.name}</td>
-                  <td className="p-4">
-                    <span className="text-sm text-gray-600 bg-gray-100 px-3 py-1 rounded-full font-medium">
-                      {food.category}
-                    </span>
-                  </td>
-                  <td className="p-4 capitalize">{food.foodType}</td>
-                  <td className="p-4 font-bold">₹{food.price}</td>
-                  <td className="p-4 font-mono">
-                    {food.quantityAvailable}
-                  </td>
-                  <td className="p-4">
-                    {food.isAvailable ? (
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-lg w-fit">
-                        <CheckCircle size={14} /> Available
-                      </span>
-                    ) : (
-                      <span className="flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg w-fit">
-                        <AlertCircle size={14} /> Unavailable
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-4 text-xs text-gray-500">
-                    {new Date(food.createdAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-xs text-gray-500">
-                    {new Date(food.updatedAt).toLocaleDateString()}
-                  </td>
-                  <td className="p-4 text-right">
-                    <button className="text-blue-600 hover:text-blue-800 font-bold text-sm">
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </div>
-    </div>
-</div>
-
       )}
 
       {/* AI Kitchen Insight */}

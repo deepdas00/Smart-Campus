@@ -57,8 +57,8 @@ router.post(
 
 // All authenticated users
 router.get(
-    "/policy",
-    verifyJWT,
+    "/policy/:collegeCode",
+    
     getCollegePolicy
 );
 

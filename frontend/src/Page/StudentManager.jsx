@@ -166,7 +166,7 @@ export function StudentManager() {
                   </td>
 
                   <td className="px-6 py-4 text-sm font-medium">
-                    {s.year}
+                    {s.admissionYear}
                   </td>
 
                   <td className="px-6 py-4">

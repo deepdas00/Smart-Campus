@@ -40,7 +40,12 @@ export const createOrUpdateCollegePolicy = asyncHandler(async (req, res) => {
 
 export const getCollegePolicy = asyncHandler(async (req, res) => {
 
-  const { collegeCode } = req.user;
+  console.log("huuuuuuuuu");
+  
+  const { collegeCode } = req.params;
+
+  console.log(collegeCode);
+  
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);

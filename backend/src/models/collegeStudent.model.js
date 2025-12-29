@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { log } from "console";
 import { stringify } from "querystring";
+import { type } from "os";
 
 
 
@@ -50,6 +51,11 @@ const collegeStudentSchema = new Schema(
     resetPasswordOTP: {
       type: String,
       default: null
+    },
+
+    isActive:{
+      type : Boolean,
+      default : true
     },
 
     resetPasswordOTPExpiry: {

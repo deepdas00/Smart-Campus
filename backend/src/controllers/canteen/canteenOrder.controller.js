@@ -255,7 +255,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(orderId)
     .populate("studentId", "studentName rollNo mobileNo")
     .select(
-      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+      "_id items transactionCode qrCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
 
 
@@ -292,7 +292,7 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
   const orders = await Order.find({ studentId: userId })
     .sort({ createdAt: -1 })
     .select(
-      "_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
+      "_id transactionCode qrCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
     );
 
   // 3️⃣ Response

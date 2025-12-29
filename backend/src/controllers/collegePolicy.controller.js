@@ -9,7 +9,8 @@ export const createOrUpdateCollegePolicy = asyncHandler(async (req, res) => {
 
   const { collegeCode } = req.user;
   const { departmentName } = req.body;
-
+ console.log(departmentName);
+ 
   if (!Array.isArray(departmentName) || departmentName.length === 0) {
     throw new ApiError(400, "departmentName must be a non-empty array");
   }
@@ -40,7 +41,7 @@ export const createOrUpdateCollegePolicy = asyncHandler(async (req, res) => {
 
 export const getCollegePolicy = asyncHandler(async (req, res) => {
 
-  const { collegeCode } = req.user;
+  const { collegeCode } = req.params;
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);

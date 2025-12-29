@@ -22,6 +22,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     mobileNo,
     email,
     password,
+    department,
+    admissionYear,
   } = req.body;
 
   // 2️⃣ Connect MASTER DB
@@ -71,6 +73,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     avatar: avatarUrl,
+    department,
+    admissionYear,
   });
 
 
@@ -82,7 +86,6 @@ export const registerStudent = asyncHandler(async (req, res) => {
   );
 
 });
-
 
 
 export const studentLogin = asyncHandler(async (req, res) => {
@@ -179,7 +182,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
 export const currentStudent = asyncHandler(async (req, res) => {
 
   // verifyJWT middleware should attach 'user' to 'req'
-  const { collegeCode, userId } = req.user;
+  const { collegeCode, userId } = req.body || req.user;
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -189,7 +192,7 @@ export const currentStudent = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName)
   const Student = getStudentModel(collegeConn)
-  const student = await Student.findById(userId).select("-password -refreshToken");
+  const student = await Student.findById(userId).select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
 
 
   if (!student) {
@@ -219,7 +222,7 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName)
   const Student = getStudentModel(collegeConn)
-  const students = await Student.find().select("-password -refreshToken");
+  const students = await Student.find().select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
 
 
   if (!students) {

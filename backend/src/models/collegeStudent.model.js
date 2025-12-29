@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { log } from "console";
+import { stringify } from "querystring";
 
 
 
@@ -31,6 +32,14 @@ const collegeStudentSchema = new Schema(
     {
       type: String,
       default: "student"
+    },
+    department:{
+      type: String,
+      required: true
+    },
+    admissionYear:{
+      type: Number,
+      required: true,
     },
     issuedBooks: [
       {

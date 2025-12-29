@@ -4,6 +4,7 @@ import { getAllColleges, getAllCollegesFullDetails } from "../controllers/colleg
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
+import { createOrUpdateCollegePolicy, getCollegePolicy } from "../controllers/collegePolicy.controller.js";
 
 
 const router = express.Router();
@@ -43,6 +44,23 @@ router.route("/update")
         authorizeRoles("platformAdmin"),
         updateCollegeDetails
     );
+
+
+
+// Admin only
+router.post(
+    "/policy",
+    verifyJWT,
+    authorizeRoles("admin"),
+    createOrUpdateCollegePolicy
+);
+
+// All authenticated users
+router.get(
+    "/policy",
+    verifyJWT,
+    getCollegePolicy
+);
 
 
 // Internal / frontend usage public 

@@ -79,6 +79,8 @@ app.use("/api/v1/college", collegeRouter);
 // POST    /api/v1/college/satusUpdate       //ADMIN PLATFORM can Active or InActive college using BTN//////////////////////////////////////////
 // POST    /api/v1/college/update            //ADMIN PLATFORM can update changes of college///////////////////////////////////////////////////////////////
 // GET    /api/v1/college/data               //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
+// POST    /api/v1/college/policy            //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
+// GET    /api/v1/college/policy             //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
 
 
 app.use("/api/v1/auth", authRouter);
@@ -177,6 +179,7 @@ PATCH   /api/v1/reports/:reportId/status        # Update report status (admin)
 
 # =============================================================
 */
+
 
 
 

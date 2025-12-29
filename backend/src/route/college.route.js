@@ -4,17 +4,23 @@ import { getAllColleges, getAllCollegesFullDetails } from "../controllers/colleg
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { createOrUpdateCollegePolicy, getCollegePolicy } from "../controllers/collegePolicy.controller.js";
+import { createOrUpdateCollegeInfo, getCollegeFullInfo, getCollegeLimitedInfo, getDepartments } from "../controllers/collegeInfo.controller.js";
+import { addGalleryImage, deleteGalleryImage, getGalleryImages } from "../controllers/collegeGallery.controller.js";
+import { createNotification, deleteNotification, getNotifications, updateNotification } from "../controllers/collegeNotification.controller.js";
 
 
 const router = express.Router();
+
+
+/*================================
+college for product admin
+==================================*/
 
 // College Registration for (ADMIN OFFICIAL)
 router.route("/register")
     .post(
         verifyJWT,
         authorizeRoles("platformAdmin"),
-        upload.single("logo"),
         registerCollege
     );
 
@@ -47,24 +53,119 @@ router.route("/update")
 
 
 
+
+
+
+
+/*================================
+        college Info
+==================================*/
+   
 // Admin only
 router.post(
-    "/policy",
+    "/info/createOrUpdate",
     verifyJWT,
     authorizeRoles("admin"),
-    createOrUpdateCollegePolicy
+    upload.single("logo"),
+    createOrUpdateCollegeInfo
 );
 
-// All authenticated users
+// public department fetch
 router.get(
-    "/policy",
-    verifyJWT,
-    getCollegePolicy
+    "/departments/:collegeCode",
+    getDepartments
 );
+
+//get full information of college admin
+router.get(
+    "/info-full",
+    verifyJWT,
+    authorizeRoles("admin"),
+    getCollegeFullInfo
+)
+
+//get limited information of student and staff
+router.get(
+    "/info-limit",
+    verifyJWT,
+    authorizeRoles("student","staff"),
+    getCollegeLimitedInfo
+)
 
 
 // Internal / frontend usage public 
 router.route("/data").get(getAllColleges);
+
+
+
+
+
+
+/*================================
+        college Gellery
+==================================*/
+
+
+
+// Admin & staff upload
+router.post(
+  "/gallery",
+  verifyJWT,
+  authorizeRoles("admin"),
+  upload.single("image"),
+  addGalleryImage
+);
+
+// All logged users view
+router.get(
+  "/gallery",
+  verifyJWT,
+  getGalleryImages
+);
+
+// Admin delete
+router.delete(
+  "/gallery/:imageId",
+  verifyJWT,
+  authorizeRoles("admin"),
+  deleteGalleryImage
+);
+
+/*================================
+        college Notification
+==================================*/
+// Admin create Notification
+router.post(
+  "/notifications",
+  verifyJWT,
+  authorizeRoles("admin"),
+  upload.single("pic"),
+  createNotification
+);
+
+// Everyone can fetch notifiction
+router.get(
+  "/notifications",
+  verifyJWT,
+  getNotifications
+);
+
+// Admin update notification
+router.patch(
+  "/notifications/:notificationId",
+  verifyJWT,
+  authorizeRoles("admin"),
+  upload.single("pic"),
+  updateNotification
+);
+
+// Admin delete notification
+router.delete(
+  "/notifications/:notificationId",
+  verifyJWT,
+  authorizeRoles("admin"),
+  deleteNotification
+);
 
 
 export default router;

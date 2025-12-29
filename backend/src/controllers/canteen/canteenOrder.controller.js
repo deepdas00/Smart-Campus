@@ -260,7 +260,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
 
 
 
-  // console.log(order);
+
 
   // 4️⃣ Response
   res

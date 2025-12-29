@@ -8,6 +8,7 @@ import { getCollegeUserModel } from "../models/collegeUser.model.js"
 import { buildCollegeRegistrationMailTemplate } from "../template/collegeRegistrationMail.template.js"
 import { sendMail } from "../utils/sendMail.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { getCollegeInfoModel } from "../models/colllegeInfo.model.js";
 
 
 
@@ -34,7 +35,7 @@ export const registerCollege = asyncHandler(async (req, res) => {
     address,
     contactPersonName,
     contactNumber,
-    NAAC
+    principalName,
   } = req.body;
   // console.log(collegeName,collegeCode);
 
@@ -61,28 +62,8 @@ export const registerCollege = asyncHandler(async (req, res) => {
   }
 
 
-// upload logo 
-  const logoPath = req.file?.path?.replace(/\\/g, "/");
-  if (!logoPath) {
-    throw new ApiError(400, "Logo File is required!!(local)");
-  }
-  let logorUrl = "";
-  const logoUploadResult = await uploadOnCloudinary(logoPath);
-  logorUrl = logoUploadResult.url;
-
-  // const documents = [];
-  // if (req.files?.length) {
-  //   for (const file of req.files) {
-  //     const uploadResult = await uploadOnCloudinary(file.path.replace(/\\/g, "/"));
-  //     if (!uploadResult?.url) {
-  //       throw new ApiError(500, "Document upload failed");
-  //     }
-  //     documents.push(uploadResult.url);
-  //   }
-  // }
-
   // 3️⃣ Generate DB name
-  const dbName = `college_${collegeCode.toLowerCase()}_db`;
+  const dbName = `college_${collegeName.toLowerCase()}_db`;
   // console.log(dbName);
 
 
@@ -95,16 +76,20 @@ export const registerCollege = asyncHandler(async (req, res) => {
     address,
     contactPersonName,
     contactNumber,
-    logo: logorUrl,
     dbName,
-    NAAC,
     status: "active"
   });
 
   // 5️⃣ Connect COLLEGE DB
   const collegeConn = getCollegeDB(dbName);
   const CollegeUserModel = getCollegeUserModel(collegeConn);
-  console.log("1");
+  const CollegeInfoModel = getCollegeInfoModel(collegeConn);
+
+  collegeInfo = CollegeInfoModel.create({
+    collegeCode,
+    collegeName,
+    registrationNumber,
+  })
 
   // 6️⃣ Create system staffs based on role
   const roles = ["admin", "librarian", "canteen"];
@@ -130,8 +115,6 @@ export const registerCollege = asyncHandler(async (req, res) => {
       password: plainPassword // ⚠️ for email only
     });
   }
-  // console.log(credentials);
-
 
 
 

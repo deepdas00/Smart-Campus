@@ -77,14 +77,37 @@ export const registerStudent = asyncHandler(async (req, res) => {
     admissionYear,
   });
 
+  // 9️⃣ Generate tokens using your existing util
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshTokens({
+      userId: student._id,
+      role: "student",
+      collegeCode
+    });
 
-  //// error handling for db fail 
+  // 🍪 Cookie options
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict"
+  };
 
-  // 9️⃣ Send response
-  res.status(201).json(
-    new ApiResponse(201, student, "Student registered successfully")
-  );
-
+  // 🔟 Send cookies + response
+  return res
+    .status(201)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        201,
+        {
+          student,
+          accessToken,
+          refreshToken
+        },
+        "Student registered & logged in successfully"
+      )
+    );
 });
 
 
@@ -95,7 +118,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   if (!collegeCode) {
     return res.status(400).json({ message: "Select College!!" });
-  }else if(!(mobileNo || email)){
+  } else if (!(mobileNo || email)) {
     return res.status(400).json({ message: "Mobile No. or Email is required!!" });
 
   }
@@ -183,7 +206,7 @@ export const currentStudent = asyncHandler(async (req, res) => {
 
   // verifyJWT middleware should attach 'user' to 'req'
   const { collegeCode, userId } = req.body || req.user;
-  
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });

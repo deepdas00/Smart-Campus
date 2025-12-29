@@ -48,6 +48,9 @@ export default function SignUpPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const API_URL = import.meta.env.VITE_API_URL;
 
+  const [collegeCode, setCollegeCode] = useState("");
+  const [departments, setDepartments] = useState([]);
+
   useEffect(() => {
     const fetchColleges = async () => {
       try {
@@ -58,8 +61,9 @@ export default function SignUpPage() {
         );
 
         // Use the correct path to your array
-
+        setDepartments([""])
         setColleges(response.data.data);
+        fetchDepartments();
       } catch (error) {
         console.error("Error fetching colleges:", error);
       } finally {
@@ -70,6 +74,37 @@ export default function SignUpPage() {
     fetchColleges();
   }, []);
 
+
+    const fetchDepartments = async () => {
+      try {
+        const resPolicy = await axios.get(`${API_URL}/api/v1/college/policy/${collegeCode}`, {
+          withCredentials: true,
+        });
+
+        console.log("POLICY RESPONSE:", resPolicy);
+
+        setDepartments(resPolicy.data.data.departmentName);
+      } catch (error) {
+        setDepartments([])
+        console.error("Failed to fetch departments", error);
+      }
+    };
+
+
+
+  useEffect(() => {
+    if (!collegeCode) return;
+
+    console.log("hhiiihih");
+
+    console.log(collegeCode);
+    
+    
+
+  
+    fetchDepartments();
+  }, [collegeCode]);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -78,9 +113,8 @@ export default function SignUpPage() {
     phone: "",
     studentId: "",
     department: "",
-    year: "",
     institutionName: "",
-    department: "",
+    admissionYear: "",
   });
 
   const handleInputChange = (e) => {
@@ -131,6 +165,8 @@ export default function SignUpPage() {
     try {
       setIsSubmitting(true);
       const form = new FormData();
+      console.log(formData.admissionYear);
+      
 
       if (userType === "student") {
         form.append("collegeCode", formData.institutionName);
@@ -140,6 +176,7 @@ export default function SignUpPage() {
         form.append("email", formData.email);
         form.append("department", formData.department);
         form.append("password", formData.password);
+        form.append("admissionYear", formData.admissionYear.split("-")[0]);
 
         if (!idCardFile) {
           toast.error("Please upload your Student ID Card!");
@@ -234,10 +271,11 @@ export default function SignUpPage() {
       whileHover={{ scale: 1.02, translateY: -5 }}
       whileTap={{ scale: 0.98 }}
       onClick={() => setUserType(type)}
-      className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-colors duration-300 ${userType === type
+      className={`relative p-8 rounded-2xl border-2 cursor-pointer transition-colors duration-300 ${
+        userType === type
           ? "border-blue-600 bg-blue-50/50 shadow-2xl shadow-blue-100"
           : "border-gray-200 bg-white hover:border-blue-300 shadow-sm"
-        }`}
+      }`}
     >
       {userType === type && (
         <motion.div
@@ -249,10 +287,11 @@ export default function SignUpPage() {
         </motion.div>
       )}
       <div
-        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all ${userType === type
+        className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 transition-all ${
+          userType === type
             ? "bg-blue-600 text-white shadow-lg shadow-blue-200"
             : "bg-gray-100 text-gray-600"
-          }`}
+        }`}
       >
         {icon}
       </div>
@@ -309,14 +348,16 @@ export default function SignUpPage() {
         <div className="mb-12">
           <div className="flex items-center justify-center space-x-4">
             <div
-              className={`flex items-center space-x-2 ${!userType ? "text-blue-600" : "text-gray-400"
-                }`}
+              className={`flex items-center space-x-2 ${
+                !userType ? "text-blue-600" : "text-gray-400"
+              }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${!userType
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  !userType
                     ? "bg-blue-600 text-white"
                     : "bg-gray-300 text-white"
-                  }`}
+                }`}
               >
                 1
               </div>
@@ -326,12 +367,14 @@ export default function SignUpPage() {
             <div className="w-12 h-0.5 bg-gray-300"></div>
 
             <div
-              className={`flex items-center space-x-2 ${userType ? "text-blue-600" : "text-gray-400"
-                }`}
+              className={`flex items-center space-x-2 ${
+                userType ? "text-blue-600" : "text-gray-400"
+              }`}
             >
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center ${userType ? "bg-blue-600 text-white" : "bg-gray-300 text-white"
-                  }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                  userType ? "bg-blue-600 text-white" : "bg-gray-300 text-white"
+                }`}
               >
                 2
               </div>
@@ -441,9 +484,19 @@ export default function SignUpPage() {
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                         <select
                           name="institutionName"
-                          value={formData.institutionName}
-                          onChange={handleInputChange}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                          value={collegeCode}
+                          onChange={(e) => {
+                            const selectedCode = e.target.value;
+
+                            setCollegeCode(selectedCode); // for department API
+                            setFormData((prev) => ({
+                              ...prev,
+                              institutionName: selectedCode,
+                              department: "", // 🔥 reset department on college change
+                            }));
+                          }}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white
+             focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                         >
                           <option value="">
                             {loadingColleges
@@ -497,12 +550,12 @@ export default function SignUpPage() {
                               : "Select Institution"}
                           </option>
 
-                          {collegePolicy.map((collegeDep) => (
+                          {departments.map((collegeDep) => (
                             <option
-                              key={collegeDep?.department}
-                              value={collegeDep?.department}
+                              key={collegeDep}
+                              value={collegeDep}
                             >
-                              {collegePolicy.department}
+                              {collegeDep}
                             </option>
                           ))}
                         </select>
@@ -523,10 +576,11 @@ export default function SignUpPage() {
                           onChange={handleInputChange}
                           max={new Date().toISOString().split("T")[0]}
                           className={`w-full pl-10 pr-4 py-3 rounded-lg outline-none transition
-        ${errors.admissionYear
-                              ? "border border-red-500 focus:ring-red-400"
-                              : "border border-gray-300 focus:ring-2 focus:ring-blue-500"
-                            }`}
+        ${
+          errors.admissionYear
+            ? "border border-red-500 focus:ring-red-400"
+            : "border border-gray-300 focus:ring-2 focus:ring-blue-500"
+        }`}
                         />
                       </div>
 
@@ -580,10 +634,11 @@ export default function SignUpPage() {
                           maxLength={10}
                           inputMode="numeric"
                           className={`w-full pl-10 pr-4 py-3 rounded-lg outline-none transition
-                             ${errors.phone
-                              ? "border border-red-500 focus:ring-red-400"
-                              : "border border-gray-300 focus:ring-2 focus:ring-blue-500"
-                            }`}
+                             ${
+                               errors.phone
+                                 ? "border border-red-500 focus:ring-red-400"
+                                 : "border border-gray-300 focus:ring-2 focus:ring-blue-500"
+                             }`}
                           placeholder="10-digit mobile number"
                         />
 
@@ -824,10 +879,11 @@ export default function SignUpPage() {
                   whileHover={{ scale: 1.01 }}
                   whileTap={{ scale: 0.99 }}
                   disabled={!acceptedTerms || isSubmitting}
-                  className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3 transition-all ${acceptedTerms
+                  className={`w-full py-5 rounded-2xl font-bold text-lg flex items-center justify-center space-x-3 transition-all ${
+                    acceptedTerms
                       ? "bg-slate-900 text-white shadow-xl shadow-slate-200"
                       : "bg-slate-300 text-slate-500 cursor-not-allowed"
-                    }`}
+                  }`}
                 >
                   {isSubmitting ? (
                     <Loader2 className="animate-spin" />

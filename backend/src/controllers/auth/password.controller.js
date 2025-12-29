@@ -13,7 +13,6 @@ import { buildForgotPasswordOtpTemplate } from "../../template/forgotPasswordOtp
 ///forget pasword otp send
 export const forgotPasswordSendOTP = asyncHandler(async (req, res) => {
 
-
     // as user is not logged in so we can not get this data from (res.user)
     const { collegeCode, loginId } = req.body;
 

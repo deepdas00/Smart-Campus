@@ -20,7 +20,8 @@ export const libraryBookSchema = new mongoose.Schema(
 
     rating: {
       type: Number,
-      default: 0
+      default: 0,
+      max:5
     },
 
     totalCopies: {

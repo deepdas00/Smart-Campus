@@ -58,7 +58,8 @@ app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP); // user wil
 
 app.use("/api/v1/users/student", studentRouter) 
 // POST   /api/v1/users/student/register        // Public: student registration with avatar upload
-// GET    /api/v1/users/student/profile         // Protected: fetch student profile (JWT + role check)
+// GET    /api/v1/users/student/profile         //  fetch one student profile (JWT + role check)
+// GET    /api/v1/users/student/allStudent      // fetch all  student profile (JWT + role check)
 
 // PATCH  /api/v1/users/student/profile   -p      // Protected: update student profile
 // DELETE /api/v1/users/student/profile   -p      // Protected: delete/deactivate student account
@@ -68,8 +69,6 @@ app.use("/api/v1/users/student", studentRouter)
 
 
 app.use("/api/v1/public/registerCollege",registerCollege);
-
-
 //POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////
 
 
@@ -172,7 +171,7 @@ GET     /api/v1/reports/getMyReports            # Get all reports created by log
 POST    /api/v1/reports/:reportId/rate          # Submit rating after report resolved (student)
 
 # ---------- ADMIN ----------
-GET     /api/v1/reports/                        # Get all reports (admin)
+GET     /api/v1/reports/:range/all                        # Get all reports (admin)
 PATCH   /api/v1/reports/:reportId/status        # Update report status (admin)
 #         Status: pending | in-progress | resolved | rejected
 

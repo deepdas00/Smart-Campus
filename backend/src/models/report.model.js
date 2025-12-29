@@ -8,10 +8,12 @@ const reportSchema = new mongoose.Schema(
       required: true
     },
     building:{
-      type:String
+      type:String,
+      default: ""
     },
     room:{
-      type:String
+      type:String,
+      default: ""
     },
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -34,6 +36,10 @@ const reportSchema = new mongoose.Schema(
       enum: ["researchandlab", "housinganddorms", "groundandpublic"],
       required: true
     },
+    zone:{
+      type: String,
+      default: ""
+    },
 
     priority:{
       type: String,
@@ -41,12 +47,13 @@ const reportSchema = new mongoose.Schema(
     },
 
     image: {
-      type: String
+      type: String,
+      default: ""
     },
 
-    location: {
-      type: String
-    },
+    // location: {
+    //   type: String
+    // },
 
     status: {
       type: String,
@@ -55,7 +62,8 @@ const reportSchema = new mongoose.Schema(
     },
 
     adminNote: {
-      type: String
+      type: String,
+      default: ""
     },
 
     rating: {

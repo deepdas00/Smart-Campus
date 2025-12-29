@@ -3,6 +3,10 @@ import { ApiError } from "../utils/apiError.js";
 
 export const verifyJWT = (req, res, next) => {
 
+
+  console.log("huuuuuuuuuuuuuuuuuuuuuuuuuuu");
+  
+
   const token = req.cookies?.accessToken  || req.header("Authorization")?.replace(/^Bearer\s+/i, "") || req.cookies?.platformAccessToken
 
   if (!token) {

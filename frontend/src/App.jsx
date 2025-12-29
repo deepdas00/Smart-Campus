@@ -82,7 +82,7 @@ export default function App() {
         <Route path="/library" element={<Library />} />
         <Route path="/orders" element={<CanteenOrders />} />
         <Route path="/report" element={<ReportPortal />} />
-        <Route path="/collegeHome" element={<CollegeHome />} />
+        {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
         <Route path="/adminowner" element={<AdminOwner />} />
         <Route path="/founderConsole" element={<FounderConsole />} />
 
@@ -100,6 +100,7 @@ export default function App() {
           <Route path="library" element={<LibraryManager />} />
           <Route path="lost-found" element={<LostAndFoundManager />} />
           <Route path="students" element={<StudentManager />} />
+          <Route path="college-info" element={<CollegeHome />} />
         </Route>
 
         {/* Kitchen Access - Operational Tool Only */}

@@ -42,6 +42,7 @@ export default function Canteen() {
   const [orderStatus, setOrderStatus] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [isCanteenOpen, setIsCanteenOpen] = useState(null); // null = loading
+  const [quantity, setQuantity] = useState(null); // null = loading
   const categories = [
     // "snacks", "meal", "drink", "sweet"
     { id: "all", name: "All Items", icon: "🍽️" },

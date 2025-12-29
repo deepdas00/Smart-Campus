@@ -74,6 +74,8 @@ app.use("/api/v1/public/registerCollege",registerCollege);
 
 
 app.use("/api/v1/college", collegeRouter);
+// GET    /api/v1/college/data    → Public → Fetch all colleges (for dropdown, selection, etc.)
+
 // ================================
 //        COLLEGE PLATFORM ADMIN
 // ================================
@@ -83,14 +85,12 @@ app.use("/api/v1/college", collegeRouter);
 // POST   /api/v1/college/update   → Platform Admin only      → Update college master details
 
 // ================================
-//           COLLEGE INFO
+//       COLLEGE INFORMATION
 // ================================
-
 // POST   /api/v1/college/info/createOrUpdate     → College Admin only    → Create or update complete college profile (logo, NAAC, address, departments, etc.)
 // GET    /api/v1/college/departments/:collegeCode    → Public   → Fetch department list of a college
 // GET    /api/v1/college/info-full     → College Admin only    → Fetch full college profile
 // GET    /api/v1/college/info-limit   → Student / Staff  → Fetch limited college profile (for dashboard display)
-// GET    /api/v1/college/data    → Public → Fetch all colleges (for dropdown, selection, etc.)
 
 // ================================
 //          COLLEGE GALLERY

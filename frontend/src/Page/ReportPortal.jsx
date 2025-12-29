@@ -5,9 +5,7 @@ import {
   Camera, Wand2, Image as ImageIcon, Zap, ShieldCheck,
   Globe, Navigation, X
 } from 'lucide-react';
-
-
-
+import axios from "axios";
 import profile from "../assets/profile.png";
 import Navbar from '../Components/Navbar/Navbar';
 import Footer from '../Components/Footer';
@@ -18,12 +16,18 @@ import logo from "../assets/logo.png";
 
 
 export default function EduReportPortal() {
+
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  
   const [sector, setSector] = useState('Academic');
   const [urgency, setUrgency] = useState('Standard');
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAiRefining, setIsAiRefining] = useState(false);
-  
+  const [selectedImageFile, setSelectedImageFile] = useState(null);
+
+
   // Image Upload Logic
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadStatus, setUploadStatus] = useState('idle');
@@ -72,20 +76,22 @@ export default function EduReportPortal() {
     }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setUploadStatus('uploading');
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setTimeout(() => {
-          setSelectedImage(reader.result);
-          setUploadStatus('success');
-        }, 1500);
-      };
-      reader.readAsDataURL(file);
-    }
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  setUploadStatus("uploading");
+  setSelectedImageFile(file);
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setTimeout(() => {
+      setSelectedImage(reader.result); // for preview
+      setUploadStatus("success");
+    }, 1000);
   };
+  reader.readAsDataURL(file);
+};
 
   const detectLocation = () => {
     setIsLocating(true);
@@ -115,13 +121,56 @@ export default function EduReportPortal() {
 
   const handleInputChange = (field, val) => setFormData(prev => ({ ...prev, [field]: val }));
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+  try {
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setStep(3);
-    }, 2500);
-  };
+
+    if (!selectedImageFile) {
+      alert("Image required");
+      return;
+    }
+
+    const formDataPayload = new FormData();
+
+    formDataPayload.append("title", formData.title);
+    formDataPayload.append("description", formData.description);
+    formDataPayload.append("category", sector);
+
+    formDataPayload.append(
+      "location",
+      JSON.stringify({
+        lat: location.lat,
+        lng: location.lng,
+        address: location.address,
+        building: formData.building,
+        room: formData.room,
+      })
+    );
+
+    formDataPayload.append("file", selectedImageFile); // req.file
+
+    const res = await axios.post(
+      `${API_URL}/api/v1/reports/createreport`,
+      formDataPayload,
+      {
+        withCredentials: true, // for JWT cookie
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("REPORT CREATED:", res.data);
+    toast.success("Report submitted successfully");
+    setStep(3);
+  } catch (error) {
+    console.error(error);
+    alert(error?.response?.data?.message || "Submission failed");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className={`min-h-screen transition-colors duration-700 font-sans text-slate-900 ${urgency === 'Urgent' ? 'bg-red-300/50' : urgency === 'Medium' ? 'bg-amber-300/30' : 'bg-[#F8FAFC]'}`}>
@@ -260,23 +309,7 @@ export default function EduReportPortal() {
               </div>
 
               {/* LOCATION TRACKER */}
-              <div className="bg-white border border-slate-200 rounded-[2rem] p-6 shadow-sm">
-                <div className="flex justify-between items-center mb-4">
-                    <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em]">GPS Coordinates</label>
-                    <button onClick={detectLocation} className="text-indigo-600 hover:text-indigo-700">
-                        <Navigation size={16} className={isLocating ? 'animate-pulse' : ''} />
-                    </button>
-                </div>
-                <div className="bg-slate-50 rounded-2xl p-4 flex items-center gap-4 border border-slate-100">
-                    <div className="bg-white p-2 rounded-lg shadow-sm border border-slate-200 text-indigo-600">
-                        <MapPin size={20} />
-                    </div>
-                    <div>
-                        <p className="text-xs font-bold text-slate-800">{location.address}</p>
-                        <p className="text-[10px] text-slate-400 font-mono">{location.lat ? `${location.lat}, ${location.lng}` : 'Ready to scan...'}</p>
-                    </div>
-                </div>
-              </div>
+              
             </div>
 
             {/* FORM AREA */}

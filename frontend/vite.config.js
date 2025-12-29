@@ -11,6 +11,11 @@ export default defineConfig({
     animation: {
       "spin-slow": "spin 3s linear infinite",
     },
+    keyframes: {
+        shimmer: {
+          '100%': { transform: 'translateX(100%)' },
+        },
+      },
   },
 });
 

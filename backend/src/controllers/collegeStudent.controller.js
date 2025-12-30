@@ -22,6 +22,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     mobileNo,
     email,
     password,
+    department,
+    admissionYear,
   } = req.body;
 
   // 2️⃣ Connect MASTER DB
@@ -71,6 +73,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     avatar: avatarUrl,
+    department,
+    admissionYear,
   });
 
 
@@ -84,16 +88,15 @@ export const registerStudent = asyncHandler(async (req, res) => {
 });
 
 
-
 export const studentLogin = asyncHandler(async (req, res) => {
   const { collegeCode, mobileNo, email, password } = req.body
 
   console.log(req.body)
 
   if (!collegeCode) {
-    res.status(400).json({ message: "Select College!!" });
+    return res.status(400).json({ message: "Select College!!" });
   }else if(!(mobileNo || email)){
-    res.status(400).json({ message: "Mobile No. or Email is required!!" });
+    return res.status(400).json({ message: "Mobile No. or Email is required!!" });
 
   }
 
@@ -126,7 +129,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
   // 4️⃣ Verify password
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
-    res.status(401).json({ message: "Invalid Password!!" });
+    return res.status(401).json({ message: "Invalid Password!!" });
 
   }
 
@@ -179,8 +182,8 @@ export const studentLogin = asyncHandler(async (req, res) => {
 export const currentStudent = asyncHandler(async (req, res) => {
 
   // verifyJWT middleware should attach 'user' to 'req'
-  const { collegeCode, userId } = req.user;
-
+  const { collegeCode, userId } = req.body || req.user;
+  
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
@@ -189,7 +192,7 @@ export const currentStudent = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName)
   const Student = getStudentModel(collegeConn)
-  const student = await Student.findById(userId).select("-password -refreshToken");
+  const student = await Student.findById(userId).select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
 
 
   if (!student) {
@@ -204,4 +207,36 @@ export const currentStudent = asyncHandler(async (req, res) => {
   ));
 
 })
+
+
+export const allStudentFetch = asyncHandler(async (req, res) => {
+
+  // verifyJWT middleware should attach 'user' to 'req'
+  const { collegeCode } = req.user;
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) throw new ApiError(404, "College not found");
+
+
+  const collegeConn = getCollegeDB(college.dbName)
+  const Student = getStudentModel(collegeConn)
+  const students = await Student.find().select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
+
+
+  if (!students) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // Change 'data' to 'user' to match your React AuthContext expectations
+  res.status(200).json(new ApiResponse(
+    200,
+    students,
+    "GOT STUDENT"
+  ));
+
+})
+
+
 

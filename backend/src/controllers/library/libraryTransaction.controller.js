@@ -84,8 +84,11 @@ export const issueBook = asyncHandler(async (req, res) => {
   const transaction = await Transaction.findById(transactionId);
   if (!transaction) throw new ApiError(404, "Transaction not found");
 
-  if (transaction.transactionStatus !== "pending")
-    throw new ApiError(400, "Invalid transaction state");
+  if (transaction.transactionStatus === "issued")
+    return res.status(400).json({ message: "Book is already issued" });
+
+  if (transaction.transactionStatus === "returned")
+    return res.status(400).json({ message: "Book is already returned" });
 
   const student = await Student.findById(transaction.studentId);
 
@@ -93,13 +96,13 @@ export const issueBook = asyncHandler(async (req, res) => {
   const policy = await Policy.findOne();
 
   if (student.issuedBooks.length >= policy.maxBooksAllowed) {
-    return res.status(400).json({message:`Student have already issued ${policy.maxBooksAllowed} books`})
+    return res.status(400).json({ message: `Student have already issued ${policy.maxBooksAllowed} books` })
   }
 
   const book = await Book.findById(transaction.bookId);
   if (!book || book.availableCopies <= 0)
-    return res.status(400).json({message:"Book not available"})
-    
+    return res.status(400).json({ message: "Book not available" })
+
 
 
 
@@ -173,6 +176,9 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const { transactionId } = req.params;
   const { collegeCode } = req.user;
 
+
+  console.log(transactionId);
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
@@ -185,8 +191,20 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const Book = getLibraryBookModel(collegeConn);
   const Student = getStudentModel(collegeConn);
 
-  const transaction = await Transaction.findById(transactionId);
+  const transaction = await Transaction.findById(transactionId)
+    .populate({ path: "bookId", select: "title author coverImage " })
+    .populate({ path: "studentId", select: "studentName" })
+
+
   if (!transaction) throw new ApiError(404, "Transaction not found");
+
+  if (transaction.transactionStatus === "pending") {
+    return res.status(400).json({ message: "Order is not issued" })
+  }
+
+ if (transaction.transactionStatus === "returned")
+  return res.status(400).json({message: "Book Already returned"})
+
 
   const policy = await Policy.findOne();
 
@@ -203,8 +221,9 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
         fine = policy.maxFine;
       }
     }
-    
-    fine=800;
+
+    fine = 50;
+
     transaction.fineAmount = fine;
 
     transaction.paymentStatus = fine > 0 ? "pending" : "paid";
@@ -212,14 +231,11 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   }
 
 
-  
 
 
   if (transaction.paymentStatus === "pending")
-    throw new ApiError(400, "Fine not paid");
+    return res.status(400).json({message: "!!OVERDUE: Pay the fine first!!"})
 
-  if (transaction.transactionStatus !== "issued")
-    throw new ApiError(400, "Invalid return state");
 
   res
     .status(200)
@@ -270,7 +286,7 @@ export const returnBook = asyncHandler(async (req, res) => {
   await book.save({ validateBeforeSave: false });
   await student.save({ validateBeforeSave: false });
   await transaction.save({ validateBeforeSave: false });
-  res.status(200).json({message : `#${transaction.transactionCode} book return succesfully`})
+  res.status(200).json({ message: `#${transaction.transactionCode} book return succesfully` })
 });
 
 // to see any library transaction
@@ -284,7 +300,8 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-
+  const Student = getStudentModel(collegeConn);
+  const LibraryBooks = getLibraryBookModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
   const transaction = await Transaction.findById(transactionId)
     .populate({
@@ -295,6 +312,9 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
       path: "studentId",
       select: "studentName rollNo mobileNo avatar",
     });
+
+  console.log("TRANSACTION", transaction);
+
 
   res
     .status(200)
@@ -313,6 +333,8 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const Transaction = getLibraryTransactionModel(collegeConn);
+  const Student = getStudentModel(collegeConn);
+
   getLibraryBookModel(collegeConn);
 
   const history = await Transaction.find({ studentId: userId })
@@ -338,6 +360,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   const LibraryBooks = getLibraryBookModel(collegeConn);
+  const Student = getStudentModel(collegeConn);
 
   const transactions = await Transaction.find()
     .populate({

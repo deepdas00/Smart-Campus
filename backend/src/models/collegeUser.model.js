@@ -32,7 +32,17 @@ const collegeUserSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
       default: null
-    }
+    },
+    resetPasswordOTP: {
+      type: String,
+      default: null
+    },
+
+    resetPasswordOTPExpiry: {
+      type: Date,
+      default: null
+    },
+
   },
   { timestamps: true }
 );

@@ -22,6 +22,24 @@ export default function CampusReporterHome() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
 
+
+  const statusStyles = {
+  green: {
+    dot: "bg-green-500",
+    badge: "bg-green-100 text-green-700",
+  },
+  yellow: {
+    dot: "bg-yellow-500",
+    badge: "bg-yellow-100 text-yellow-700",
+  },
+  blue: {
+    dot: "bg-blue-500",
+    badge: "bg-blue-100 text-blue-700",
+  },
+};
+
+
+
   const features = [
     {
       icon: <Camera className="w-8 h-8" />,
@@ -76,7 +94,8 @@ export default function CampusReporterHome() {
                 <span>Powered by Google AI</span>
               </div>
               
-              <h1 className="text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+
                 Report Campus Issues{' '}
                 <span className="bg-blue-600 bg-clip-text text-transparent">
                   Instantly
@@ -98,7 +117,8 @@ export default function CampusReporterHome() {
                 </button>
               </div>
 
-              <div className="mt-12 flex items-center space-x-8">
+              <div className="mt-12 flex flex-col sm:flex-row sm:items-center gap-6 sm:space-x-8">
+
                 {stats.slice(0, 3).map((stat, idx) => (
                   <div key={idx}>
                     <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
@@ -109,7 +129,8 @@ export default function CampusReporterHome() {
             </div>
 
             <div className="relative">
-              <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-8 shadow-2xl">
+             <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-5 sm:p-8 shadow-2xl">
+
                 <div className="bg-white rounded-2xl p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-700">Recent Reports</span>
@@ -122,12 +143,14 @@ export default function CampusReporterHome() {
                     { issue: "Damaged road near Gate 2", status: "Reported", time: "1h ago", color: "blue" }
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                      <div className={`w-2 h-2 rounded-full bg-${item.color}-500`}></div>
+                     <div className={`w-2 h-2 rounded-full ${statusStyles[item.color].dot}`}></div>
+
                       <div className="flex-1">
                         <div className="text-sm font-medium text-gray-900">{item.issue}</div>
                         <div className="text-xs text-gray-500">{item.time}</div>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded bg-${item.color}-100 text-${item.color}-700`}>
+                      <span className={`text-xs px-2 py-1 rounded ${statusStyles[item.color].badge}`}>
+
                         {item.status}
                       </span>
                     </div>
@@ -168,7 +191,9 @@ export default function CampusReporterHome() {
               <div
                 key={idx}
                 className="p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition cursor-pointer"
-                onMouseEnter={() => setActiveFeature(idx)}
+               onMouseEnter={() => setActiveFeature(idx)}
+onClick={() => setActiveFeature(idx)}
+
               >
                 <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
                   activeFeature === idx 
@@ -226,7 +251,8 @@ export default function CampusReporterHome() {
       {/* Impact Section */}
       <section id="impact" className="py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
+
             <div>
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                 Real-World Impact
@@ -272,7 +298,8 @@ export default function CampusReporterHome() {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-blue-700">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-6">
+
             Ready to Make Your Campus Better?
           </h2>
           <p className="text-xl mb-8 opacity-90">

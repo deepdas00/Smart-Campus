@@ -1,5 +1,5 @@
 import express from "express";
-import { currentStudent, registerStudent } from "../controllers/collegeStudent.controller.js";
+import { allStudentFetch, currentStudent, registerStudent } from "../controllers/collegeStudent.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
@@ -13,13 +13,21 @@ router.post(
   registerStudent
 );
 
-// Protected student-only APIs (templates)
+// one student details fetch
 router.get(
   "/profile",
   verifyJWT,
-  authorizeRoles("student"),
+  authorizeRoles("student","admin"),
   currentStudent
 );
 
+
+// all students details fetch
+router.get(
+  "/allStudent",
+  verifyJWT,
+  authorizeRoles("admin"),
+  allStudentFetch
+)
 
 export default router;

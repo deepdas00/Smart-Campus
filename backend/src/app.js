@@ -35,15 +35,31 @@ import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
 import reportRouter from "./route/report.route.js";
 import registerCollege from "./route/collegeRequest.route.js";
+import { platformAdminLogin } from "./controllers/platformAdmin/platformAuth.controller.js";
+import { forgotPasswordSendOTP, forgotPasswordVerifyOTP } from "./controllers/auth/password.controller.js";
 
 
 
 
 // -p = pending
 
+
+app.post("/api/v1/platform/admin/login", platformAdminLogin);
+app.post("/api/v1/college/forgot-password", forgotPasswordSendOTP); ///user will get a otp (body: collegeId, loginId{if student= > email || user => loginId})
+app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP); // user will submit the otp (body: collegeId,otp,newPassword,loginId)
+// app.post("/api/v1/college/change-password", verifyJWT, changePassword);/////////////////////////////////////////pending
+
+
+
+
+
+
+
+
 app.use("/api/v1/users/student", studentRouter) 
 // POST   /api/v1/users/student/register        // Public: student registration with avatar upload
-// GET    /api/v1/users/student/profile         // Protected: fetch student profile (JWT + role check)
+// GET    /api/v1/users/student/profile         //  fetch one student profile (JWT + role check)
+// GET    /api/v1/users/student/allStudent      // fetch all  student profile (JWT + role check)
 
 // PATCH  /api/v1/users/student/profile   -p      // Protected: update student profile
 // DELETE /api/v1/users/student/profile   -p      // Protected: delete/deactivate student account
@@ -53,18 +69,18 @@ app.use("/api/v1/users/student", studentRouter)
 
 
 app.use("/api/v1/public/registerCollege",registerCollege);
-
-
 //POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////
 
 
 
 app.use("/api/v1/college", collegeRouter);
-// POST   /api/v1/college/register           //ADMIN OFFICIAL can only register a college////////////////////////////////
-// POST   /api/v1/college/fetchCollgeData    //ADMIN OFFICIAL can only view all college FULL DATA////////////////////////////////////
-// POST    /api/v1/college/satusUpdate       //ADMIN OFFICIAL can Active or InActive college using BTN//////////////////////////////////////////
-// POST    /api/v1/college/update            //ADMIN OFFICIAL can update changes of college///////////////////////////////////////////////////////////////
+// POST   /api/v1/college/register           //ADMIN PLATFORM can only register a college////////////////////////////////
+// POST   /api/v1/college/fetchCollgeData    //ADMIN PLATFORM can only view all college FULL DATA////////////////////////////////////
+// POST    /api/v1/college/satusUpdate       //ADMIN PLATFORM can Active or InActive college using BTN//////////////////////////////////////////
+// POST    /api/v1/college/update            //ADMIN PLATFORM can update changes of college///////////////////////////////////////////////////////////////
 // GET    /api/v1/college/data               //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
+// POST    /api/v1/college/policy            //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
+// GET    /api/v1/college/policy             //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
 
 
 app.use("/api/v1/auth", authRouter);
@@ -121,6 +137,7 @@ app.use("/api/v1/canteen", canteenRouter);
 POST    /api/v1/canteen/policy                 # Set / Update canteen policy (admin)
 GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status///////////////////////////////////////////////////////////
 POST    /api/v1/canteen/isActive               # To set Canteen Status ////////////////////////////////////////////////////////////////
+GET     /api/v1/canteen/fetchpolicy            # To fetch policy details
 
 # ---------- FOOD ----------
 POST    /api/v1/canteen/foods                  # Add food (canteen, admin)
@@ -156,12 +173,13 @@ GET     /api/v1/reports/getMyReports            # Get all reports created by log
 POST    /api/v1/reports/:reportId/rate          # Submit rating after report resolved (student)
 
 # ---------- ADMIN ----------
-GET     /api/v1/reports/                        # Get all reports (admin)
+GET     /api/v1/reports/:range/all                        # Get all reports (admin)
 PATCH   /api/v1/reports/:reportId/status        # Update report status (admin)
 #         Status: pending | in-progress | resolved | rejected
 
 # =============================================================
 */
+
 
 
 

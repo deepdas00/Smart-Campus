@@ -1,4 +1,4 @@
-import { Plus, Minus, Star, Leaf, Flame, Clock } from "lucide-react";
+import { Plus, Minus, Star, Leaf, Flame, Clock, Wine } from "lucide-react";
 
 export default function FoodGrid({
   items,
@@ -163,7 +163,19 @@ export default function FoodGrid({
                           }`}
                         >
                           <Flame className="w-3 h-3" />
-                          Spicy
+                          Non-Veg
+                        </span>
+                      )}
+                      {item.foodType === "beverage" && (
+                        <span
+                          className={`flex items-center gap-1 text-xs px-2 py-1 rounded ${
+                            isUnavailable
+                              ? "bg-gray-100 text-gray-400"
+                              : "text-blue-600 bg-blue-50"
+                          }`}
+                        >
+                          <Wine className="w-3 h-3" />
+                          Beverage
                         </span>
                       )}
                     </div>

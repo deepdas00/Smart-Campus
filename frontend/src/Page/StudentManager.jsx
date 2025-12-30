@@ -1,90 +1,196 @@
-import React, { useState } from 'react';
-import { Search, Filter, Mail, Phone, GraduationCap, ChevronRight, Plus } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Users,
+  GraduationCap,
+  Search,
+  AlertCircle,
+  CheckCircle2,
+} from "lucide-react";
 
 export function StudentManager() {
-  const [selectedDept, setSelectedDept] = useState("All Departments");
+  const [students, setStudents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const departments = ["All Departments", "Computer Science", "Mechanical", "Civil", "Electrical", "MBA"];
+  // ---------------- FETCH ----------------
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/api/v1/users/student/allStudent`,
+          { withCredentials: true }
+        );
 
-  const students = [
-    { id: "STU-101", name: "Ananya Sharma", dept: "Computer Science", year: "3rd Year", email: "ananya@univ.edu", status: "Active" },
-    { id: "STU-102", name: "Rohan Varma", dept: "Mechanical", year: "2nd Year", email: "rohan@univ.edu", status: "Active" },
-    { id: "STU-103", name: "Ishaan Gupta", dept: "Computer Science", year: "4th Year", email: "ishaan@univ.edu", status: "Internship" },
-  ];
+        console.log(res.data.data);
+        
+        setStudents(res.data.data || []);
+      } catch (err) {
+        console.error("Error fetching students", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStudents();
+  }, []);
 
-  const filteredStudents = selectedDept === "All Departments" 
-    ? students 
-    : students.filter(s => s.dept === selectedDept);
+  // ---------------- FILTER ----------------
+  const query = searchQuery.toLowerCase();
+
+  const filteredStudents = students.filter((s) =>
+    s.studentName?.toLowerCase().includes(query) ||
+    s.rollNo?.toLowerCase().includes(query) ||
+    s.email?.toLowerCase().includes(query) ||
+    s.department?.toLowerCase().includes(query)
+  );
+
+  // ---------------- STATS ----------------
+  const totalStudents = students.length;
+  const activeStudents = students.filter((s) => s.isActive).length;
+  const inactiveStudents = totalStudents - activeStudents;
+  const finalYear = students.filter((s) => s.year === "4th Year").length;
+
+  // ---------------- LOADER ----------------
+  const TableLoader = ({ cols = 6 }) => (
+    <>
+      {[...Array(6)].map((_, i) => (
+        <tr key={i}>
+          {[...Array(cols)].map((__, j) => (
+            <td key={j} className="px-6 py-4">
+              <div className="h-4 bg-gray-100 rounded animate-pulse" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-extrabold text-gray-900">Student Directory</h2>
-          <p className="text-gray-500 text-sm">Manage academic profiles and department assignments.</p>
+    <div className="space-y-6">
+
+      {/* HEADER */}
+      <div>
+        <h2 className="text-2xl font-extrabold text-gray-900">
+          Student Authority
+        </h2>
+        <p className="text-gray-500 text-sm font-medium">
+          Centralized academic records & enrollment tracking
+        </p>
+      </div>
+
+      {/* STATS */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { title: "Total Students", value: totalStudents, icon: Users },
+          { title: "Active", value: activeStudents, icon: CheckCircle2 },
+          { title: "Inactive", value: inactiveStudents, icon: AlertCircle },
+          { title: "Final Year", value: finalYear, icon: GraduationCap },
+        ].map((s, i) => {
+          const Icon = s.icon;
+          return (
+            <div
+              key={i}
+              className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm"
+            >
+              <div className="flex justify-between items-center">
+                <p className="text-xs font-bold uppercase text-gray-400">
+                  {s.title}
+                </p>
+                <Icon className="w-4 h-4 text-gray-400" />
+              </div>
+              <p className="text-2xl font-black text-gray-900 mt-1">
+                {s.value}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* SEARCH */}
+      <div className="flex justify-between items-center">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            placeholder="Search name, roll, email, department..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-80 pl-10 pr-4 py-2.5 text-sm font-medium
+              rounded-xl border border-gray-200 bg-white
+              shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
         </div>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
-          <Plus size={18} /> Register Student
-        </button>
       </div>
 
-      {/* Department Filter Bar */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-        {departments.map((dept) => (
-          <button
-            key={dept}
-            onClick={() => setSelectedDept(dept)}
-            className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all border ${
-              selectedDept === dept 
-              ? "bg-blue-600 text-white border-blue-600 shadow-md" 
-              : "bg-white text-gray-500 border-gray-200 hover:border-blue-300"
-            }`}
-          >
-            {dept}
-          </button>
-        ))}
-      </div>
+      {/* TABLE */}
+      <div className="overflow-x-auto bg-white rounded-2xl border border-gray-100 shadow-sm">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b">
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Roll</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Student</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Department</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Year</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-4 text-xs font-bold text-gray-500 uppercase text-right">
+                Actions
+              </th>
+            </tr>
+          </thead>
 
-      {/* Student Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredStudents.map((student) => (
-          <div key={student.id} className="bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-all p-5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-50 rounded-bl-full -mr-10 -mt-10 group-hover:bg-blue-100 transition-colors" />
-            
-            <div className="flex items-start gap-4 mb-4 relative z-10">
-              <div className="w-14 h-14 bg-gradient-to-tr from-blue-100 to-blue-50 rounded-2xl flex items-center justify-center text-blue-600 font-bold text-xl shadow-inner">
-                {student.name.charAt(0)}
-              </div>
-              <div>
-                <h4 className="font-bold text-gray-900 leading-tight">{student.name}</h4>
-                <p className="text-xs text-blue-600 font-bold mt-1">{student.id}</p>
-                <div className="flex items-center gap-1 text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">
-                   <GraduationCap size={12} /> {student.dept}
-                </div>
-              </div>
-            </div>
+          <tbody className="divide-y divide-gray-50">
+            {loading ? (
+              <TableLoader cols={6} />
+            ) : filteredStudents.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="py-10 text-center text-gray-400">
+                  No students found
+                </td>
+              </tr>
+            ) : (
+              filteredStudents.map((s) => (
+                <tr key={s._id} className="hover:bg-blue-50/30 transition">
+                  <td className="px-6 py-4 font-bold text-gray-900">
+                    {s.rollNo}
+                  </td>
 
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-center justify-between text-xs p-2 bg-gray-50 rounded-xl font-medium text-gray-600">
-                <span>Enrollment Year:</span>
-                <span className="text-gray-900 font-bold">{student.year}</span>
-              </div>
-              
-              <div className="flex gap-2">
-                <button className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg bg-white border border-gray-100 hover:bg-gray-50 text-gray-400 transition">
-                  <Mail size={14} />
-                </button>
-                <button className="flex-1 flex items-center justify-center gap-2 p-2 rounded-lg bg-white border border-gray-100 hover:bg-gray-50 text-gray-400 transition">
-                  <Phone size={14} />
-                </button>
-                <button className="flex-[3] flex items-center justify-center gap-2 p-2 rounded-lg bg-blue-50 text-blue-700 font-bold text-[10px] uppercase tracking-wider hover:bg-blue-100 transition">
-                  View Profile <ChevronRight size={14} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+                  <td className="px-6 py-4">
+                    <div className="font-semibold text-gray-800">
+                      {s.studentName}
+                    </div>
+                    <div className="text-xs text-gray-500">{s.email}</div>
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {s.department}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm font-medium">
+                    {s.admissionYear}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span
+                      className={`px-2 py-1 text-xs font-bold rounded-full ${
+                        s.isActive
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {s.isActive ? "Active" : "Inactive"}
+                    </span>
+                  </td>
+
+                  <td className="px-6 py-4 text-right">
+                    <button className="px-3 py-1 text-xs font-bold bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                      View
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </div>
   );

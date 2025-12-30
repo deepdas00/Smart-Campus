@@ -48,8 +48,6 @@ export const canteenOrderSchema = new mongoose.Schema(
             type: String,
             enum: [
                 "order_received",
-                "preparing",
-                "ready",
                 "served",
             ],
             default: "order_received"

@@ -3,7 +3,7 @@ import { ApiError } from "../utils/apiError.js";
 
 export const verifyJWT = (req, res, next) => {
 
-  const token = req.cookies?.accessToken  || req.header("Authorization")?.replace(/^Bearer\s+/i, "")
+  const token = req.cookies?.accessToken  || req.header("Authorization")?.replace(/^Bearer\s+/i, "") || req.cookies?.platformAccessToken
 
   if (!token) {
       // Instead of throwing, return a response or use next()
@@ -14,7 +14,7 @@ export const verifyJWT = (req, res, next) => {
     const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
     req.user = decoded;
    
-  // console.log(req.user)
+  console.log(req.user)
     
     next();
   } catch {

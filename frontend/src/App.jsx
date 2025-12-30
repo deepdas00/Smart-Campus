@@ -26,6 +26,9 @@ import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
 import CollegeHome from "./Page/CollegeHome.jsx";
 import Sidebar from "./components/Sidebar.jsx";
+import AdminOwner from "./Page/AdminOwner.jsx";
+import FounderConsole from "./Page/FounderConsole.jsx";
+import ForgotPassword from "./Page/ForgotPassword.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -66,6 +69,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route
           path="/profile"
           element={
@@ -78,7 +82,9 @@ export default function App() {
         <Route path="/library" element={<Library />} />
         <Route path="/orders" element={<CanteenOrders />} />
         <Route path="/report" element={<ReportPortal />} />
-        <Route path="/collegeHome" element={<CollegeHome />} />
+        {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
+        <Route path="/adminowner" element={<AdminOwner />} />
+        <Route path="/founderConsole" element={<FounderConsole />} />
 
         <Route
           path="/admin"
@@ -94,6 +100,7 @@ export default function App() {
           <Route path="library" element={<LibraryManager />} />
           <Route path="lost-found" element={<LostAndFoundManager />} />
           <Route path="students" element={<StudentManager />} />
+          <Route path="college-info" element={<CollegeHome />} />
         </Route>
 
         {/* Kitchen Access - Operational Tool Only */}

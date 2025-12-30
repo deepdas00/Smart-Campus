@@ -14,10 +14,10 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 export const createReport = asyncHandler(async (req, res) => {
 
     const { collegeCode, userId } = req.user;
-    const { title, description, category, location } = req.body;
+    const { building, room, title, description, zone, category, location, priority } = req.body;
 
     if (!title || !description || !category) {
-        throw new ApiError(400, "Required fields missing");
+        return res.status(400).json({ message: "Required fields missing" });
     }
 
     // Resolve college
@@ -25,19 +25,24 @@ export const createReport = asyncHandler(async (req, res) => {
     const College = getCollegeModel(masterConn);
 
     const college = await College.findOne({ collegeCode, status: "active" });
-    if (!college) throw new ApiError(404, "College not found");
+    if (!college) return res.status(404).json({ message: "College not found" });
 
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
     // Upload images
 
-    const coverPath = req.file?.path?.replace(/\\/g, "/");
-    if (!coverPath) throw new ApiError(400, "Book cover image required");
-    const imageUrl = await uploadOnCloudinary(coverPath);
+    let imageUrl;
 
+    if (req.file?.path) {
+        const coverPath = req.file?.path.replace(/\\/g, "/");
+        try {
+            imageUrl = await uploadOnCloudinary(coverPath);
+        } catch (err) {
+            return res.status(500).json({ message: "Failed to upload book cover image" });
+        }
 
-
+    }
 
 
     const reportCode = await generateTransactionCode(collegeCode, "RPT", Report);
@@ -49,7 +54,11 @@ export const createReport = asyncHandler(async (req, res) => {
         description,
         category,
         location,
-        image: imageUrl
+        image: imageUrl,
+        priority,
+        building,
+        room,
+        zone
     });
 
     res.status(201).json(
@@ -84,12 +93,39 @@ export const getMyReports = asyncHandler(async (req, res) => {
 
 
 /* =========================
-   ADMIN REPORT LIST (FOR INDEX)
+ADMIN REPORT LIST (FOR INDEX)
 ========================= */
 
 export const getAllReports = asyncHandler(async (req, res) => {
 
     const { collegeCode } = req.user;
+    const { range = "daily" } = req.query;
+
+    // 1️⃣ Decide start date
+    const now = new Date();
+    let startDate;
+    console.log(range);
+
+    switch (range) {
+        case "daily":
+            startDate = new Date(now.setHours(0, 0, 0, 0));
+            break;
+
+        case "weekly":
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - 7);
+            break;
+
+        case "monthly":
+            startDate = new Date();
+            startDate.setDate(startDate.getDate() - 30);
+            break;
+
+        default:
+            throw new ApiError(400, "Invalid range value");
+    }
+
+
 
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
@@ -99,8 +135,13 @@ export const getAllReports = asyncHandler(async (req, res) => {
 
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
-
-    const reports = await Report.find().sort({ createdAt: -1 });
+    getStudentModel(collegeConn);
+    
+    const reports = await Report.find({
+        createdAt: { $gte: startDate }
+    })
+    .sort({ createdAt: -1 })
+    .populate({ path: "studentId", select: "studentName rollNo mobileNo" })
 
     res.status(200).json(
         new ApiResponse(200, reports, "All reports fetched")
@@ -141,8 +182,8 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
     if (assignedAdmin) report.assignedAdmin = assignedAdmin;
 
     console.log(report.status);//////////////////////////////////////////////////////////////////////////////////////for testing
-    
-    
+
+
 
     await report.save();
 

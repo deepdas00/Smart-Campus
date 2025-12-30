@@ -55,7 +55,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     }
 
     if (food.quantityAvailable < item.quantity) {
-      throw new ApiError(400, `Insufficient quantity for ${food.name}`);
+      return res.status(400).json({message:`Insufficient quantity for ${food.name}`})
     }
 
     const itemTotal = food.price * item.quantity;
@@ -129,7 +129,7 @@ export const serveOrder = asyncHandler(async (req, res) => {
   const canteenPolicy = await CanteenPolicyModel.findOne();
   const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
-    res.status(401).json({ message: "Canteen Is Offline!!" });
+    return res.status(401).json({ message: "Canteen Is Offline!!" });
   }
 
   const Order = getCanteenOrderModel(collegeConn);
@@ -165,7 +165,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   // 1️⃣ Decide start date
   const now = new Date();
   let startDate;
-
+ console.log( range );
+ 
   switch (range) {
     case "daily":
       startDate = new Date(now.setHours(0, 0, 0, 0));
@@ -199,6 +200,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
+  getStudentModel(collegeConn);
+
   const Order = getCanteenOrderModel(collegeConn);
 
   // 3️⃣ Fetch filtered orders
@@ -211,6 +214,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
+    console.log(orders);
+    
 
   // 4️⃣ Response
   res

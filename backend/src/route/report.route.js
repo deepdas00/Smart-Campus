@@ -25,7 +25,7 @@ router.post(
 router.get(
   "/getMyReports",
   verifyJWT,
-  authorizeRoles("student"),
+  authorizeRoles("student","admin"),
   getMyReports
 );
 
@@ -38,7 +38,7 @@ router.post(
 
 // Admin
 router.get(
-  "/",
+  "/:range/all",
   verifyJWT,
   authorizeRoles("admin"),
   getAllReports

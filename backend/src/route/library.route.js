@@ -31,7 +31,7 @@ const router = express.Router();
 router.post(
   "/policy",
   verifyJWT,
-  authorizeRoles("admin"),
+  authorizeRoles("admin","librarian"),
   setLibraryPolicy
 );
 

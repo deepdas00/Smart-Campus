@@ -2036,7 +2036,7 @@ export default function LibraryTeacherHandle() {
                       Student
                     </span>
                     <span className="text-sm font-bold text-slate-800">
-                      {returnData.studentName}
+                      {returnData.studentId.studentName}
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-100 pt-3">
@@ -2044,7 +2044,15 @@ export default function LibraryTeacherHandle() {
                       Book Title
                     </span>
                     <span className="text-sm font-bold text-indigo-600 text-right max-w-[180px] leading-tight">
-                      {returnData.bookTitle}
+                      {returnData.bookId.title}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center border-t border-slate-100 pt-3">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                      Transaction Code
+                    </span>
+                    <span className="text-sm font-bold text-indigo-600 text-right max-w-[180px] leading-tight">
+                      {returnData.transactionCode}
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-100 pt-3">
@@ -2052,7 +2060,8 @@ export default function LibraryTeacherHandle() {
                       Issue Date
                     </span>
                     <span className="text-sm font-bold text-slate-800">
-                      {returnData.issuedAt}
+                      {new Date(returnData.issueDate).toLocaleString()}
+
                     </span>
                   </div>
                 </div>

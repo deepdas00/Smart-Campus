@@ -32,6 +32,10 @@ export const addBook = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Required book fields missing");
   }
 
+  if (rating > 5) {
+    res.status(401).json({ message: "rating can not be graterthan 5!!!" })
+  }
+
   const coverPath = req.file?.path?.replace(/\\/g, "/");
   if (!coverPath) throw new ApiError(400, "Book cover image required");
 
@@ -88,11 +92,13 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 export const updateBook = asyncHandler(async (req, res) => {
 
   const { bookId } = req.params;
-  const {description,publishedYear,publisher,title,author,category,rating,totalCopies,shelf,isbn,availableCopies} = req.body;
+  const { description, publishedYear, publisher, title, author, category, rating, totalCopies, shelf, isbn, availableCopies } = req.body;
 
 
   const { collegeCode } = req.user;
-
+  if (rating > 5) {
+    res.status(401).json({ message: "rating can not be graterthan 5!!!" })
+  }
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
 
@@ -105,29 +111,30 @@ export const updateBook = asyncHandler(async (req, res) => {
   const existingBook = await LibraryBook.findById(bookId);
   if (!existingBook) throw new ApiError(404, "Book not found");
 
- 
-  
-  if (req.file?.path){
-      const imagePath = req.file?.path?.replace(/\\/g, "/");
-      console.log(imagePath);
-      
-      const uploadResult = await uploadOnCloudinary(imagePath);
-      console.log(uploadResult);
-      
-      existingBook.coverImage  = uploadResult.url
-    }
 
-    existingBook.description = description?description:existingBook.description
-    existingBook.publishedYear = publishedYear?publishedYear:existingBook.publishedYear
-    existingBook.publisher = publisher?publisher:existingBook.publisher
-    existingBook.title = title?title:existingBook.title
-    existingBook.author = author?author:existingBook.author
-    existingBook.category = category?category:existingBook.category
-    existingBook.rating = rating?rating:existingBook.rating
-    existingBook.totalCopies = totalCopies?totalCopies:existingBook.totalCopies
-    existingBook.shelf = shelf?shelf:existingBook.shelf
-    existingBook.isbn = isbn?isbn:existingBook.isbn
-    existingBook.availableCopies = availableCopies?availableCopies:existingBook.availableCopies
+
+
+  if (req.file?.path) {
+    const imagePath = req.file?.path?.replace(/\\/g, "/");
+    console.log(imagePath);
+
+    const uploadResult = await uploadOnCloudinary(imagePath);
+    console.log(uploadResult);
+
+    existingBook.coverImage = uploadResult.url
+  }
+
+  existingBook.description = description ? description : existingBook.description
+  existingBook.publishedYear = publishedYear ? publishedYear : existingBook.publishedYear
+  existingBook.publisher = publisher ? publisher : existingBook.publisher
+  existingBook.title = title ? title : existingBook.title
+  existingBook.author = author ? author : existingBook.author
+  existingBook.category = category ? category : existingBook.category
+  existingBook.rating = rating ? rating : existingBook.rating
+  existingBook.totalCopies = totalCopies ? totalCopies : existingBook.totalCopies
+  existingBook.shelf = shelf ? shelf : existingBook.shelf
+  existingBook.isbn = isbn ? isbn : existingBook.isbn
+  existingBook.availableCopies = availableCopies ? availableCopies : existingBook.availableCopies
   // // 🖼️ If new cover image is provided
   // if (req.file) {
   //   const coverPath = req.file.path.replace(/\\/g, "/");
@@ -136,9 +143,9 @@ export const updateBook = asyncHandler(async (req, res) => {
   //   updates.coverImage = uploadedCover.url;
   // }
 
-    // 🔄 Apply updates
+  // 🔄 Apply updates
 
-    existingBook.save()
+  existingBook.save()
   // const updatedBook = await LibraryBook.findByIdAndUpdate(
   //   bookId,
   //   updates,

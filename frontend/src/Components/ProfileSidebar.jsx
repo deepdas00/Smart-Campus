@@ -9,11 +9,13 @@ import {
   Book,
   BookSearchIcon,
   BookDashed,
+  ShieldCheck ,
   BookDashedIcon,
   BookTemplate,
   ShieldAlert,
   LogIn,
-  LogOut 
+  House,
+  LogOut,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -80,6 +82,71 @@ export default function ProfileSidebar({ isOpen, onClose }) {
     );
   }
 
+  const roleMenus = {
+    canteen: [
+      {
+        to: "/home",
+        label: "Home",
+        icon: <User className="w-5 h-5" />,
+        color: "blue",
+      },
+      {
+        to: "/kitchen",
+        label: "Kitchen",
+        icon: <Utensils className="w-5 h-5" />,
+        color: "green",
+      },
+      {
+        to: "/",
+        label: "Settings",
+        icon: <ShieldAlert className="w-5 h-5" />,
+        color: "blue",
+      },
+    ],
+
+    librarian: [
+      {
+        to: "/home",
+        label: "Home",
+        icon: <User className="w-5 h-5" />,
+        color: "blue",
+      },
+      {
+        to: "/library-admin",
+        label: "Library",
+        icon: <Book className="w-5 h-5" />,
+        color: "orange",
+      },
+      {
+        to: "/",
+        label: "Settings",
+        icon: <ShieldAlert className="w-5 h-5" />,
+        color: "blue",
+      },
+    ],
+
+    admin: [
+      {
+        to: "/home",
+        label: "Home",
+        icon: <User className="w-5 h-5" />,
+        color: "blue",
+      },
+      {
+        to: "/admin",
+        label: "College Overview",
+        icon: <BookTemplate className="w-5 h-5" />,
+        color: "blue",
+      },
+      {
+        to: "/",
+        label: "Settings",
+        icon: <ShieldAlert className="w-5 h-5" />,
+        color: "blue",
+      },
+    ],
+  };
+
   return (
     <>
       {/* Backdrop */}
@@ -105,88 +172,188 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           </button>
 
           {/* User Info */}
-          <div className="flex items-center gap-4 mt-4">
-            <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-              {user?.avatar ? (
-                <img
-                  src={user.avatar}
-                  alt={user.studentName}
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <span className="text-xl font-bold">
-                  {shortName.toUpperCase()}
-                </span>
-              )}
+          {user?.role === "student" && (
+            <div className="flex items-center gap-4 mt-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt={user.studentName}
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {shortName.toUpperCase()}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {studentName} Dashboard
+                </h3>
+                <p className="text-sm text-blue-100">{rollNo}</p>
+              </div>
             </div>
+          )}
 
-            <div>
-              <h3 className="text-lg font-semibold">{studentName} Dashboard</h3>
-              <p className="text-sm text-blue-100">{rollNo}</p>
+          {user?.role === "canteen" && (
+            <div className="flex items-center gap-4 mt-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="Canteen Manager"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {"C.M".toUpperCase()}
+                  </span>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold">Canteen Manager</h3>
+              </div>
             </div>
-          </div>
-        </div>
+          )}
+          {user?.role === "librarian" && (
+            <div className="flex items-center gap-4 mt-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="Canteen Manager"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {"C.M".toUpperCase()}
+                  </span>
+                )}
+              </div>
 
-        {/* Menu */}
-        <div className="p-4 space-y-2">
-          <SidebarItem
-            to="/profile"
-            icon={<User className="w-5 h-5" />}
-            label="Profile"
-            color="blue"
-            onClose={onClose}
-          />
+              <div>
+                <h3 className="text-lg font-semibold">Library Manager</h3>
+              </div>
+            </div>
+          )}
+          {user?.role === "admin" && (
+            <div className="flex items-center gap-4 mt-4">
+              <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
+                {user?.avatar ? (
+                  <img
+                    src={user.avatar}
+                    alt="Canteen Manager"
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : (
+                  <span className="text-xl font-bold">
+                    {"A.M".toUpperCase()}
+                  </span>
+                )}
+              </div>
 
-          <SidebarItem
-            to="/orders"
-            icon={<ShoppingBag className="w-5 h-5" />}
-            label="My Orders"
-            color="orange"
-            onClose={onClose}
-          />
-
-          <SidebarItem
-            to="/canteen"
-            icon={<Utensils className="w-5 h-5" />}
-            label="Canteen"
-            color="green"
-            onClose={onClose}
-          />
-
-          <SidebarItem
-            to="/library"
-            icon={<Book className="w-5 h-5" />}
-            label="library"
-            color="blue"
-            onClose={onClose}
-          />
-          <SidebarItem
-            to="/report"
-            icon={<ShieldAlert className="w-5 h-5" />}
-            label="report"
-            color="#ff0000"
-            activeColor="bg-red-50 text-red-600"
-            onClose={onClose}
-          />
-          {user ? (
-            <LogoutItem
-              icon={<LogIn className="w-5 h-5" />}
-              label="Logout"
-              onLogout={handleLogout}
-            />
-          ) : (
-            <SidebarItem
-              to="/login"
-              icon={<LogIn className="w-5 h-5" />}
-              label="logout"
-              color="blue"
-              onClose={onClose}
-            />
+              <div>
+                <h3 className="text-lg font-semibold">Admin Manager</h3>
+              </div>
+            </div>
           )}
         </div>
 
+        {/* Menu */}
+
+        <div className="flex-1 overflow-y-auto " style={{ maxHeight: "calc(100% - 11rem)" }}>
+          {user?.role === "student" && (
+            <div className="p-4 space-y-1">
+              <SidebarItem
+                to="/home"
+                icon={<House className="w-5 h-5 text-[#ff00f7]" />}
+                label="Home"
+                color="blue"
+                onClose={onClose}
+              />
+              <SidebarItem
+                to="/profile"
+                icon={<User className="w-5 h-5" />}
+                label="Profile"
+                color="blue"
+                onClose={onClose}
+              />
+
+              <SidebarItem
+                to="/orders"
+                icon={<ShoppingBag className="w-5 h-5" />}
+                label="My Orders"
+                color="orange"
+                onClose={onClose}
+              />
+
+              <SidebarItem
+                to="/canteen"
+                icon={<Utensils className="w-5 h-5" />}
+                label="Canteen"
+                color="green"
+                onClose={onClose}
+              />
+
+              <SidebarItem
+                to="/library"
+                icon={<Book className="w-5 h-5" />}
+                label="Library"
+                color="blue"
+                onClose={onClose}
+              />
+              <SidebarItem
+                to="/report"
+                icon={<ShieldAlert className="w-5 h-5" />}
+                label="Report"
+                color="#ff0000"
+                activeColor="bg-red-50 text-red-600"
+                onClose={onClose}
+              />
+              <SidebarItem
+                to="/report-history"
+                icon={<ShieldCheck  className="w-5 h-5" />}
+                label="Report History"
+                color="#ff0000"
+                activeColor="bg-red-50 text-red-600"
+                onClose={onClose}
+              />
+              <LogoutItem
+                icon={<LogOut className="w-5 h-5" />}
+                label="Logout"
+                onLogout={handleLogout}
+              />
+            </div>
+          )}
+
+          {/* Menu */}
+          <div className="p-4 space-y-2">
+            {roleMenus[user?.role]?.map((item) => (
+              <SidebarItem
+                key={item.to}
+                to={item.to}
+                icon={item.icon}
+                label={item.label}
+                color={item.color}
+                onClose={onClose}
+              />
+            ))}
+
+            {/* Logout always visible */}
+            {user?.role !== "student" && (
+              <LogoutItem
+                icon={<LogOut className="w-5 h-5" />}
+                label="Logout"
+                onLogout={handleLogout}
+              />
+            )}
+          </div>
+        </div>
         {/* Footer */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t text-xs text-gray-500 text-center">
+        <div className="border-t absolute bottom-0 left-0 right-0 p-4  text-xs text-gray-500 text-center">
           © 2025 Smart Campus
         </div>
       </div>

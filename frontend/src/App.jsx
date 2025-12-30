@@ -29,6 +29,7 @@ import Sidebar from "./components/Sidebar.jsx";
 import AdminOwner from "./Page/AdminOwner.jsx";
 import FounderConsole from "./Page/FounderConsole.jsx";
 import ForgotPassword from "./Page/ForgotPassword.jsx";
+import ReportHistory from "./Page/ReportHistory.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -63,13 +64,15 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="top-right"   reverseOrder={false} />
+      <Toaster position="top-right" reverseOrder={false} />
       <Routes>
-        <Route path="/home" element={<HomeLogin />} />
+        {/* Public Routes */}
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+
+        {/* Student Routes */}
         <Route
           path="/profile"
           element={
@@ -78,14 +81,61 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/canteen" element={<Canteen />} />
-        <Route path="/library" element={<Library />} />
-        <Route path="/orders" element={<CanteenOrders />} />
-        <Route path="/report" element={<ReportPortal />} />
-        {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
-        <Route path="/adminowner" element={<AdminOwner />} />
-        <Route path="/founderConsole" element={<FounderConsole />} />
 
+        <Route
+          path="/orders"
+          element={
+            <ProtectedRoute allow={["student"]}>
+              <CanteenOrders />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/report"
+          element={
+            <ProtectedRoute allow={["student"]}>
+              <ReportPortal />{" "}
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report-history"
+          element={
+            <ProtectedRoute allow={["student"]}>
+              <ReportHistory />{" "}
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/home"
+          element={
+            <ProtectedRoute allow={["student", "librarian", "admin"]}>
+              <HomeLogin />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/library"
+          element={
+            <ProtectedRoute allow={["student", "librarian", "admin"]}>
+              <Library />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/canteen"
+          element={
+            <ProtectedRoute allow={["student", "canteen", "admin"]}>
+              <Canteen />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin Routes */}
         <Route
           path="/admin"
           element={
@@ -94,7 +144,7 @@ export default function App() {
             </ProtectedRoute>
           }
         >
-          <Route index element={<OfficeOverview />} /> {/* Default Page */}
+          <Route index element={<OfficeOverview />} />
           <Route path="issues" element={<CampusIssues />} />
           <Route path="canteen" element={<CanteenManager />} />
           <Route path="library" element={<LibraryManager />} />
@@ -103,7 +153,17 @@ export default function App() {
           <Route path="college-info" element={<CollegeHome />} />
         </Route>
 
-        {/* Kitchen Access - Operational Tool Only */}
+        {/* Librarian Routes */}
+        <Route
+          path="/library-admin"
+          element={
+            <ProtectedRoute allow={["librarian", "admin"]}>
+              <LibraryTeacherHandle />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Canteen Operational Routes */}
         <Route
           path="/kitchen"
           element={
@@ -113,14 +173,19 @@ export default function App() {
           }
         />
 
-        <Route
-          path="/library-admin"
-          element={
-            <ProtectedRoute allow={["librarian", "admin"]}>
-              <LibraryTeacherHandle />
-            </ProtectedRoute>
-          }
-        />
+        {/* Catch-all for undefined routes */}
+        <Route path="*" element={<HomePage />} />
+
+
+
+
+
+
+        {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
+        <Route path="/adminowner" element={<AdminOwner />} />
+        <Route path="/founderConsole" element={<FounderConsole />} />
+
+        {/* Kitchen Access - Operational Tool Only */}
       </Routes>
     </>
   );

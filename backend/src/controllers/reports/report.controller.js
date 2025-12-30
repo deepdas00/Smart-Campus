@@ -14,7 +14,8 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 export const createReport = asyncHandler(async (req, res) => {
 
     const { collegeCode, userId } = req.user;
-    const { building, room, title, description, zone, category, location, priority } = req.body;
+    const { building, room, title, description, zone, category,  priority } = req.body;
+
 
     if (!title || !description || !category) {
         return res.status(400).json({ message: "Required fields missing" });
@@ -33,11 +34,14 @@ export const createReport = asyncHandler(async (req, res) => {
     // Upload images
 
     let imageUrl;
-
+    console.log(req.file);
+    
     if (req.file?.path) {
         const coverPath = req.file?.path.replace(/\\/g, "/");
         try {
             imageUrl = await uploadOnCloudinary(coverPath);
+            console.log("IMGAAAGAGGA", imageUrl);
+            
         } catch (err) {
             return res.status(500).json({ message: "Failed to upload book cover image" });
         }
@@ -45,21 +49,30 @@ export const createReport = asyncHandler(async (req, res) => {
     }
 
 
-    const reportCode = await generateTransactionCode(collegeCode, "RPT", Report);
+    const transactionCode = await generateTransactionCode(collegeCode, "RPT", Report);
+
+
+
+
+
+
+    console.log("TRARARARA", transactionCode);
+    
 
     const report = await Report.create({
-        reportCode,
+        transactionCode : transactionCode,
         studentId: userId,
         title,
         description,
         category,
-        location,
-        image: imageUrl,
+        image: imageUrl?.url,
         priority,
         building,
         room,
         zone
     });
+
+    
 
     res.status(201).json(
         new ApiResponse(201, report, "Report submitted successfully")
@@ -73,7 +86,7 @@ export const createReport = asyncHandler(async (req, res) => {
 
 export const getMyReports = asyncHandler(async (req, res) => {
 
-    const { collegeCode, userId } = req.user;
+    const { collegeCode, userId } = req.body || req.user;
 
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);

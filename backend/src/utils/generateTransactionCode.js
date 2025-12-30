@@ -1,5 +1,8 @@
 export const generateTransactionCode = async (collegeCode, module, Model) => {
 
+  // console.log(collegeCode, "/////", module, "//////", Model);
+  
+
 // module = {canteen = C} {library = L}
 // model = schema model so the we can use (.find)
 

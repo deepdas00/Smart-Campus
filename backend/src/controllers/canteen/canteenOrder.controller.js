@@ -37,7 +37,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const canteenPolicy = await CanteenPolicyModel.findOne();
   const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
-    res.status(401).json({ message: "Canteen Is Offline!!" });
+    return res.status(401).json({ message: "Canteen Is Offline!!" });
   }
 
   const Food = getCanteenFoodModel(collegeConn);
@@ -84,7 +84,6 @@ export const placeOrder = asyncHandler(async (req, res) => {
     items: orderItems,
     totalAmount,
     paymentStatus: "pending",
-    orderStatus: "order_received",
     transactionCode,
   });
 

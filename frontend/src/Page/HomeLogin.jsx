@@ -9,6 +9,8 @@ import {
 import Footer from '../Components/Footer';
 import Navbar from '../Components/Navbar/Navbar';
 import CollegeInfo from '../Components/CollegeInfo';
+import HomepageHeaderCollegeInfo from '../Components/HomepageHeaderCollegeInfo';
+import Collaboration from './Collaboration';
 
 export default function HomeLogin() {
   const scrollRef = useRef(null);
@@ -33,7 +35,7 @@ export default function HomeLogin() {
   return (
     <div className="min-h-screen font-sans text-[#1E293B] bg-white overflow-x-hidden">
       <Navbar />
-      <CollegeInfo />
+     <HomepageHeaderCollegeInfo/>
 
       <style>
         {`
@@ -372,6 +374,13 @@ export default function HomeLogin() {
       </section>
 
       <hr className="border-slate-100" />
+
+
+      {/*Collaborate */}
+
+
+<Collaboration/>
+      
 
       {/* SECTION 4: SMART CAMPUS CORE */}
       <section className="py-24 px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">

@@ -34,7 +34,7 @@ router.post(
   verifyJWT,
   authorizeRoles("student"),
   submitRating
-);
+);             //after resolve
 
 // Admin
 router.get(

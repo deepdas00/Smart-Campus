@@ -34,13 +34,17 @@ const collegeStudentSchema = new Schema(
       type: String,
       default: "student"
     },
-    department:{
+    department: {
       type: String,
       required: true
     },
-    admissionYear:{
+    admissionYear: {
       type: Number,
       required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true
     },
     issuedBooks: [
       {

@@ -10,7 +10,7 @@ import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
-import { BookMarked, ChevronRight, ShoppingCart, ChefHat  } from "lucide-react";
+import { BookMarked, ChevronRight, ShoppingCart, ChefHat } from "lucide-react";
 
 export default function Navbar({
   onMyBooksClick,
@@ -134,16 +134,13 @@ export default function Navbar({
                     </button>
                   )}
 
-
                   {isOrderPage && (
                     <Link
                       to={"/canteen"}
                       className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
                     >
-                      <ChefHat  className="w-4 h-4" />
+                      <ChefHat className="w-4 h-4" />
                       <span className="hidden sm:inline">Canteen</span>
-
-                      
                     </Link>
                   )}
 
@@ -170,7 +167,7 @@ export default function Navbar({
           <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-105">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
               <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center justify-between space-x-2">
                   <Link to={"/"} className="flex items-center space-x-2">
                     <img
                       src={logo}
@@ -182,18 +179,26 @@ export default function Navbar({
                     </span>
                   </Link>
                 </div>
-                <div>
-                  <div className="flex items-center space-x-4">
-                    <span
-                      onClick={handleLogout}
-                      className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500"
-                    >
-                      Logout
-                    </span>
-                  </div>
+
+                <div className="flex items-center space-x-4">
+                  <span
+                    onClick={handleLogout}
+                    className="text-gray-600 hidden sm:inline cursor-pointer hover:text-blue-500"
+                  >
+                    Logout
+                  </span>
+
+                  <Link className="flex items-center space-x-2">
+                    <img
+                      src={user?.avatar}
+                      alt="Profile"
+                      onClick={() => setShowProfileMenu(true)}
+                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                    />
+                  </Link>
                 </div>
 
-                <div></div>
+               
               </div>
             </div>
           </header>

@@ -37,7 +37,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const canteenPolicy = await CanteenPolicyModel.findOne();
   const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
-    res.status(401).json({ message: "Canteen Is Offline!!" });
+    return res.status(401).json({ message: "Canteen Is Offline!!" });
   }
 
   const Food = getCanteenFoodModel(collegeConn);
@@ -84,7 +84,6 @@ export const placeOrder = asyncHandler(async (req, res) => {
     items: orderItems,
     totalAmount,
     paymentStatus: "pending",
-    orderStatus: "order_received",
     transactionCode,
   });
 
@@ -255,12 +254,12 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   const order = await Order.findById(orderId)
     .populate("studentId", "studentName rollNo mobileNo")
     .select(
-      "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
+      "_id items transactionCode qrCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
 
 
 
-  // console.log(order);
+
 
   // 4️⃣ Response
   res
@@ -292,7 +291,7 @@ export const getMyCanteenOrderHistory = asyncHandler(async (req, res) => {
   const orders = await Order.find({ studentId: userId })
     .sort({ createdAt: -1 })
     .select(
-      "_id transactionCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
+      "_id transactionCode qrCode items totalAmount paymentStatus createdAt orderStatus createdAt razorpayPaymentId"
     );
 
   // 3️⃣ Response

@@ -6,14 +6,13 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { getStudentModel } from "../models/collegeStudent.model.js"
+import { getStudentModel } from "../models/collegeStudent.model.js";
 import { generateAccessAndRefreshTokens } from "../utils/tokenGenerator.js";
 import { getCollegeUserModel } from "../models/collegeUser.model.js";
-
-
+import { getLibraryTransactionModel } from "../models/libraryTransaction.model.js";
+import { getLibraryBookModel } from "../models/libraryBook.model.js";
 
 export const registerStudent = asyncHandler(async (req, res) => {
-
   // 1️⃣ Get data from frontend
   const {
     collegeCode,
@@ -39,19 +38,13 @@ export const registerStudent = asyncHandler(async (req, res) => {
     throw new ApiError(404, "College not active or not found");
   }
 
-
   // 4️⃣ Connect COLLEGE DB
   const collegeConn = getCollegeDB(college.dbName);
-
 
   // 5️⃣ Attach Student model to THIS DB
   const CollegeStudent = getStudentModel(collegeConn);
 
-
-
   ////// verification of student with id
-
-
 
   // 6️⃣ Upload avatar (optional)
   const avatarLocalPath = req.file?.path?.replace(/\\/g, "/");
@@ -77,27 +70,46 @@ export const registerStudent = asyncHandler(async (req, res) => {
     admissionYear,
   });
 
+  // 9️⃣ Generate tokens using your existing util
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshTokens({
+      userId: student._id,
+      role: "student",
+      collegeCode
+    });
 
-  //// error handling for db fail 
+  // 🍪 Cookie options
+  const options = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "strict"
+  };
 
-  // 9️⃣ Send response
-  res.status(201).json(
-    new ApiResponse(201, student, "Student registered successfully")
-  );
-
+  // 🔟 Send cookies + response
+  return res
+    .status(201)
+    .cookie("accessToken", accessToken, options)
+    .cookie("refreshToken", refreshToken, options)
+    .json(
+      new ApiResponse(
+        201,
+        {
+          student
+        },
+        "Student registered & logged in successfully"
+      )
+    );
 });
 
-
 export const studentLogin = asyncHandler(async (req, res) => {
-  const { collegeCode, mobileNo, email, password } = req.body
+  const { collegeCode, mobileNo, email, password } = req.body;
 
-  console.log(req.body)
+  console.log(req.body);
 
   if (!collegeCode) {
     return res.status(400).json({ message: "Select College!!" });
-  }else if(!(mobileNo || email)){
+  } else if (!(mobileNo || email)) {
     return res.status(400).json({ message: "Mobile No. or Email is required!!" });
-
   }
 
   // 1️⃣ Resolve college
@@ -109,17 +121,13 @@ export const studentLogin = asyncHandler(async (req, res) => {
     throw new ApiError(404, "College not found or inactive");
   }
 
-
   // 2️⃣ Connect college DB
   const collegeConn = getCollegeDB(college.dbName);
   const CollegeStudentModel = getStudentModel(collegeConn);
 
   // 3️⃣ Find staff user
   const student = await CollegeStudentModel.findOne({
-    $or: [
-      { email },
-      { mobileNo }
-    ]
+    $or: [{ email }, { mobileNo }],
   });
 
   if (!student) {
@@ -130,20 +138,16 @@ export const studentLogin = asyncHandler(async (req, res) => {
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
     return res.status(401).json({ message: "Invalid Password!!" });
-
   }
 
-
   // 5️⃣ Generate tokens
-  const { accessToken, refreshToken } =
-    await generateAccessAndRefreshTokens({
-      userId: student._id,
-      role: student.role,
-      collegeCode
-    });
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens({
+    userId: student._id,
+    role: student.role,
+    collegeCode,
+  });
 
   // console.log(" GENERATION SUCCESSFULL", accessToken, refreshToken);
-
 
   // 6️⃣ Save refresh token
   student.refreshToken = refreshToken;
@@ -158,59 +162,102 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   // 7️⃣ Send response
 
-  const updatedStudent = await CollegeStudentModel.findById(student._id).select("-password -refreshToken")
+  const updatedStudent = await CollegeStudentModel.findById(student._id).select(
+    "-password -refreshToken"
+  );
 
   res
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
     .cookie("refreshToken", refreshToken, {
       ...cookieOptions,
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
-    .json(
-      new ApiResponse(
-        200,
-        updatedStudent,
-        "Login successful"
-      )
-    );
-
-
-})
-
+    .json(new ApiResponse(200, updatedStudent, "Login successful"));
+});
 
 export const currentStudent = asyncHandler(async (req, res) => {
-
   // verifyJWT middleware should attach 'user' to 'req'
-  const { collegeCode, userId } = req.body || req.user;
-  
+
+  const { collegeCode, userId } = req.user;
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) throw new ApiError(404, "College not found");
 
-
-  const collegeConn = getCollegeDB(college.dbName)
-  const Student = getStudentModel(collegeConn)
-  const student = await Student.findById(userId).select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
-
+  const collegeConn = getCollegeDB(college.dbName);
+  const Student = getStudentModel(collegeConn);
+  const student = await Student.findById(userId).select(
+    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+  );
 
   if (!student) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
   // Change 'data' to 'user' to match your React AuthContext expectations
-  res.status(200).json(new ApiResponse(
-    200,
-    student,
-    "GOT STUDENT"
-  ));
+  res.status(200).json(new ApiResponse(200, student, "GOT STUDENT"));
+});
 
-})
+
+
+export const currentStudentAllDetails = asyncHandler(async (req, res) => {
+  // verifyJWT middleware should attach 'user' to 'req'
+  console.log("hiiiiiiii");
+  
+  const { collegeCode, userId } = req.body;
+
+  console.log(collegeCode, userId);
+  
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) throw new ApiError(404, "College not found");
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Student = getStudentModel(collegeConn);
+  const LibraryTransaction = getLibraryTransactionModel(collegeConn);
+  const LibraryBooks = getLibraryBookModel(collegeConn);
+  const student = await Student.findById(userId).select(
+    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+  );
+
+
+  
+  
+  const libraryTransaction = await LibraryTransaction.find({
+    studentId: userId,
+    transactionStatus: "issued",
+
+  })
+  .populate({path:"bookId", select : "title coverImage author category isbn"})
+  .select("-qrCode")
+
+  
+  console.log(libraryTransaction);
+  if (!student) {
+    return res.status(404).json({ success: false, message: "User not found" });
+  }
+
+  // Change 'data' to 'user' to match your React AuthContext expectations
+  res
+    .status(200)
+    .json(
+      {
+      student, 
+      libraryTransaction, 
+      message : "GOT STUDENT"
+    });
+
+
+    
+});
+
 
 
 export const allStudentFetch = asyncHandler(async (req, res) => {
-
   // verifyJWT middleware should attach 'user' to 'req'
   const { collegeCode } = req.user;
 
@@ -219,24 +266,26 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) throw new ApiError(404, "College not found");
 
-
-  const collegeConn = getCollegeDB(college.dbName)
-  const Student = getStudentModel(collegeConn)
-  const students = await Student.find().select("-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry");
-
+  const collegeConn = getCollegeDB(college.dbName);
+  const Student = getStudentModel(collegeConn);
+  const students = await Student.find().select(
+    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+  );
 
   if (!students) {
     return res.status(404).json({ success: false, message: "User not found" });
   }
 
   // Change 'data' to 'user' to match your React AuthContext expectations
-  res.status(200).json(new ApiResponse(
-    200,
-    students,
-    "GOT STUDENT"
-  ));
 
+
+res.status(200).json({
+  students,
+  collegeCode,
+  message : "Student details fetched"
 })
 
 
 
+  // res.status(200).json(new ApiResponse(200, students,collegeCode, "GOT STUDENT"));
+});

@@ -77,13 +77,13 @@ export default function SignUpPage() {
 
     const fetchDepartments = async () => {
       try {
-        const resPolicy = await axios.get(`${API_URL}/api/v1/college/policy/${collegeCode}`, {
+        const resPolicy = await axios.get(`${API_URL}/api/v1/college/departments/${collegeCode}`, {
           withCredentials: true,
         });
 
         console.log("POLICY RESPONSE:", resPolicy);
 
-        setDepartments(resPolicy.data.data.departmentName);
+        setDepartments(resPolicy.data.departments);
       } catch (error) {
         setDepartments([])
         console.error("Failed to fetch departments", error);
@@ -188,11 +188,13 @@ export default function SignUpPage() {
       // Use axios with multipart/form-data
       const response = await axios.post(
         `${API_URL}/api/v1/users/student/register`,
-        form
-      );
+        form, {
+    withCredentials: true
+  }
+);
 
       toast.success(response.data.message || "Account created successfully!");
-      navigate("/", { replace: true });
+      navigate("/home", { replace: true });
 
       // Reset form
       setFormData({

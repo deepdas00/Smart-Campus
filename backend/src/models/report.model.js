@@ -2,10 +2,14 @@ import mongoose from "mongoose";
 
 const reportSchema = new mongoose.Schema(
   {
-    reportCode: {
+    transactionCode: {
       type: String,
       unique: true,
       required: true
+    },
+    reportCode: {
+      type: String,
+      unique: false
     },
     building:{
       type:String,

@@ -17,8 +17,15 @@ import { Link } from "react-router-dom";
 import Footer from '../Components/Footer';
 import Navbar from '../Components/Navbar/Navbar';
 
+import { useAuth } from "../context/AuthContext";
+
+
 
 export default function CampusReporterHome() {
+
+  const { user } = useAuth();
+
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
 
@@ -85,7 +92,7 @@ export default function CampusReporterHome() {
       <Navbar/>
 
       {/* Hero Section */}
-      <section className="pt-15 pb-20 px-4">
+      <section className={`${user ? "pt-15" : "p-35"} px-4`}>
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>

@@ -55,6 +55,8 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Order already paid");
   }
 
+
+
 console.log("ORDER ID",order._id);
 
   // 5️⃣ Create Razorpay order
@@ -173,6 +175,7 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
 
   // 9️⃣ Save QR code in order
   order.qrCode = qrCodeBase64;
+  order.orderStatus = "order_received"
   await order.save({ validateBeforeSave: false });
 
 

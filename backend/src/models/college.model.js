@@ -9,7 +9,6 @@ const collegeSchema = new Schema(
       required: true,
       uppercase: true,
     },
-
     collegeName: {
       type: String,
       required: true,
@@ -28,9 +27,6 @@ const collegeSchema = new Schema(
       type: String,
       required: true
     },
-    NAAC:{
-      type: String
-    },
     contactPersonName: {
       type: String,
       required: true
@@ -39,18 +35,13 @@ const collegeSchema = new Schema(
       type: String,
       required: true
     },
+    principalName:{
+      type:String,
+      required: true
+    },
     dbName: {
       type: String,
       required: true,
-
-    },
-    // documents: [
-    //   {
-    //     type: String   // Cloudinary URLs
-    //   }
-    // ],
-    logo:{
-      type: String
     },
 
     status: {

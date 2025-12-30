@@ -47,10 +47,11 @@ export const canteenOrderSchema = new mongoose.Schema(
         orderStatus: {
             type: String,
             enum: [
+                "Not-Placed",
                 "order_received",
                 "served",
             ],
-            default: "order_received"
+            default: "Not-Placed"
         },
 
         orderType: {

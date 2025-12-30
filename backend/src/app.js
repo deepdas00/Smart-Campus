@@ -74,14 +74,39 @@ app.use("/api/v1/public/registerCollege",registerCollege);
 
 
 app.use("/api/v1/college", collegeRouter);
-// POST   /api/v1/college/register           //ADMIN PLATFORM can only register a college////////////////////////////////
-// POST   /api/v1/college/fetchCollgeData    //ADMIN PLATFORM can only view all college FULL DATA////////////////////////////////////
-// POST    /api/v1/college/satusUpdate       //ADMIN PLATFORM can Active or InActive college using BTN//////////////////////////////////////////
-// POST    /api/v1/college/update            //ADMIN PLATFORM can update changes of college///////////////////////////////////////////////////////////////
-// GET    /api/v1/college/data               //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
-// POST    /api/v1/college/policy            //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
-// GET    /api/v1/college/policy             //(public api)for DropDown     ////////////////////////////////////////////////////////////////////////
+// GET    /api/v1/college/data    → Public → Fetch all colleges (for dropdown, selection, etc.)
 
+// ================================
+//        COLLEGE PLATFORM ADMIN
+// ================================
+// POST   /api/v1/college/register     → Platform Admin only     → Register a new college (creates DB, system users)
+// GET    /api/v1/college/fetchCollgeData   → Platform Admin only      → Fetch full details of all colleges 
+// POST   /api/v1/college/satusUpdate    → Platform Admin only       → Activate / Deactivate a college
+// POST   /api/v1/college/update   → Platform Admin only      → Update college master details
+
+// ================================
+//       COLLEGE INFORMATION
+// ================================
+// POST   /api/v1/college/info/createOrUpdate     → College Admin only    → Create or update complete college profile (logo, NAAC, address, departments, etc.)
+// GET    /api/v1/college/departments/:collegeCode    → Public   → Fetch department list of a college
+// GET    /api/v1/college/info-full     → College Admin only    → Fetch full college profile
+// GET    /api/v1/college/info-limit   → Student / Staff  → Fetch limited college profile (for dashboard display)
+
+// ================================
+//          COLLEGE GALLERY
+// ================================
+// POST   /api/v1/college/gallery    → College Admin only   → Upload new gallery image
+// GET    /api/v1/college/gallery    → All logged users    → Fetch college gallery images
+// DELETE /api/v1/college/gallery/:imageId     → College Admin only    → Delete a gallery image
+
+// ================================
+//       COLLEGE NOTIFICATIONS
+// ================================
+// POST   /api/v1/college/notifications   → College Admin only   → Create new notification
+// GET    /api/v1/college/notifications   → All logged users   → Fetch notifications (supports category filter)
+// PATCH  /api/v1/college/notifications/:notificationId    → College Admin only    → Update notification
+// DELETE /api/v1/college/notifications/:notificationId    → College Admin only    → Delete notification
+    
 
 app.use("/api/v1/auth", authRouter);
 // POST /api/v1/auth/student/login 

@@ -42,6 +42,7 @@ export default function Canteen() {
   const [orderStatus, setOrderStatus] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [isCanteenOpen, setIsCanteenOpen] = useState(null); // null = loading
+  const [quantity, setQuantity] = useState(null); // null = loading
   const categories = [
     // "snacks", "meal", "drink", "sweet"
     { id: "all", name: "All Items", icon: "🍽️" },
@@ -59,8 +60,10 @@ export default function Canteen() {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-  useEffect(() => {
-    const fetchCanteenStatus = async () => {
+
+
+
+  const fetchCanteenStatus = async () => {
       try {
         const res = await axios.get(`${API_URL}/api/v1/canteen/canteenStatus`, {
           withCredentials: true,
@@ -78,6 +81,11 @@ export default function Canteen() {
       }
     };
 
+
+
+
+  useEffect(() => {
+    
     fetchCanteenStatus();
 
     const intervalId = setInterval(fetchCanteenStatus, 5 * 60 * 1000);
@@ -170,8 +178,16 @@ export default function Canteen() {
   };
 
   const placeOrder = async () => {
+
+
+    
+      fetchCanteenStatus()
+
+
+      
     if (!isCanteenOpen) {
       toast.error("Canteen is currently closed");
+    
       return;
     }
 
@@ -187,6 +203,8 @@ export default function Canteen() {
         foodId: item._id,
         quantity: item.quantity,
       }));
+
+
 
       const res = await axios.post(
         `${API_URL}/api/v1/canteen/orders`,
@@ -209,6 +227,10 @@ export default function Canteen() {
         id: "place-order",
       });
     }
+    finally {
+  isCanteenOpen(null); // still runs
+}
+
   };
 
   const startPayment = async (orderId) => {
@@ -423,7 +445,8 @@ export default function Canteen() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Order Status:</span>
-                  <span className="font-semibold">{orderStatus}</span>
+                  <span className="font-semibold">{orderStatus === "order_receive" ? "Order Placed" : orderStatus}
+</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Time:</span>

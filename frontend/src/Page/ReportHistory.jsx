@@ -624,9 +624,9 @@ const feedbackRate = resolvedCount > 0
             )}
 
             {/* Main Status Badge */}
-            <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border ${status.className}`}>
-              {status.icon}
-              {status.label}
+            <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border ${status?.className}`}>
+              {status?.icon}
+              {status?.label}
             </div>
           </div>
 

@@ -30,6 +30,7 @@ import AdminOwner from "./Page/AdminOwner.jsx";
 import FounderConsole from "./Page/FounderConsole.jsx";
 import ForgotPassword from "./Page/ForgotPassword.jsx";
 import ReportHistory from "./Page/ReportHistory.jsx";
+import CollegePolicy from "./Page/CollegePolicy.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -184,6 +185,7 @@ export default function App() {
         {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
         <Route path="/adminowner" element={<AdminOwner />} />
         <Route path="/founderConsole" element={<FounderConsole />} />
+        <Route path="/collegePolicy" element={<CollegePolicy />} />
 
         {/* Kitchen Access - Operational Tool Only */}
       </Routes>

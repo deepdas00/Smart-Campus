@@ -181,7 +181,7 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
     if (adminNote) report.adminNote = adminNote;
     if (assignedAdmin) report.assignedAdmin = assignedAdmin;
 
-    console.log(report.status);//////////////////////////////////////////////////////////////////////////////////////for testing
+    console.log(report.status);
 
 
 

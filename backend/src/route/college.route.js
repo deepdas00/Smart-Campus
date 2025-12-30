@@ -7,6 +7,7 @@ import { upload } from "../middlewares/multer.middleware.js";
 import { createOrUpdateCollegeInfo, getCollegeFullInfo, getCollegeLimitedInfo, getDepartments } from "../controllers/collegeInfo.controller.js";
 import { addGalleryImage, deleteGalleryImage, getGalleryImages } from "../controllers/collegeGallery.controller.js";
 import { createNotification, deleteNotification, getNotifications, updateNotification } from "../controllers/collegeNotification.controller.js";
+import { getAdminDashboardStatistics } from "../controllers/collegeOverView.controller.js";
 
 
 const router = express.Router();
@@ -166,6 +167,20 @@ router.delete(
   authorizeRoles("admin"),
   deleteNotification
 );
+
+
+/*================================
+        college overview
+==================================*/
+// college will get overview stas by admin
+// GET /api/v1/college/admin/statistics?range=weekly
+router.get(
+  "/admin/statistics",
+  verifyJWT,
+  authorizeRoles("admin"),
+  getAdminDashboardStatistics
+);
+
 
 
 export default router;

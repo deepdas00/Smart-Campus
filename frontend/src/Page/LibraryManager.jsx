@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import {
   BookOpen,
+  Download ,
   Clock,
   Search,
   AlertCircle,
@@ -25,6 +26,15 @@ import {
   Bar,
 } from "recharts";
 
+
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+
+
+
+
+
 export function LibraryManager() {
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(false);
@@ -34,6 +44,107 @@ export function LibraryManager() {
   const [activeTab, setActiveTab] = useState("transactions");
   const [books, setBooks] = useState([]);
   const [loadingBooks, setLoadingBooks] = useState(false);
+
+
+
+
+  const handlePrintTransactions = () => {
+  if (!transactions.length) return;
+
+  const doc = new jsPDF();
+  const timestamp = new Date().toLocaleString();
+
+  // 1. Professional Header Banner
+  doc.setFillColor(30, 41, 59); // Dark Slate Blue
+  doc.rect(0, 0, 210, 45, 'F');
+
+  // 2. Add Branding / Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(24);
+  doc.setFont("helvetica", "bold");
+  doc.text("LIBRARY FINANCIAL STATEMENT", 14, 25);
+  
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Official Document: ${timestamp}`, 14, 33);
+  doc.text(`Total Records: ${transactions.length}`, 14, 38);
+
+  // 3. Calculation Logic (Financial Summary)
+  const totalFine = transactions.reduce((sum, tx) => sum + (tx.fineAmount || 0), 0);
+  const collectedFine = transactions
+    .filter(tx => tx.paymentStatus === "paid")
+    .reduce((sum, tx) => sum + (tx.fineAmount || 0), 0);
+  const pendingFine = totalFine - collectedFine;
+
+  // 4. Financial Summary "Bill" Boxes
+  autoTable(doc, {
+    startY: 50,
+    head: [['Financial Summary', 'Amount (INR)']],
+    body: [
+      ['Gross Fine Calculated', `Rs. ${totalFine.toFixed(2)}`],
+      ['Total Fine Collected', `Rs. ${collectedFine.toFixed(2)}`],
+      ['Pending Dues', `Rs. ${pendingFine.toFixed(2)}`],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [30, 41, 59], fontSize: 11 },
+    styles: { fontStyle: 'bold', fontSize: 10, cellPadding: 3 },
+  });
+
+  // 5. Detailed Transaction Table
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text("Transaction Ledger", 14, doc.lastAutoTable.finalY + 15);
+
+  const tableRows = transactions.map(tx => [
+    tx.transactionCode,
+    `${tx.studentId?.studentName || "N/A"}\n(${tx.studentId?.rollNo || "N/A"})`,
+    tx.bookId?.title || "N/A",
+    `Rs. ${tx.fineAmount || 0}`,
+    tx.paymentStatus.toUpperCase(),
+    new Date(tx.createdAt).toLocaleDateString()
+  ]);
+
+  autoTable(doc, {
+    startY: doc.lastAutoTable.finalY + 20,
+    head: [['TXN ID', 'Student Details', 'Book Title', 'Fine', 'Payment', 'Date']],
+    body: tableRows,
+    theme: 'striped',
+    headStyles: { fillColor: [51, 65, 85], fontSize: 9 },
+    styles: { fontSize: 8, cellPadding: 4 },
+    columnStyles: {
+      1: { cellWidth: 40 }, // Student details
+      2: { cellWidth: 60 }, // Book title
+    },
+    // Change color based on payment status
+    didParseCell: function (data) {
+      if (data.section === 'body' && data.column.index === 4) {
+        if (data.cell.raw === 'PAID') {
+          data.cell.styles.textColor = [22, 163, 74]; // Green
+          data.cell.styles.fontStyle = 'bold';
+        } else {
+          data.cell.styles.textColor = [220, 38, 38]; // Red
+          data.cell.styles.fontStyle = 'bold';
+        }
+      }
+    }
+  });
+
+  // 6. Footer & Signature
+  const finalY = doc.lastAutoTable.finalY + 30;
+  doc.setFontSize(10);
+  doc.text("__________________________", 140, finalY);
+  doc.text("Librarian Signature", 148, finalY + 5);
+  
+  doc.setFontSize(8);
+  doc.setTextColor(150);
+  doc.text("This is an electronically generated report for library records.", 105, 285, null, null, "center");
+
+  doc.save(`Library_Statement_${Date.now()}.pdf`);
+};
+
+
+
 
   // Fetch transactions
   useEffect(() => {
@@ -358,6 +469,18 @@ export function LibraryManager() {
                 Books
               </button>
             </div>
+
+
+
+<button
+    onClick={handlePrintTransactions}
+    className="flex items-center gap-2 bg-blue-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95 w-full justify-center"
+  >
+    <Download size={18} />
+    Download All Bill Report
+  </button>
+
+            
 
             <div className="flex gap-2">
               <div className="relative">

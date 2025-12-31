@@ -92,16 +92,21 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
 
     // 🧾 Reports Summary
     const totalReports = await Complaint.countDocuments();
-    const resolvedReports = await Complaint.countDocuments({ status: "resolved" });
+   const resolvedReports = await Complaint.countDocuments({
+  status: { $in: ["resolved", "closed"] }
+});
 
     // 👨‍🎓 Active Students
     const activeStudentsCount = await Student.countDocuments({ isActive: true });
 
+    const rating = await Complaint.find({status: "closed"}).select("rating")
+
     res.status(200).json(
         new ApiResponse(
             200,
-            {
+            {   
                 range,
+                rating,
                 librarySuccessTransCount,
                 totalCanteenRevenue,
                 canteenRevenueGraphData,

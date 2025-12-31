@@ -1,147 +1,344 @@
-import React, { useState } from 'react';
-import { 
-  AlertCircle, CheckCircle2, Clock, Filter, 
-  Search, MoreVertical, MessageSquare, MapPin 
-} from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { Search, FileWarning, Clock, ExternalLink, Download, MoreHorizontal, ArrowUpDown } from "lucide-react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import Cookies from "js-cookie";
 
-export function CampusIssues() {
-  const [filter, setFilter] = useState('All');
+// PDF Download Helper
+const downloadReport = (r) => {
+  const doc = new jsPDF();
+  
+  // Header Banner
+  doc.setFillColor(79, 70, 229); 
+  doc.rect(0, 0, 210, 40, 'F');
 
-  const issues = [
-    { 
-      id: "ISS-2401", 
-      title: "Broken AC - Room 302", 
-      status: "In Progress", 
-      priority: "High", 
-      user: "Rahul S.", 
-      aiTag: "HVAC", 
-      location: "Admin Block",
-      time: "2h ago",
-      image: "https://images.unsplash.com/photo-1581094288338-2314dddb7ecb?auto=format&fit=crop&w=100&q=80" 
-    },
-    { 
-      id: "ISS-2402", 
-      title: "Water Leakage - Block A", 
-      status: "Reported", 
-      priority: "Critical", 
-      user: "Priya K.", 
-      aiTag: "Plumbing", 
-      location: "Girls Hostel",
-      time: "15m ago",
-      image: "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=100&q=80"
-    },
-    { 
-      id: "ISS-2403", 
-      title: "Flickering Lights - Library", 
-      status: "Fixed", 
-      priority: "Low", 
-      user: "Amit V.", 
-      aiTag: "Electrical", 
-      location: "Central Library",
-      time: "5h ago",
-      image: "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?auto=format&fit=crop&w=100&q=80"
-    }
-  ];
+  // Header Text
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("INCIDENT REPORT", 120, 20);
+  
+  doc.setFontSize(10);
+  doc.text(`Ref ID: #${r._id.substring(0, 8).toUpperCase()}`, 120, 28);
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case 'Critical': return 'bg-red-100 text-red-700 border-red-200';
-      case 'High': return 'bg-orange-100 text-orange-700 border-orange-200';
-      default: return 'bg-blue-100 text-blue-700 border-blue-200';
+  // CORRECT WAY TO CALL AUTOTABLE:
+  autoTable(doc, {
+    startY: 50,
+    head: [['Official Incident Specification', 'Details']],
+    body: [
+      ['Report Title', r.title],
+      ['Issue Category', r.category || "General"],
+      ['Priority Level', r.priority.toUpperCase()],
+      ['Current Status', r.status.toUpperCase()],
+      ['Student Name', r.studentId?.studentName || "Guest"],
+      ['Roll Number', r.studentId?.rollNo || "N/A"],
+    ],
+    theme: 'striped',
+    headStyles: { fillColor: [79, 70, 229] },
+  });
+
+  // Description Section
+  const finalY = doc.lastAutoTable.finalY;
+  doc.setTextColor(0, 0, 0);
+  doc.setFont("helvetica", "bold");
+  doc.text("Incident Description:", 14, finalY + 15);
+  doc.setFont("helvetica", "normal");
+  doc.text(r.description || "No description provided.", 14, finalY + 22, { maxWidth: 180 });
+
+  doc.save(`Report_${r._id.substring(0, 5)}.pdf`);
+};
+
+// Generic detail grid
+const DetailGrid = ({ items }) => (
+  <div className="grid grid-cols-2 gap-4">
+    {items.map(([label, value]) => (
+      <div key={label}>
+        <p className="text-[10px] uppercase font-bold text-slate-400">{label}</p>
+        <p className="text-sm font-semibold text-slate-700">{value || "—"}</p>
+      </div>
+    ))}
+  </div>
+);
+
+// Category-specific detail component
+const CategoryDetails = ({ report }) => {
+  if (!report) return null;
+
+  switch (report.category) {
+    case "researchandlab":
+      return <DetailGrid items={[["Building", report.building], ["Room / Lab", report.room]]} />;
+    case "housinganddorms":
+      return <DetailGrid items={[["Hostel Block", report.building], ["Room", report.room], ["Zone", report.zone]]} />;
+    case "groundandpublic":
+      return <DetailGrid items={[["Area / Zone", report.zone], ["Building", report.building || "N/A"]]} />;
+    case "Library":
+      return <DetailGrid items={[["Shelf / Section", report.section], ["Floor", report.floor]]} />;
+    case "Canteen":
+      return <DetailGrid items={[["Canteen Area", report.area], ["Menu Issue", report.menuIssue || "N/A"]]} />;
+    case "Hostel":
+      return <DetailGrid items={[["Hostel Block", report.building], ["Room", report.room]]} />;
+    case "Infrastructure":
+      return <DetailGrid items={[["Building", report.building], ["Issue Type", report.issueType]]} />;
+    default:
+      return <DetailGrid items={[["Description", report.description]]} />;
+  }
+};
+
+// Admin panel
+export default function CampusIssues() {
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const [range, setRange] = useState("weekly");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [reports, setReports] = useState([]);
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [collegeCode, setCollegeCode] = useState(null);
+
+
+const handleSelectReport = async (r) => {
+  try {
+
+const res = await axios.post(
+  `${API_URL}/api/v1/reports/getMyReports`,
+  {
+    reportId: r._id,
+    collegeCode: collegeCode,
+  },
+  {
+    withCredentials: true, // browser sends cookie automatically
+  }
+);
+
+    console.log("API response:", res.data);
+    setSelectedReport(r);
+
+  } catch (error) {
+    console.error(
+      "API ERROR:",
+      error.response?.data || error.message
+    );
+  }
+};
+
+
+
+
+
+
+  useEffect(() => {
+    fetchReports();
+  }, [range]);
+
+  const fetchReports = async () => {
+    try {
+      setLoading(true);
+      const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, { withCredentials: true });
+      console.log(res.data.data);
+      
+      setReports(res.data.data.reports || []);
+      setCollegeCode(res.data.data.collegeCode)
+    } catch (err) {
+      console.error("Fetch Error", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const filteredReports = useMemo(() => {
+    return reports.filter((r) => {
+      const matchStatus = statusFilter === "All" || r.status?.toLowerCase() === statusFilter.toLowerCase();
+      const matchSearch =
+        r.title?.toLowerCase().includes(search.toLowerCase()) ||
+        r.studentId?.studentName?.toLowerCase().includes(search.toLowerCase()) ||
+        r.category?.toLowerCase().includes(search.toLowerCase());
+      return matchStatus && matchSearch;
+    });
+  }, [reports, statusFilter, search]);
+
+  const getPriorityStyle = (p) => {
+    const val = p?.toLowerCase();
+    if (val === "urgent" || val === "critical") return "bg-red-100 text-red-700 ring-1 ring-red-200";
+    if (val === "medium") return "bg-amber-100 text-amber-700 ring-1 ring-amber-200";
+    return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+  };
+
+  const getStatusStyle = (s) => {
+    const val = s?.toLowerCase();
+    if (["fixed", "closed", "resolved"].includes(val)) return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
+    if (val === "in progress") return "bg-blue-100 text-blue-700 ring-1 ring-blue-200";
+    return "bg-slate-50 text-slate-500 ring-1 ring-slate-200";
+  };
+
+  const categoryLabel = {
+    researchandlab: "Research & Lab",
+    housinganddorms: "Housing & Dorms",
+    groundandpublic: "Ground & Public Area",
+    Library: "Library",
+    Canteen: "Canteen",
+    Hostel: "Hostel",
+    Infrastructure: "Infrastructure",
+  };
+
   return (
-    <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-extrabold text-gray-900">Maintenance Pipeline</h2>
-          <p className="text-gray-500 text-sm">Review and manage AI-categorized campus infrastructure reports.</p>
-        </div>
-        <div className="flex gap-2 w-full md:w-auto">
-          <div className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" placeholder="Search issues..." className="w-full pl-10 pr-4 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-8 font-sans text-slate-900">
+      <div className="max-w-[1400px] mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Issue Management</h1>
+            <p className="text-slate-500 text-sm font-medium">Track and resolve campus infrastructure reports</p>
           </div>
-          <button className="p-2 border rounded-xl hover:bg-gray-50"><Filter className="w-5 h-5 text-gray-600" /></button>
+          <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+            {["daily", "weekly", "monthly"].map((r) => (
+              <button key={r} onClick={() => setRange(r)}
+                className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${range === r ? "bg-white text-slate-900 shadow-sm border border-slate-200" : "text-slate-400 hover:text-slate-600"}`}>
+                {r}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Status Tabs */}
-      <div className="flex border-b border-gray-200 gap-8">
-        {['All', 'Reported', 'In Progress', 'Fixed'].map((tab) => (
-          <button 
-            key={tab}
-            onClick={() => setFilter(tab)}
-            className={`pb-4 text-sm font-semibold transition-all relative ${filter === tab ? 'text-blue-600' : 'text-gray-400 hover:text-gray-600'}`}
-          >
-            {tab}
-            {filter === tab && <div className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 rounded-full" />}
-          </button>
-        ))}
-      </div>
-
-      {/* Issues List */}
-      <div className="grid gap-4">
-        {issues.filter(i => filter === 'All' || i.status === filter).map((issue) => (
-          <div key={issue.id} className="group bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-blue-100 transition-all">
-            <div className="flex flex-col lg:flex-row lg:items-center gap-5">
-              
-              {/* Issue Image (AI Input) */}
-              <div className="w-full lg:w-24 h-24 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 relative">
-                <img src={issue.image} alt="issue" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                <div className="absolute top-1 left-1 bg-black/50 text-white text-[10px] px-1.5 py-0.5 rounded backdrop-blur-sm">
-                  {issue.id}
-                </div>
-              </div>
-
-              {/* Content */}
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-3">
-                  <h4 className="font-bold text-gray-900 text-lg">{issue.title}</h4>
-                  <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full border ${getPriorityColor(issue.priority)}`}>
-                    {issue.priority}
-                  </span>
-                </div>
-                
-                <div className="flex flex-wrap items-center gap-y-2 gap-x-4 text-sm text-gray-500">
-                  <span className="flex items-center gap-1.5"><MapPin className="w-4 h-4 text-blue-500" /> {issue.location}</span>
-                  <span className="flex items-center gap-1.5"><Clock className="w-4 h-4" /> {issue.time}</span>
-                  <span className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-2 py-0.5 rounded-lg text-xs font-bold">
-                    AI: {issue.aiTag}
-                  </span>
-                </div>
-
-                <p className="text-xs text-gray-400">Reported by <span className="text-gray-700 font-medium">{issue.user}</span></p>
-              </div>
-
-              {/* Action Area */}
-              <div className="flex items-center gap-3 border-t lg:border-t-0 pt-4 lg:pt-0">
-                <button className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-xl transition">
-                  <MessageSquare className="w-4 h-4" /> Chat
-                </button>
-                <div className="h-8 w-[1px] bg-gray-200 hidden lg:block" />
-                <select className={`text-sm font-bold p-2 pr-8 rounded-xl border-none ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer
-                  ${issue.status === 'Fixed' ? 'bg-green-50 text-green-700' : 'bg-gray-50 text-gray-700'}`}>
-                  <option>Reported</option>
-                  <option>In Progress</option>
-                  <option>Fixed</option>
-                </select>
-                <button className="p-2 hover:bg-gray-100 rounded-full transition"><MoreVertical className="w-5 h-5 text-gray-400" /></button>
-              </div>
-
+        {/* Reports Table */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          {/* Toolbar */}
+          <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
+            <div className="relative w-full md:w-96">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search reports..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 rounded-xl text-sm transition-all outline-none"
+              />
             </div>
           </div>
-        ))}
+
+          {/* Table */}
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-50/50 border-b border-slate-100">
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Report Details</th>
+                  <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Submitted By</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
+                  <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {filteredReports.length > 0 ? filteredReports.map((r) => (
+                  <tr key={r._id} className="hover:bg-slate-50/80 transition-all group">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 flex-shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 group-hover:border-blue-200 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
+                          <FileWarning size={18} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-slate-800 truncate leading-tight mb-1">{r.title}</p>
+                          <div className="flex items-center gap-2">
+                            <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase">{categoryLabel[r.category]}</span>
+                            <span className="text-slate-300 text-xs">•</span>
+                            <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1"><Clock size={10}/> {new Date(r.createdAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">{r.studentId?.studentName || "Guest"}
+
+                      <p className="text-[10px] text-slate-400 font-medium">{r.studentId?.rollNo || "N/A"}</p>
+
+                    </td>
+                    <td className="px-6 py-4 text-center"><span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${getPriorityStyle(r.priority)}`}>{r.priority}</span></td>
+                    <td className="px-6 py-4 text-center"><span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${getStatusStyle(r.status)}`}>{r.status}</span></td>
+                    <td className="px-6 py-4 text-right flex justify-end gap-2">
+                      <button onClick={() => handleSelectReport(r)}className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
+                        
+                        <ExternalLink size={16} />
+                        
+                        </button>
+
+
+                      <button onClick={() => downloadReport(r)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Download size={16} /></button>
+                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"><MoreHorizontal size={16} /></button>
+                    </td>
+                  </tr>
+                )) : (
+                  <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 font-bold">No reports found</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Selected report details */}
+{selectedReport && (
+  <div className="fixed inset-0 z-[150] flex justify-center items-center bg-slate-900/60 backdrop-blur-md p-4 animate-fadeIn">
+    
+    {/* Popup container */}
+    <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-white/20 overflow-hidden animate-zoomIn">
+      
+      {/* Header with Background Accent */}
+      <div className="flex items-center justify-between px-8 py-5 bg-slate-50/50 border-b border-slate-100">
+        <div>
+          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-1 block">
+            Report Details
+          </span>
+          <h2 className="text-xl font-bold text-slate-900 leading-tight">
+            {selectedReport.title}
+          </h2>
+        </div>
+
+        <button
+          onClick={() => setSelectedReport(null)}
+          className="p-2 bg-white rounded-full border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-100 hover:bg-rose-50 transition-all duration-200 shadow-sm"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      {/* Footer Info */}
-      <div className="bg-blue-50 p-4 rounded-2xl flex items-center gap-3 text-blue-800 border border-blue-100">
-        <AlertCircle className="w-5 h-5" />
-        <p className="text-sm font-medium">
-          <span className="font-bold">AI Note:</span> 85% of issues this week are categorized under "Infrastructure". Consider scheduling a general campus audit.
-        </p>
+      {/* Content Area - Scrollable if content is long */}
+      <div className="p-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
+        
+        {selectedReport.image && (
+          <div className="relative mb-8 group">
+            <div className="absolute inset-0 bg-indigo-500/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
+            <img
+              src={selectedReport.image}
+              alt="Evidence"
+              className="relative w-full h-72 object-cover rounded-2xl shadow-md border border-slate-100"
+            />
+          </div>
+        )}
+
+        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-6">
+          <CategoryDetails report={selectedReport} />
+        </div>
+
+        <div className="space-y-3">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Description</h3>
+          <p className="text-slate-700 leading-relaxed font-medium">
+            {selectedReport.description}
+          </p>
+        </div>
+      </div>
+
+      {/* Optional Footer */}
+      <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+        <button 
+          onClick={() => setSelectedReport(null)}
+          className="px-6 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+        >
+          Close Report
+        </button>
+      </div>
+    </div>
+  </div>
+)}
       </div>
     </div>
   );

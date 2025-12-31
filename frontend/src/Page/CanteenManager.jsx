@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useEffect } from "react";
 import React, { useState } from "react";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Download } from "lucide-react"; // Add Download to your lucide imports
 import {
   ShoppingBag,
   Clock,
@@ -33,6 +36,89 @@ export function CanteenManager() {
   const [dailyRevenue, setDailyRevenue] = useState(0);
   const [activeOrders, setActiveOrders] = useState(0);
   const [avgPrepTime, setAvgPrepTime] = useState(0);
+
+
+
+
+  const downloadFinancialReport = () => {
+  const doc = new jsPDF();
+  const timestamp = new Date().toLocaleString();
+
+  // 1. Header Design
+  doc.setFillColor(37, 99, 235); // Blue-600
+  doc.rect(0, 0, 210, 45, 'F');
+  
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.text("CANTEEN COMMAND REPORT", 14, 25);
+  
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(`Report Period: ${selectedRange.toUpperCase()}`, 14, 33);
+  doc.text(`Generated on: ${timestamp}`, 14, 38);
+
+  // 2. Summary "Bill" Box (Financial Metrics)
+  const estimatedTax = dailyRevenue * 0.05; // 5% GST example
+  const platformFees = filteredOrders.length * 2; // Example flat fee
+  const netProfit = dailyRevenue - estimatedTax - platformFees;
+
+  autoTable(doc, {
+    startY: 55,
+    head: [['Executive Summary', 'Value']],
+    body: [
+      ['Total Gross Revenue', `Rs. ${dailyRevenue}`],
+      ['Total Orders Processed', `${filteredOrders.length} Orders`],
+      ['Average Order Value', `Rs. ${Math.round(dailyRevenue / (filteredOrders.length || 1))}`],
+      ['Estimated GST (5%)', `- Rs. ${estimatedTax.toFixed(2)}`],
+      ['Platform/Operational Fees', `- Rs. ${platformFees.toFixed(2)}`],
+      ['Net Estimated Profit', `Rs. ${netProfit.toFixed(2)}`],
+    ],
+    theme: 'grid',
+    headStyles: { fillColor: [37, 99, 235] },
+    styles: { fontStyle: 'bold' }
+  });
+
+  // 3. Transaction Details Table
+ // 3. Transaction Details Table
+doc.setTextColor(0, 0, 0);
+doc.setFontSize(14);
+doc.text("Transaction Breakdown", 14, doc.lastAutoTable.finalY + 15);
+
+const tableRows = filteredOrders.map(o => [
+  o.transactionCode,
+  o.studentId?.rollNo || "N/A",
+  o.items.map(i => `${i.name} (x${i.quantity})`).join(", "),
+  o.paymentStatus.toUpperCase(),
+  `Rs. ${o.totalAmount}`,
+  new Date(o.createdAt).toLocaleString() // <-- added Date & Time
+]);
+
+autoTable(doc, {
+  startY: doc.lastAutoTable.finalY + 20,
+  head: [['TXN ID', 'Roll No', 'Items', 'Payment', 'Amount', 'Order Date/Time']], // <-- added header
+  body: tableRows,
+  headStyles: { fillColor: [71, 85, 105] }, // Slate-600
+  styles: { fontSize: 8 },
+  columnStyles: { 2: { cellWidth: 60 } }
+});
+
+
+  // 4. Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  for(let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(`Page ${i} of ${pageCount} - Canteen Command Official Statement`, 105, 285, null, null, "center");
+  }
+
+  doc.save(`Canteen_Report_${selectedRange}_${Date.now()}.pdf`);
+};
+
+
+
+
 
   useEffect(() => {
     const fetchDashboardOrders = async () => {
@@ -209,6 +295,20 @@ export function CanteenManager() {
                 </button>
               ))}
             </div>
+
+
+
+            <button
+    onClick={downloadFinancialReport}
+    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition-all active:scale-95"
+  >
+    <Download size={18} />
+    Download {selectedRange} Bill Report
+  </button>
+
+
+
+
 
             {/* Search Input */}
             <div className="relative flex-1 max-w-sm">

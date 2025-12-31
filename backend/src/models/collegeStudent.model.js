@@ -57,11 +57,6 @@ const collegeStudentSchema = new Schema(
       default: null
     },
 
-    isActive:{
-      type : Boolean,
-      default : true
-    },
-
     resetPasswordOTPExpiry: {
       type: Date,
       default: null

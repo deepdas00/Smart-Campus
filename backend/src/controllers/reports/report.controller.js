@@ -6,6 +6,7 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
+import { getStudentModel } from "../../models/collegeStudent.model.js";
 
 /* =========================
    CREATE REPORT (Student)
@@ -97,7 +98,10 @@ export const getMyReports = asyncHandler(async (req, res) => {
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
-    const reports = await Report.find({ studentId: userId }).sort({ createdAt: -1 });
+    const Student = getStudentModel(collegeConn)
+    const reports = await Report.find({ studentId: userId })
+    .populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
+    .sort({ createdAt: -1 });
 
     res.status(200).json(
         new ApiResponse(200, reports, "Reports fetched successfully")
@@ -105,6 +109,46 @@ export const getMyReports = asyncHandler(async (req, res) => {
 });
 
 
+
+/* =========================
+   STUDENT REPORT LIST
+========================= */
+export const getMySingleReport = asyncHandler(async(req,res)=>{
+     const { collegeCode, reportId } = req.body;
+
+
+     console.log(reportId);
+     console.log(reportId, collegeCode);
+     
+
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
+
+    const college = await College.findOne({ collegeCode, status: "active" });
+    if (!college) throw new ApiError(404, "College not found");
+
+    const collegeConn = getCollegeDB(college.dbName);
+    const Report = getReportModel(collegeConn);
+
+    const Student = getStudentModel(collegeConn)
+
+    const report = await Report.find({ _id : reportId }).populate({path : "studentId", select : "studentName rollNo mobileNo avatar"})
+
+    console.log(report);
+    
+
+    // const student = await Student.findById(report.studentId)
+    // .select("studentName rollNo mobileNo avatar")
+
+    // console.log(student);
+    
+
+    res.status(200).json(
+        new ApiResponse(200, report, "Reports fetched successfully")
+    );
+    
+
+})
 /* =========================
 ADMIN REPORT LIST (FOR INDEX)
 ========================= */
@@ -112,7 +156,8 @@ ADMIN REPORT LIST (FOR INDEX)
 export const getAllReports = asyncHandler(async (req, res) => {
 
     const { collegeCode } = req.user;
-    const { range = "daily" } = req.query;
+    
+    const { range = "daily" } = req.params;
 
     // 1️⃣ Decide start date
     const now = new Date();
@@ -148,16 +193,16 @@ export const getAllReports = asyncHandler(async (req, res) => {
 
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
-    getStudentModel(collegeConn);
+    const Student = getStudentModel(collegeConn);
     
     const reports = await Report.find({
         createdAt: { $gte: startDate }
     })
     .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "studentName rollNo mobileNo" })
+    .populate({ path: "studentId", select: "studentName rollNo mobileNo avatar" })
 
     res.status(200).json(
-        new ApiResponse(200, reports, "All reports fetched")
+        new ApiResponse(200, {reports, collegeCode}, "All reports fetched")
     );
 });
 

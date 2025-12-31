@@ -50,11 +50,42 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
     const Complaint = getReportModel(collegeConn);
     const Student = getStudentModel(collegeConn);
 
+
+
+
     // 📚 Library Issued and Returned Count
-    const librarySuccessTransCount = await LibraryTransaction.countDocuments({
+    const libraryTransactions = await LibraryTransaction.find({
         transactionStatus: { $in: ["issued", "returned"] },
         createdAt: { $gte: startDate }
     });
+
+    const libraryIssueMap = {};
+    let totalLibraryIssued = 0;
+
+    libraryTransactions.forEach(tx => {
+        totalLibraryIssued++;
+
+        const created = new Date(tx.createdAt);
+        let label;
+
+        if (range === "daily") {
+            const hour = created.getHours().toString().padStart(2, "0");
+            label = `${hour}:00`;
+        } else {
+            const y = created.getFullYear();
+            const m = (created.getMonth() + 1).toString().padStart(2, "0");
+            const d = created.getDate().toString().padStart(2, "0");
+            label = `${y}-${m}-${d}`;
+        }
+
+        libraryIssueMap[label] = (libraryIssueMap[label] || 0) + 1;
+    });
+
+    const libraryIssueGraphData = Object.entries(libraryIssueMap)
+        .map(([label, count]) => ({ label, count }))
+        .sort((a, b) => a.label.localeCompare(b.label));
+
+
 
 
     // 🍽 Canteen Revenue
@@ -90,23 +121,37 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
         .map(([label, amount]) => ({ label, amount }))
         .sort((a, b) => a.label.localeCompare(b.label));
 
+
+
+
+
     // 🧾 Reports Summary
     const totalReports = await Complaint.countDocuments();
-    const resolvedReports = await Complaint.countDocuments({ status: "resolved" });
+
+    const resolvedReports = await Complaint.countDocuments({
+        status: { $in: ["resolved", "closed"] }
+    });
+
+ 
 
     // 👨‍🎓 Active Students
     const activeStudentsCount = await Student.countDocuments({ isActive: true });
+    const rating = await Complaint.find({ status: "closed" }).select("rating")
+
+
 
     res.status(200).json(
         new ApiResponse(
             200,
-            {
+            {   
                 range,
+                libraryIssueGraphData,
                 librarySuccessTransCount,
                 totalCanteenRevenue,
                 canteenRevenueGraphData,
                 totalReports,
                 resolvedReports,
+                rating,
                 activeStudentsCount
             },
             "Admin dashboard statistics fetched successfully"

@@ -25,6 +25,19 @@ export const registerStudent = asyncHandler(async (req, res) => {
     admissionYear,
   } = req.body;
 
+
+
+  if(!collegeCode ||
+     !studentName ||
+     !rollNo ||
+     !mobileNo ||
+     !email ||
+     !password ||
+     !department ||
+     !admissionYear
+  ) { return res.status(400).json({ message: "All fields are required" }); }
+
+
   // 2️⃣ Connect MASTER DB
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -35,7 +48,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     status: "active",
   });
   if (!college) {
-    throw new ApiError(404, "College not active or not found");
+    return res.status(404).json({ message: "College not active or not found" })
+
   }
 
   // 4️⃣ Connect COLLEGE DB
@@ -44,12 +58,24 @@ export const registerStudent = asyncHandler(async (req, res) => {
   // 5️⃣ Attach Student model to THIS DB
   const CollegeStudent = getStudentModel(collegeConn);
 
-  ////// verification of student with id
+  const existingStudent = await CollegeStudent.findOne({
+    $or: [
+      { email },
+      { mobileNo },
+      { rollNo }
+    ]
+  });
+
+  if (existingStudent) {
+    return res.status(409).json({ message: "student already exist with this Email or MobileNo. or RollNo" })
+  }
+
+
 
   // 6️⃣ Upload avatar (optional)
   const avatarLocalPath = req.file?.path?.replace(/\\/g, "/");
   if (!avatarLocalPath) {
-    throw new ApiError(400, "Avatar File is required!!(local)");
+    return res.status(400).json({ message: "Avatar File is required!!(local)" })
   }
   let avatarUrl = "";
   const avatarUploadResult = await uploadOnCloudinary(avatarLocalPath);
@@ -84,6 +110,8 @@ export const registerStudent = asyncHandler(async (req, res) => {
     secure: true,
     sameSite: "strict"
   };
+
+
 
   // 🔟 Send cookies + response
   return res
@@ -131,7 +159,8 @@ export const studentLogin = asyncHandler(async (req, res) => {
   });
 
   if (!student) {
-    throw new ApiError(401, "Invalid credentials");
+    return res.status(401).json({ message: "Invalid credentials" });
+
   }
 
   // 4️⃣ Verify password
@@ -205,11 +234,11 @@ export const currentStudent = asyncHandler(async (req, res) => {
 export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   // verifyJWT middleware should attach 'user' to 'req'
   console.log("hiiiiiiii");
-  
+
   const { collegeCode, userId } = req.body;
 
   console.log(collegeCode, userId);
-  
+
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -225,17 +254,17 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   );
 
 
-  
-  
+
+
   const libraryTransaction = await LibraryTransaction.find({
     studentId: userId,
     transactionStatus: "issued",
 
   })
-  .populate({path:"bookId", select : "title coverImage author category isbn"})
-  .select("-qrCode")
+    .populate({ path: "bookId", select: "title coverImage author category isbn" })
+    .select("-qrCode")
 
-  
+
   console.log(libraryTransaction);
   if (!student) {
     return res.status(404).json({ success: false, message: "User not found" });
@@ -246,13 +275,13 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
     .status(200)
     .json(
       {
-      student, 
-      libraryTransaction, 
-      message : "GOT STUDENT"
-    });
+        student,
+        libraryTransaction,
+        message: "GOT STUDENT"
+      });
 
 
-    
+
 });
 
 
@@ -279,11 +308,11 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   // Change 'data' to 'user' to match your React AuthContext expectations
 
 
-res.status(200).json({
-  students,
-  collegeCode,
-  message : "Student details fetched"
-})
+  res.status(200).json({
+    students,
+    collegeCode,
+    message: "Student details fetched"
+  })
 
 
 

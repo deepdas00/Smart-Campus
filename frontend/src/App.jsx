@@ -9,8 +9,8 @@ import Canteen from "./Page/Canteen";
 import Library from "./Page/Library";
 import CanteenOrders from "./Page/CanteenOrders";
 import OfficeAdminPanel from "./Page/OfficeAdminPanel";
-import { OfficeOverview } from "./Components/OfficeOverview";
-import { CampusIssues } from "./Page/CampusIssues";
+
+import  CampusIssues  from "./Page/CampusIssues";
 import { CanteenManager } from "./Page/CanteenManager";
 import { LibraryManager } from "./Page/LibraryManager";
 import Navbar from "./Components/Navbar/Navbar";
@@ -31,6 +31,7 @@ import FounderConsole from "./Page/FounderConsole.jsx";
 import ForgotPassword from "./Page/ForgotPassword.jsx";
 import ReportHistory from "./Page/ReportHistory.jsx";
 import CollegePolicy from "./Page/CollegePolicy.jsx";
+import OfficeOverview from "./Page/OfficeOverview.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper

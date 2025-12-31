@@ -21,6 +21,7 @@ const reportSchema = new mongoose.Schema(
     },
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
+      ref: "CollegeStudent",
       required: true
     },
 

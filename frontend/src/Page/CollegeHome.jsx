@@ -83,7 +83,7 @@ export default function SmartCollegeAdmin() {
     <div className="min-h-screen bg-white font-sans text-slate-900">
 
 
-      <div className="pt-14 max-w-[1400px] mx-auto px-6 pb-20">
+      <div className=" max-w-[1400px] mx-auto pb-5">
 
         {/* COMPACT HEADER */}
         <div className="flex justify-between items-center mb-6 bg-slate-900 p-6 rounded-[2rem] shadow-xl">

@@ -7,6 +7,7 @@ import {
   Search,
   LogOut,
   School ,
+  FileText ,
   Users,
 } from "lucide-react"; // Added Users icon
 import { useAuth } from "../context/AuthContext";
@@ -22,6 +23,7 @@ export default function Sidebar() {
     { path: "/admin/library", icon: <Library />, label: "Library Authority" },
     { path: "/admin/lost-found", icon: <Search />, label: "Lost & Found" },
     { path: "/admin/college-info", icon: <School  />, label: "College-info" },
+    { path: "/admin/college-policy", icon: <FileText   />, label: "College-Policy" },
   ];
 
   // Filter menu items based on role

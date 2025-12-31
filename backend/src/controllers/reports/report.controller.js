@@ -114,7 +114,12 @@ export const getMyReports = asyncHandler(async (req, res) => {
    STUDENT REPORT LIST
 ========================= */
 export const getMySingleReport = asyncHandler(async(req,res)=>{
-     const { collegeCode, reportId } = req.body || req.user;
+     const { collegeCode, reportId } = req.body;
+
+
+     console.log(reportId);
+     console.log(reportId, collegeCode);
+     
 
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
@@ -125,11 +130,23 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
-    const report = await Report.find({ reportId })
+    const Student = getStudentModel(collegeConn)
+
+    const report = await Report.find({ _id : reportId }).populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
+
+    console.log(report);
+    
+
+    // const student = await Student.findById(report.studentId)
+    // .select("studentName rollNo mobileNo avatar")
+
+    // console.log(student);
+    
 
     res.status(200).json(
         new ApiResponse(200, report, "Reports fetched successfully")
     );
+    
 
 })
 /* =========================
@@ -182,7 +199,7 @@ export const getAllReports = asyncHandler(async (req, res) => {
         createdAt: { $gte: startDate }
     })
     .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "studentName rollNo mobileNo avatar" })
+    .populate({ path: "studentId", select: "studentName rollNo mobileNo avatar department email admissionYear" })
 
     res.status(200).json(
         new ApiResponse(200, {reports, collegeCode}, "All reports fetched")

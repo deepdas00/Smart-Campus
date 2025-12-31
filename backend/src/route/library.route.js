@@ -15,11 +15,12 @@ import { fetchlibraryTransactionDetails,
   getAllLibraryTransactions, 
   getStudentLibraryHistory, 
   issueBook, 
+  // notifyReturnReminders, 
   orderBook, 
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
 import { library_createRazorpayOrder, library_verifyPayment } from "../controllers/library/libraryPayment.controller.js";
-import { setLibraryPolicy } from "../controllers/library/libraryPolicy.controller.js";
+import { fetchLibraryPolicy, setLibraryPolicy } from "../controllers/library/libraryPolicy.controller.js";
 
 const router = express.Router();
 
@@ -33,6 +34,14 @@ router.post(
   verifyJWT,
   authorizeRoles("admin","librarian"),
   setLibraryPolicy
+);
+
+/*get library Policy */
+router.get(
+  "/policy",
+  verifyJWT,
+  authorizeRoles("admin","librarian"),
+  fetchLibraryPolicy
 );
 
 /* ➕ Add new book (Librarian / Admin) */
@@ -151,6 +160,16 @@ router.get(
   authorizeRoles("librarian", "admin"),
   getAllLibraryTransactions
 );
+
+
+
+// notify-return-reminders for student 
+// router.get(
+//   "/notify-return-reminders",
+//   verifyJWT,
+//   authorizeRoles("librarian", "admin"),
+//   notifyReturnReminders
+// );
 
 
 export default router;

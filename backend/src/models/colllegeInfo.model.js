@@ -74,7 +74,16 @@ const collegeInfoSchema = new mongoose.Schema(
         required: true,
         trim: true
       }
-    ]
+    ], 
+    isAutonomous: {
+      type: Boolean,
+      default: false
+    },
+    universityName: {
+      type: String,
+      default: "",
+      trim: true
+    }
   },
   { timestamps: true }
 );

@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeInfoModel } from "../models/colllegeInfo.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
 export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
 
@@ -17,8 +18,13 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     contactNumber,
     principalName,
     departmentName,
-    description
+    description,
+    isAutonomous,
+    universityName
   } = req.body;
+
+  console.log(req.file);
+  
 
   if (!Array.isArray(departmentName) || departmentName.length === 0) {
     return res.status(400).json({message:"departmentName must be a non-empty array"});
@@ -47,6 +53,8 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     officialEmail,
     address,
     NAAC,
+    isAutonomous,
+    universityName,
     contactPersonName,
     contactNumber,
     principalName,

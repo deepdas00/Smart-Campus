@@ -14,7 +14,7 @@ import {
   Cell,
   BarChart,
   Area,
-  AreaChart ,
+  AreaChart,
   ReferenceLine,
 } from "recharts";
 import {
@@ -43,26 +43,22 @@ function OfficeIntelligence() {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
 
-
-
   const CustomMiniTooltip = ({ active, payload }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-slate-900 text-white px-3 py-2 rounded-xl shadow-2xl scale-90 border border-white/10">
-        <p className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
-          {payload[0].payload.label}
-        </p>
-        <p className="text-base font-black tracking-tight">
-          {payload[0].value} <span className="text-[8px] text-slate-500">BOOKS</span>
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
-
-
-
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-900 text-white px-3 py-2 rounded-xl shadow-2xl scale-90 border border-white/10">
+          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-tighter">
+            {payload[0].payload.label}
+          </p>
+          <p className="text-base font-black tracking-tight">
+            {payload[0].value}{" "}
+            <span className="text-[8px] text-slate-500">BOOKS</span>
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
 
   useEffect(() => {
     fetchDashboard();
@@ -94,23 +90,23 @@ function OfficeIntelligence() {
     const libData = stats.libraryIssueGraphData || [];
     const n = revData.length;
 
+    // Dynamic Library Metrics
+    const totalLibIssues = libData.reduce((acc, curr) => acc + curr.count, 0);
+    const avgIssues =
+      libData.length > 0 ? (totalLibIssues / libData.length).toFixed(1) : 0;
+    const maxPeak =
+      libData.length > 0 ? Math.max(...libData.map((d) => d.count)) : 0;
 
-  // Dynamic Library Metrics
-  const totalLibIssues = libData.reduce((acc, curr) => acc + curr.count, 0);
-  const avgIssues = libData.length > 0 ? (totalLibIssues / libData.length).toFixed(1) : 0;
-  const maxPeak = libData.length > 0 ? Math.max(...libData.map(d => d.count)) : 0;
-  
-  // Dynamic Growth (Comparing last two periods)
-  let growth = 0;
-  if (libData.length >= 2) {
-    const current = libData[libData.length - 1].count;
-    const previous = libData[libData.length - 2].count;
-    growth = previous !== 0 ? ((current - previous) / previous * 100).toFixed(1) : 0;
-  }
-
-
-
-
+    // Dynamic Growth (Comparing last two periods)
+    let growth = 0;
+    if (libData.length >= 2) {
+      const current = libData[libData.length - 1].count;
+      const previous = libData[libData.length - 2].count;
+      growth =
+        previous !== 0
+          ? (((current - previous) / previous) * 100).toFixed(1)
+          : 0;
+    }
 
     // --- 1. REVENUE REGRESSION (Keep as is) ---
     let sumX = 0,
@@ -130,7 +126,6 @@ function OfficeIntelligence() {
 
     // --- 2. LIBRARY ANALYTICS ---
 
-
     // --- 3. SATISFACTION & RATES (Keep as is) ---
     const validRatings =
       stats.rating?.filter((r) => r.rating).map((r) => r.rating) || [];
@@ -149,9 +144,9 @@ function OfficeIntelligence() {
       revData,
       libData, // Pass library data to UI
       projectedNext,
-    avgIssues,
-    maxPeak,
-    growth,
+      avgIssues,
+      maxPeak,
+      growth,
       satisfactionScore,
       resolutionRate,
       totalLibIssues,
@@ -385,109 +380,149 @@ function OfficeIntelligence() {
           </div>
         </div>
 
-
         {/*Library graph hart */}
 
-       {/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
-{/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
-{/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
-{/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
-{/* --- ADVANCED LIBRARY INTELLIGENCE CORE --- */}
+        {/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
+        {/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
+        {/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
+        {/* --- LIBRARY CIRCULATION (LIGHT MODE) --- */}
+        {/* --- ADVANCED LIBRARY INTELLIGENCE CORE --- */}
 
-{/* --- COMPACT KINETIC LIBRARY CAPSULE --- */}
-{/* --- COMPACT INTELLIGENCE HUB --- */}
-{/* --- FULLY DYNAMIC INTELLIGENCE HUB --- */}
-<div className="lg:col-span-4 bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden relative group h-full flex flex-col">
-  
-  {/* Header: Dynamic Status */}
-  <div className="relative z-10 flex justify-between items-start mb-6">
-    <div className="flex gap-3">
-      <div className="relative">
-        <div className="p-2.5 bg-slate-900 text-white rounded-2xl z-10 relative group-hover:bg-indigo-600 transition-colors">
-          <Zap size={18} className={intelligence.growth > 0 ? "animate-pulse" : ""} />
-        </div>
-        <div className={`absolute inset-0 blur-lg opacity-0 group-hover:opacity-40 transition-opacity ${intelligence.growth > 0 ? "bg-emerald-400" : "bg-indigo-400"}`} />
-      </div>
-      <div>
-        <h3 className="text-sm font-black text-slate-900 tracking-tight">Library Hub</h3>
-        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-          {range} Pulse
-        </p>
-      </div>
-    </div>
-    <div className={`px-3 py-1 rounded-full border text-[10px] font-black ${intelligence.growth > 0 ? "bg-emerald-50 border-emerald-100 text-emerald-600" : "bg-indigo-50 border-indigo-100 text-indigo-600"}`}>
-      {intelligence.growth > 0 ? "TRENDING UP" : "STABLE"}
-    </div>
-  </div>
-
-  {/* Main Content: Dynamic Pillar Scaling */}
-  <div className="flex-1 flex gap-4 items-end mb-6">
-    {/* Left Side: The Pillar Chart (Scaled to Max Peak) */}
-    <div className="flex-1 h-32 flex items-end gap-1.5 px-2">
-      {intelligence.libData.map((item, i) => {
-        // Calculate dynamic height percentage based on max value in set
-        const heightPercent = intelligence.maxPeak > 0 
-          ? (item.count / intelligence.maxPeak) * 100 
-          : 0;
-          
-        return (
-          <div 
-            key={i}
-            className="flex-1 bg-slate-100 rounded-t-lg relative group/pillar transition-all duration-700 ease-out"
-            style={{ height: `${heightPercent}%` }}
-          >
-            <div className="absolute inset-0 bg-indigo-500 opacity-0 group-hover/pillar:opacity-100 transition-all rounded-t-lg shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
-            
-            {/* Dynamic Tooltip */}
-            <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover/pillar:opacity-100 transition-opacity whitespace-nowrap z-30">
-              {item.label}: {item.count}
+        {/* --- COMPACT KINETIC LIBRARY CAPSULE --- */}
+        {/* --- COMPACT INTELLIGENCE HUB --- */}
+        {/* --- FULLY DYNAMIC INTELLIGENCE HUB --- */}
+        <div className="lg:col-span-4 bg-white border border-slate-200 rounded-[2.5rem] p-6 shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden relative group h-full flex flex-col">
+          {/* Header: Dynamic Status */}
+          <div className="relative z-10 flex justify-between items-start mb-6">
+            <div className="flex gap-3">
+              <div className="relative">
+                <div className="p-2.5 bg-slate-900 text-white rounded-2xl z-10 relative group-hover:bg-indigo-600 transition-colors">
+                  <Zap
+                    size={18}
+                    className={intelligence.growth > 0 ? "animate-pulse" : ""}
+                  />
+                </div>
+                <div
+                  className={`absolute inset-0 blur-lg opacity-0 group-hover:opacity-40 transition-opacity ${
+                    intelligence.growth > 0 ? "bg-emerald-400" : "bg-indigo-400"
+                  }`}
+                />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-slate-900 tracking-tight">
+                  Library Hub
+                </h3>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  {range} Pulse
+                </p>
+              </div>
+            </div>
+            <div
+              className={`px-3 py-1 rounded-full border text-[10px] font-black ${
+                intelligence.growth > 0
+                  ? "bg-emerald-50 border-emerald-100 text-emerald-600"
+                  : "bg-indigo-50 border-indigo-100 text-indigo-600"
+              }`}
+            >
+              {intelligence.growth > 0 ? "TRENDING UP" : "STABLE"}
             </div>
           </div>
-        );
-      })}
-    </div>
 
-    {/* Right Side: Primary Dynamic Stats */}
-    <div className="flex flex-col items-end">
-      <p className="text-[10px] font-black text-slate-400 uppercase">Total Issues</p>
-      <p className="text-5xl font-black text-slate-900 tracking-tighter leading-none">
-        {intelligence.totalLibIssues}
-      </p>
-      <div className={`mt-2 flex items-center gap-1 ${intelligence.growth >= 0 ? "text-emerald-500" : "text-rose-500"}`}>
-        {intelligence.growth >= 0 ? <TrendingUp size={12} strokeWidth={3}/> : <TrendingDown size={12} strokeWidth={3}/>}
-        <span className="text-[10px] font-black">{Math.abs(intelligence.growth)}%</span>
-      </div>
-    </div>
-  </div>
+          {/* Main Content: Dynamic Pillar Scaling */}
+          <div className="flex-1 flex gap-4 items-end mb-6">
+            {/* Left Side: The Pillar Chart (Scaled to Max Peak) */}
+            <div className="flex-1 h-32 flex items-end gap-1.5 px-2">
+              {intelligence.libData.map((item, i) => {
+                // Calculate dynamic height percentage based on max value in set
+                const heightPercent =
+                  intelligence.maxPeak > 0
+                    ? (item.count / intelligence.maxPeak) * 100
+                    : 0;
 
-  {/* Footer: Multi-Metric Matrix */}
-  <div className="grid grid-cols-3 gap-2 relative z-10">
-    <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl text-center">
-      <p className="text-[8px] font-black text-slate-400 uppercase">Average</p>
-      <p className="text-xs font-black text-slate-800">{intelligence.avgIssues}</p>
-    </div>
-    <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl text-center">
-      <p className="text-[8px] font-black text-slate-400 uppercase">Peak</p>
-      <p className="text-xs font-black text-slate-800">{intelligence.maxPeak}</p>
-    </div>
-    <div className={`p-2 rounded-xl text-center shadow-lg transition-colors ${intelligence.growth > 0 ? "bg-indigo-600 shadow-indigo-200" : "bg-slate-800 shadow-slate-200"}`}>
-      <p className="text-[8px] font-black text-white/50 uppercase">Velocity</p>
-      <p className="text-xs font-black text-white">
-        {intelligence.libData.length} <span className="text-[8px] opacity-60">PTS</span>
-      </p>
-    </div>
-  </div>
+                return (
+                  <div
+                    key={i}
+                    className="flex-1 bg-slate-100 rounded-t-lg relative group/pillar transition-all duration-700 ease-out"
+                    style={{ height: `${heightPercent}%` }}
+                  >
+                    <div className="absolute inset-0 bg-indigo-500 opacity-0 group-hover/pillar:opacity-100 transition-all rounded-t-lg shadow-[0_0_15px_rgba(99,102,241,0.5)]" />
 
-  {/* Dynamic Watermark Decoration */}
-  <div className="absolute -bottom-10 -left-10 text-slate-50 group-hover:text-indigo-50/50 transition-colors duration-500 -rotate-12">
-    <BookOpen size={140} />
-  </div>
-</div>
+                    {/* Dynamic Tooltip */}
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] font-bold px-2 py-1 rounded opacity-0 group-hover/pillar:opacity-100 transition-opacity whitespace-nowrap z-30">
+                      {item.label}: {item.count}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
 
+            {/* Right Side: Primary Dynamic Stats */}
+            <div className="flex flex-col items-end">
+              <p className="text-[10px] font-black text-slate-400 uppercase">
+                Total Issues
+              </p>
+              <p className="text-5xl font-black text-slate-900 tracking-tighter leading-none">
+                {intelligence.totalLibIssues}
+              </p>
+              <div
+                className={`mt-2 flex items-center gap-1 ${
+                  intelligence.growth >= 0
+                    ? "text-emerald-500"
+                    : "text-rose-500"
+                }`}
+              >
+                {intelligence.growth >= 0 ? (
+                  <TrendingUp size={12} strokeWidth={3} />
+                ) : (
+                  <TrendingDown size={12} strokeWidth={3} />
+                )}
+                <span className="text-[10px] font-black">
+                  {Math.abs(intelligence.growth)}%
+                </span>
+              </div>
+            </div>
+          </div>
 
+          {/* Footer: Multi-Metric Matrix */}
+          <div className="grid grid-cols-3 gap-2 relative z-10">
+            <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl text-center">
+              <p className="text-[8px] font-black text-slate-400 uppercase">
+                Average
+              </p>
+              <p className="text-xs font-black text-slate-800">
+                {intelligence.avgIssues}
+              </p>
+            </div>
+            <div className="bg-slate-50 border border-slate-100 p-2 rounded-xl text-center">
+              <p className="text-[8px] font-black text-slate-400 uppercase">
+                Peak
+              </p>
+              <p className="text-xs font-black text-slate-800">
+                {intelligence.maxPeak}
+              </p>
+            </div>
+            <div
+              className={`p-2 rounded-xl text-center shadow-lg transition-colors ${
+                intelligence.growth > 0
+                  ? "bg-indigo-600 shadow-indigo-200"
+                  : "bg-slate-800 shadow-slate-200"
+              }`}
+            >
+              <p className="text-[8px] font-black text-white/50 uppercase">
+                Velocity
+              </p>
+              <p className="text-xs font-black text-white">
+                {intelligence.libData.length}{" "}
+                <span className="text-[8px] opacity-60">PTS</span>
+              </p>
+            </div>
+          </div>
 
-
-
+          {/* Dynamic Watermark Decoration */}
+          <div className="absolute -bottom-10 -left-10 text-slate-50 group-hover:text-indigo-50/50 transition-colors duration-500 -rotate-12">
+            <BookOpen size={140} />
+          </div>
+        </div>
 
         {/* --- DEEP INFERENCE GRID --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

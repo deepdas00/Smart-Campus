@@ -140,7 +140,7 @@ router.post(
   "/notifications",
   verifyJWT,
   authorizeRoles("admin"),
-  upload.single("pic"),
+  upload.single("image"),
   createNotification
 );
 
@@ -156,7 +156,7 @@ router.patch(
   "/notifications/:notificationId",
   verifyJWT,
   authorizeRoles("admin"),
-  upload.single("pic"),
+  upload.single("image"),
   updateNotification
 );
 

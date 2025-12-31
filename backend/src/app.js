@@ -143,11 +143,12 @@ GET     /api/v1/library/transactions/:transactionId    # Fetch single transactio
 GET     /api/v1/library/transactions                   # Get all transactions (librarian, admin)
 
 # ---------- RETURN & PAYMENT ----------
-PATCH   /api/v1/library/return/pay/:transactionId      # Create Razorpay order for fine (student) ////////////////////////////////////////////
-POST    /api/v1/library/return/verify                  # Verify fine payment (student)////////////////////////////////////////////////////////
+PATCH   /api/v1/library/return/pay/:transactionId      # Create Razorpay order for fine (student) 
+POST    /api/v1/library/return/verify                  # Verify fine payment (student)
 
-POST    /api/v1/library/return/finalize                # Finalize return via QR scan (librarian, admin)///////////////////////////////////////
-POST    /api/v1/library/return/                        #  return by clicking on return btn (librarian, admin)///////////////////////////////////////
+POST    /api/v1/library/return/finalize                # Finalize return via QR scan (librarian, admin)
+POST    /api/v1/library/return/                        #  return by clicking on return btn (librarian, admin)
+GET    /api/v1/library/notify-return-reminders        #  return reminder for student (librarian, admin)///////////////////////////////////////
 
 # ---------- STUDENT HISTORY ----------
 GET     /api/v1/library/my/history                     # Get current student library history
@@ -161,8 +162,8 @@ app.use("/api/v1/canteen", canteenRouter);
 
 # ---------- POLICY ----------
 POST    /api/v1/canteen/policy                 # Set / Update canteen policy (admin)
-GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status///////////////////////////////////////////////////////////
-POST    /api/v1/canteen/isActive               # To set Canteen Status ////////////////////////////////////////////////////////////////
+GET    /api/v1/canteen/canteenStatus           # To fetch Canteen Status
+POST    /api/v1/canteen/isActive               # To set Canteen Status 
 GET     /api/v1/canteen/fetchpolicy            # To fetch policy details
 
 # ---------- FOOD ----------

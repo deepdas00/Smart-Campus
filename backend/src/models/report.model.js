@@ -35,7 +35,7 @@ const reportSchema = new mongoose.Schema(
       type: String,
       required: true
     },
- 
+
     category: {
       type: String,
       enum: ["researchandlab", "housinganddorms", "groundandpublic"],

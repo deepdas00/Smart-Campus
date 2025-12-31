@@ -123,8 +123,6 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
 
 
 
-
-
     // 🧾 Reports Summary
     const totalReports = await Complaint.countDocuments();
 
@@ -146,7 +144,6 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
             {   
                 range,
                 libraryIssueGraphData,
-                librarySuccessTransCount,
                 totalCanteenRevenue,
                 canteenRevenueGraphData,
                 totalReports,

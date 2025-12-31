@@ -9,6 +9,8 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getStudentModel } from "../../models/collegeStudent.model.js";
+import { sendMail } from "../../utils/sendMail.js";
+import { buildBookReturnReminderTemplate } from "../../template/buildBookReturnReminderTemplate.js";
 
 export const orderBook = asyncHandler(async (req, res) => {
   const { bookId } = req.body;
@@ -142,35 +144,6 @@ export const issueBook = asyncHandler(async (req, res) => {
     );
 });
 
-//studetnt click on returnorder
-
-/*export const prepareReturn = asyncHandler(async (req, res) => {
-
-  const { transactionId } = req.body;
-  const { collegeCode, userId } = req.user;
-
-  const masterConn = connectMasterDB();
-  const College = getCollegeModel(masterConn);
-  const college = await College.findOne({ collegeCode, status: "active" });
-  if (!college) throw new ApiError(404, "College not found");
-
-  const collegeConn = getCollegeDB(college.dbName);
-
-  const Transaction = getLibraryTransactionModel(collegeConn);
-  const transaction = await Transaction.findById(transactionId);
-  if (!transaction) throw new ApiError(404, "Transaction not found");
-
-  if (transaction.studentId.toString() !== userId.toString())
-    throw new ApiError(403, "Unauthorized");
-
-  if (transaction.transactionStatus !== "issued")
-    throw new ApiError(400, "Invalid return state");
-
-  res.status(200).json(
-    new ApiResponse(200, transaction, "transaction fetched(if paymentStatus unpaid then call payment api")
-  );
-});*/
-
 // mam scan the qr
 export const finalizeReturn = asyncHandler(async (req, res) => {
   const { transactionId } = req.params;
@@ -202,8 +175,8 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "Order is not issued" })
   }
 
- if (transaction.transactionStatus === "returned")
-  return res.status(400).json({message: "Book Already returned"})
+  if (transaction.transactionStatus === "returned")
+    return res.status(400).json({ message: "Book Already returned" })
 
 
   const policy = await Policy.findOne();
@@ -212,17 +185,22 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   let fine = 0;
 
   if (transaction.paymentStatus === "none") {
-    if (today > transaction.dueDate) {
+
+
+    const today = new Date();
+
+    const graceDeadline = new Date(transaction.dueDate);
+    graceDeadline.setDate(graceDeadline.getDate() + 1);  // ⏳ +1 day grace
+
+    if (today > graceDeadline) {
       const overdueDays = Math.ceil(
-        (today - transaction.dueDate) / (1000 * 60 * 60 * 24)
+        (today - graceDeadline) / (1000 * 60 * 60 * 24)
       );
       fine = overdueDays * policy.finePerDay;
       if (fine > policy.maxFine) {
         fine = policy.maxFine;
       }
     }
-
-    fine = 50;
 
     transaction.fineAmount = fine;
 
@@ -234,7 +212,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
 
 
   if (transaction.paymentStatus === "pending")
-    return res.status(400).json({message: "!!OVERDUE: Pay the fine first!!"})
+    return res.status(400).json({ message: "!!OVERDUE: Pay the fine first!!" })
 
 
   res
@@ -249,7 +227,6 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
 });
 
 //mam click on return
-
 export const returnBook = asyncHandler(async (req, res) => {
   const { transactionId } = req.body;
   const { collegeCode } = req.user;
@@ -376,4 +353,64 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
     .json(
       new ApiResponse(200, transactions, "All library transactions fetched")
     );
+});
+
+
+export const notifyReturnReminders = asyncHandler(async (req, res) => {
+
+  const { collegeCode } = req.user;
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) throw new ApiError(404, "College not found");
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const LibraryTransaction = getLibraryTransactionModel(collegeConn);
+  const Student = getStudentModel(collegeConn);
+  const Book = getLibraryBookModel(collegeConn)
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const issuedBooks = await LibraryTransaction.find({
+    transactionStatus: "issued"
+  });
+
+  let notifiedCount = 0;
+
+  for (const tx of issuedBooks) {
+
+    const returnDate = new Date(tx.dueDate);
+    returnDate.setHours(0, 0, 0, 0);
+
+    const book = await Book.findById(tx.bookId)
+    const bookTitle = book.title
+
+
+    const diffDays = Math.ceil((returnDate - today) / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 1 || diffDays === 2) {
+
+      const student = await Student.findById(tx.studentId);
+      console.log(bookTitle);
+
+      if (student?.email) {
+        await sendMail({
+          to: student.email,
+          subject: "Smart Campus - Book Return Reminder",
+          html: buildBookReturnReminderTemplate(
+            student.studentName,
+            book.title,
+            diffDays,
+            returnDate.toDateString()
+          )
+        });
+        notifiedCount++;
+      }
+    }
+  }
+
+  res.status(200).json(
+    new ApiResponse(200, { notifiedCount }, "Return reminders sent")
+  );
 });

@@ -285,7 +285,6 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
 });
 
 
-
 export const allStudentFetch = asyncHandler(async (req, res) => {
   // verifyJWT middleware should attach 'user' to 'req'
   const { collegeCode } = req.user;
@@ -318,3 +317,94 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
 
   // res.status(200).json(new ApiResponse(200, students,collegeCode, "GOT STUDENT"));
 });
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                 BULK REGISTRATION OF STUDENT
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/*-
+const generateStudentPassword = (collegeCode, rollNo) => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const random =
+    chars[Math.floor(Math.random() * 26)] +
+    chars[Math.floor(Math.random() * 26)] +
+    chars[Math.floor(Math.random() * 26)] +
+    Math.floor(10 + Math.random() * 90);
+
+  return `${collegeCode}_${rollNo}_${random}`;
+};
+
+export const bulkRegisterStudents = asyncHandler(async (req, res) => {
+
+  const { students } = req.body;
+  if (!Array.isArray(students) || students.length === 0) {
+    throw new ApiError(400, "Students array required");
+  }
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({
+    collegeCode: students[0].collegeCode,
+    status: "active"
+  });
+  if (!college) throw new ApiError(404, "College not active");
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const CollegeStudent = getStudentModel(collegeConn);
+
+  const results = {
+    inserted: 0,
+    failed: 0,
+    failures: []
+  };
+
+  const newStudents = [];
+
+  for (const s of students) {
+
+    const exists = await CollegeStudent.findOne({
+      $or: [{ email: s.email }, { rollNo: s.rollNo }, { mobileNo: s.mobileNo }]
+    });
+
+    if (exists) {
+      results.failed++;
+      results.failures.push({ rollNo: s.rollNo, reason: "Duplicate record" });
+      continue;
+    }
+
+    const plainPassword = generateStudentPassword(s.collegeCode, s.rollNo);
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    newStudents.push({
+      ...s,
+      password: hashedPassword,
+      isActive: true
+    });
+
+    // Email sending (async background safe)
+    sendStudentCredentialsEmail(s.email, s.rollNo, plainPassword);
+    results.inserted++;
+  }
+
+  if (newStudents.length > 0) {
+    await CollegeStudent.insertMany(newStudents);
+  }
+
+  res.status(201).json(
+    new ApiResponse(201, results, "Bulk student registration completed")
+  );
+});
+////route
+router.post(
+  "/students/bulk-register",
+  verifyJWT,
+  authorizeRoles("admin"),
+  bulkRegisterStudents
+);
+
+*/

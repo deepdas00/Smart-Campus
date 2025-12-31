@@ -15,6 +15,7 @@ import { fetchlibraryTransactionDetails,
   getAllLibraryTransactions, 
   getStudentLibraryHistory, 
   issueBook, 
+  notifyReturnReminders, 
   orderBook, 
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
@@ -150,6 +151,16 @@ router.get(
   verifyJWT,
   authorizeRoles("librarian", "admin"),
   getAllLibraryTransactions
+);
+
+
+
+// notify-return-reminders for student 
+router.get(
+  "/notify-return-reminders",
+  verifyJWT,
+  authorizeRoles("librarian", "admin"),
+  notifyReturnReminders
 );
 
 

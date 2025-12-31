@@ -809,7 +809,7 @@ const feedbackRate = resolvedCount > 0
                         width:
                           selectedReport.status === "submitted"
                             ? "21%" : selectedReport.status === "viewed"
-                            ? "37%"
+                            ? "31%"
                             : selectedReport.status === "in_progress" ||
                               selectedReport.status === "processing"
                             ? "52%"

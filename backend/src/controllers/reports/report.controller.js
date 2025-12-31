@@ -98,7 +98,10 @@ export const getMyReports = asyncHandler(async (req, res) => {
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
-    const reports = await Report.find({ studentId: userId }).sort({ createdAt: -1 });
+    const Student = getStudentModel(collegeConn)
+    const reports = await Report.find({ studentId: userId })
+    .populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
+    .sort({ createdAt: -1 });
 
     res.status(200).json(
         new ApiResponse(200, reports, "Reports fetched successfully")
@@ -136,6 +139,7 @@ ADMIN REPORT LIST (FOR INDEX)
 export const getAllReports = asyncHandler(async (req, res) => {
 
     const { collegeCode } = req.user;
+    
     const { range = "daily" } = req.params;
 
     // 1️⃣ Decide start date
@@ -181,7 +185,7 @@ export const getAllReports = asyncHandler(async (req, res) => {
     .populate({ path: "studentId", select: "studentName rollNo mobileNo avatar" })
 
     res.status(200).json(
-        new ApiResponse(200, reports, "All reports fetched")
+        new ApiResponse(200, {reports, collegeCode}, "All reports fetched")
     );
 });
 

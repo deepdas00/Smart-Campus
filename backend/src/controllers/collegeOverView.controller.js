@@ -132,18 +132,21 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
         status: { $in: ["resolved", "closed"] }
     });
 
+ 
 
     // 👨‍🎓 Active Students
     const activeStudentsCount = await Student.countDocuments({ isActive: true });
     const rating = await Complaint.find({ status: "closed" }).select("rating")
 
 
+
     res.status(200).json(
         new ApiResponse(
             200,
-            {
+            {   
                 range,
                 libraryIssueGraphData,
+                librarySuccessTransCount,
                 totalCanteenRevenue,
                 canteenRevenueGraphData,
                 totalReports,

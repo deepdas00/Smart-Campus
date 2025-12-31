@@ -56,6 +56,7 @@ const collegeStudentSchema = new Schema(
       type: String,
       default: null
     },
+
     resetPasswordOTPExpiry: {
       type: Date,
       default: null

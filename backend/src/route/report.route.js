@@ -23,7 +23,7 @@ router.post(
   createReport
 );
 
-router.post(
+router.get(
   "/getMyReports",
   verifyJWT,
   authorizeRoles("student","admin"),

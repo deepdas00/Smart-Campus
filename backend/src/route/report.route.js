@@ -8,7 +8,8 @@ import {
   getMyReports,
   getAllReports,
   updateReportStatus,
-  submitRating
+  submitRating,
+  getMySingleReport
 } from "../controllers/reports/report.controller.js";
 
 const router = express.Router();
@@ -22,11 +23,19 @@ router.post(
   createReport
 );
 
-router.get(
+router.post(
   "/getMyReports",
   verifyJWT,
   authorizeRoles("student","admin"),
   getMyReports
+);
+
+
+router.post(
+  "/getMySingleReports",
+  verifyJWT,
+  authorizeRoles("student","admin"),
+  getMySingleReport
 );
 
 router.post(

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import jwt from "jsonwebtoken"
 
+import { globalErrorHandler } from "./middlewares/error.multer.middleware.js";
 
 const app = express();
 
@@ -194,7 +195,8 @@ app.use("/api/v1/reports", reportRouter);
 
 # ---------- STUDENT ----------
 POST    /api/v1/reports/createreport            # Create a new report with image (student)
-GET     /api/v1/reports/getMyReports            # Get all reports created by logged-in student
+POST     /api/v1/reports/getMyReports            # Get all reports created by logged-in student
+POST     /api/v1/reports/getMySingleReports            # Get one single report created of a student
 POST    /api/v1/reports/:reportId/rate          # Submit rating after report resolved (student)
 
 # ---------- ADMIN ----------
@@ -208,6 +210,6 @@ PATCH   /api/v1/reports/:reportId/status        # Update report status (admin)
 
 
 
-
+app.use(globalErrorHandler);
 
 export { app }

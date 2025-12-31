@@ -42,13 +42,15 @@ export const forgotPasswordSendOTP = asyncHandler(async (req, res) => {
 
     await user.save({ validateBeforeSave: false });
 
-    let userEmail,userName;
+    let userEmail,userName, mobileNumber;
     if (user.role === "student") {
         userEmail = user.email;
         userName = user.studentName;
+        mobileNumber = user.mobileNo
     } else if (["admin", "canteen", "librarian"].includes(user.role)) {
         userEmail = college.officialEmail;
         userName = college.collegeName;
+        mobileNumber = college.contactNumber;
     }
 
     // 7️⃣ Send credentials email
@@ -57,6 +59,8 @@ export const forgotPasswordSendOTP = asyncHandler(async (req, res) => {
         subject: "Smart-Campus System - Login Credentials",
         html: buildForgotPasswordOtpTemplate(userName, otp),
     });
+
+
 
     res.status(200).json(new ApiResponse(200, null, "OTP sent successfully"));
 });

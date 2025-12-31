@@ -309,6 +309,20 @@ onClick={() => setActiveFeature(idx)}
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <section id='Founder-section'>
 
 </section>

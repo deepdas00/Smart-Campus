@@ -7,7 +7,7 @@ import {
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar/Navbar";
 
-export default function ProfessionalAdminPortal() {
+export function CollegePolicy() {
   const [activeTab, setActiveTab] = useState('library');
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
@@ -26,9 +26,9 @@ export default function ProfessionalAdminPortal() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans text-slate-900">
-      <Navbar />
 
-      <main className="flex-grow w-full max-w-[1800px] mx-auto px-6 py-10">
+
+      <main className="flex-grow w-full max-w-[1800px] mx-auto ">
         
         {/* --- MINIMAL HEADER --- */}
         <div className="flex justify-between items-end border-b border-slate-200 pb-6 mb-8">
@@ -184,7 +184,7 @@ export default function ProfessionalAdminPortal() {
         </div>
       </main>
       
-      <Footer />
+
     </div>
   );
 }

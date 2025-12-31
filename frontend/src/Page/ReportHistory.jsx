@@ -791,7 +791,8 @@ const feedbackRate = resolvedCount > 0
                     {/* Dynamic Progress Line */}
                     <div
                       className={`absolute top-4 left-0 h-0.5 -z-0 transition-all duration-1000 ${
-                        selectedReport.status === "submitted"
+                        selectedReport.status === "submitted" ||
+                            selectedReport.status === "viewed"
                           ? "bg-indigo-500"
                           : selectedReport.status === "in_progress" ||
                             selectedReport.status === "processing"
@@ -807,7 +808,8 @@ const feedbackRate = resolvedCount > 0
                       style={{
                         width:
                           selectedReport.status === "submitted"
-                            ? "21%"
+                            ? "21%" : selectedReport.status === "viewed"
+                            ? "37%"
                             : selectedReport.status === "in_progress" ||
                               selectedReport.status === "processing"
                             ? "52%"

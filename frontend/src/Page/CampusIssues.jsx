@@ -101,8 +101,11 @@ export default function CampusIssues() {
 const handleSelectReport = async (r) => {
   try {
 
+    console.log(r._id);
+    
+
 const res = await axios.post(
-  `${API_URL}/api/v1/reports/getMyReports`,
+  `${API_URL}/api/v1/reports/getMySingleReports`,
   {
     reportId: r._id,
     collegeCode: collegeCode,
@@ -113,7 +116,7 @@ const res = await axios.post(
 );
 
     console.log("API response:", res.data);
-    setSelectedReport(r);
+    setSelectedReport(res.data.data);
 
   } catch (error) {
     console.error(

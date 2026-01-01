@@ -165,7 +165,7 @@ function OfficeIntelligence() {
   if (loading || !stats) return <LoadingSpinner />;
 
   return (
-    <div className="min-h-screen bg-[#ffffff] text-slate-900 lg:p-10 font-sans">
+    <div className="min-h-screen bg-[#ffffff] text-slate-900 lg:p-10 lg:pt-2 pt-2 font-sans">
       <div className="max-w-[1500px] mx-auto space-y-8">
         {/* --- DYNAMIC HEADER --- */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">

@@ -13,6 +13,7 @@ import {
   X
 } from "lucide-react";
 
+import { Linkedin, Twitter, Instagram, Github, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { Link } from "react-router-dom";
 import Footer from '../Components/Footer';
 import Navbar from '../Components/Navbar/Navbar';
@@ -25,25 +26,25 @@ export default function CampusReporterHome() {
 
   const { user } = useAuth();
 
-  
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeFeature, setActiveFeature] = useState(0);
 
 
   const statusStyles = {
-  green: {
-    dot: "bg-green-500",
-    badge: "bg-green-100 text-green-700",
-  },
-  yellow: {
-    dot: "bg-yellow-500",
-    badge: "bg-yellow-100 text-yellow-700",
-  },
-  blue: {
-    dot: "bg-blue-500",
-    badge: "bg-blue-100 text-blue-700",
-  },
-};
+    green: {
+      dot: "bg-green-500",
+      badge: "bg-green-100 text-green-700",
+    },
+    yellow: {
+      dot: "bg-yellow-500",
+      badge: "bg-yellow-100 text-yellow-700",
+    },
+    blue: {
+      dot: "bg-blue-500",
+      badge: "bg-blue-100 text-blue-700",
+    },
+  };
 
 
 
@@ -86,10 +87,37 @@ export default function CampusReporterHome() {
     { name: "Other", color: "bg-gray-500", icon: "📋" }
   ];
 
+  const founders = [
+    {
+      name: "Deep Das",
+      role: "Chief Technology Officer",
+      bio: "Architecting the core engine and infrastructure of our ecosystem.",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      side: "left"
+    },
+    {
+      name: "Sangita Ghosh",
+      role: "Chief Product Officer",
+      bio: "Defining the human-centric product vision and high-fidelity user experiences.",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      featured: true
+    },
+    {
+      name: "Trideep Ray",
+      role: "Chief Operations Officer",
+      bio: "Directing strategic institutional growth and operational excellence.",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      side: "right"
+    }
+  ];
+
   return (
     <div id='home' className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Navigation */}
-      <Navbar/>
+      <Navbar />
 
       {/* Hero Section */}
       <section className={`${user ? "pt-15" : "p-35"} px-4`}>
@@ -100,15 +128,15 @@ export default function CampusReporterHome() {
                 <Zap className="w-4 h-4" />
                 <span>Powered by Google AI </span>
               </div>
-              
-             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
 
                 Report Campus Issues{' '}
                 <span className="bg-blue-600 bg-clip-text text-transparent">
                   Instantly
                 </span>
               </h1>
-              
+
               <p className="text-xl text-gray-600 mb-8">
                 An AI-powered platform to report, track, and resolve campus infrastructure issues efficiently. Make your campus safer and better.
               </p>
@@ -136,21 +164,21 @@ export default function CampusReporterHome() {
             </div>
 
             <div className="relative">
-             <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-5 sm:p-8 shadow-2xl">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-5 sm:p-8 shadow-2xl">
 
                 <div className="bg-white rounded-2xl p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-gray-700">Recent Reports</span>
                     <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full">Live</span>
                   </div>
-                  
+
                   {[
                     { issue: "Broken light in Library", status: "Resolved", time: "2m ago", color: "green" },
                     { issue: "Water leakage in Hostel B", status: "In Progress", time: "15m ago", color: "yellow" },
                     { issue: "Damaged road near Gate 2", status: "Reported", time: "1h ago", color: "blue" }
                   ].map((item, idx) => (
                     <div key={idx} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
-                     <div className={`w-2 h-2 rounded-full ${statusStyles[item.color].dot}`}></div>
+                      <div className={`w-2 h-2 rounded-full ${statusStyles[item.color].dot}`}></div>
 
                       <div className="flex-1">
                         <div className="text-sm font-medium text-gray-900">{item.issue}</div>
@@ -198,15 +226,14 @@ export default function CampusReporterHome() {
               <div
                 key={idx}
                 className="p-6 rounded-2xl bg-gradient-to-br from-gray-50 to-white border-2 border-gray-100 hover:border-blue-300 hover:shadow-xl transition cursor-pointer"
-               onMouseEnter={() => setActiveFeature(idx)}
-onClick={() => setActiveFeature(idx)}
+                onMouseEnter={() => setActiveFeature(idx)}
+                onClick={() => setActiveFeature(idx)}
 
               >
-                <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${
-                  activeFeature === idx 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-100 text-gray-600'
-                } transition`}>
+                <div className={`w-16 h-16 rounded-xl flex items-center justify-center mb-4 ${activeFeature === idx
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 text-gray-600'
+                  } transition`}>
                   {feature.icon}
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{feature.title}</h3>
@@ -267,7 +294,7 @@ onClick={() => setActiveFeature(idx)}
               <p className="text-xl text-gray-600 mb-8">
                 Transforming campus maintenance with transparency, speed, and data-driven decisions
               </p>
-              
+
               <div className="space-y-6">
                 {[
                   { icon: <Zap className="w-6 h-6" />, title: "Faster Response", desc: "AI reduces manual classification time by 80%" },
@@ -323,10 +350,90 @@ onClick={() => setActiveFeature(idx)}
 
 
 
-<section id='Founder-section'>
+   <section id="Founder-section" className="h-screen w-full bg-white overflow-hidden flex flex-col pt-10">
+      <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
+            <ShieldCheck size={12} className="text-blue-600" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">The Architectures</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
+            THE FOUNDING <span className="text-blue-600">TRIAD.</span>
+          </h2>
+        </div>
 
-</section>
+        {/* Full Image Grid - No Scroll */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+          {founders.map((founder, index) => (
+            <div 
+              key={index} 
+              className="relative group rounded-[3.5rem] overflow-hidden bg-slate-200 shadow-2xl transition-all duration-500"
+            >
+              {/* IMAGE: Clear at all times. No Blur. */}
+              <img 
+                src={founder.image} 
+                alt={founder.name} 
+                className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
+              />
 
+              {/* INITIAL STATE: Light Shadow Overlay (Not full B&W, just a tint) */}
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-all duration-500" />
+
+              {/* HOVER STATE: Glossy Shine streak */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </div>
+
+              {/* THE GLASS BOX: Black Drop Filter effect inside the box */}
+              <div className="absolute inset-x-6 bottom-6 z-20">
+                <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-7 shadow-2xl transform transition-all duration-500 group-hover:-translate-y-2">
+                  
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                      {founder.name}
+                    </h3>
+                    <ArrowUpRight size={20} className="text-blue-400" />
+                  </div>
+                  
+                  <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                    {founder.role}
+                  </p>
+                  
+                  {/* Bio and Socials: Hidden until hover */}
+                  <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-700 ease-in-out overflow-hidden">
+                    <p className="text-white/90 text-sm font-medium leading-relaxed mb-6">
+                      {founder.bio}
+                    </p>
+
+                    <div className="flex gap-3">
+                      {Object.entries(founder.social).map(([key, url]) => (
+                        <a 
+                          key={key} 
+                          href={url} 
+                          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/10 text-white hover:bg-blue-600 hover:scale-110 transition-all"
+                        >
+                          {key === 'li' && <Linkedin size={18} />}
+                          {key === 'tw' && <Twitter size={18} />}
+                          {key === 'ig' && <Instagram size={18} />}
+                          {key === 'gh' && <Github size={18} />}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Badge */}
+              <div className="absolute top-8 right-8 bg-black/20 backdrop-blur-md text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest border border-white/10">
+                PARTNER_{founder.name.split(' ')[0]}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
 
 
 
@@ -388,7 +495,7 @@ onClick={() => setActiveFeature(idx)}
       </section>
 
       {/* Footer */}
-      <Footer/>
+      <Footer />
     </div>
   );
 }

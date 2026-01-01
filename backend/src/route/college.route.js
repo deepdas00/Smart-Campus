@@ -89,7 +89,7 @@ router.get(
 router.get(
     "/info-limit",
     verifyJWT,
-    authorizeRoles("student","staff"),
+    authorizeRoles("student","staff", "admin", "librarian", "canteen"),
     getCollegeLimitedInfo
 )
 

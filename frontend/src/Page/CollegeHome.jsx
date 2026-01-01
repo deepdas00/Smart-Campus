@@ -214,6 +214,7 @@ const fetchNotifications = async () => {
     isAutonomous: collegeData.isAutonomous || false,
     universityName: collegeData.universityName || "",
     registrationNumber: collegeData.regNumber || "",
+    description: collegeData.description || "",
   });
 
   useEffect(() => {
@@ -713,6 +714,25 @@ const handleEditNotification = (note) => {
                       })
                     }
                     className="w-full bg-white p-4 pl-12 rounded-2xl border-2 border-slate-100 focus:border-blue-500 outline-none text-base font-medium h-24 shadow-sm"
+                  />
+                </div>
+                <div className="relative">
+                  <label className="text-xs font-black uppercase text-blue-600 mb-2 block tracking-widest mt-6">
+                  Campus Description
+                </label>
+                  <Info 
+                    className="absolute left-4 top-10 text-blue-500"
+                    size={20}
+                  />
+                  <textarea
+                    value={collegeData.description}
+                    onChange={(e) =>
+                      setCollegeData({
+                        ...collegeData,
+                        description: e.target.value,
+                      })
+                    }
+                    className="w-full bg-white p-4 pl-12 rounded-2xl border-2 border-slate-100 focus:border-blue-500 outline-none text-base font-medium h-24 shadow-sm "
                   />
                 </div>
                 <div className="w-full mt-5 flex items-center justify-center">

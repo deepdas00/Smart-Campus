@@ -116,7 +116,7 @@ export const getCollegeLimitedInfo = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
   const CollegeInfo = getCollegeInfoModel(collegeConn);
 
-  const collegeInfo = await CollegeInfo.findOne({ collegeCode }).select("collegeCode collegeName officialEmail address logo description")
+  const collegeInfo = await CollegeInfo.findOne({ collegeCode }).select("collegeCode collegeName officialEmail address logo description principalName departmentName NAAC registrationNumber");
   
   
   

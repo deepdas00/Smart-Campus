@@ -40,7 +40,7 @@ router.post(
 router.get(
   "/policy",
   verifyJWT,
-  authorizeRoles("admin","librarian"),
+  authorizeRoles("admin","librarian", "student"),
   fetchLibraryPolicy
 );
 

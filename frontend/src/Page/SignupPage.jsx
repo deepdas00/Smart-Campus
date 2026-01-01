@@ -578,11 +578,11 @@ export default function SignUpPage() {
                           onChange={handleInputChange}
                           max={new Date().toISOString().split("T")[0]}
                           className={`w-full pl-10 pr-4 py-3 rounded-lg outline-none transition
-        ${
-          errors.admissionYear
-            ? "border border-red-500 focus:ring-red-400"
-            : "border border-gray-300 focus:ring-2 focus:ring-blue-500"
-        }`}
+                             ${
+                               errors.admissionYear
+                                 ? "border border-red-500 focus:ring-red-400"
+                                 : "border border-gray-300 focus:ring-2                     focus:ring-blue-500"
+                             }`}
                         />
                       </div>
 

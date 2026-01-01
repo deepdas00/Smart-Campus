@@ -29,7 +29,7 @@ export function CollegePolicy() {
   const [canteenPolicy, setCanteenPolicy] = useState([]);
   const [canteenStatus, setCanteenStatus] = useState(false);
   const [loading, setLoading] = useState(false);
-const [successMessage, setSuccessMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   // edit form state
   const [editData, setEditData] = useState({
@@ -38,14 +38,13 @@ const [successMessage, setSuccessMessage] = useState("");
   });
 
   const [libraryPolicy, setLibraryPolicy] = useState({
-  maxBooksAllowed: "",
-  returnPeriodDays: "",
-  finePerDay: "",
-  maxFine: "",
-  lastModified: "",
-  updatedBy: "",
-});
-
+    maxBooksAllowed: "",
+    returnPeriodDays: "",
+    finePerDay: "",
+    maxFine: "",
+    lastModified: "",
+    updatedBy: "",
+  });
 
   const ENABLE_CANTEEN_POLICY_API = false;
 
@@ -105,36 +104,35 @@ const [successMessage, setSuccessMessage] = useState("");
     }
   };
 
-const handleSavePolicy = async () => {
-  try {
-    setLoading(true);
+  const handleSavePolicy = async () => {
+    try {
+      setLoading(true);
 
-    const opening =
-      editData.openingTime ||
-      canteenPolicy.find((p) => p.id === "CAN-001")?.value;
+      const opening =
+        editData.openingTime ||
+        canteenPolicy.find((p) => p.id === "CAN-001")?.value;
 
-    const closing =
-      editData.closingTime ||
-      canteenPolicy.find((p) => p.id === "CAN-002")?.value;
+      const closing =
+        editData.closingTime ||
+        canteenPolicy.find((p) => p.id === "CAN-002")?.value;
 
-    await api.post("/api/v1/canteen/policy", {
-      openingTime: opening,
-      closingTime: closing,
-    });
+      await api.post("/api/v1/canteen/policy", {
+        openingTime: opening,
+        closingTime: closing,
+      });
 
-    await fetchCanteenPolicy();
+      await fetchCanteenPolicy();
 
-    setSuccessMessage("Canteen policy updated successfully");
-    setSelectedPolicy(null);
+      setSuccessMessage("Canteen policy updated successfully");
+      setSelectedPolicy(null);
 
-    setTimeout(() => setSuccessMessage(""), 3000);
-  } catch (err) {
-    console.error("Save policy failed:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Save policy failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   React.useEffect(() => {
     if (activeTab === "canteen") {
@@ -155,71 +153,67 @@ const handleSavePolicy = async () => {
     }
   }, [selectedPolicy]);
 
- const libraryTableData = [
-  {
-    id: "LIB-001",
-    label: "Maximum Books Allowed",
-    value: libraryPolicy.maxBooksAllowed,
-    detail: "Applies to Undergraduate & Postgraduate students",
-    lastModified: libraryPolicy.lastModified,
-    updatedBy: libraryPolicy.updatedBy,
-  },
-  {
-    id: "LIB-002",
-    label: "Standard Return Period",
-    value: `${libraryPolicy.returnPeriodDays} Days`,
-    detail: "Policy excludes gazetted public holidays",
-    lastModified: libraryPolicy.lastModified,
-    updatedBy: libraryPolicy.updatedBy,
-  },
-  {
-    id: "LIB-003",
-    label: "Fine Amount (Per Day)",
-    value: `₹${libraryPolicy.finePerDay}`,
-    detail: "Automatic calculation via student portal",
-    lastModified: libraryPolicy.lastModified,
-    updatedBy: libraryPolicy.updatedBy,
-  },
-  {
-    id: "LIB-004",
-    label: "Maximum Fine Amount",
-    value: `₹${libraryPolicy.maxFine}`,
-    detail: "Automatic calculation via student portal",
-    lastModified: libraryPolicy.lastModified,
-    updatedBy: libraryPolicy.updatedBy,
-  },
-];
+  const libraryTableData = [
+    {
+      id: "LIB-001",
+      label: "Maximum Books Allowed",
+      value: libraryPolicy.maxBooksAllowed,
+      detail: "Applies to Undergraduate & Postgraduate students",
+      lastModified: libraryPolicy.lastModified,
+      updatedBy: libraryPolicy.updatedBy,
+    },
+    {
+      id: "LIB-002",
+      label: "Standard Return Period",
+      value: `${libraryPolicy.returnPeriodDays} Days`,
+      detail: "Policy excludes gazetted public holidays",
+      lastModified: libraryPolicy.lastModified,
+      updatedBy: libraryPolicy.updatedBy,
+    },
+    {
+      id: "LIB-003",
+      label: "Fine Amount (Per Day)",
+      value: `₹${libraryPolicy.finePerDay}`,
+      detail: "Automatic calculation via student portal",
+      lastModified: libraryPolicy.lastModified,
+      updatedBy: libraryPolicy.updatedBy,
+    },
+    {
+      id: "LIB-004",
+      label: "Maximum Fine Amount",
+      value: `₹${libraryPolicy.maxFine}`,
+      detail: "Automatic calculation via student portal",
+      lastModified: libraryPolicy.lastModified,
+      updatedBy: libraryPolicy.updatedBy,
+    },
+  ];
 
+  const fetchLibraryPolicy = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get("/api/v1/library/policy");
+      const data = res.data.data;
 
+      if (data) {
+        const localTime = new Date(data.updatedAt).toLocaleString("en-IN", {
+          timeZone: "Asia/Kolkata",
+        });
 
-
- const fetchLibraryPolicy = async () => {
-  try {
-    setLoading(true);
-    const res = await api.get("/api/v1/library/policy");
-    const data = res.data.data;
-
-    if (data) {
-      const localTime = new Date(data.updatedAt).toLocaleString("en-IN", {
-        timeZone: "Asia/Kolkata",
-      });
-
-      setLibraryPolicy({
-        maxBooksAllowed: data.maxBooksAllowed || "",
-        returnPeriodDays: data.returnPeriodDays || "",
-        finePerDay: data.finePerDay || "",
-        maxFine: data.maxFine || "",
-        lastModified: localTime,
-        updatedBy: data.updatedBy || "System",
-      });
+        setLibraryPolicy({
+          maxBooksAllowed: data.maxBooksAllowed || "",
+          returnPeriodDays: data.returnPeriodDays || "",
+          finePerDay: data.finePerDay || "",
+          maxFine: data.maxFine || "",
+          lastModified: localTime,
+          updatedBy: data.updatedBy || "System",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch library policy:", err);
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error("Failed to fetch library policy:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   useEffect(() => {
     if (activeTab === "library") {
@@ -228,23 +222,22 @@ const handleSavePolicy = async () => {
     }
   }, [activeTab]);
 
-const handleSaveLibraryPolicy = async () => {
-  try {
-    setLoading(true);
-    await api.post("/api/v1/library/policy", libraryPolicy);
-    await fetchLibraryPolicy();
+  const handleSaveLibraryPolicy = async () => {
+    try {
+      setLoading(true);
+      await api.post("/api/v1/library/policy", libraryPolicy);
+      await fetchLibraryPolicy();
 
-    setSuccessMessage("Library policy updated successfully");
-    setSelectedPolicy(null);
+      setSuccessMessage("Library policy updated successfully");
+      setSelectedPolicy(null);
 
-    setTimeout(() => setSuccessMessage(""), 3000);
-  } catch (err) {
-    console.error("Save library policy failed:", err);
-  } finally {
-    setLoading(false);
-  }
-};
-
+      setTimeout(() => setSuccessMessage(""), 3000);
+    } catch (err) {
+      console.error("Save library policy failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const toggleCanteenStatus = async () => {
     await api.post("/api/v1/canteen/isActive", {
@@ -362,21 +355,22 @@ const handleSaveLibraryPolicy = async () => {
                       </td>
                       <td className="px-6 py-5 text-xs text-slate-500">
                         {item.lastModified} <br />{" "}
-                        
                       </td>
                       <td className="px-6 py-5 text-right">
                         <button
-  onClick={() => {
-    setSelectedPolicy(item);
+                          onClick={() => {
+                            setSelectedPolicy(item);
 
-    if (activeTab === "canteen") {
-      setEditData({
-        openingTime: item.id === "CAN-001" ? item.value : "",
-        closingTime: item.id === "CAN-002" ? item.value : "",
-      });
-    }
-  }}
-  className="
+                            if (activeTab === "canteen") {
+                              setEditData({
+                                openingTime:
+                                  item.id === "CAN-001" ? item.value : "",
+                                closingTime:
+                                  item.id === "CAN-002" ? item.value : "",
+                              });
+                            }
+                          }}
+                          className="
     inline-flex items-center gap-2
     px-4 py-2
     text-xs font-bold uppercase tracking-wider
@@ -388,11 +382,10 @@ const handleSaveLibraryPolicy = async () => {
     transition-all duration-200
     shadow-sm hover:shadow-md
   "
->
-  <FileText size={14} />
-  Modify
-</button>
-
+                        >
+                          <FileText size={14} />
+                          Modify
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -401,9 +394,9 @@ const handleSaveLibraryPolicy = async () => {
             </div>
           </div>
 
-{successMessage && (
-  <div
-    className="
+          {successMessage && (
+            <div
+              className="
       fixed top-6 right-6 z-50
       px-6 py-4 z-900
       bg-white
@@ -415,16 +408,11 @@ const handleSaveLibraryPolicy = async () => {
       flex items-center gap-3
       animate-in slide-in-from-right-4 duration-300
     "
-  >
-    <ShieldCheck size={18} className="text-green-600" />
-    <span>{successMessage}</span>
-  </div>
-)}
-
-
-
-
-
+            >
+              <ShieldCheck size={18} className="text-green-600" />
+              <span>{successMessage}</span>
+            </div>
+          )}
 
           {/* --- MINIMAL SLIDE-IN EDIT FORM --- */}
           {selectedPolicy && (

@@ -33,7 +33,7 @@ const collegeInfoSchema = new mongoose.Schema(
 
     address: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
 
@@ -44,19 +44,19 @@ const collegeInfoSchema = new mongoose.Schema(
 
     contactPersonName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
 
     contactNumber: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
 
     principalName: {
       type: String,
-      required: true,
+      // required: true,
       trim: true
     },
 
@@ -71,10 +71,21 @@ const collegeInfoSchema = new mongoose.Schema(
     departmentName: [
       {
         type: String,
-        required: true,
+        // required: true,
         trim: true
       }
-    ]
+    ],
+
+    isAutonomous: {
+      type: Boolean,
+      default: false
+    },
+
+    universityName:{
+      type: String,
+      default: ""
+    }
+
   },
   { timestamps: true }
 );

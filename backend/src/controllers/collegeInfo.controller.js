@@ -17,7 +17,9 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     contactNumber,
     principalName,
     departmentName,
-    description
+    description,
+    isAutonomous,
+    universityName
   } = req.body;
 
   if (!Array.isArray(departmentName) || departmentName.length === 0) {
@@ -51,7 +53,9 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     contactNumber,
     principalName,
     departmentName,
-    description
+    description,
+    isAutonomous,
+    universityName
   };
 
   if (logoUrl) payload.logo = logoUrl;

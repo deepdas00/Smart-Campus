@@ -11,6 +11,7 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 import { getStudentModel } from "../../models/collegeStudent.model.js";
 import { sendMail } from "../../utils/sendMail.js";
 import { buildBookReturnReminderTemplate } from "../../template/buildBookReturnReminderTemplate.js";
+import { getCollegeInfoModel } from "../../models/colllegeInfo.model.js";
 
 export const orderBook = asyncHandler(async (req, res) => {
   const { bookId } = req.body;
@@ -369,6 +370,12 @@ export const notifyReturnReminders = asyncHandler(async (req, res) => {
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
   const Student = getStudentModel(collegeConn);
   const Book = getLibraryBookModel(collegeConn)
+  const LibraryPolicy = getLibraryPolicyModel(collegeConn)
+  
+  const libraryPolicy = await LibraryPolicy.findOne()
+  const fineAmount = libraryPolicy.finePerDay
+  
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -402,7 +409,9 @@ export const notifyReturnReminders = asyncHandler(async (req, res) => {
             student.studentName,
             book.title,
             diffDays,
-            returnDate.toDateString()
+            returnDate.toDateString(),
+            college.collegeName,
+            fineAmount
           )
         });
         notifiedCount++;

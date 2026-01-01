@@ -27,6 +27,10 @@ const generatePassword = (collegeCode, role) => {
 
 
 export const registerCollege = asyncHandler(async (req, res) => {
+
+  console.log("--------------------------");
+  console.log("1------------------>",req.body);
+  
   const {
     collegeName,
     collegeCode,
@@ -37,7 +41,8 @@ export const registerCollege = asyncHandler(async (req, res) => {
     contactNumber,
     principalName,
   } = req.body;
-  // console.log(collegeName,collegeCode);
+  
+  console.log("2--------------------->",collegeName,collegeCode);
 
   if (
     !collegeName ||
@@ -46,9 +51,10 @@ export const registerCollege = asyncHandler(async (req, res) => {
     !registrationNumber ||
     !address ||
     !contactPersonName ||
-    !contactNumber
+    !contactNumber ||
+    !principalName
   ) {
-    res.status(400).json({ message: "Missing required fields!!" });
+    return res.status(400).json({ message: "Missing required fields!!" });
   }
 
   // 1️⃣ Connect to MASTER DB
@@ -63,10 +69,35 @@ export const registerCollege = asyncHandler(async (req, res) => {
 
 
   // 3️⃣ Generate DB name
-  const dbName = `college_${collegeName.toLowerCase()}_db`;
-  // console.log(dbName);
+const sanitizeName = (name) => {
+  return name
+    .toLowerCase()                // convert to lowercase
+    .replace(/[^a-z0-9\s]/g, "")  // remove all special characters
+    .trim()                       // remove leading/trailing spaces
+    .replace(/\s+/g, "_");        // replace spaces with underscores
+};
+
+const dbName = `college_${sanitizeName(collegeCode)}_db`;
+
+console.log(dbName);
 
 
+  console.log("3--------------------->",dbName);
+
+
+  // 5️⃣ Connect COLLEGE DB
+  const collegeConn = getCollegeDB(dbName);
+  const CollegeUserModel = getCollegeUserModel(collegeConn);
+  const CollegeInfoModel = getCollegeInfoModel(collegeConn);
+
+  const collegeInfo = CollegeInfoModel.create({
+    collegeCode,
+    collegeName,
+    registrationNumber,
+    officialEmail
+  })
+
+  
   // 4️⃣ Save college (ACTIVE)
   const college = await MasterCollegeModel.create({
     collegeName,
@@ -76,20 +107,10 @@ export const registerCollege = asyncHandler(async (req, res) => {
     address,
     contactPersonName,
     contactNumber,
+    principalName,
     dbName,
     status: "active"
   });
-
-  // 5️⃣ Connect COLLEGE DB
-  const collegeConn = getCollegeDB(dbName);
-  const CollegeUserModel = getCollegeUserModel(collegeConn);
-  const CollegeInfoModel = getCollegeInfoModel(collegeConn);
-
-  collegeInfo = CollegeInfoModel.create({
-    collegeCode,
-    collegeName,
-    registrationNumber,
-  })
 
   // 6️⃣ Create system staffs based on role
   const roles = ["admin", "librarian", "canteen"];
@@ -133,7 +154,8 @@ export const registerCollege = asyncHandler(async (req, res) => {
       201,
       {
         college,
-        credentials
+        credentials,
+        collegeInfo
       },
       "College registered and system users created successfully"
     )

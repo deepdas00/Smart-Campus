@@ -388,3 +388,4 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
       new ApiResponse(200, canteenStatus, "Canteen Status fetched successfully")
     );
 });
+

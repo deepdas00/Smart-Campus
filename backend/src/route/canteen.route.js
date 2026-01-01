@@ -5,7 +5,7 @@ import { upload } from "../middlewares/multer.middleware.js"
 import { canteenIsActive, canteenSatusFetch, fetchedSingleOrder, getCanteenDashboardOrders, getMyCanteenOrderHistory, placeOrder, serveOrder } from "../controllers/canteen/canteenOrder.controller.js";
 import { canteen_createRazorpayOrder, canteen_verifyPayment } from "../controllers/canteen/canteenPayment.controller.js";
 import { addFood, deleteFood, getAllFoods, updateFood } from "../controllers/canteen/canteenFood.controller.js";
-import { setCanteenPolicy } from "../controllers/canteen/canteenPolicy.controller.js";
+import { fetchPolicy, setCanteenPolicy } from "../controllers/canteen/canteenPolicy.controller.js";
 
 const router = express.Router();
 
@@ -38,7 +38,7 @@ router.get(
   "/fetchpolicy",
   verifyJWT,
   authorizeRoles("admin","canteen","student"),
-  // fetchPolicy
+  fetchPolicy
 )
 
 

@@ -14,18 +14,16 @@ export const setCanteenPolicy = asyncHandler(async (req, res) => {
 
   const { openingTime, closingTime } = req.body;
 
-  
 
-    if (!openingTime || !closingTime) {
-        throw new ApiError(400, "All required policy fields must be provided");
-    }
 
-    const masterConn = connectMasterDB();
-    const College = getCollegeModel(masterConn);
-    const college = await College.findOne({ collegeCode, status: "active" });
   if (!openingTime || !closingTime) {
     throw new ApiError(400, "All required policy fields must be provided");
   }
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+
 
 
   if (!college) {
@@ -50,21 +48,49 @@ export const setCanteenPolicy = asyncHandler(async (req, res) => {
     await policy.save({ validateBeforeSave: false });
   }
 
-    if (!policy) {
-        policy = await Policy.create({
-            openingTime,
-            closingTime,
-            updatedBy: userId
-        });
-    } else {
-        policy.openingTime = openingTime;
-        policy.closingTime = closingTime;
-        policy.updatedBy = userId;
-        await policy.save();
-    }
+  if (!policy) {
+    policy = await Policy.create({
+      openingTime,
+      closingTime,
+      updatedBy: userId
+    });
+  } else {
+    policy.openingTime = openingTime;
+    policy.closingTime = closingTime;
+    policy.updatedBy = userId;
+    await policy.save();
+  }
 
-    res.status(200).json(
-        new ApiResponse(200, policy, "Canteen policy updated successfully")
-    );
+  res.status(200).json(
+    new ApiResponse(200, policy, "Canteen policy updated successfully")
+  );
 
 });
+
+
+
+export const fetchPolicy = asyncHandler(async (req, res) => {
+  const { collegeCode, userId } = req.user;
+
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Policy = getCanteenPolicyModel(collegeConn);
+
+  let policy = await Policy.findOne();
+
+
+  res.status(200).json(
+    new ApiResponse(200, policy, "Canteen policy updated successfully")
+  );
+
+
+})

@@ -1,4 +1,4 @@
-export const buildBookReturnReminderTemplate = (name, bookTitle, daysLeft, returnDate) => {
+export const buildBookReturnReminderTemplate = (name, bookTitle, daysLeft, returnDate, collegeName, fineAmount) => {
 
   const urgencyText = daysLeft === 1 
     ? "⚠️ Urgent: Only 1 day remaining!" 
@@ -18,7 +18,7 @@ export const buildBookReturnReminderTemplate = (name, bookTitle, daysLeft, retur
         <!-- HEADER -->
         <tr>
           <td style="background:linear-gradient(135deg,#2563EB,#22D3EE);padding:26px 28px;color:#ffffff;">
-            <h1 style="margin:0;font-size:22px;font-weight:600;">Smart Campus</h1>
+            <h1 style="margin:0;font-size:22px;font-weight:600;">${collegeName}</h1>
             <p style="margin:6px 0 0;font-size:13px;opacity:0.9;">
               Library Return Reminder
             </p>
@@ -57,7 +57,7 @@ export const buildBookReturnReminderTemplate = (name, bookTitle, daysLeft, retur
             </p>
 
             <p style="margin:0 0 22px;line-height:1.6;color:#475569;">
-              Please make sure to return the book on or before the due date to avoid any late fine or penalties.
+              Please make sure to return the book on or before the due date to avoid any late fine or penalties(<b>₹${fineAmount}/day</b>).
             </p>
 
             <hr style="border:none;border-top:1px solid #e2e8f0;margin:26px 0;">

@@ -39,11 +39,23 @@ import registerCollege from "./route/collegeRequest.route.js";
 import { platformAdminLogin } from "./controllers/platformAdmin/platformAuth.controller.js";
 import { forgotPasswordSendOTP, forgotPasswordVerifyOTP } from "./controllers/auth/password.controller.js";
 
+import { upload } from "./middlewares/multer.middleware.js";
+import { registerStudentId } from "./controllers/test.js";
+
+
+
+
+app.post(
+    "/test",
+    upload.single("idCard"),
+    registerStudentId
+)
+
+
 
 
 
 // -p = pending
-
 
 app.post("/api/v1/platform/admin/login", platformAdminLogin);
 app.post("/api/v1/college/forgot-password", forgotPasswordSendOTP); ///user will get a otp (body: collegeId, loginId{if student= > email || user => loginId})

@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react";
 
+import { Linkedin, Twitter, Instagram, Github, ArrowUpRight, ShieldCheck } from 'lucide-react';
 import { Link } from "react-router-dom";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar/Navbar";
@@ -81,6 +82,33 @@ export default function CampusReporterHome() {
     { name: "Infrastructure", color: "bg-red-500", icon: "🏗️" },
     { name: "Safety", color: "bg-purple-500", icon: "🛡️" },
     { name: "Other", color: "bg-gray-500", icon: "📋" },
+  ];
+
+  const founders = [
+    {
+      name: "Deep Das",
+      role: "Chief Technology Officer",
+      bio: "Architecting the core engine and infrastructure of our ecosystem.",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      side: "left"
+    },
+    {
+      name: "Sangita Ghosh",
+      role: "Chief Product Officer",
+      bio: "Defining the human-centric product vision and high-fidelity user experiences.",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      featured: true
+    },
+    {
+      name: "Trideep Ray",
+      role: "Chief Operations Officer",
+      bio: "Directing strategic institutional growth and operational excellence.",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop",
+      social: { li: "#", ig: "#", gh: "#", tw: "#" },
+      side: "right"
+    }
   ];
 
   return (
@@ -416,6 +444,150 @@ export default function CampusReporterHome() {
           </div>
         </div>
       </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   <section id="Founder-section" className="h-screen w-full bg-white overflow-hidden flex flex-col pt-10">
+      <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
+        
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
+            <ShieldCheck size={12} className="text-blue-600" />
+            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">The Architectures</span>
+          </div>
+          <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
+            THE FOUNDING <span className="text-blue-600">TRIAD.</span>
+          </h2>
+        </div>
+
+        {/* Full Image Grid - No Scroll */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
+          {founders.map((founder, index) => (
+            <div 
+              key={index} 
+              className="relative group rounded-[3.5rem] overflow-hidden bg-slate-200 shadow-2xl transition-all duration-500"
+            >
+              {/* IMAGE: Clear at all times. No Blur. */}
+              <img 
+                src={founder.image} 
+                alt={founder.name} 
+                className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
+              />
+
+              {/* INITIAL STATE: Light Shadow Overlay (Not full B&W, just a tint) */}
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-all duration-500" />
+
+              {/* HOVER STATE: Glossy Shine streak */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </div>
+
+              {/* THE GLASS BOX: Black Drop Filter effect inside the box */}
+              <div className="absolute inset-x-6 bottom-6 z-20">
+                <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-7 shadow-2xl transform transition-all duration-500 group-hover:-translate-y-2">
+                  
+                  <div className="flex justify-between items-center mb-2">
+                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
+                      {founder.name}
+                    </h3>
+                    <ArrowUpRight size={20} className="text-blue-400" />
+                  </div>
+                  
+                  <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
+                    {founder.role}
+                  </p>
+                  
+                  {/* Bio and Socials: Hidden until hover */}
+                  <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-700 ease-in-out overflow-hidden">
+                    <p className="text-white/90 text-sm font-medium leading-relaxed mb-6">
+                      {founder.bio}
+                    </p>
+
+                    <div className="flex gap-3">
+                      {Object.entries(founder.social).map(([key, url]) => (
+                        <a 
+                          key={key} 
+                          href={url} 
+                          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/10 text-white hover:bg-blue-600 hover:scale-110 transition-all"
+                        >
+                          {key === 'li' && <Linkedin size={18} />}
+                          {key === 'tw' && <Twitter size={18} />}
+                          {key === 'ig' && <Instagram size={18} />}
+                          {key === 'gh' && <Github size={18} />}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Top Badge */}
+              <div className="absolute top-8 right-8 bg-black/20 backdrop-blur-md text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest border border-white/10">
+                PARTNER_{founder.name.split(' ')[0]}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 px-4 bg-blue-700">

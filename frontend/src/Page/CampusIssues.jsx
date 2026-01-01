@@ -1,148 +1,252 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
-import { Search, FileWarning, Clock, ExternalLink, Download, MoreHorizontal, ArrowUpDown } from "lucide-react";
+import {
+  Search,
+  FileWarning,
+  ExternalLink,
+  Download,
+  Filter ,
+  X,
+  MapPin,
+  Hash,
+  ArrowRight ,
+  CheckCircle2,
+  ShieldCheck ,
+  AlertCircle,
+  Loader2,
+  ChevronRight,
+  AlertTriangle,
+  Info,
+  Calendar,
+  Mail,
+  Phone,
+  User,
+  GraduationCap,
+  Star,
+} from "lucide-react";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import Cookies from "js-cookie";
 
 // PDF Download Helper
-const downloadReport = (r) => {
-  const doc = new jsPDF();
-  
-  // Header Banner
-  doc.setFillColor(79, 70, 229); 
-  doc.rect(0, 0, 210, 40, 'F');
+const downloadReport = async (r) => {
+  const doc = new jsPDF("p", "mm", "a4");
 
-  // Header Text
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(22);
+  /* ================= HEADER ================= */
+  doc.setFillColor(79, 70, 229); // Indigo
+  doc.rect(0, 0, 210, 35, "F");
+
+  doc.setTextColor(255);
+  doc.setFontSize(20);
   doc.setFont("helvetica", "bold");
-  doc.text("INCIDENT REPORT", 120, 20);
-  
-  doc.setFontSize(10);
-  doc.text(`Ref ID: #${r._id.substring(0, 8).toUpperCase()}`, 120, 28);
+  doc.text("CAMPUS INCIDENT REPORT", 14, 22);
 
-  // CORRECT WAY TO CALL AUTOTABLE:
+  doc.setFontSize(10);
+  doc.text(`Transaction ID: ${r.transactionCode}`, 150, 22);
+
+  doc.setTextColor(0);
+  let y = 45;
+
+  /* ================= INCIDENT SUMMARY ================= */
   autoTable(doc, {
-    startY: 50,
-    head: [['Official Incident Specification', 'Details']],
+    startY: y,
+    head: [["Incident Summary", ""]],
     body: [
-      ['Report Title', r.title],
-      ['Issue Category', r.category || "General"],
-      ['Priority Level', r.priority.toUpperCase()],
-      ['Current Status', r.status.toUpperCase()],
-      ['Student Name', r.studentId?.studentName || "Guest"],
-      ['Roll Number', r.studentId?.rollNo || "N/A"],
+      ["Title", r.title],
+      ["Status", r.status.toUpperCase()],
+      ["Priority", r.priority?.toUpperCase()],
+      ["Category", r.category],
+      ["Reported On", new Date(r.createdAt).toLocaleString()],
     ],
-    theme: 'striped',
-    headStyles: { fillColor: [79, 70, 229] },
+    headStyles: {
+      fillColor: [79, 70, 229],
+      textColor: 255,
+      fontStyle: "bold",
+    },
+    styles: {
+      fontSize: 10,
+      cellPadding: 4,
+    },
   });
 
-  // Description Section
-  const finalY = doc.lastAutoTable.finalY;
-  doc.setTextColor(0, 0, 0);
+  y = doc.lastAutoTable.finalY + 8;
+
+  /* ================= STUDENT DETAILS ================= */
+  autoTable(doc, {
+    startY: y,
+    head: [["Student Information", ""]],
+    body: [
+      ["Name", r.studentId?.studentName],
+      ["Roll No", r.studentId?.rollNo],
+      ["Department", r.studentId?.department],
+      ["Batch", r.studentId?.admissionYear],
+      ["Email", r.studentId?.email],
+      ["Mobile", r.studentId?.mobileNo],
+    ],
+    headStyles: {
+      fillColor: [15, 23, 42], // slate-900
+      textColor: 255,
+    },
+    styles: { fontSize: 10 },
+  });
+
+  y = doc.lastAutoTable.finalY + 8;
+
+  /* ================= LOCATION DETAILS ================= */
+  autoTable(doc, {
+    startY: y,
+    head: [["Incident Location", ""]],
+    body: [
+      ["Zone", r.zone || "—"],
+      ["Building", r.building || "—"],
+      ["Room / Area", r.room || "—"],
+    ],
+    headStyles: {
+      fillColor: [226, 232, 240], // slate-200
+      textColor: 15,
+    },
+    styles: { fontSize: 10 },
+  });
+
+  y = doc.lastAutoTable.finalY + 8;
+
+  /* ================= DESCRIPTION ================= */
+ y = ensurePageSpace(doc, y, 40);
+
+doc.setFont("helvetica", "bold");
+doc.text("Incident Description", 14, y);
+y += 6;
+
+doc.setFont("helvetica", "normal");
+const descLines = doc.splitTextToSize(`"${r.description}"`, 180);
+
+doc.text(descLines, 14, y);
+y += descLines.length * 6;
+
+
+  /* ================= ADMIN RESPONSE ================= */
+if (r.adminNote || r.status !== "submitted") {
+  y = ensurePageSpace(doc, y, 40);
+
   doc.setFont("helvetica", "bold");
-  doc.text("Incident Description:", 14, finalY + 15);
+  doc.text("Administrative Resolution", 14, y);
+  y += 6;
+
   doc.setFont("helvetica", "normal");
-  doc.text(r.description || "No description provided.", 14, finalY + 22, { maxWidth: 180 });
+  const noteLines = doc.splitTextToSize(
+    r.adminNote ||
+      "This report has been processed according to campus administrative protocols.",
+    180
+  );
 
-  doc.save(`Report_${r._id.substring(0, 5)}.pdf`);
-};
+  doc.text(noteLines, 14, y);
+  y += noteLines.length * 6;
+}
 
-// Generic detail grid
-const DetailGrid = ({ items }) => (
-  <div className="grid grid-cols-2 gap-4">
-    {items.map(([label, value]) => (
-      <div key={label}>
-        <p className="text-[10px] uppercase font-bold text-slate-400">{label}</p>
-        <p className="text-sm font-semibold text-slate-700">{value || "—"}</p>
-      </div>
-    ))}
-  </div>
-);
+  /* ================= EVIDENCE IMAGE ================= */
+if (r.image) {
+  try {
+    const img = await fetch(r.image);
+    const blob = await img.blob();
+    const reader = new FileReader();
 
-// Category-specific detail component
-const CategoryDetails = ({ report }) => {
-  if (!report) return null;
+    reader.onload = function () {
+      const imgProps = doc.getImageProperties(reader.result);
 
-  switch (report.category) {
-    case "researchandlab":
-      return <DetailGrid items={[["Building", report.building], ["Room / Lab", report.room]]} />;
-    case "housinganddorms":
-      return <DetailGrid items={[["Hostel Block", report.building], ["Room", report.room], ["Zone", report.zone]]} />;
-    case "groundandpublic":
-      return <DetailGrid items={[["Area / Zone", report.zone], ["Building", report.building || "N/A"]]} />;
-    case "Library":
-      return <DetailGrid items={[["Shelf / Section", report.section], ["Floor", report.floor]]} />;
-    case "Canteen":
-      return <DetailGrid items={[["Canteen Area", report.area], ["Menu Issue", report.menuIssue || "N/A"]]} />;
-    case "Hostel":
-      return <DetailGrid items={[["Hostel Block", report.building], ["Room", report.room]]} />;
-    case "Infrastructure":
-      return <DetailGrid items={[["Building", report.building], ["Issue Type", report.issueType]]} />;
-    default:
-      return <DetailGrid items={[["Description", report.description]]} />;
+      const pageWidth = doc.internal.pageSize.width;
+      const pageHeight = doc.internal.pageSize.height;
+
+      const maxWidth = pageWidth - 28;
+      const maxHeight = pageHeight - y - 30;
+
+      let imgWidth = maxWidth;
+      let imgHeight = (imgProps.height * imgWidth) / imgProps.width;
+
+      if (imgHeight > maxHeight) {
+        imgHeight = maxHeight;
+        imgWidth = (imgProps.width * imgHeight) / imgProps.height;
+      }
+
+      y = ensurePageSpace(doc, y, imgHeight + 10);
+
+      doc.setFont("helvetica", "bold");
+      doc.text("Evidence Image", 14, y);
+      y += 6;
+
+      doc.addImage(reader.result, "JPEG", 14, y, imgWidth, imgHeight);
+
+      footerAndSave(doc, r.transactionCode);
+    };
+
+    reader.readAsDataURL(blob);
+    return;
+  } catch (err) {
+    console.error("Image load failed", err);
   }
+}
+
+
+  footerAndSave(doc, r.transactionCode);
 };
 
-// Admin panel
+
+const ensurePageSpace = (doc, y, required = 30) => {
+  const pageHeight = doc.internal.pageSize.height;
+  if (y + required > pageHeight - 20) {
+    doc.addPage();
+    return 20; // reset y safely
+  }
+  return y;
+};
+
+
+const footerAndSave = (doc, code) => {
+  const pageHeight = doc.internal.pageSize.height;
+
+  doc.setDrawColor(226, 232, 240);
+  doc.line(14, pageHeight - 18, 196, pageHeight - 18);
+
+  doc.setFontSize(9);
+  doc.setTextColor(150);
+  doc.text(
+    "Generated by Campus Control • Confidential Administrative Document",
+    14,
+    pageHeight - 10
+  );
+
+  doc.save(`Campus_Report_${code}.pdf`);
+};
+
+
 export default function CampusIssues() {
   const API_URL = import.meta.env.VITE_API_URL;
 
-  const [range, setRange] = useState("weekly");
-  const [statusFilter, setStatusFilter] = useState("All");
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  // States
   const [reports, setReports] = useState([]);
-  const [selectedReport, setSelectedReport] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [range, setRange] = useState("weekly");
+  const [search, setSearch] = useState("");
   const [collegeCode, setCollegeCode] = useState(null);
+  const [isAvatarOpen, setIsAvatarOpen] = useState(false);
+  const [zoomImage, setZoomImage] = useState(null);
+  // Selection & Modal States
+  const [selectedReport, setSelectedReport] = useState(null);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState(null);
+  const [adminResponse, setAdminResponse] = useState("");
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
 
-
-const handleSelectReport = async (r) => {
-  try {
-
-    console.log(r._id);
-    
-
-const res = await axios.post(
-  `${API_URL}/api/v1/reports/getMySingleReports`,
-  {
-    reportId: r._id,
-    collegeCode: collegeCode,
-  },
-  {
-    withCredentials: true, // browser sends cookie automatically
-  }
-);
-
-    console.log("API response:", res.data);
-    setSelectedReport(res.data.data);
-
-  } catch (error) {
-    console.error(
-      "API ERROR:",
-      error.response?.data || error.message
-    );
-  }
-};
-
-
-
-
-
-
-  useEffect(() => {
-    fetchReports();
-  }, [range]);
 
   const fetchReports = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, { withCredentials: true });
+      const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, {
+        withCredentials: true,
+      });
       console.log(res.data.data);
       
       setReports(res.data.data.reports || []);
-      setCollegeCode(res.data.data.collegeCode)
+      setCollegeCode(res.data.data.collegeCode);
     } catch (err) {
       console.error("Fetch Error", err);
     } finally {
@@ -150,199 +254,778 @@ const res = await axios.post(
     }
   };
 
-  const filteredReports = useMemo(() => {
-    return reports.filter((r) => {
-      const matchStatus = statusFilter === "All" || r.status?.toLowerCase() === statusFilter.toLowerCase();
-      const matchSearch =
-        r.title?.toLowerCase().includes(search.toLowerCase()) ||
-        r.studentId?.studentName?.toLowerCase().includes(search.toLowerCase()) ||
-        r.category?.toLowerCase().includes(search.toLowerCase());
-      return matchStatus && matchSearch;
-    });
-  }, [reports, statusFilter, search]);
+  useEffect(() => {
+    fetchReports();
+  }, [range]);
 
-  const getPriorityStyle = (p) => {
-    const val = p?.toLowerCase();
-    if (val === "urgent" || val === "critical") return "bg-red-100 text-red-700 ring-1 ring-red-200";
-    if (val === "medium") return "bg-amber-100 text-amber-700 ring-1 ring-amber-200";
-    return "bg-slate-100 text-slate-600 ring-1 ring-slate-200";
+  const handleSelectReport = async (r) => {
+    try {
+      setIsUpdating(true);
+
+      console.log(r.status);
+      
+
+      if (r.status === "submitted") {
+        await axios.patch(
+        `${API_URL}/api/v1/reports/${r._id}/status`,
+        { status:"viewed" },
+        { withCredentials: true }
+      );
+      }
+      const res = await axios.post(
+        `${API_URL}/api/v1/reports/getMySingleReports`,
+        { reportId: r._id, collegeCode: collegeCode },
+        { withCredentials: true }
+      );
+      const reportData = res.data.data[0];
+      setSelectedReport(reportData);
+      setAdminResponse(reportData.adminNote || "");
+    } catch (error) {
+      console.error("API ERROR:", error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const getStatusStyle = (s) => {
-    const val = s?.toLowerCase();
-    if (["fixed", "closed", "resolved"].includes(val)) return "bg-emerald-100 text-emerald-700 ring-1 ring-emerald-200";
-    if (val === "in progress") return "bg-blue-100 text-blue-700 ring-1 ring-blue-200";
-    return "bg-slate-50 text-slate-500 ring-1 ring-slate-200";
+  const handleUpdateStatus = async () => {
+    try {
+      setIsUpdating(true);
+      const apiStatus =
+        pendingStatus === "in progress" ? "in_progress" : pendingStatus;
+      await axios.patch(
+        `${API_URL}/api/v1/reports/${selectedReport._id}/status`,
+        { status: apiStatus, adminNote: adminResponse },
+        { withCredentials: true }
+      );
+      setSelectedReport((prev) => ({
+        ...prev,
+        status: pendingStatus,
+        adminNote: adminResponse,
+      }));
+      setShowConfirm(false);
+      fetchReports();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
-  const categoryLabel = {
-    researchandlab: "Research & Lab",
-    housinganddorms: "Housing & Dorms",
-    groundandpublic: "Ground & Public Area",
-    Library: "Library",
-    Canteen: "Canteen",
-    Hostel: "Hostel",
-    Infrastructure: "Infrastructure",
+ const filteredReports = useMemo(() => {
+  return reports.filter((r) => {
+    const matchesSearch =
+      r.title?.toLowerCase().includes(search.toLowerCase()) ||
+      r.studentId?.studentName
+        ?.toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "all" || r.status === statusFilter;
+
+    return matchesSearch && matchesStatus;
+  });
+}, [reports, search, statusFilter]);
+
+  // Helper UI Component for the Modal
+  const DetailBadge = ({ label, value, icon: Icon }) => {
+    if (!value || value === "" || value === "N/A") return null;
+    return (
+      <div className="flex flex-col p-4 rounded-2xl bg-slate-50 border border-slate-100 break-words whitespace-normal">
+        <div className="text-indigo-500 mb-1 flex items-center gap-2">
+          {Icon}{" "}
+          <span className="text-[10px] font-black text-slate-400 uppercase">
+            {label}
+          </span>
+        </div>
+        <span className="text-sm font-bold text-slate-800">{value}</span>
+      </div>
+    );
   };
+
+  const isFinalStatus =
+    selectedReport &&
+    ["resolved", "rejected", "closed", "completed"].includes(
+      selectedReport.status
+    );
 
   return (
-    <div className="min-h-screen bg-[#F9FAFB] p-4 md:p-8 font-sans text-slate-900">
-      <div className="max-w-[1400px] mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+    <div className="min-h-screen bg-white  font-sans text-slate-900">
+      <div className="max-w-7xl mx-auto space-y-6">
+        {/* HEADER SECTION */}
+        <div className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-[2rem] shadow-sm border border-slate-200">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">Issue Management</h1>
-            <p className="text-slate-500 text-sm font-medium">Track and resolve campus infrastructure reports</p>
+            <h1 className="text-2xl font-black tracking-tight italic">
+              CAMPUS CONTROL
+            </h1>
+            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">
+              Issue Management Dashboard
+            </p>
           </div>
-          <div className="flex items-center gap-3 bg-slate-50 p-1.5 rounded-xl border border-slate-200">
+          <div className="flex gap-2 bg-slate-100 p-1.5 rounded-2xl">
             {["daily", "weekly", "monthly"].map((r) => (
-              <button key={r} onClick={() => setRange(r)}
-                className={`px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all ${range === r ? "bg-white text-slate-900 shadow-sm border border-slate-200" : "text-slate-400 hover:text-slate-600"}`}>
+              <button
+                key={r}
+                onClick={() => setRange(r)}
+                className={`px-6 py-2 rounded-xl text-[10px] font-black uppercase transition-all ${
+                  range === r
+                    ? "bg-white text-indigo-600 shadow-sm"
+                    : "text-slate-400"
+                }`}
+              >
                 {r}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Reports Table */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          {/* Toolbar */}
-          <div className="p-4 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-white">
-            <div className="relative w-full md:w-96">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search reports..."
-                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 rounded-xl text-sm transition-all outline-none"
-              />
-            </div>
-          </div>
+        {/* SEARCH & TABLE */}
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+  {/* Search */}
+<div className="px-8 py-6 flex flex-col md:flex-row gap-6 items-center justify-between bg-slate-50/50 border-b border-slate-100 w-full">
+    
+    {/* Professional Search Bar */}
+    <div className="relative w-full group">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-200">
+        <Search 
+          className="text-slate-400 group-focus-within:text-indigo-500" 
+          size={18} 
+          strokeWidth={2.5}
+        />
+      </div>
+      <input
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        type="text"
+        placeholder="Search incident, student, or roll no..."
+        className="w-full pl-12 pr-12 py-3 bg-white border border-slate-200 rounded-2xl outline-none 
+                   placeholder:text-slate-400 text-slate-700 text-sm font-semibold
+                   shadow-sm transition-all focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500"
+      />
+    </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+    {/* Filter Controls Group */}
+    <div className="flex items-center gap-3 w-full ">
+      <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm w-full">
+        <Filter size={14} className="text-slate-400" />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 outline-none cursor-pointer min-w-[120px]"
+        >
+          <option value="all">All Status</option>
+          <option value="submitted">Submitted</option>
+          <option value="in_progress">In Progress</option>
+          <option value="resolved">Resolved</option>
+          <option value="rejected">Rejected</option>
+        </select>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+          
+
+          <div className="overflow-x-auto px-6 pb-6">
+            <table className="w-full text-left">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Report Details</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-black text-slate-400 uppercase tracking-widest">Submitted By</th>
-                  <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Priority</th>
-                  <th className="px-6 py-4 text-center text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</th>
-                  <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Action</th>
+                <tr className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  <th className="px-4 py-4">Incident Specification</th>
+                  <th className="px-4 py-4">Submitted By</th>
+                  <th className="px-4 py-4 text-center">Status</th>
+                  <th className="px-4 py-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredReports.length > 0 ? filteredReports.map((r) => (
-                  <tr key={r._id} className="hover:bg-slate-50/80 transition-all group">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 flex-shrink-0 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 group-hover:border-blue-200 group-hover:bg-blue-50 group-hover:text-blue-600 transition-all">
-                          <FileWarning size={18} />
+              <tbody className="divide-y divide-slate-50">
+                {filteredReports.map((r) => (
+                  <tr
+                    key={r._id}
+                    className="group hover:bg-slate-50/50 transition-all"
+                  >
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                          <FileWarning size={20} />
                         </div>
-                        <div className="min-w-0">
-                          <p className="text-sm font-bold text-slate-800 truncate leading-tight mb-1">{r.title}</p>
-                          <div className="flex items-center gap-2">
-                            <span className="text-[9px] font-black text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded uppercase">{categoryLabel[r.category]}</span>
-                            <span className="text-slate-300 text-xs">•</span>
-                            <span className="text-[10px] text-slate-400 font-medium flex items-center gap-1"><Clock size={10}/> {new Date(r.createdAt).toLocaleDateString()}</span>
-                          </div>
+                        <div>
+                          <p className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                            {r.title}
+                            {r.rating > 0 && (
+                              <span className="flex items-center text-amber-500 text-[10px] font-black bg-amber-50 px-1.5 py-0.5 rounded-md">
+                                <Star
+                                  size={10}
+                                  fill="currentColor"
+                                  className="mr-0.5"
+                                />{" "}
+                                {r.rating}
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-[10px] text-slate-400 font-mono uppercase">
+                            {r.transactionCode}
+                          </p>
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4">{r.studentId?.studentName || "Guest"}
-
-                      <p className="text-[10px] text-slate-400 font-medium">{r.studentId?.rollNo || "N/A"}</p>
-
+                    <td className="px-4 py-4 text-sm font-semibold text-slate-600">
+                      {r.studentId?.studentName}
                     </td>
-                    <td className="px-6 py-4 text-center"><span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${getPriorityStyle(r.priority)}`}>{r.priority}</span></td>
-                    <td className="px-6 py-4 text-center"><span className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${getStatusStyle(r.status)}`}>{r.status}</span></td>
-                    <td className="px-6 py-4 text-right flex justify-end gap-2">
-                      <button onClick={() => handleSelectReport(r)}className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-xl transition-all">
-                        
+                    <td className="px-4 py-4 text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${
+                          ["resolved", "closed", "completed"].includes(r.status)
+                            ? "bg-emerald-100 text-emerald-600"
+                            : r.status === "rejected"
+                            ? "bg-rose-100 text-rose-600"
+                            : "bg-blue-100 text-blue-600"
+                        }`}
+                      >
+                        {r.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right space-x-2">
+                      <button
+                        onClick={() => handleSelectReport(r)}
+                        className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-indigo-600 hover:text-white transition-all"
+                      >
                         <ExternalLink size={16} />
-                        
-                        </button>
-
-
-                      <button onClick={() => downloadReport(r)} className="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all"><Download size={16} /></button>
-                      <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-all"><MoreHorizontal size={16} /></button>
+                      </button>
+                      <button
+                        onClick={() => downloadReport(r)}
+                        className="p-2.5 bg-slate-100 text-slate-500 rounded-xl hover:bg-emerald-600 hover:text-white transition-all"
+                      >
+                        <Download size={16} />
+                      </button>
                     </td>
                   </tr>
-                )) : (
-                  <tr><td colSpan={5} className="px-6 py-20 text-center text-slate-500 font-bold">No reports found</td></tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
+      </div>
 
-        {/* Selected report details */}
-{selectedReport && (
-  <div className="fixed inset-0 z-[150] flex justify-center items-center bg-slate-900/60 backdrop-blur-md p-4 animate-fadeIn">
-    
-    {/* Popup container */}
-    <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-white/20 overflow-hidden animate-zoomIn">
-      
-      {/* Header with Background Accent */}
-      <div className="flex items-center justify-between px-8 py-5 bg-slate-50/50 border-b border-slate-100">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-indigo-500 mb-1 block">
-            Report Details
-          </span>
-          <h2 className="text-xl font-bold text-slate-900 leading-tight">
-            {selectedReport.title}
-          </h2>
+
+
+
+
+
+
+
+      {/* --- POPUP MODAL --- */}
+      {selectedReport && (
+        <div className="fixed inset-0 z-[160] flex items-center justify-center bg-slate-950/60 backdrop-blur-md p-6 animate-in fade-in duration-300">
+          <div className="bg-white w-full max-w-6xl rounded-[1.5rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] flex flex-col md:flex-row h-[90vh] overflow-hidden border border-slate-200">
+            {/* --- LEFT SIDEBAR: IDENTITY & EVIDENCE --- */}
+            <div className="md:w-150 bg-slate-50/80 p-8 border-r border-slate-200 flex flex-col gap-8 overflow-y-auto">
+              {/* Student Identification */}
+              <div className="text-center space-y-4">
+                <div className="relative inline-block group">
+                  <button
+                    onClick={() => setIsAvatarOpen(true)}
+                    className="relative block transition-transform active:scale-95 duration-200"
+                  >
+                    <img
+                      src={selectedReport.studentId?.avatar}
+                      className="w-24 h-24 rounded-[2rem] object-cover ring-4 ring-white shadow-xl group-hover:ring-indigo-100 transition-all"
+                      alt="Student avatar"
+                    />
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-black/20 rounded-[2rem] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <Search size={20} className="text-white" />
+                    </div>
+                  </button>
+
+                  {/* Status Indicator */}
+                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 border-4 border-white w-7 h-7 rounded-full flex items-center justify-center shadow-sm">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-black text-slate-900 text-lg tracking-tight">
+                    {selectedReport.studentId?.studentName}
+                  </h3>
+                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 inline-block px-2 py-0.5 rounded-md mt-1">
+                    {selectedReport.studentId?.rollNo}
+                  </p>
+                </div>
+
+
+                {/* ADDED RATING FIELD */}
+    {selectedReport.rating > 0 && (
+      <div className="mt-3 flex flex-col items-center animate-in fade-in slide-in-from-top-1 duration-500">
+        <div className="flex gap-1">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              size={12}
+              fill={star <= selectedReport.rating ? "#f59e0b" : "transparent"}
+              className={star <= selectedReport.rating ? "text-amber-500" : "text-slate-200"}
+            />
+          ))}
         </div>
+        <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter mt-1">
+          Resolution Rating
+        </span>
+      </div>
+    )}
+
+                <div className="grid grid-cols-1 gap-2">
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center gap-3 shadow-sm">
+                    <div className="bg-slate-100 p-2 rounded-xl text-slate-500">
+                      <GraduationCap size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[8px] font-black text-slate-400 uppercase leading-none mb-1">
+                        Department
+                      </p>
+                      <p className="text-[11px] font-bold text-slate-700">
+                        {selectedReport.studentId?.department}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="bg-white border border-slate-200 p-2.5 rounded-2xl flex items-center gap-3 shadow-sm">
+                    <div className="bg-slate-100 p-2 rounded-xl text-slate-500">
+                      <User size={16} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-[8px] font-black text-slate-400 uppercase leading-none mb-1">
+                        Academic Batch
+                      </p>
+                      <p className="text-[11px] font-bold text-slate-700">
+                        Batch of {selectedReport.studentId?.admissionYear}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Evidence Vault */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center justify-between px-1">
+                  Visual Evidence{" "}
+                  <span className="text-[9px] lowercase font-medium">
+                    (1 file)
+                  </span>
+                </h4>
+                <div
+                  onClick={() =>
+                    setZoomImage({
+                      url: selectedReport.image,
+                      title: "Report Evidence",
+                    })
+                  }
+                  className="rounded-3xl overflow-hidden shadow-inner border border-slate-200 aspect-[4/3] relative group cursor-pointer bg-slate-200"
+                >
+                  <img
+                    src={selectedReport.image}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    alt="Report evidence"
+                  />
+                  <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-sm">
+                    <button className="bg-white text-slate-900 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">
+                      Expand Image
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Direct Communication */}
+              <div className="mt-auto space-y-2">
+                <a
+                  href={`mailto:${selectedReport.studentId?.email}`}
+                  className="flex items-center gap-3 p-3 bg-white hover:bg-indigo-50 rounded-2xl text-[11px] font-bold text-slate-600 border border-slate-200 transition-all group"
+                >
+                  <Mail
+                    size={16}
+                    className="text-slate-400 group-hover:text-indigo-500"
+                  />
+                  <span className="truncate">
+                    {selectedReport.studentId?.email}
+                  </span>
+                </a>
+                <a
+                  href={`tel:${selectedReport.studentId?.mobileNo}`}
+                  className="flex items-center gap-3 p-3 bg-white hover:bg-emerald-50 rounded-2xl text-[11px] font-bold text-slate-600 border border-slate-200 transition-all group"
+                >
+                  <Phone
+                    size={16}
+                    className="text-slate-400 group-hover:text-emerald-500"
+                  />
+                  <span>{selectedReport.studentId?.mobileNo}</span>
+                </a>
+              </div>
+            </div>
+
+            {/* --- RIGHT MAIN: CASE MANAGEMENT --- */}
+            <div className="flex-grow flex flex-col bg-white overflow-hidden">
+              {/* Modern Modal Header */}
+              <div className="px-10 py-8 flex justify-between items-center bg-white/50 backdrop-blur-sm border-b border-slate-100 sticky top-0 z-10">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        selectedReport.status === "resolved"
+                          ? "bg-emerald-500"
+                          : "bg-amber-500 animate-pulse"
+                      }`}
+                    />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                      Case Request #{selectedReport.transactionCode}
+                    </span>
+                  </div>
+                  <h2 className="text-3xl font-black text-slate-900 tracking-tight leading-none">
+                    {selectedReport.title}
+                  </h2>
+                </div>
+                <button
+                  onClick={() => setSelectedReport(null)}
+                  className="p-3 bg-slate-100 text-slate-400 hover:bg-slate-900 hover:text-white rounded-2xl transition-all duration-300 shadow-sm"
+                >
+                  <X size={20} strokeWidth={3} />
+                </button>
+              </div>
+
+              <div className="p-10 flex-grow overflow-y-auto space-y-10 scrollbar-hide">
+                {/* Diagnostic Metrics Grid */}
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
+                  <DetailBadge
+                    label="Zone"
+                    value={selectedReport.zone}
+                    icon={<MapPin size={14} />}
+                  />
+                  <DetailBadge
+                    label="Facility"
+                    value={selectedReport.building}
+                    icon={<ChevronRight size={14} />}
+                  />
+                  <DetailBadge
+                    label="Location"
+                    value={selectedReport.room}
+                    icon={<Info size={14} />}
+                  />
+                  <DetailBadge
+                    label="Category"
+                    value={selectedReport.category === "researchandlab"
+    ? "Research & Lab"
+    : selectedReport.category === "housinganddorms"
+    ? "Housing & Dorms"
+    : selectedReport.category === "groundandpublic"
+    ? "Ground & Public"
+    : selectedReport.category}
+                    icon={<AlertCircle size={14} />}
+                  />
+
+                  <div
+                    className={`flex flex-col p-4 rounded-3xl border ${
+                      selectedReport.priority === "high"
+                        ? "bg-rose-50 border-rose-100"
+                        : "bg-slate-50 border-slate-200"
+                    }`}
+                  >
+                    <div
+                      className={`${
+                        selectedReport.priority === "high"
+                          ? "text-rose-500"
+                          : "text-slate-400"
+                      } mb-1 flex items-center gap-2`}
+                    >
+                      <AlertTriangle size={14} />
+                      <span className="text-[10px] font-black uppercase tracking-widest">
+                        Urgency
+                      </span>
+                    </div>
+                    <span
+                      className={`text-xs font-black ${
+                        selectedReport.priority === "high"
+                          ? "text-rose-700"
+                          : "text-slate-900"
+                      }`}
+                    >
+                      {selectedReport.priority?.toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Incident Narrative */}
+                <div className="p-8 bg-slate-50/50 rounded-[2rem] border border-slate-100 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-5">
+                    <FileWarning size={60} />
+                  </div>
+                  <h4 className="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest flex items-center gap-2">
+                    Incident Description
+                  </h4>
+                  <p className="text-slate-700 font-medium text-lg leading-relaxed antialiased relative z-10">
+                    "{selectedReport.description}"
+                  </p>
+                </div>
+
+                {/* Administrative Resolution Center */}
+                <div className="pt-8 border-t border-slate-100">
+                  {!isFinalStatus ? (
+                    <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold">
+                          QA
+                        </div>
+                        <span className="text-[11px] font-black text-slate-900 uppercase tracking-widest">
+                          Internal Resolution Response
+                        </span>
+                      </div>
+
+                      <textarea
+                        value={adminResponse}
+                        onChange={(e) => setAdminResponse(e.target.value)}
+                        className="w-full h-44 p-6 bg-white border-2 border-slate-200 rounded-[2rem] outline-none focus:border-indigo-600 focus:ring-4 ring-indigo-50 transition-all font-medium text-slate-800 shadow-sm placeholder:text-slate-300 text-base"
+                        placeholder="Enter the official administrative response to be shared with the student..."
+                      />
+
+                      <div className="flex gap-4">
+                        <button
+                          onClick={() => {
+                            setPendingStatus("in progress");
+                            setShowConfirm(true);
+                          }}
+                          className="flex-[2] py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border-2 border-slate-200 text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                        >
+                          Hold / In Progress
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPendingStatus("resolved");
+                            setShowConfirm(true);
+                          }}
+                          className="flex-[3] py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all transform hover:-translate-y-0.5"
+                        >
+                          Resolve Case
+                        </button>
+                        <button
+                          onClick={() => {
+                            setPendingStatus("rejected");
+                            setShowConfirm(true);
+                          }}
+                          className="flex-[2] py-4 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border-2 border-rose-100 text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
+                        >
+                          Reject Report
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    /* FINALIZED PROFESSIONAL STATUS CARD */
+                    <div
+                      className={`p-8 rounded-[2.5rem] border flex items-center gap-8 animate-in zoom-in-95 duration-500 shadow-sm ${
+                        selectedReport.status === "rejected"
+                          ? "bg-rose-50/50 border-rose-100"
+                          : "bg-emerald-50/50 border-emerald-100"
+                      }`}
+                    >
+                      <div
+                        className={`w-16 h-16 rounded-[1.5rem] text-white flex items-center justify-center shadow-lg transition-transform hover:scale-105 duration-300 ${
+                          selectedReport.status === "rejected"
+                            ? "bg-rose-500 shadow-rose-200"
+                            : "bg-emerald-500 shadow-emerald-200"
+                        }`}
+                      >
+                        {selectedReport.status === "rejected" ? (
+                          <X size={32} strokeWidth={3} />
+                        ) : (
+                          <CheckCircle2 size={32} strokeWidth={3} />
+                        )}
+                      </div>
+
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-1">
+                          <span
+                            className={`text-[10px] font-black uppercase tracking-[0.3em] ${
+                              selectedReport.status === "rejected"
+                                ? "text-rose-600"
+                                : "text-emerald-600"
+                            }`}
+                          >
+                            Official Closing Statement
+                          </span>
+                          <div className="h-px flex-1 bg-slate-200" />
+                        </div>
+
+                        <h4 className="text-xl font-black text-slate-900 mb-1">
+                          Administrative Decision:{" "}
+                          {selectedReport.status.toUpperCase()}
+                        </h4>
+                        <p
+                          className={`text-base font-semibold leading-relaxed italic ${
+                            selectedReport.status === "rejected"
+                              ? "text-rose-900/70"
+                              : "text-emerald-900/70"
+                          }`}
+                        >
+                          {selectedReport.adminNote ||
+                            "The administrative team has successfully closed this incident file following standard campus protocol."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- CONFIRMATION WINDOW --- */}
+{showConfirm && (
+  <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/40 backdrop-blur-md p-4 animate-in fade-in duration-300">
+    <div className="bg-white p-10 rounded-[3rem] shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] max-w-sm w-full text-center border border-slate-100 overflow-hidden relative">
+      
+      {/* Decorative Brand Accent */}
+      <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+
+      {/* Dynamic Icon Section */}
+      <div className={`w-20 h-20 rounded-[2.2rem] flex items-center justify-center mx-auto mb-8 transition-colors duration-500 shadow-inner ${
+        pendingStatus === "resolved" ? "bg-emerald-50 text-emerald-500" :
+        pendingStatus === "rejected" ? "bg-rose-50 text-rose-500" :
+        "bg-amber-50 text-amber-500"
+      }`}>
+        <ShieldCheck size={38} strokeWidth={2.5} className="animate-in zoom-in-50 duration-500" />
+      </div>
+
+      {/* Copy Section */}
+      <div className="space-y-3 mb-10">
+        <h3 className="text-2xl font-black text-slate-900 tracking-tight">
+          Verify Action
+        </h3>
+        <p className="text-slate-500 text-sm leading-relaxed px-4">
+          Are you sure you want to transition this case file to the 
+          <span className={`mx-1.5 inline-block font-black uppercase tracking-widest text-[11px] px-2 py-0.5 rounded-md border ${
+            pendingStatus === "resolved" ? "bg-emerald-50 border-emerald-100 text-emerald-700" :
+            pendingStatus === "rejected" ? "bg-rose-50 border-rose-100 text-rose-700" :
+            "bg-indigo-50 border-indigo-100 text-indigo-700"
+          }`}>
+            {pendingStatus}
+          </span> 
+          registry?
+        </p>
+      </div>
+
+      {/* Action Buttons */}
+      <div className="flex flex-col gap-3">
+        <button
+          onClick={handleUpdateStatus}
+          disabled={isUpdating}
+          className="group relative w-full py-5 bg-slate-900 text-white rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all hover:bg-indigo-600 hover:shadow-lg hover:shadow-indigo-200 active:scale-95 disabled:opacity-70 disabled:active:scale-100 overflow-hidden"
+        >
+          <span className="relative z-10 flex items-center justify-center gap-3">
+            {isUpdating ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
+              <>
+                Confirm Transition
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+              </>
+            )}
+          </span>
+        </button>
 
         <button
-          onClick={() => setSelectedReport(null)}
-          className="p-2 bg-white rounded-full border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-100 hover:bg-rose-50 transition-all duration-200 shadow-sm"
+          onClick={() => setShowConfirm(false)}
+          className="w-full py-4 text-slate-400 rounded-2xl font-bold uppercase text-[10px] tracking-widest hover:text-slate-900 hover:bg-slate-50 transition-all"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          Cancel & Review
         </button>
       </div>
 
-      {/* Content Area - Scrollable if content is long */}
-      <div className="p-8 max-h-[75vh] overflow-y-auto custom-scrollbar">
-        
-        {selectedReport.image && (
-          <div className="relative mb-8 group">
-            <div className="absolute inset-0 bg-indigo-500/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-300 opacity-0 group-hover:opacity-100" />
-            <img
-              src={selectedReport.image}
-              alt="Evidence"
-              className="relative w-full h-72 object-cover rounded-2xl shadow-md border border-slate-100"
-            />
-          </div>
-        )}
-
-        <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100 mb-6">
-          <CategoryDetails report={selectedReport} />
-        </div>
-
-        <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Description</h3>
-          <p className="text-slate-700 leading-relaxed font-medium">
-            {selectedReport.description}
-          </p>
-        </div>
-      </div>
-
-      {/* Optional Footer */}
-      <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-end">
-        <button 
-          onClick={() => setSelectedReport(null)}
-          className="px-6 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
-        >
-          Close Report
-        </button>
-      </div>
+      {/* Subtle Footer */}
+      <p className="mt-6 text-[9px] font-bold text-slate-300 uppercase tracking-widest">
+        Official Admin Action • {new Date().getFullYear()}
+      </p>
     </div>
   </div>
-)}
-      </div>
+)}  
+
+
+
+
+{/* --- IMAGE ZOOM OVERLAY --- */}
+      {zoomImage && (
+        <div
+          className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-lg p-8 animate-in fade-in duration-300"
+          onClick={() => setZoomImage(null)}
+        >
+          {/* Close Button */}
+          <button
+            className="absolute top-8 right-8 p-4 bg-white/10 hover:bg-white/20 text-white rounded-2xl transition-all border border-white/10"
+            onClick={() => setZoomImage(null)}
+          >
+            <X size={32} />
+          </button>
+
+          {/* Image Container */}
+          <div
+            className="relative max-w-5xl w-full flex flex-col items-center animate-in zoom-in-95 duration-300"
+            onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image
+          >
+            <img
+              src={zoomImage.url}
+              className="max-h-[75vh] w-auto rounded-[2.5rem] shadow-[0_0_50px_rgba(0,0,0,0.5)] border-4 border-white/10"
+              alt="Expanded view"
+            />
+
+            {/* Detail Label */}
+            <div className="mt-8 text-center">
+              <span className="text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em] block mb-2">
+                College Administration Portal
+              </span>
+              <h4 className="text-white text-3xl font-black tracking-tight italic uppercase">
+                {zoomImage.title}
+              </h4>
+              <div className="mt-4 flex gap-4 justify-center">
+                <a
+                  href={zoomImage.url}
+                  download
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-slate-900 rounded-xl text-[11px] font-black uppercase tracking-widest hover:bg-indigo-50 transition-colors"
+                >
+                  <Download size={16} /> Download File
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* AVATAR FULL-SCREEN VIEW */}
+      {isAvatarOpen && (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/90 backdrop-blur-sm p-4 animate-in fade-in duration-300"
+          onClick={() => setIsAvatarOpen(false)}
+        >
+          <button
+            className="absolute top-10 right-10 p-3 bg-white/10 text-white hover:bg-white/20 rounded-full transition-all"
+            onClick={() => setIsAvatarOpen(false)}
+          >
+            <X size={32} />
+          </button>
+
+          <img
+            src={selectedReport.studentId?.avatar}
+            className="max-w-full max-h-[80vh] rounded-[3rem] shadow-2xl border-8 border-white/10 animate-in zoom-in-95 duration-300"
+            alt="Student Full Profile"
+            onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image itself
+          />
+
+          <div className="absolute bottom-10 text-center">
+            <h3 className="text-white text-xl font-black tracking-tight">
+              {selectedReport.studentId?.studentName}
+            </h3>
+            <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">
+              Official Profile Photo
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

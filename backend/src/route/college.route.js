@@ -89,7 +89,7 @@ router.get(
 router.get(
     "/info-limit",
     verifyJWT,
-    authorizeRoles("student","staff"),
+    authorizeRoles("student","staff", "admin", "librarian", "canteen"),
     getCollegeLimitedInfo
 )
 
@@ -140,7 +140,7 @@ router.post(
   "/notifications",
   verifyJWT,
   authorizeRoles("admin"),
-  upload.single("pic"),
+  upload.single("image"),
   createNotification
 );
 
@@ -156,7 +156,7 @@ router.patch(
   "/notifications/:notificationId",
   verifyJWT,
   authorizeRoles("admin"),
-  upload.single("pic"),
+  upload.single("image"),
   updateNotification
 );
 

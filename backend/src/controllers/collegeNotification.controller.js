@@ -87,6 +87,9 @@ export const getNotifications = asyncHandler(async (req, res) => {
 
 export const updateNotification = asyncHandler(async (req, res) => {
 
+
+  console.log("uuhhuhu");
+  
   const { collegeCode } = req.user;
   const { notificationId } = req.params;
 

@@ -68,3 +68,31 @@ export const setCanteenPolicy = asyncHandler(async (req, res) => {
     );
 
 });
+
+
+
+export const fetchPolicy = asyncHandler(async (req, res) => {
+  const { collegeCode, userId } = req.user;
+
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+
+
+  if (!college) {
+    throw new ApiError(404, "College not found");
+  }
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Policy = getCanteenPolicyModel(collegeConn);
+
+  let policy = await Policy.findOne();
+
+
+  res.status(200).json(
+    new ApiResponse(200, policy, "Canteen policy updated successfully")
+  );
+
+
+})

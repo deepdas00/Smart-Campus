@@ -146,7 +146,6 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
             {   
                 range,
                 libraryIssueGraphData,
-                librarySuccessTransCount,
                 totalCanteenRevenue,
                 canteenRevenueGraphData,
                 totalReports,

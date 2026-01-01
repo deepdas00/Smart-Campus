@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AlertCircle, Menu, X } from "lucide-react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavLinks from "./NavLinks";
@@ -10,6 +10,7 @@ import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 
+const API_URL = import.meta.env.VITE_API_URL;
 import { BookMarked, ChevronRight, ShoppingCart, ChefHat } from "lucide-react";
 
 export default function Navbar({
@@ -25,10 +26,10 @@ export default function Navbar({
   const isCanteenPage = location.pathname === "/canteen";
   const isOrderPage = location.pathname === "/orders";
 
+
+  const [collegeInfo, setCollegeInfo] = useState("")
   const { user } = useAuth();
   const { logout } = useAuth();
-
-  const API_URL = import.meta.env.VITE_API_URL;
 
   const handleLogout = async () => {
     try {
@@ -43,7 +44,8 @@ export default function Navbar({
       logout(); // clear context
       toast.success("Logged out successfully", { id: "logout" });
 
-      setTimeout(() => navigate("/login"), 100);
+      navigate("/login", { replace: true });
+
     } catch (error) {
       console.error(error);
       toast.error("Logout failed", { id: "logout" });
@@ -79,6 +81,33 @@ export default function Navbar({
     }
   };
 
+  
+
+
+
+    
+  const fetchCollegeInfo = async () => {
+    try {
+      console.log("huuuuuuu");
+      
+      const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
+        withCredentials: true,
+      });
+      console.log("infooofofooof",res.data.data);
+      setCollegeInfo(res.data.data);
+     
+    } catch (err) {
+      console.error("Fetch college info failed", err);
+    }
+  };
+
+
+useEffect(() => {
+  if (!user) return;
+   fetchCollegeInfo();
+}, [user]);
+
+  
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -89,14 +118,19 @@ export default function Navbar({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <Link to={"/"} className="flex items-center space-x-2">
+                  <Link to={"/home"} className="flex items-center space-x-2">
                     <img
-                      src={logo}
+                      src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
                       className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
                     <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
-                      Smart Campus
+                      {collegeInfo?.collegeName || "Smart Campus"}
+                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                        Powered by <span className="font-semibold ">
+                          Smart Campus
+                        </span>
+                      </p>
                     </span>
                   </Link>
                 </div>
@@ -168,14 +202,19 @@ export default function Navbar({
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center justify-between space-x-2">
-                  <Link to={"/"} className="flex items-center space-x-2">
+                  <Link to={"/home"} className="flex items-center space-x-2">
                     <img
-                      src={logo}
+                      src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
                       className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
                     <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
-                      Smart Campus
+                      {collegeInfo?.collegeName || "Smart Campus"}
+                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                        Powered by <span className="font-semibold ">
+                          Smart Campus
+                        </span>
+                      </p>
                     </span>
                   </Link>
                 </div>
@@ -197,8 +236,6 @@ export default function Navbar({
                     />
                   </Link>
                 </div>
-
-               
               </div>
             </div>
           </header>

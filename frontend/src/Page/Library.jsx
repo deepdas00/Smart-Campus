@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import {
   motion,
   AnimatePresence,
@@ -13,6 +13,7 @@ import {
   BookOpen,
   Search,
   Star,
+  ShieldCheck,
   ArrowRight,
   CheckCircle,
   Clock,
@@ -85,9 +86,6 @@ export default function Library() {
         { withCredentials: true }
       );
 
-      
-      
-
       const { razorpayOrderId, amount, currency, key } = res.data.data;
 
       openLibraryRazorpay({
@@ -102,6 +100,25 @@ export default function Library() {
       toast.error("Unable to start payment");
     }
   };
+
+  const [libraryPolicy, setLibraryPolicy] = useState(null);
+
+  const fetchLibraryPolicy = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/library/policy`, {
+        withCredentials: true,
+      });
+      console.log("policyyyy", res);
+      setLibraryPolicy(res.data?.data || ""); // default to 5 if not provided
+    } catch (err) {
+      console.error("Failed to fetch library policy", err);
+      setLibraryPolicy(""); // safest fallback
+    }
+  };
+
+  useEffect(() => {
+    fetchLibraryPolicy();
+  }, []);
 
   const openLibraryRazorpay = ({
     razorpayOrderId,
@@ -162,7 +179,6 @@ export default function Library() {
   };
 
   const normalizeTransaction = (tx) => ({
-
     id: tx._id,
     qrCode: tx.qrCode,
     issueDate: tx.issueDate ? formatDateTime(tx.issueDate) : "Collect the Book",
@@ -344,6 +360,21 @@ export default function Library() {
   const pendingBooks = issuedBooks.filter((b) => b.status === "pending");
   const collectedBooks = issuedBooks.filter((b) => b.status === "collected");
 
+  const PolicyItem = ({ label, value, danger }) => (
+    <div
+      className={`rounded-xl px-4 py-3 border text-sm font-bold ${
+        danger
+          ? "bg-red-50 border-red-200 text-red-600"
+          : "bg-indigo-50 border-indigo-200 text-indigo-700"
+      }`}
+    >
+      <div className="text-[10px] uppercase tracking-widest opacity-70 mb-1">
+        {label}
+      </div>
+      <div className="text-lg font-black">{value}</div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
       {/* Header */}
@@ -363,14 +394,98 @@ export default function Library() {
       {/*Banner*/}
       <CollegeInfo />
 
-      {/* <button
-                onClick={() => setShowMyBooks(true)}
-                className="fixed top-3 right-[20%] px-4 py-2 bg-blue-700  text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2 z-100"
-              >
-                <BookMarked className="w-5 h-5" />
-                <span className="hidden sm:inline">My Books</span>
-                
-              </button> */}
+      {libraryPolicy && (
+        <div className="max-w-7xl mx-auto px-8 mt-4 ">
+          {/* Container with a subtle "Glass & Steel" aesthetic */}
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            {/* Top Thin Accent Bar */}
+            <div className="h-1 w-full bg-gradient-to-r from-blue-600 via-indigo-500 to-slate-200" />
+
+            <div className="flex flex-col md:flex-row items-center gap-8 p-6">
+              {/* Section Label: Minimalist & Academic */}
+              <div className="flex-shrink-0 md:border-r md:border-slate-100 md:pr-10">
+                <div className="flex items-center gap-2 mb-1">
+                  <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                    Regulatory Framework
+                  </h3>
+                </div>
+                <h2 className="text-xl font-bold text-slate-900 tracking-tight">
+                  Circulation Policy
+                </h2>
+                <p className="text-[10px] font-medium text-slate-400 mt-1 uppercase">
+                  Revised:{" "}
+                  {new Date(libraryPolicy.updatedAt).toLocaleDateString(
+                    "en-GB",
+                    { month: "short", year: "numeric" }
+                  )}
+                </p>
+              </div>
+
+              {/* Policy Data Grid: Professional Metrics */}
+              <div className="flex-1 grid grid-cols-2 lg:grid-cols-4 gap-8 w-full">
+                {[
+                  {
+                    label: "Lending Limit",
+                    value: `${libraryPolicy.maxBooksAllowed} Volumes`,
+                    icon: <BookOpen className="w-3.5 h-3.5" />,
+                  },
+                  {
+                    label: "Standard Term",
+                    value: `${libraryPolicy.returnPeriodDays} Calendar Days`,
+                    icon: <Clock className="w-3.5 h-3.5" />,
+                  },
+                  {
+                    label: "Overdue Rate",
+                    value: `₹${libraryPolicy.finePerDay} / Per Day`,
+                    icon: <AlertCircle className="w-3.5 h-3.5" />,
+                    danger: true,
+                  },
+                  {
+                    label: "Liability Cap",
+                    value: `₹${libraryPolicy.maxFine} Maximum`,
+                    icon: <ShieldCheck className="w-3.5 h-3.5" />,
+                    danger: true,
+                  },
+                ].map((item, idx) => (
+                  <div key={idx} className="relative group">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span
+                        className={`${
+                          item.danger ? "text-rose-500" : "text-blue-500"
+                        } opacity-70`}
+                      >
+                        {item.icon}
+                      </span>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+                        {item.label}
+                      </p>
+                    </div>
+                    <p
+                      className={`text-sm font-black tracking-tight ${
+                        item.danger ? "text-rose-600" : "text-slate-800"
+                      }`}
+                    >
+                      {item.value}
+                    </p>
+                    {/* Vertical Divider for Desktop */}
+                    {idx !== 3 && (
+                      <div className="hidden lg:block absolute -right-4 top-1/2 -translate-y-1/2 h-8 w-px bg-slate-100" />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Help Action */}
+              <div className="hidden xl:block">
+                <button className="text-[10px] font-bold text-slate-400 border border-slate-200 px-4 py-2 rounded-lg hover:bg-slate-50 transition-colors uppercase tracking-tight">
+                  Full Terms
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Book Collection Success */}
       {bookReceived && (
@@ -564,9 +679,9 @@ export default function Library() {
                                 ₹
                               </span>
                               <span className="text-xl font-black tracking-tighter">
-                                {bookingDetails?.paymentStatus === "paid" && (0)}
-                                {bookingDetails?.paymentStatus !== "paid" && (bookingDetails.fineAmount)}
-                                
+                                {bookingDetails?.paymentStatus === "paid" && 0}
+                                {bookingDetails?.paymentStatus !== "paid" &&
+                                  bookingDetails.fineAmount}
                               </span>
                             </div>
                           </div>
@@ -587,8 +702,9 @@ export default function Library() {
                                 ₹
                               </span>
                               <span className="text-xl font-black tracking-tighter">
-                                {bookingDetails?.paymentStatus !== "paid" && (0)}
-                                {bookingDetails?.paymentStatus === "paid" && (bookingDetails.fineAmount)}
+                                {bookingDetails?.paymentStatus !== "paid" && 0}
+                                {bookingDetails?.paymentStatus === "paid" &&
+                                  bookingDetails.fineAmount}
                               </span>
                             </div>
                           </div>
@@ -601,8 +717,9 @@ export default function Library() {
                             <motion.button
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={() => startLibraryFinePayment(bookingDetails?.id)}
-
+                              onClick={() =>
+                                startLibraryFinePayment(bookingDetails?.id)
+                              }
                               className="w-full py-4 bg-red-600 text-white rounded-2xl flex items-center justify-center gap-3 shadow-xl shadow-slate-200 hover:bg-indigo-600 transition-colors group"
                             >
                               <div className="bg-white/40 p-1.5 rounded-lg group-hover:bg-white/20 transition-colors">
@@ -717,9 +834,9 @@ export default function Library() {
                 <div className="space-y-4">
                   {history.map((item) => {
                     const isPending = item.paymentStatus === "pending";
-                    
+
                     const isFined = isPending && item.fineAmount > 0;
-                    
+
                     const isReturn = item.transactionStatus === "return";
 
                     return (
@@ -764,14 +881,14 @@ export default function Library() {
                               {/* Inline Status Badge */}
                               <div className="flex items-center gap-2 mt-3">
                                 <span
-  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
-    item.transactionStatus === "pending"
-      ? "bg-amber-50 text-amber-600 border-amber-200"
-      : item.transactionStatus === "issued"
-      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-      : "bg-indigo-50 text-indigo-600 border-indigo-200"
-  }`}
->
+                                  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
+                                    item.transactionStatus === "pending"
+                                      ? "bg-amber-50 text-amber-600 border-amber-200"
+                                      : item.transactionStatus === "issued"
+                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                                  }`}
+                                >
                                   {item.transactionStatus}
                                 </span>
                               </div>
@@ -968,9 +1085,9 @@ export default function Library() {
         </div>
       )}
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 pb-2 pt-2">
         {/* Stats Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-2">
           <div className="bg-white rounded-xl p-4 shadow-lg">
             <div className="flex items-center space-x-3">
               <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center">
@@ -1043,41 +1160,43 @@ export default function Library() {
 
           <div className="relative mb-8">
             {/* Modern Category Scroller */}
-            <div className="flex gap-4 overflow-x-auto pb-4 px-2 no-scrollbar scroll-smooth">
+            <div className="flex gap-4 overflow-x-auto pb-3 px-2 no-scrollbar scroll-smooth">
               {categories.map((category) => {
                 const isActive = selectedCategory === category.id;
                 return (
-                  <button
-                    key={category.id}
-                    onClick={() => setSelectedCategory(category.id)}
-                    className={`
-            relative flex items-center gap-3 px-8 py-4 rounded-2xl font-bold transition-all duration-300 
-            whitespace-nowrap group
-            ${
-              isActive
-                ? "bg-blue-700 text-white scale-105 z-10 border border-black-950"
-                : "bg-blue-200 text-black border border-black  hover:bg-slate-50 border border-black"
-            }
-          `}
-                  >
-                    {/* Icon with special animation on active */}
-                    <span
-                      className={`text-xl transition-transform duration-500 ${
-                        isActive
-                          ? "scale-125 rotate-12"
-                          : "group-hover:scale-110"
-                      }`}
-                    >
-                      {category.icon}
-                    </span>
+                 <button
+  key={category.id}
+  onClick={() => setSelectedCategory(category.id)}
+  className={`
+    relative flex items-center gap-3 px-5 py-2.5 rounded-xl transition-all duration-300 
+    whitespace-nowrap group overflow-hidden
+    ${
+      isActive
+        ? "bg-blue-900 text-white shadow-lg shadow-slate-200"
+        : "bg-white text-slate-500 border border-slate-200 hover:border-blue-400 hover:text-blue-600 shadow-sm"
+    }
+  `}
+>
+  {/* The Icon: Small, sharp, and purposeful */}
+  <span
+    className={`transition-transform duration-300 ${
+      isActive ? "scale-110 text-blue-400" : "group-hover:scale-110"
+    }`}
+  >
+    {/* If category.icon is a Lucide component, render it with size 16 */}
+    {category.icon} 
+  </span>
 
-                    <span className="tracking-tight">{category.name}</span>
+  {/* Typography: Small caps for an "archival" professional feel */}
+  <span className="text-[11px] font-black uppercase tracking-[0.15em]">
+    {category.name}
+  </span>
 
-                    {/* Hidden "Active Glow" behind the button */}
-                    {isActive && (
-                      <div className="absolute inset-0 bg-orange-500/20 blur-2xl rounded-full -z-10 animate-pulse" />
-                    )}
-                  </button>
+  {/* Minimalist Active Indicator: A thin blue line on the left */}
+  {isActive && (
+    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-4 w-1 bg-blue-500 rounded-r-full" />
+  )}
+</button>
                 );
               })}
             </div>

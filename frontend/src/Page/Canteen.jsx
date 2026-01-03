@@ -69,12 +69,12 @@ export default function Canteen() {
           withCredentials: true,
         });
 
-        console.log("hiii", res);
+     
 
         // assuming backend returns { data: { isActive: true/false } }
         setIsCanteenOpen(res.data?.data);
 
-        console.log(isCanteenOpen);
+      
       } catch (err) {
         console.error("Failed to fetch canteen status", err);
         setIsCanteenOpen(false); // safest fallback
@@ -88,7 +88,7 @@ const fetchCanteenPolicy = async () => {
       const res = await axios.get(`${API_URL}/api/v1/canteen/fetchpolicy`, {
         withCredentials: true,
       });
-      console.log("policyyyy", res);
+ 
       setCanteenPolicy(res.data?.data || ""); // default to 5 if not provided
     } catch (err) {
       console.error("Failed to fetch canteen policy", err);
@@ -226,7 +226,7 @@ const fetchCanteenPolicy = async () => {
         { withCredentials: true }
       );
 
-      console.log(res);
+    
 
       toast.success("Order created! Redirecting to payment…", {
         id: "place-order",
@@ -297,7 +297,7 @@ const fetchCanteenPolicy = async () => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       response;
 
-    console.log("huhhuhuh", razorpay_order_id);
+    
 
     const res = await axios.post(
       `${API_URL}/api/v1/canteen/orders/verify-payment`,
@@ -333,7 +333,7 @@ const fetchCanteenPolicy = async () => {
       time: new Date(createdAt).toLocaleTimeString(),
     });
 
-    console.log(res.data.data);
+  
 
     setCart({});
     setShowCart(false);

@@ -118,7 +118,7 @@ fetchMyReports();
         withCredentials: true,
       });
 
-      console.log(res);
+    
 
       setReports(res.data.data || []);
     } catch (error) {
@@ -208,7 +208,7 @@ const feedbackCount = closed;
 
 // The Engagement Score (How well you are doing)
 
-console.log(closed, resolvedCount);
+
 
 const feedbackRate = resolvedCount > 0 
   ? Math.round((closed / resolvedCount) * 100)

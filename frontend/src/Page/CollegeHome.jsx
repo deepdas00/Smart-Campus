@@ -122,12 +122,12 @@ const notificationFormRef = useRef(null);
 
     // Inspect formData content
     for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+
     }
 
     try {
       const res = await api.post("/college/gallery", formData);
-      console.log("Upload success", res.data);
+    
     } catch (err) {
       console.error("Upload failed", err.response?.data || err);
     }
@@ -136,7 +136,7 @@ const notificationFormRef = useRef(null);
   const fetchGallery = async () => {
     try {
       const res = await api.get("/college/gallery");
-      console.log(res.data.data);
+      
 
       setGallery(res.data.data);
     } catch (err) {
@@ -164,7 +164,7 @@ const fetchNotifications = async () => {
       ...n,
       expireAt: n.expireAt || null,
     }));
-    console.log(res.data.data);
+
     
     setNotices(data);
   } catch (err) {
@@ -226,7 +226,7 @@ const fetchNotifications = async () => {
       const res = await api.get("/college/info-full");
       const data = res.data.data;
 
-      console.log(res.data.data);
+     
 
       setCollegeData({
         code: data.collegeCode || "",
@@ -348,7 +348,7 @@ const updateNotification = async (id, notificationPayload) => {
 
     // Properly log FormData content
     for (let pair of formData.entries()) {
-      console.log(pair[0], pair[1]);
+
     }
 
     const res = await api.patch(`/college/notifications/${id}`, formData, {

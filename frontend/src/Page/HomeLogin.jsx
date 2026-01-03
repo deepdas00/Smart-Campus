@@ -74,7 +74,7 @@ export default function HomeLogin() {
         withCredentials: true,
       });
 
-      console.log(res.data.data);
+
 
       // Expecting array from backend
       setGallery(res.data.data || []);

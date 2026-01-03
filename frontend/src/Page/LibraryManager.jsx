@@ -177,7 +177,7 @@ export function LibraryManager() {
         { withCredentials: true }
       );
 
-      console.log("BOOKS AYA", res.data.data);
+ 
 
       setBooks(res.data.data || []);
     } catch (err) {

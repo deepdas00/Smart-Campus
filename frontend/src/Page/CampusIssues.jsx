@@ -243,7 +243,7 @@ export default function CampusIssues() {
       const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, {
         withCredentials: true,
       });
-      console.log(res.data.data);
+ 
       
       setReports(res.data.data.reports || []);
       setCollegeCode(res.data.data.collegeCode);
@@ -262,7 +262,7 @@ export default function CampusIssues() {
     try {
       setIsUpdating(true);
 
-      console.log(r.status);
+     
       
 
       if (r.status === "submitted") {

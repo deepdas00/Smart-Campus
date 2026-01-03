@@ -33,6 +33,7 @@ import ReportHistory from "./Page/ReportHistory.jsx";
 import { CollegePolicy } from "./Page/CollegePolicy";
 
 import OfficeOverview from "./Page/OfficeOverview.jsx";
+import Teacher from "./Page/Teacher.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -155,6 +156,7 @@ export default function App() {
           <Route path="students" element={<StudentManager />} />
           <Route path="college-info" element={<CollegeHome />} />
           <Route path="college-policy" element={<CollegePolicy />} />
+          <Route path="teacher" element={<Teacher />} />
 
         </Route>
 

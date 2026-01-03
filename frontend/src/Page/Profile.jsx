@@ -109,7 +109,7 @@ export default function App() {
     return orderDate >= startOfDay && orderDate <= endOfDay;
   };
 
-  console.log("TODAY CHECK", isToday(new Date()));
+ 
 
   const todayExpense = orderHistory
     .filter((order) => isToday(order.createdAt))
@@ -121,7 +121,7 @@ export default function App() {
         withCredentials: true,
       });
 
-      console.log("FODD", res);
+     
 
       setCanteenFoods(res.data.data.foods || []);
     };
@@ -133,22 +133,21 @@ export default function App() {
     // Filter for ONLY available food
     // We use Boolean(food.isAvailable) to handle true/false/undefined safely
 
-    console.log(canteenFoods);
-
+  
     const available = canteenFoods.filter((item) => item.isAvailable === true);
 
-    console.log(available);
+
     // If this is for a "Top Picks" or "Preview" section, keep the slice
     // Otherwise, remove .slice(0, 5) to show the full menu
     setPreviewFoods(available.slice(0, 5));
   }, [canteenFoods]);
 
   useEffect(() => {
-    console.log("ooooooooooo", orderHistory);
+   
 
     if (orderHistory.length <= 0) {
       setActiveOrderCount(0);
-      console.log("////////////////////////////////");
+   
 
       return;
     }
@@ -160,13 +159,12 @@ export default function App() {
       (order) => order.status === "order_received"
     );
 
-    console.log("AACCTIIIVEEE", activeOrders);
-
+  
     setActiveOrderCount(activeOrders.length);
   }, [orderHistory]);
 
   const fetchCurrentStudent = async () => {
-    console.log("hiiiii");
+
 
     const res = await axios.get(`${API_URL}/api/v1/users/student/profile `, {
       withCredentials: true,
@@ -180,7 +178,7 @@ export default function App() {
     const loadStudent = async () => {
       try {
         const data = await fetchCurrentStudent();
-        console.log(data);
+     
 
         setStudent(data);
       } catch (err) {
@@ -287,7 +285,7 @@ export default function App() {
         //    await axios.post(`${API_URL}/api/v1/library/return/verify`, response);
         //    refreshHistory();
         // });
-        console.log("Fine Payment Required:", orderRes.data);
+      
       } else {
         // If no fine, the student usually just goes to the librarian to scan QR
         alert("Please visit the librarian to finalize the return via QR Scan.");

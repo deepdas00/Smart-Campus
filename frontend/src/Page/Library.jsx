@@ -78,7 +78,7 @@ export default function Library() {
 
   const startLibraryFinePayment = async (transactionId) => {
     try {
-      console.log("TRRARARARA", transactionId);
+
 
       const res = await axios.patch(
         `${API_URL}/api/v1/library/return/pay/${transactionId}`,
@@ -108,7 +108,7 @@ export default function Library() {
       const res = await axios.get(`${API_URL}/api/v1/library/policy`, {
         withCredentials: true,
       });
-      console.log("policyyyy", res);
+ 
       setLibraryPolicy(res.data?.data || ""); // default to 5 if not provided
     } catch (err) {
       console.error("Failed to fetch library policy", err);
@@ -168,7 +168,7 @@ export default function Library() {
       { withCredentials: true }
     );
 
-    console.log("RESSSSSSSS", res);
+    
 
     // Update UI after payment
     setBookingDetails((prev) => ({
@@ -193,8 +193,7 @@ export default function Library() {
   const issueBook = async (book) => {
     try {
       const token = Cookies.get("accessToken");
-      console.log("Token:", token);
-      console.log("Issuing book ID:", book.id);
+
 
       const res = await axios.post(
         `${API_URL}/api/v1/library/order`,
@@ -234,10 +233,9 @@ export default function Library() {
         }
       );
 
-      console.log("/////////////////////////////////", data);
 
       if (data?.success) {
-        console.log("BOOKKK ayooo", normalizeTransaction(data.data));
+
 
         setBookingDetails(normalizeTransaction(data.data));
         setBookingSuccess(true);
@@ -255,7 +253,7 @@ export default function Library() {
     try {
       const token = Cookies.get("accessToken"); // or localStorage.getItem("token")
 
-      console.log("Tokennnnn", token);
+   
 
       const res = await axios.get(`${API_URL}/api/v1/library/my/history`, {
         headers: {
@@ -264,7 +262,7 @@ export default function Library() {
         withCredentials: true,
       });
 
-      // console.log("History:", res.data);
+    
       setHistory(res.data.data);
     } catch (error) {
       console.error("Failed to fetch history", error);
@@ -311,7 +309,7 @@ export default function Library() {
 
         const token = Cookies.get("accessToken");
 
-        console.log("from the fetched Book", token);
+      
 
         const res = await axios.get(`${API_URL}/api/v1/library/books`, {
           headers: {
@@ -322,7 +320,7 @@ export default function Library() {
 
         const rawBooks = res.data?.data || [];
 
-        console.log(rawBooks);
+    
 
         const formattedBooks = normalizeBooks(rawBooks);
 

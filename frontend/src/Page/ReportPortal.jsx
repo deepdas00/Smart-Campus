@@ -200,7 +200,7 @@ const handleSubmit = async () => {
       }
     );
 
-    console.log("Report created:", res.data);
+ 
     setStep(3);
   } catch (error) {
     console.error("CREATE REPORT ERROR:", error);

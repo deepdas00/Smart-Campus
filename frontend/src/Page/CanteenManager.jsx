@@ -168,7 +168,7 @@ autoTable(doc, {
           `${import.meta.env.VITE_API_URL}/api/v1/canteen/foods`,
           { withCredentials: true }
         );
-        console.log(res.data.data.foods);
+      
 
         setFoods(res.data.data.foods || []);
       } catch (error) {

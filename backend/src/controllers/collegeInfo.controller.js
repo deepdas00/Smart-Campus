@@ -4,6 +4,8 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeInfoModel } from "../models/colllegeInfo.model.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { getCollegeDepartmentModel } from "../models/collegeDepartment.model.js";
 
 export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
 
@@ -16,15 +18,12 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     contactPersonName,
     contactNumber,
     principalName,
-    departmentName,
     description,
     isAutonomous,
     universityName
   } = req.body;
 
-  if (!Array.isArray(departmentName) || departmentName.length === 0) {
-    return res.status(400).json({message:"departmentName must be a non-empty array"});
-  }
+  
 
   // Resolve college
   const masterConn = connectMasterDB();
@@ -49,10 +48,11 @@ export const createOrUpdateCollegeInfo = asyncHandler(async (req, res) => {
     officialEmail,
     address,
     NAAC,
+    isAutonomous,
+    universityName,
     contactPersonName,
     contactNumber,
     principalName,
-    departmentName,
     description,
     isAutonomous,
     universityName
@@ -111,40 +111,43 @@ export const getCollegeLimitedInfo = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const CollegeInfo = getCollegeInfoModel(collegeConn);
+  const Department = getCollegeDepartmentModel(collegeConn);
 
-  const collegeInfo = await CollegeInfo.findOne({ collegeCode }).select("collegeCode collegeName officialEmail address logo description")
   
-  
+  const collegeInfo = await CollegeInfo.findOne({ collegeCode }).select("collegeCode collegeName officialEmail address logo description principalName NAAC registrationNumber");
+
+  // also fetching all departments name
+  const departments = await Department.find().sort({ departmentName: 1 });
   
   if (!collegeInfo) throw new ApiError(404, "College information not found");
 
   res.status(200).json(
-    new ApiResponse(200, collegeInfo, "College limited information fetched successfully")
+    new ApiResponse(200, {collegeInfo,departments}, "College limited information fetched successfully")
   );
 });
 
 
-//department fetch  
-export const getDepartments = asyncHandler(async (req, res) => {
+// //department fetch  
+// export const getDepartments = asyncHandler(async (req, res) => {
 
-  const { collegeCode } = req.params;
+//   const { collegeCode } = req.params;
   
-  const masterConn = connectMasterDB();
-  const College = getCollegeModel(masterConn);
+//   const masterConn = connectMasterDB();
+//   const College = getCollegeModel(masterConn);
 
-  const college = await College.findOne({ collegeCode, status: "active" });
-  if (!college) throw new ApiError(404, "College not found");
+//   const college = await College.findOne({ collegeCode, status: "active" });
+//   if (!college) throw new ApiError(404, "College not found");
 
-  const collegeConn = getCollegeDB(college.dbName);
-  const CollegeInfo = getCollegeInfoModel(collegeConn);
+//   const collegeConn = getCollegeDB(college.dbName);
+//   const CollegeInfo = getCollegeInfoModel(collegeConn);
 
-  const info = await CollegeInfo.findOne();
-  const departments = info.departmentName
-  res.status(200).json({
-    departments,
-    message:"Departments fetched Successfully"
-  })
-});
+//   const info = await CollegeInfo.findOne();
+//   const departments = info.departmentName
+//   res.status(200).json({
+//     departments,
+//     message:"Departments fetched Successfully"
+//   })
+// });
 
 
 

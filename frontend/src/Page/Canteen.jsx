@@ -81,12 +81,26 @@ export default function Canteen() {
       }
     };
 
+    const [canteenPolicy, setCanteenPolicy] = useState(null);
 
+const fetchCanteenPolicy = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/canteen/fetchpolicy`, {
+        withCredentials: true,
+      });
+      console.log("policyyyy", res);
+      setCanteenPolicy(res.data?.data || ""); // default to 5 if not provided
+    } catch (err) {
+      console.error("Failed to fetch canteen policy", err);
+      setCanteenPolicy(""); // safest fallback
+    }
+  };
 
 
   useEffect(() => {
     
     fetchCanteenStatus();
+    fetchCanteenPolicy();
 
     const intervalId = setInterval(fetchCanteenStatus, 5 * 60 * 1000);
 
@@ -593,7 +607,7 @@ export default function Canteen() {
               <Clock className="w-4 h-4 text-gray-500" />
               <span className="font-medium">Open</span>
               <span className="text-gray-400">|</span>
-              <span>7 AM – 9 PM</span>
+              <span>{canteenPolicy?.openingTime}  –  {canteenPolicy?.closingTime}</span>
             </div>
           </div>
 

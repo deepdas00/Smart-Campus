@@ -22,7 +22,7 @@ import { useAuth } from "../context/AuthContext";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../assets/logo.png";
 export default function ProfileSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +32,8 @@ export default function ProfileSidebar({ isOpen, onClose }) {
   const [rollNo, setRollNo] = useState(user?.rollNo);
   const [shortName, setShortName] = useState("");
 
+
+  
   useEffect(() => {
     if (user?.studentName) {
       const words = user.studentName.trim().split(" "); // split by space
@@ -96,12 +98,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <Utensils className="w-5 h-5" />,
         color: "green",
       },
-      {
-        to: "/",
-        label: "Settings",
-        icon: <ShieldAlert className="w-5 h-5" />,
-        color: "blue",
-      },
+      
     ],
 
     librarian: [
@@ -117,12 +114,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <Book className="w-5 h-5" />,
         color: "orange",
       },
-      {
-        to: "/",
-        label: "Settings",
-        icon: <ShieldAlert className="w-5 h-5" />,
-        color: "blue",
-      },
+     
     ],
 
     admin: [
@@ -138,12 +130,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <BookTemplate className="w-5 h-5" />,
         color: "blue",
       },
-      {
-        to: "/",
-        label: "Settings",
-        icon: <ShieldAlert className="w-5 h-5" />,
-        color: "blue",
-      },
+      
     ],
   };
 
@@ -321,6 +308,13 @@ export default function ProfileSidebar({ isOpen, onClose }) {
                 activeColor="bg-red-50 text-red-600"
                 onClose={onClose}
               />
+              <SidebarItem
+                to="/"
+                icon={<img src={logo} alt="Smart Campus Logo" className="w-5 h-5" />}
+                label="About Smart Campus"
+                color="#ff0000"
+                activeColor="bg-blue-50 text-blue-600"
+              />
               <LogoutItem
                 icon={<LogOut className="w-5 h-5" />}
                 label="Logout"
@@ -344,11 +338,24 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
             {/* Logout always visible */}
             {user?.role !== "student" && (
+              <>
+
+              <SidebarItem
+                to="/"
+                icon={<img src={logo} alt="Smart Campus Logo" className="w-5 h-5" />}
+                label="About Smart Campus"
+                color="#ff0000"
+                activeColor="bg-blue-50 text-blue-600"
+              />
+
+
               <LogoutItem
                 icon={<LogOut className="w-5 h-5" />}
                 label="Logout"
                 onLogout={handleLogout}
               />
+              </>
+              
             )}
           </div>
         </div>

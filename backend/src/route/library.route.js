@@ -16,6 +16,7 @@ import { fetchlibraryTransactionDetails,
   getStudentLibraryHistory, 
   issueBook, 
   notifyReturnReminders, 
+  // notifyReturnReminders, 
   orderBook, 
   returnBook
 } from "../controllers/library/libraryTransaction.controller.js";
@@ -40,7 +41,7 @@ router.post(
 router.get(
   "/policy",
   verifyJWT,
-  authorizeRoles("admin","librarian"),
+  authorizeRoles("admin","librarian", "student"),
   fetchLibraryPolicy
 );
 
@@ -170,6 +171,7 @@ router.get(
   authorizeRoles("librarian", "admin"),
   notifyReturnReminders
 );
+
 
 
 export default router;

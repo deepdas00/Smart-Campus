@@ -8,6 +8,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 import { getStudentModel } from "../../models/collegeStudent.model.js";
+import { log } from "console";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
@@ -360,6 +361,9 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 // });
 
 export const canteenSatusFetch = asyncHandler(async (req, res) => {
+  
+  console.log("HELLO BHAIYAAAA");
+  
   const { collegeCode } = req.user;
 
   // 1️⃣ Resolve college DB
@@ -382,6 +386,7 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
 
   const canteenStatus = canteenPolicy.isActive;
 
+  
   res
     .status(200)
     .json(

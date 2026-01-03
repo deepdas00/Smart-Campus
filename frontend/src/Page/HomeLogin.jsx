@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import axios from "axios";
 import {
   ImageIcon,
   X,
@@ -22,16 +23,28 @@ import {
   Layers,
 } from "lucide-react";
 
+import { useAuth } from "../context/AuthContext";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar/Navbar";
 import CollegeInfo from "../Components/CollegeInfo";
 import HomepageHeaderCollegeInfo from "../Components/HomepageHeaderCollegeInfo";
 import Collaboration from "./Collaboration";
+import { Link, Links } from "react-router-dom";
+import { toast } from "react-hot-toast";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function HomeLogin() {
   const scrollRef = useRef(null);
+  const [selectedNote, setSelectedNote] = useState(null);
   const [scrollProgress, setScrollProgress] = useState(0);
-  const [showPopup , setShowPopup ] = useState(0);
+  const [showPopup, setShowPopup] = useState(0);
+  const [shortName, setShortName] = useState("Alex Saff");
+  const [gallery, setGallery] = useState([]);
+  const [loadingGallery, setLoadingGallery] = useState(true);
+  const [open, setOpen] = useState(false);
+
+  const { user } = useAuth();
 
   const handleScroll = () => {
     if (scrollRef.current) {
@@ -41,30 +54,64 @@ export default function HomeLogin() {
     }
   };
 
-  const galleryIds = [
-    "1562774053-701939374585",
-    "1766310549540-2de9da114f2b",
-    "1766365076306-419d3349ba12",
-    "1759338584492-ad1dbbffd96d",
-    "1523240795612-9a054b0db644",
-    "1517245386807-bb43f82c33c4",
-    "1503676260728-1c00da094a0b",
-    "1492538368677-f6e0afe31dcc"
-  ];
+  const previewGallery = gallery.slice(0, 5);
+  const fullGallery = gallery;
 
-  const extendedGallery = galleryIds.map((id, i) => ({
-    id: i,
-    url: `https://images.unsplash.com/photo-${id}?w=800&auto=format&fit=crop`,
-    title: `Campus Space ${i + 1}`
-  }));
+  useEffect(() => {
+    if (user?.studentName) {
+      const words = user.studentName.trim().split(" "); // split by space
+      if (words.length === 1) {
+        setShortName(words[0]); // only one word
+      } else {
+        setShortName(words[0][0] + words[1][0]); // first letters of first + second word
+      }
+    }
+  }, [user]);
 
-  const notices = [
-    { id: 1, title: "Semester Results Out", date: "26 Dec", type: "Exam" },
-    { id: 2, title: "Hackathon 2025", date: "24 Dec", type: "Event" },
-    { id: 3, title: "New AI Research Lab", date: "22 Dec", type: "Lab" },
-    { id: 4, title: "Placement: Google", date: "18 Dec", type: "Jobs" },
-    { id: 5, title: "Winter Tech Fest", date: "15 Dec", type: "Fest" },
-  ];
+  const fetchGallery = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/college/gallery`, {
+        withCredentials: true,
+      });
+
+      console.log(res.data.data);
+
+      // Expecting array from backend
+      setGallery(res.data.data || []);
+    } catch (err) {
+      console.error("Fetch gallery failed", err);
+      toast.error("Failed to load campus gallery");
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchGallery();
+  }, [user]);
+
+  const [notices, setNotices] = useState([]);
+  const fetchNotifications = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/college/notifications`, {
+        withCredentials: true,
+      });
+
+      // Expecting array from backend
+      setNotices(res.data.data || []);
+    } catch (err) {
+      console.error("Fetch gallery failed", err);
+      toast.error("Failed to load campus gallery");
+    } finally {
+      setLoadingGallery(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchNotifications();
+  }, [user]);
 
   return (
     <div className="min-h-screen font-sans text-[#1E293B] bg-white overflow-x-hidden">
@@ -131,7 +178,9 @@ export default function HomeLogin() {
               </div>
               <h1 className="text-5xl font-black tracking-tighter text-slate-900">
                 Welcome back, <br />
-                <span className="text-blue-600 italic">Champ Alex!</span>
+                <span className="text-blue-600 italic">
+                  Champ {user?.studentName || "Alex"}!
+                </span>
               </h1>
             </div>
 
@@ -152,6 +201,7 @@ export default function HomeLogin() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-stretch">
             {[
               {
+                link: "/canteen",
                 icon: Coffee,
                 title: "Digital Canteen",
                 color: "orange-500",
@@ -159,6 +209,7 @@ export default function HomeLogin() {
                 style: "stagger-1",
               },
               {
+                link: "/library",
                 icon: BookOpen,
                 title: "Digital Library",
                 color: "blue-600",
@@ -166,6 +217,7 @@ export default function HomeLogin() {
                 style: "stagger-2",
               },
               {
+                link: "/profile",
                 icon: User,
                 title: "My Profile",
                 color: "slate-900",
@@ -173,26 +225,14 @@ export default function HomeLogin() {
                 style: "stagger-3",
               },
             ].map((tile, idx) => (
-              <div
-                key={idx}
-                className={`group relative bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
-              >
-                {/* THE TOP HOVER LINE - FIXED OVERFLOW */}
+              <Link to={tile.link} key={idx}>
                 <div
-                  className={`absolute top-0 left-0 w-full h-2 transition-transform duration-500 scale-x-0 group-hover:scale-x-100`}
-                  style={{
-                    backgroundColor:
-                      tile.icon === Coffee
-                        ? "#f97316"
-                        : tile.icon === BookOpen
-                        ? "#2563eb"
-                        : "#0f172a",
-                  }}
-                ></div>
-
-                <div className="relative z-10 flex flex-col h-full">
+                  key={idx}
+                  className={`group relative bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
+                >
+                  {/* THE TOP HOVER LINE - FIXED OVERFLOW */}
                   <div
-                    className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}
+                    className={`absolute top-0 left-0 w-full h-2 transition-transform duration-500 scale-x-0 group-hover:scale-x-100`}
                     style={{
                       backgroundColor:
                         tile.icon === Coffee
@@ -201,77 +241,95 @@ export default function HomeLogin() {
                           ? "#2563eb"
                           : "#0f172a",
                     }}
-                  >
-                    <tile.icon size={30} />
-                  </div>
+                  ></div>
 
-                  <h3 className="text-xl font-black text-slate-800 tracking-tight mb-3">
-                    {tile.title}
-                  </h3>
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div
+                      className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}
+                      style={{
+                        backgroundColor:
+                          tile.icon === Coffee
+                            ? "#f97316"
+                            : tile.icon === BookOpen
+                            ? "#2563eb"
+                            : "#0f172a",
+                      }}
+                    >
+                      <tile.icon size={30} />
+                    </div>
 
-                  <p className="text-slate-500 text-sm leading-relaxed font-medium flex-grow">
-                    {tile.desc}
-                  </p>
+                    <h3 className="text-xl font-black text-slate-800 tracking-tight mb-3">
+                      {tile.title}
+                    </h3>
 
-                  <div
-                    className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{
-                      color:
-                        tile.icon === Coffee
-                          ? "#f97316"
-                          : tile.icon === BookOpen
-                          ? "#2563eb"
-                          : "#0f172a",
-                    }}
-                  >
-                    Open Module <ArrowRight size={14} />
+                    <p className="text-slate-500 text-sm leading-relaxed font-medium flex-grow">
+                      {tile.desc}
+                    </p>
+
+                    <div
+                      className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        color:
+                          tile.icon === Coffee
+                            ? "#f97316"
+                            : tile.icon === BookOpen
+                            ? "#2563eb"
+                            : "#0f172a",
+                      }}
+                    >
+                      Open Module <ArrowRight size={14} />
+                    </div>
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
           {/* SECONDARY ROW: WIDGETS */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {/* ORDER HISTORY */}
-            <div className="group bg-white p-3 rounded-[2.5rem] shadow-xl shadow-blue-900/5 flex items-center border border-white hover:border-purple-200 transition-all duration-500 cursor-pointer">
-              <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center text-white shrink-0 shadow-lg shadow-purple-100 group-hover:rotate-6 transition-transform">
-                <ShoppingBag size={28} />
+            <Link to="/orders">
+              <div className="group bg-white p-3 rounded-[2.5rem] shadow-xl shadow-blue-900/5 flex items-center border border-white hover:border-purple-200 transition-all duration-500 cursor-pointer">
+                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center text-white shrink-0 shadow-lg shadow-purple-100 group-hover:rotate-6 transition-transform">
+                  <ShoppingBag size={28} />
+                </div>
+                <div className="px-8 flex-1">
+                  <h4 className="font-black text-slate-800 text-lg uppercase italic tracking-tighter">
+                    Order History
+                  </h4>
+                  <p className="text-slate-400 text-[10px] font-bold tracking-widest mt-1">
+                    LATEST UPDATED: 2 MINS AGO
+                  </p>
+                </div>
+                <div className="pr-8 text-purple-300 group-hover:text-purple-600 transition-colors">
+                  <ChevronRight size={28} />
+                </div>
               </div>
-              <div className="px-8 flex-1">
-                <h4 className="font-black text-slate-800 text-lg uppercase italic tracking-tighter">
-                  Order History
-                </h4>
-                <p className="text-slate-400 text-[10px] font-bold tracking-widest mt-1">
-                  LATEST UPDATED: 2 MINS AGO
-                </p>
-              </div>
-              <div className="pr-8 text-purple-300 group-hover:text-purple-600 transition-colors">
-                <ChevronRight size={28} />
-              </div>
-            </div>
+            </Link>
 
             {/* SOS HUB */}
-            <div className="group bg-rose-600 p-3 rounded-[2.5rem] shadow-2xl shadow-rose-900/20 flex items-center border border-rose-500 hover:bg-rose-700 transition-all duration-500 cursor-pointer">
-              <div className="w-20 h-20 bg-white rounded-3xl flex flex-col items-center justify-center text-rose-600 shrink-0 shadow-sm group-hover:scale-90 transition-transform">
-                <AlertTriangle size={28} className="animate-pulse" />
+            <Link to="/report">
+              <div className="group bg-rose-600 p-3 rounded-[2.5rem] shadow-2xl shadow-rose-900/20 flex items-center border border-rose-500 hover:bg-rose-700 transition-all duration-500 cursor-pointer">
+                <div className="w-20 h-20 bg-white rounded-3xl flex flex-col items-center justify-center text-rose-600 shrink-0 shadow-sm group-hover:scale-90 transition-transform">
+                  <AlertTriangle size={28} className="animate-pulse" />
+                </div>
+                <div className="px-8 flex-1">
+                  <h4 className="font-black text-white text-lg uppercase italic tracking-tighter">
+                    SOS Hub
+                  </h4>
+                  <p className="text-rose-100 text-[10px] font-bold tracking-widest mt-1 opacity-70">
+                    EMERGENCY ASSISTANCE
+                  </p>
+                </div>
+                <div className="pr-8 text-white flex items-center gap-3">
+                  <Camera
+                    size={24}
+                    className="opacity-50 group-hover:opacity-100 transition-opacity"
+                  />
+                  <ChevronRight size={28} />
+                </div>
               </div>
-              <div className="px-8 flex-1">
-                <h4 className="font-black text-white text-lg uppercase italic tracking-tighter">
-                  SOS Hub
-                </h4>
-                <p className="text-rose-100 text-[10px] font-bold tracking-widest mt-1 opacity-70">
-                  EMERGENCY ASSISTANCE
-                </p>
-              </div>
-              <div className="pr-8 text-white flex items-center gap-3">
-                <Camera
-                  size={24}
-                  className="opacity-50 group-hover:opacity-100 transition-opacity"
-                />
-                <ChevronRight size={28} />
-              </div>
-            </div>
+            </Link>
           </div>
         </div>
       </section>
@@ -312,66 +370,69 @@ export default function HomeLogin() {
           </div>
 
           {/* THE MOSAIC GRID - Height reduced to 550px for decent showing */}
+          {/* PREVIEW GALLERY (ONLY 4–5 IMAGES) */}
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-auto md:h-[550px]">
-            {/* 1. Large Feature Card */}
-            <div className="md:col-span-4 md:row-span-2 relative group overflow-hidden rounded-[2.5rem] shadow-xl bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1766430677995-a60227a65a3e?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzMXx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover transition-transform duration-[2s] group-hover:scale-110"
-                alt="Main Campus"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-900/90 via-blue-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
-              <div className="absolute bottom-8 left-8 right-8 transform translate-y-6 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2">
-                  Architecture
-                </p>
-                <h4 className="text-white text-2xl font-black italic uppercase tracking-tighter">
-                  The Innovation Hub
-                </h4>
-              </div>
-            </div>
+            {loadingGallery ? (
+              <p className="text-center text-slate-400">Loading gallery...</p>
+            ) : (
+              previewGallery.map((img, index) => (
+                <div
+                  key={img._id}
+                  className={`relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200
+        ${
+          index === 0
+            ? "md:col-span-4 md:row-span-2"
+            : index === 1
+            ? "md:col-span-5"
+            : index === 2
+            ? "md:col-span-3"
+            : index === 3
+            ? "md:col-span-3"
+            : "md:col-span-5 bg-blue-600 cursor-pointer"
+        }
+      `}
+                  onClick={index === 4 ? () => setShowPopup(true) : undefined}
+                >
+                  {index === 4 ? (
+                    /* 150+ CARD */
+                    <div className="h-full flex items-center justify-between p-8 text-white">
+                      <div>
+                        <p className="text-5xl font-black italic">150+</p>
+                        <p className="text-[11px] uppercase tracking-widest opacity-80">
+                          Interactive Spaces
+                        </p>
+                      </div>
+                      <ArrowRight size={36} />
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={img.image}
+                        alt={img.description}
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                      />
 
-            {/* 2. Top Wide Card */}
-            <div className="md:col-span-5 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839257287-3030c9300ece?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHwzNnx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-                alt="Digital Plaza"
-              />
-              <div className="absolute inset-0 bg-blue-600/10 group-hover:bg-transparent transition-colors"></div>
-            </div>
+                      {/* DESCRIPTION OVERLAY */}
+                      <div
+                        className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent 
+                          opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 flex flex-col justify-end"
+                      >
+                        <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                          Campus Life
+                        </p>
+                        <h4 className="text-white text-xl font-black italic uppercase">
+                          {img.description}
+                        </h4>
 
-            {/* 3. Top Small Card */}
-            <div className="md:col-span-3 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839258239-2be2146f1605?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1MHx8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover transition-all duration-700 group-hover:rotate-2 group-hover:scale-110"
-                alt="Study Zone"
-              />
-            </div>
-
-            {/* 4. Bottom Row - Left (Small Square) */}
-            <div className="md:col-span-3 md:row-span-1 relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200">
-              <img
-                src="https://images.unsplash.com/photo-1761839262867-af53d08b0eb5?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDF8MHxmZWF0dXJlZC1waG90b3MtZmVlZHw1N3x8fGVufDB8fHx8fA%3D%3D"
-                className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
-                alt="Tech Library"
-              />
-            </div>
-
-            {/* 5. Bottom Row - Right (Wide Info Card) */}
-            <div
-              onClick={() => setShowPopup(true)}
-              className="md:col-span-5 md:row-span-1 bg-blue-600 rounded-[2.5rem] p-8 flex items-center justify-between text-white group cursor-pointer hover:bg-blue-700 transition-all shadow-xl"
-            >
-              <div className="space-y-1">
-                <p className="text-5xl font-black italic tracking-tighter leading-none">150+</p>
-                <p className="text-[11px] font-bold uppercase tracking-[0.2em] opacity-80">Interactive Spaces</p>
-              </div>
-              <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 group-hover:rotate-12 transition-all">
-                <ArrowRight size={32} />
-              </div>
-            </div>
+                        <h4 className="text-gray-400 flex w-full text-[11px] font-black items-end justify-end">
+                          {new Date(img.createdAt).toLocaleDateString()}
+                        </h4>
+                      </div>
+                    </>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           {/* Interactive Pagination Look */}
@@ -443,7 +504,7 @@ export default function HomeLogin() {
           >
             {notices.map((note) => (
               <div
-                key={note.id}
+                key={note._id}
                 className="min-w-[340px] md:min-w-[440px] snap-center"
               >
                 <div className="group relative bg-white p-10 rounded-[3rem] border-2 border-slate-100 hover:border-blue-600 transition-all duration-500 shadow-xl shadow-slate-200/50 hover:shadow-blue-500/10 h-full flex flex-col">
@@ -459,10 +520,12 @@ export default function HomeLogin() {
                     <div className="w-2 h-8 bg-blue-600 rounded-full"></div>
                     <div>
                       <span className="text-[10px] font-black uppercase text-blue-600 tracking-widest block">
-                        {note.type}
+                        {note.category}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                        {note.date}
+                        {new Date(note.updatedAt)
+                          .toLocaleDateString("en-GB")
+                          .replaceAll("/", "-")}
                       </span>
                     </div>
                   </div>
@@ -473,14 +536,19 @@ export default function HomeLogin() {
                       {note.title}
                     </h4>
                     <p className="text-slate-500 text-sm leading-relaxed font-medium">
-                      System synchronization and digital resource updates are
-                      now being deployed across the campus cloud.
+                      {note.description}
                     </p>
                   </div>
 
                   {/* Action Area */}
                   <div className="mt-12 flex items-center justify-between">
-                    <button className="flex items-center gap-3 text-slate-900 font-black text-[10px] uppercase tracking-[0.3em] group/btn">
+                    <button
+                      onClick={() => {
+                        setSelectedNote(note);
+                        setOpen(true);
+                      }}
+                      className="flex items-center gap-3 text-slate-900 font-black text-[10px] uppercase tracking-[0.3em] group/btn"
+                    >
                       <span className="bg-slate-900 text-white p-2 rounded-xl group-hover/btn:bg-blue-600 group-hover/btn:scale-110 transition-all">
                         <ArrowRight size={14} />
                       </span>
@@ -502,6 +570,82 @@ export default function HomeLogin() {
           </div>
         </div>
       </section>
+
+      {open && selectedNote && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop with Blur */}
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Modal Container */}
+          <div className="relative bg-white overflow-hidden rounded-[2rem] w-full max-w-lg shadow-2xl animate-in fade-in zoom-in duration-300">
+            {/* Image Header (If pic exists) */}
+            {selectedNote.pic && (
+              <div className="h-56 w-full overflow-hidden">
+                <img
+                  src={selectedNote.pic}
+                  alt={selectedNote.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
+            <div className="p-8">
+              {/* Category Badge & Date */}
+              <div className="flex justify-between items-center mb-4">
+                <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider">
+                  {selectedNote.category}
+                </span>
+                <p className="text-xs text-slate-400 font-medium">
+                  {new Date(selectedNote.updatedAt).toLocaleDateString(
+                    "en-GB",
+                    {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+              </div>
+
+              {/* Content */}
+              <h2 className="text-2xl font-black text-slate-800 leading-tight">
+                {selectedNote.title}
+              </h2>
+
+              <p className="mt-4 text-slate-600 leading-relaxed">
+                {selectedNote.description}
+              </p>
+
+              {/* Action Buttons */}
+              <div className="mt-8 flex gap-3">
+                <button
+                  onClick={() => setOpen(false)}
+                  className="flex-1 py-3 px-6 bg-slate-900 text-white font-bold rounded-2xl hover:bg-slate-800 transition-colors shadow-lg shadow-slate-200"
+                >
+                  Got it
+                </button>
+                <button
+                  onClick={() => setOpen(false)}
+                  className="py-3 px-6 bg-slate-100 text-slate-500 font-bold rounded-2xl hover:bg-slate-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+
+            {/* Close "X" Button (Top Right) */}
+            <button
+              onClick={() => setOpen(false)}
+              className="absolute top-4 right-4 bg-white/20 backdrop-blur-md hover:bg-white/40 text-white w-8 h-8 rounded-full flex items-center justify-center transition-all"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      )}
 
       <hr className="border-slate-100" />
 
@@ -609,68 +753,77 @@ export default function HomeLogin() {
           </div>
         </div>
       </section>
+
       {showPopup && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
-            <div className="absolute inset-0 bg-slate-900/95 backdrop-blur-[1px]" onClick={() => setShowPopup(false)}></div>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
+          <div
+            className="absolute inset-0 bg-slate-900/95 backdrop-blur-[1px]"
+            onClick={() => setShowPopup(false)}
+          ></div>
 
-            <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
-
-              {/* Header */}
-              <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
-                <div className="flex items-center gap-4">
-                  <div className="bg-blue-600 p-2 rounded-1xl text-white">
-                    <ImageIcon size={28} />
-                  </div>
-                  <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
-                    Student <span className="text-blue-600">Gallery</span>
-                  </h3>
+          <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
+            {/* Header */}
+            <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-600 p-2 rounded-1xl text-white">
+                  <ImageIcon size={28} />
                 </div>
-                <button
-                  onClick={() => setShowPopup(false)}
-                  className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
-                >
-                  <X size={30} />
-                </button>
+                <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
+                  Student <span className="text-blue-600">Gallery</span>
+                </h3>
               </div>
+              <button
+                onClick={() => setShowPopup(false)}
+                className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
+              >
+                <X size={30} />
+              </button>
+            </div>
 
-              {/* INTERACTIVE POPUP GRID */}
-              <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar group/gallery">
-                {/* We use gap-y-24 for huge vertical gaps and gap-x-12 for horizontal */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
-                  {extendedGallery.map((img) => (
-                    <div
-                      key={img.id}
-                      className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 transition-all duration-700 
-                         group-hover/gallery:blur-[0.4px] group-hover/gallery:opacity-40 group-hover/gallery:scale-[0.95]
-                         hover:!blur-none hover:!scale-110 hover:!opacity-100 hover:z-20 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20"
-                    >
-                      <img
-                        src={img.url}
-                        className="w-full h-full object-cover"
-                        alt={img.title}
-                      />
-
-                      {/* Info Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-transparent to-transparent opacity-0 hover:opacity-50 transition-all duration-500 flex flex-col justify-end p-3">
-                        <p className="text-blue-400 text-[9px] font-black uppercase tracking-[0.3em] mb-1">Campus Life</p>
-                        <span className="text-white text-sm font-bold uppercase tracking-widest">{img.title}</span>
-                      </div>
+            {/* INTERACTIVE POPUP GRID */}
+            <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar group/gallery">
+              {/* We use gap-y-24 for huge vertical gaps and gap-x-12 for horizontal */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
+                {fullGallery.map((img) => (
+                  <div
+                    key={img._id}
+                    className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50
+               hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
+                  >
+                    <img
+                      src={img.image}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
+                      <p className="text-blue-400 text-[9px] uppercase tracking-widest">
+                        Campus Life
+                      </p>
+                      <p className="text-white font-bold text-sm">
+                        {img.description ? img.description : ""}
+                      </p>
+                      <h4 className="text-gray-400 flex w-full text-[11px] font-black items-end justify-end">
+                        {img.createdAt
+                          ? new Date(img.createdAt).toLocaleDateString()
+                          : ""}
+                      </h4>
                     </div>
-                  ))}
-                </div>
-
-                {/* Extra Bottom Padding to ensure the last row has gap below it */}
-                <div className="h-24"></div>
+                  </div>
+                ))}
               </div>
 
-              <div className="p-6 bg-white border-t border-slate-50 text-center">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-                  Scroll to Explore • Hover to Focus
-                </p>
-              </div>
+              {/* Extra Bottom Padding to ensure the last row has gap below it */}
+              <div className="h-24"></div>
+            </div>
+
+            <div className="p-6 bg-white border-t border-slate-50 text-center">
+              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+                Scroll to Explore • Hover to Focus
+              </p>
             </div>
           </div>
-        )}
+        </div>
+      )}
+
       <Footer />
     </div>
   );

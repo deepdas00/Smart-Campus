@@ -330,7 +330,7 @@ export default function CampusIssues() {
   const DetailBadge = ({ label, value, icon: Icon }) => {
     if (!value || value === "" || value === "N/A") return null;
     return (
-      <div className="flex flex-col p-4 rounded-2xl bg-slate-50 border border-slate-100">
+      <div className="flex flex-col p-4 rounded-2xl bg-slate-50 border border-slate-100 break-words whitespace-normal">
         <div className="text-indigo-500 mb-1 flex items-center gap-2">
           {Icon}{" "}
           <span className="text-[10px] font-black text-slate-400 uppercase">
@@ -693,7 +693,7 @@ export default function CampusIssues() {
 
               <div className="p-10 flex-grow overflow-y-auto space-y-10 scrollbar-hide">
                 {/* Diagnostic Metrics Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 items-stretch">
                   <DetailBadge
                     label="Zone"
                     value={selectedReport.zone}
@@ -711,7 +711,13 @@ export default function CampusIssues() {
                   />
                   <DetailBadge
                     label="Category"
-                    value={selectedReport.category}
+                    value={selectedReport.category === "researchandlab"
+    ? "Research & Lab"
+    : selectedReport.category === "housinganddorms"
+    ? "Housing & Dorms"
+    : selectedReport.category === "groundandpublic"
+    ? "Ground & Public"
+    : selectedReport.category}
                     icon={<AlertCircle size={14} />}
                   />
 

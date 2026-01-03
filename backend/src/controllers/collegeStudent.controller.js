@@ -151,16 +151,15 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   // 2️⃣ Connect college DB
   const collegeConn = getCollegeDB(college.dbName);
-  const CollegeStudentModel = getStudentModel(collegeConn);
+  const Student = getStudentModel(collegeConn);
 
   // 3️⃣ Find staff user
-  const student = await CollegeStudentModel.findOne({
+  const student = await Student.findOne({
     $or: [{ email }, { mobileNo }],
   });
 
   if (!student) {
     return res.status(401).json({ message: "Invalid credentials" });
-
   }
 
   // 4️⃣ Verify password
@@ -191,7 +190,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   // 7️⃣ Send response
 
-  const updatedStudent = await CollegeStudentModel.findById(student._id).select(
+  const updatedStudent = await Student.findById(student._id).select(
     "-password -refreshToken"
   );
 

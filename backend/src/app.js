@@ -35,7 +35,9 @@ import libraryRouter from "./route/library.route.js"
 import canteenRouter from "./route/canteen.route.js"
 import adminOfficialRoute from "./route/adminOfficial.route.js"
 import reportRouter from "./route/report.route.js";
+import teacherRoute from "./route/teacher.route.js";
 import registerCollege from "./route/collegeRequest.route.js";
+import departmentRoute from "./route/department.route.js";
 import { platformAdminLogin } from "./controllers/platformAdmin/platformAuth.controller.js";
 import { forgotPasswordSendOTP, forgotPasswordVerifyOTP } from "./controllers/auth/password.controller.js";
 
@@ -65,12 +67,26 @@ app.post("/api/v1/college/reset-password", forgotPasswordVerifyOTP); // user wil
 
 
 
+app.use("/api/v1/auth", authRouter);
+// POST /api/v1/auth/student/login 
+// POST /api/v1/auth/staff/login 
+// POST /api/v1/auth/teacher/login  
+
+// POST /api/v1/auth/refresh 
+// POST /api/v1/auth/logout
+// POST /api/v1/auth/change-password  -p
+// POST /api/v1/auth/forgot-password  -p
+// POST /api/v1/auth/reset-password/:token -p
+
+
+app.use("/api/v1/public/registerCollege",registerCollege);
+//POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////
 
 
 
 
 app.use("/api/v1/users/student", studentRouter) 
-// POST   /api/v1/users/student/register        // Public: student registration with avatar upload
+// POST   /api/v1/users/student/register        // Public: student registration with avatar upload///////////////////////////////////////////////////////
 // GET    /api/v1/users/student/profile         //  fetch one student profile (JWT + role check)
 // GET    /api/v1/users/student/allStudent      // fetch all  student profile (JWT + role check)
 
@@ -81,9 +97,20 @@ app.use("/api/v1/users/student", studentRouter)
 
 
 
-app.use("/api/v1/public/registerCollege",registerCollege);
-//POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////
+app.use("/api/v1/teacher",teacherRoute);
 
+//POST /api/v1/teacher/registration               //registeer Teacher details
+//POST /api/v1/teacher/update/:teacherId               //update Teacher details
+//GET  /api/v1/teacher/:teacherId                   //single Teacher details
+//GET  /api/v1/teacher/all                   //all Teacher details
+//POST  /api/v1/teacher/status/:teacherId                   //teacher status update isActive
+
+
+app.use("/api/v1/department",departmentRoute);
+//POST /api/v1/department/set                             //set Department by admin
+//POST /api/v1/department/update/:departmentId            //update Department by admin
+//POST /api/v1/department/status/:departmentId            //status change (isActive) Department by admin
+//GET  /api/v1/department/all                             //fetch all department by ("admin","student","teacher")
 
 
 app.use("/api/v1/college", collegeRouter);
@@ -103,7 +130,7 @@ app.use("/api/v1/college", collegeRouter);
 // POST   /api/v1/college/info/createOrUpdate     → College Admin only    → Create or update complete college profile (logo, NAAC, address, departments, etc.)
 // GET    /api/v1/college/departments/:collegeCode    → Public   → Fetch department list of a college
 // GET    /api/v1/college/info-full     → College Admin only    → Fetch full college profile
-// GET    /api/v1/college/info-limit   → Student / Staff  → Fetch limited college profile (for dashboard display)
+// GET    /api/v1/college/info-limit   → Student / Staff  → Fetch limited college profile (for dashboard display)  =================================================================
 
 // ================================
 //          COLLEGE GALLERY
@@ -121,15 +148,6 @@ app.use("/api/v1/college", collegeRouter);
 // DELETE /api/v1/college/notifications/:notificationId    → College Admin only    → Delete notification
     
 
-app.use("/api/v1/auth", authRouter);
-// POST /api/v1/auth/student/login 
-// POST /api/v1/auth/student/me     {Whole details of student}
-// POST /api/v1/auth/staff/login 
-// POST /api/v1/auth/refresh 
-// POST /api/v1/auth/logout
-// POST /api/v1/auth/change-password  -p
-// POST /api/v1/auth/forgot-password  -p
-// POST /api/v1/auth/reset-password/:token -p
 
 app.use("/api/v1/admin", adminRouter);
 //

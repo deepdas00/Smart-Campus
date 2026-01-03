@@ -60,15 +60,14 @@ export default function CanteenOrders() {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        console.log(res);
+       
 
         const filteredOrders = res.data.data.filter((order) => {
           if (activeFilter === "all") return true;
           return normalizeOrderStatus(order.orderStatus) === activeFilter;
         });
 
-        console.log(filteredOrders);
-
+       
         setOrders(filteredOrders);
       } catch (error) {
         console.error(error);
@@ -90,7 +89,7 @@ export default function CanteenOrders() {
     return normalizeOrderStatus(order.orderStatus) === activeFilter;
   });
 
-  console.log(filteredOrders);
+
 
   return (
     <div className="min-h-screen bg-[#fcfcfd]">

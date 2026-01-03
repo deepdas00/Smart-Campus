@@ -54,7 +54,7 @@ export function CollegePolicy() {
 
       const statusRes = await api.get("/api/v1/canteen/canteenStatus");
 
-      console.log(statusRes);
+
 
       let policy = {
         openingTime: "08:00 AM",
@@ -65,7 +65,7 @@ export function CollegePolicy() {
       try {
         const policyRes = await api.get("/api/v1/canteen/fetchpolicy");
 
-        console.log("huuuuuuuuuuuuuuuuuuuuuuuu", policyRes);
+       
 
         if (policyRes?.data) {
           policy = policyRes.data.data;

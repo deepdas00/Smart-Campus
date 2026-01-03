@@ -30,7 +30,7 @@ export default function CollaborationHero({ collegeData, startupData }) {
         const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
           withCredentials: true,
         });
-        console.log(res.data.data);
+    
         setCollegeInfo(res.data.data);
       } catch (err) {
         console.error("Fetch college info failed", err);

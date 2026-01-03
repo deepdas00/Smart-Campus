@@ -72,7 +72,7 @@ function OfficeIntelligence() {
         { withCredentials: true }
       );
 
-      console.log(res.data.data);
+
 
       setStats(res.data.data);
     } catch (err) {

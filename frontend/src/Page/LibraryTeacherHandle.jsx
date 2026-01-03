@@ -179,10 +179,6 @@ export default function LibraryTeacherHandle() {
 
       // Extract only transactionId
       const transactionId = parsed.transactionId;
-      console.log("Transaction ID:", transactionId);
-
-      // You can now call your API or function with transactionId
-      console.log("----------------", transactionId);
 
       if (isReturnMode) {
         fetchReturnDetails(transactionId);
@@ -200,7 +196,7 @@ export default function LibraryTeacherHandle() {
 
   const fetchBookDetails = async (bookId) => {
     try {
-      console.log("BOOOOOKKKKKIIIIDDDD", bookId);
+
 
       const token = Cookies.get("accessToken");
       const res = await axios.get(
@@ -208,7 +204,7 @@ export default function LibraryTeacherHandle() {
         { withCredentials: true }
       );
 
-      console.log("TRANNNNNNSNSNNSNSNNSNSNSN", res);
+   
 
       setScannedBook(res.data.data);
 
@@ -220,14 +216,14 @@ export default function LibraryTeacherHandle() {
 
   const fetchReturnDetails = async (transactionId) => {
     try {
-      console.log("RETURN TX ID:", transactionId);
+    
 
       const res = await axios.get(
         `${API_URL}/api/v1/library/return/finalize/${transactionId}`,
         { withCredentials: true }
       );
 
-      console.log("RETURN DATA:", res.data.data);
+    
 
       setReturnData(res.data.data);
       setShowReturnModal(true); // 🔥 THIS IS REQUIRED
@@ -237,9 +233,7 @@ export default function LibraryTeacherHandle() {
     }
   };
 
-  const handleMouseMove = (e) => {
-    // console.log("Mouse moved", e.clientX, e.clientY);
-  };
+
 
   //   useEffect(() => {
   //   if (scannedBook) {
@@ -261,7 +255,7 @@ export default function LibraryTeacherHandle() {
       setIssuing(true);
       setIsProcessing(true);
 
-      console.log("AMIIIIII KHEB", scannedBook._id);
+  
 
       const token = Cookies.get("accessToken");
       await axios.get(
@@ -302,7 +296,6 @@ export default function LibraryTeacherHandle() {
   const handleReturnConfirm = async () => {
     try {
       setReturning(true);
-      console.log("HIIIII", returnData.transactionId);
 
       await axios.post(
         `${API_URL}/api/v1/library/return`,
@@ -375,7 +368,7 @@ export default function LibraryTeacherHandle() {
             withCredentials: true,
           }
         );
-        console.log("All BOOKS AREREEEEE", res.data);
+      
 
         setBooks(res.data.data);
       } catch (err) {
@@ -425,7 +418,7 @@ export default function LibraryTeacherHandle() {
           }
         );
 
-        console.log("THE RESPONSEEEEEEEE", res);
+     
 
         const normalized = res.data.data.map(normalizeTransaction);
 

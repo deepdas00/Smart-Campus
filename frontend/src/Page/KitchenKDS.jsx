@@ -191,7 +191,6 @@ export function KitchenKDS() {
         return;
       }
 
-      console.log("hele", parsed.orderId);
 
       fetchOrderDetails(parsed.orderId);
     } catch (err) {
@@ -201,15 +200,13 @@ export function KitchenKDS() {
 
   const fetchOrderDetails = async (orderId) => {
     try {
-      console.log("final", orderId);
-
       const res = await axios.get(
         `${API_URL}/api/v1/canteen/orders/details/${orderId}`,
         { withCredentials: true }
       );
 
 
-      console.log("response", res);
+      
 
       setScannedOrder(res.data.data);
       setShowConfirmModal(true);
@@ -222,7 +219,7 @@ export function KitchenKDS() {
   const handleServeOrder = async () => {
     try {
       setIsProcessing(true); // Start loading state
-      console.log("SCANEERRRR ID ", scannedOrder._id);
+     
 
       await axios.post(
         `${API_URL}/api/v1/canteen/orders/serve`,
@@ -261,7 +258,7 @@ export function KitchenKDS() {
     if (toggleLoading) return;
 
     const nextStatus = !isOpen;
-    console.log("hiiii");
+ 
 
     try {
       setToggleLoading(true);
@@ -271,7 +268,7 @@ export function KitchenKDS() {
 
       // 2️⃣ Backend update
       try {
-        console.log("1️⃣ BEFORE API");
+       
 
         const res = await axios.post(
           `${API_URL}/api/v1/canteen/isActive`,
@@ -279,14 +276,13 @@ export function KitchenKDS() {
           { withCredentials: true }
         );
 
-        console.log("2️⃣ AFTER API", res.data.data);
+     
       } catch (err) {
         console.error("❌ ERROR:", err?.response || err.message);
       } finally {
-        console.log("3️⃣ FINALLY");
+     
       }
 
-      console.log("heeloooooooooooooo");
 
       toast.success(
         nextStatus ? "Canteen is now OPEN" : "Canteen is now CLOSED"
@@ -302,7 +298,7 @@ export function KitchenKDS() {
 
   const deleteFood = async (foodId) => {
     try {
-      console.log("Deleting food", foodId);
+     
 
       const res = await axios.delete(
         `${API_URL}/api/v1/canteen/food/${foodId}`,
@@ -311,7 +307,7 @@ export function KitchenKDS() {
         }
       );
 
-      console.log("Delete response:", res.data);
+
       toast.success("Food deleted successfully!");
     } catch (err) {
       console.error("Delete failed:", err.response || err);
@@ -352,7 +348,7 @@ export function KitchenKDS() {
           { withCredentials: true } // if auth cookies are used
         );
 
-        console.log("agayaaa food", res.data.data);
+    
 
         setMenuItems(res.data?.data?.foods); // adjust if response structure differs
       } catch (err) {
@@ -368,7 +364,7 @@ export function KitchenKDS() {
 
   const toggleAvailability = async (item) => {
     try {
-      console.log("Toggling item:", item._id);
+  
 
       const res = await axios.patch(
         `${API_URL}/api/v1/canteen/foods/${item._id}`, // <-- 'foods' plural
@@ -376,7 +372,7 @@ export function KitchenKDS() {
         { withCredentials: true }
       );
 
-      console.log("Updated in DB:", res.data);
+    
 
       // Update UI
       setMenuItems(
@@ -483,7 +479,7 @@ export function KitchenKDS() {
           { withCredentials: true }
         );
 
-        console.log("Dashboard API response:", res.data);
+     
 
         const rawOrders =
           res.data?.orders || res.data?.data?.orders || res.data?.data || [];

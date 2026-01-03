@@ -81,8 +81,7 @@ export default function SignUpPage() {
           withCredentials: true,
         });
 
-        console.log("POLICY RESPONSE:", resPolicy);
-
+    
         setDepartments(resPolicy.data.departments);
       } catch (error) {
         setDepartments([])
@@ -95,10 +94,7 @@ export default function SignUpPage() {
   useEffect(() => {
     if (!collegeCode) return;
 
-    console.log("hhiiihih");
 
-    console.log(collegeCode);
-    
     
 
   
@@ -165,7 +161,7 @@ export default function SignUpPage() {
     try {
       setIsSubmitting(true);
       const form = new FormData();
-      console.log(formData.admissionYear);
+   
       
 
       if (userType === "student") {

@@ -63,7 +63,7 @@ export function StudentManager() {
         { withCredentials: true }
       );
 
-      console.log(res.data);
+    
 
       setSelectedStudent(res.data); // Stores { student, libraryTransaction, message }
     } catch (err) {

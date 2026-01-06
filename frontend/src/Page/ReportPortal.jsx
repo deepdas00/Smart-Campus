@@ -23,7 +23,7 @@ import axios from "axios";
 import profile from "../assets/profile.png";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import ProfileSidebar from "../Components/ProfileSidebar";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
@@ -229,7 +229,7 @@ const handleSubmit = async () => {
         <Navbar />
 
         <div className="">
-          <CollegeInfo />
+          {/* <CollegeInfo /> */}
         </div>
       </div>
 

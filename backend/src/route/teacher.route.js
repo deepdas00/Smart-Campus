@@ -21,12 +21,6 @@ router.post(
     updateTeacher
 )
 
-router.get(
-    "/:teacherId",
-    verifyJWT,
-    authorizeRoles("admin","teacher"),
-    singleTeacher
-)
 
 
 router.get(
@@ -35,6 +29,14 @@ router.get(
     authorizeRoles("admin"),
     fetchAllTeachers
 )
+
+router.get(
+    "/:teacherId",
+    verifyJWT,
+    authorizeRoles("admin","teacher"),
+    singleTeacher
+)
+
 
 
 router.post(

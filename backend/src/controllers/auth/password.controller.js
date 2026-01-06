@@ -6,7 +6,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCollegeUserModel } from "../../models/collegeUser.model.js";
-import { getStudentModel } from "../../models/collegeStudent.model.js"
+import { getCollegeStudentModel } from "../../models/collegeStudent.model.js"
 import { sendMail } from "../../utils/sendMail.js";
 import { buildForgotPasswordOtpTemplate } from "../../template/forgotPasswordOtpTemplate.js";
 import { getCollegeTeacherModel } from "../../models/collegeTeacher.model.js";
@@ -32,7 +32,7 @@ export const forgotPasswordSendOTP = asyncHandler(async (req, res) => {
 
     let user =
         await getCollegeUserModel(collegeConn).findOne({ loginId }) ||
-        await getStudentModel(collegeConn).findOne({ email: loginId }) ||
+        await getCollegeStudentModel(collegeConn).findOne({ email: loginId }) ||
         await getCollegeTeacherModel(collegeConn).findOne({ loginId });
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -82,7 +82,7 @@ export const forgotPasswordVerifyOTP = asyncHandler(async (req, res) => {
 
     let user =
         await getCollegeUserModel(collegeConn).findOne({ loginId }) ||
-        await getStudentModel(collegeConn).findOne({ email: loginId }) ||
+        await getCollegeStudentModel(collegeConn).findOne({ email: loginId }) ||
         await getCollegeTeacherModel(collegeConn).findOne({ userId: loginId });
 
 
@@ -99,8 +99,6 @@ export const forgotPasswordVerifyOTP = asyncHandler(async (req, res) => {
 
     res.status(200).json(new ApiResponse(200, null, "Password reset successful"));
 });
-
-
 
 
 //changing password, verify old password..
@@ -120,7 +118,7 @@ export const verifyOldPassword = asyncHandler(async (req, res) => {
 
     let user;
     if (role === "student") {
-        user = await getStudentModel(collegeConn).findById(userId)
+        user = await getCollegeStudentModel(collegeConn).findById(userId)
     } else if (role === "teacher") {
         user = await getCollegeTeacherModel(collegeConn).findById(userId)
     } else if (["admin", "canteen", "librarian"].includes(role)) {
@@ -163,7 +161,7 @@ export const changePassword = asyncHandler(async (req, res) => {
 
     let user;
     if (role === "student") {
-        user = await getStudentModel(collegeConn).findById(userId)
+        user = await getCollegeStudentModel(collegeConn).findById(userId)
     } else if (role === "teacher") {
         user = await getCollegeTeacherModel(collegeConn).findById(userId)
     } else if (["admin", "canteen", "librarian"].includes(role)) {

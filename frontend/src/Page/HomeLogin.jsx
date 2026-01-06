@@ -26,7 +26,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar/Navbar";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import HomepageHeaderCollegeInfo from "../Components/HomepageHeaderCollegeInfo";
 import Collaboration from "./Collaboration";
 import { Link, Links } from "react-router-dom";

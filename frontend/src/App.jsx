@@ -22,7 +22,7 @@ import LibraryTeacherHandle from "./Page/LibraryTeacherHandle";
 import ReportPortal from "./Page/ReportPortal";
 import ProtectedRoute from "./Components/ProtectedRoute.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
-import CollegeInfo from "./Components/CollegeInfo.jsx";
+// import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
 import CollegeHome from "./Page/CollegeHome.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -34,6 +34,7 @@ import { CollegePolicy } from "./Page/CollegePolicy";
 
 import OfficeOverview from "./Page/OfficeOverview.jsx";
 import Teacher from "./Page/Teacher.jsx";
+import CollegeDept from "./Page/CollegeDept.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -42,7 +43,7 @@ const AdminLayout = () => {
     <div className="min-h-screen flex flex-col ">
       {/* Top Navbar */}
       <Navbar />
-      <CollegeInfo />
+      {/* <CollegeInfo /> */}
 
       {/* Body */}
       <div className="flex flex-1">
@@ -157,6 +158,7 @@ export default function App() {
           <Route path="college-info" element={<CollegeHome />} />
           <Route path="college-policy" element={<CollegePolicy />} />
           <Route path="teacher" element={<Teacher />} />
+          <Route path="department" element={<CollegeDept />} />
 
         </Route>
 

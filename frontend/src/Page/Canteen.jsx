@@ -17,7 +17,7 @@ import {
   Flame,
   Award,
 } from "lucide-react";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";
 import profile from "../assets/profile.png";
 import { Link } from "react-router-dom";
@@ -379,7 +379,7 @@ const fetchCanteenPolicy = async () => {
       />
 
       {/*Banner*/}
-      <CollegeInfo />
+      {/* <CollegeInfo /> */}
 
       {/* Success Message */}
       {orderReceived && (

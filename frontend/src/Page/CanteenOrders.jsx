@@ -16,7 +16,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-hot-toast";
 import Navbar from "../Components/Navbar/Navbar";
 import ProfileSidebar from "../Components/ProfileSidebar";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import Footer from "../Components/Footer";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -101,7 +101,7 @@ export default function CanteenOrders() {
 
       {/* Top Banner Section */}
       <div className="bg-white border-b border-slate-100 pb-12">
-        <CollegeInfo />
+        {/* <CollegeInfo /> */}
         <div className="max-w-6xl mx-auto px-6 mt-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="text-center md:text-left">

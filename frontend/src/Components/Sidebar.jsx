@@ -25,6 +25,7 @@ export default function Sidebar() {
     { path: "/admin/college-info", icon: <School />, label: "College-info" },
     { path: "/admin/college-policy", icon: <FileText />, label: "College-Policy" },
     { path: "/admin/teacher", icon: <Users />, label: "Teacher Management" },
+    { path: "/admin/department", icon: <Users />, label: "Department" },
   ];
 
   // Filter menu items based on role

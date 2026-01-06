@@ -71,6 +71,11 @@ router.post(
     createOrUpdateCollegeInfo
 );
 
+// public department fetch
+// router.get(
+//     "/departments/:collegeCode",
+//     getDepartments
+// );
 
 //get full information of college admin
 router.get(

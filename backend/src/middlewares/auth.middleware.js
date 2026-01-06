@@ -6,14 +6,15 @@ import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 import { getCollegeTeacherModel } from "../models/collegeTeacher.model.js";
 
 export const verifyJWT = async (req, res, next) => {
-
   const token =
     req.cookies?.accessToken ||
     req.header("Authorization")?.replace(/^Bearer\s+/i, "") ||
     req.cookies?.platformAccessToken;
 
   if (!token) {
-    return res.status(401).json({ success: false, message: "Unauthorized: No token" });
+    return res
+      .status(401)
+      .json({ success: false, message: "Unauthorized: No token" });
   }
 
   try {
@@ -29,13 +30,20 @@ export const verifyJWT = async (req, res, next) => {
     const college = await College.findOne({ collegeCode, status: "active" });
 
     if (!college) {
-      return res.status(403).json({ message: "College is inactive or not found" });
+      return res
+        .status(403)
+        .json({ message: "College is inactive or not found" });
     }
 
     //  Connect College DB
     const collegeConn = getCollegeDB(college.dbName);
 
     let account;
+
+    if (["admin", "librarian", "canteen"].includes(role)) {
+      return next();
+    } 
+
 
     //  Check account status by role
     if (role === "student") {
@@ -53,11 +61,12 @@ export const verifyJWT = async (req, res, next) => {
     }
 
     if (!account.isActive) {
-      return res.status(403).json({ message: "Your account is deactivated. Contact admin." });
+      return res
+        .status(403)
+        .json({ message: "Your account is deactivated. Contact admin." });
     }
 
     next();
-
   } catch (error) {
     throw new ApiError(401, "Invalid or expired token");
   }

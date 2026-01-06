@@ -22,7 +22,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import ProfileSidebar from "../Components/ProfileSidebar";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../Components/Navbar/Navbar";
 import { Link } from "react-router-dom";

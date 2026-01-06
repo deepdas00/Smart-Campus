@@ -34,7 +34,7 @@ import {
 import { Upload, Loader2 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 const api = axios.create({
   baseURL: `${import.meta.env.VITE_API_URL}/api/v1`,
   withCredentials: true,

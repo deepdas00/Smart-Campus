@@ -28,6 +28,7 @@ export default function Navbar({
 
 
   const [collegeInfo, setCollegeInfo] = useState("")
+  const [collegeDept, setCollegeDept] = useState([])
   const { user } = useAuth();
   const { logout } = useAuth();
 
@@ -88,13 +89,17 @@ export default function Navbar({
     
   const fetchCollegeInfo = async () => {
     try {
-      console.log("huuuuuuu");
+      // console.log("huuuuuuu");
       
       const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
         withCredentials: true,
       });
-      console.log("infooofofooof",res.data.data);
-      setCollegeInfo(res.data.data);
+
+      // console.log("bywyyyyyyyyy");
+      
+      // console.log("infooofofooof",res);
+      setCollegeInfo(res.data.data.collegeInfo);
+      setCollegeDept(res.data.data.departments);
      
     } catch (err) {
       console.error("Fetch college info failed", err);

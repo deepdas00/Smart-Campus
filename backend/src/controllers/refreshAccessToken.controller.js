@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeUserModel } from "../models/collegeUser.model.js";
-import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -44,7 +44,7 @@ export const refreshAccessToken = asyncHandler(async (req, res) => {
     // 4️⃣ Find user (staff OR student)
     let user =
         await getCollegeUserModel(collegeConn).findById(userId) ||
-        await getStudentModel(collegeConn).findById(userId);
+        await getCollegeStudentModel(collegeConn).findById(userId);
 
     if (!user || user.refreshToken !== refreshToken) {
         throw new ApiError(401, "Refresh token mismatch");

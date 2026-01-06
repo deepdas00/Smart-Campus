@@ -5,6 +5,7 @@ import { refreshAccessToken } from "../controllers/refreshAccessToken.controller
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { logoutUser } from "../controllers/logout.controller.js";
 import { teacherLogin } from "../controllers/collegeTeacher.controller.js";
+import { changePassword, verifyOldPassword } from "../controllers/auth/password.controller.js";
 
 const router = express.Router();
 
@@ -31,6 +32,19 @@ router.post("/refresh", refreshAccessToken);
  router.post("/logout", verifyJWT, logoutUser);
 
 
+//CHANGE PASSWORD
+//verifyold password
+router.post(
+    "/reset-password-verify",
+    verifyJWT,
+    verifyOldPassword
+)
+//change with new pass
+router.post(
+    "/reset-password-new",
+    verifyJWT,
+    changePassword
+)
 
 
 

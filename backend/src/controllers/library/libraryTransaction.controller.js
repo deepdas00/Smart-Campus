@@ -8,7 +8,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getLibraryPolicyModel } from "../../models/libraryPolicy.model.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
-import { getStudentModel } from "../../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { sendMail } from "../../utils/sendMail.js";
 import { buildBookReturnReminderTemplate } from "../../template/buildBookReturnReminderTemplate.js";
 import { getCollegeInfoModel } from "../../models/colllegeInfo.model.js";
@@ -76,7 +76,7 @@ export const issueBook = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   console.log("TRANSACTION ID  ::: ", transactionId);
@@ -163,7 +163,7 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
   const Policy = getLibraryPolicyModel(collegeConn);
   const Book = getLibraryBookModel(collegeConn);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
 
   const transaction = await Transaction.findById(transactionId)
     .populate({ path: "bookId", select: "title author coverImage " })
@@ -242,7 +242,7 @@ export const returnBook = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
   const Policy = getLibraryPolicyModel(collegeConn);
   const Book = getLibraryBookModel(collegeConn);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
 
   const transaction = await Transaction.findById(transactionId);
   if (!transaction) throw new ApiError(404, "Transaction not found");
@@ -278,7 +278,7 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const LibraryBooks = getLibraryBookModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
   const transaction = await Transaction.findById(transactionId)
@@ -311,7 +311,7 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const Transaction = getLibraryTransactionModel(collegeConn);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
 
   getLibraryBookModel(collegeConn);
 
@@ -338,7 +338,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
   const Transaction = getLibraryTransactionModel(collegeConn);
 
   const LibraryBooks = getLibraryBookModel(collegeConn);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
 
   const transactions = await Transaction.find()
     .populate({
@@ -368,7 +368,7 @@ export const notifyReturnReminders = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const Book = getLibraryBookModel(collegeConn)
   const LibraryPolicy = getLibraryPolicyModel(collegeConn)
   

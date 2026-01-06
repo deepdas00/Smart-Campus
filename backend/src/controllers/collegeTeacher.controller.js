@@ -1,3 +1,6 @@
+import bcrypt from "bcrypt";
+import { connectMasterDB } from "../db/db.index.js";
+import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeTeacherModel } from "../models/collegeTeacher.model.js";
 import { buildTeacherCredentialsMailTemplate } from "../template/buildTeacherCredentialsMailTemplate.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -20,17 +23,17 @@ const generateTeacherCredentials = (teacherName, collegeCode, teacherCode) => {
         randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
     }
 
-    const userId = `${safeName}_${collegeCode}`;
+    const loginId = `${collegeCode}_${teacherCode}`;
     const password = `${teacherCode}_${randomPart}`;
 
-    return { userId, password };
+    return { loginId, password };
 };
 
 // ===========================
 // 🧾 Register / Create Teacher
 // ===========================
 export const registerTeacher = asyncHandler(async (req, res) => {
-    const { collegeCode, userId } = req.User;
+    const { collegeCode, userId } = req.user;
     const {
         teacherCode,
         employeeId,
@@ -102,7 +105,7 @@ export const registerTeacher = asyncHandler(async (req, res) => {
         profilePicUrl = uploadResult.url;
     }
 
-    const { UserId, password } = generateTeacherCredentials(fullName, collegeCode, teacherCode)
+    const { loginId, password } = generateTeacherCredentials(fullName, collegeCode, teacherCode)
 
     // 7️⃣ Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -112,58 +115,84 @@ export const registerTeacher = asyncHandler(async (req, res) => {
     //collegeCode
     // profilePhoto
 
-
-    const teacher = await CollegeStudent.create({
+    // ✅ Required fields list
+    const requiredFields = {
         teacherCode,
         employeeId,
         fullName,
         gender,
-        dob,
         email,
         phone,
-        alternatePhone,
-        address,
-        department,
         designation,
-        qualification,
-        specialization,
-        experienceYears,
         joiningDate,
-        employmentType,
-        subjects,  // select the id from dropdown!! from fronnt end
-        salary,
-        bankDetails,
-        totalLeaves,
-        userId: UserId,
+        loginId,
         password: hashedPassword,
-        profilePhoto: profilePicUrl,
-        collegeCode,
-        createdBy: userId
-    });
+        collegeCode
+    };
 
+    // ✅ Check if any required field is missing
+    const missingFields = Object.entries(requiredFields)
+        .filter(([key, value]) => !value || value === "")
+        .map(([key]) => key);
 
-    await sendMail({
-        to: email,
-        subject: `${collegeName} - Your Teacher Login Credentials`,
-        html: buildTeacherCredentialsMailTemplate(
-            college.collegeName,
+    if (missingFields.length > 0) {
+        return res.status(401).json({message:`Missing required fields: ${missingFields.join(", ")}`})
+    }
+        const teacher = await Teacher.create({
+            teacherCode,
+            employeeId,
             fullName,
-            { userId, password }
-        )
-    });
+            gender,
+            dob,
+            email,
+            phone,
+            alternatePhone,
+            address,
+            department,
+            designation,
+            qualification,
+            specialization,
+            experienceYears,
+            joiningDate,
+            employmentType,
+            subjects,  // select the id from dropdown!! from fronnt end
+            salary,
+            bankDetails,
+            totalLeaves,
+            loginId,
+            password: hashedPassword,
+            profilePhoto: profilePicUrl,
+            collegeCode,
+            createdBy: userId
+        });
 
 
-    return res.status(201).json({ fullName, message: "Teacher register successfully" })
+        await sendMail({
+            to: email,
+            subject: `${collegeName} - Your Teacher Login Credentials`,
+            html: buildTeacherCredentialsMailTemplate(
+                college.collegeName,
+                fullName,
+                { loginId, password }
+            )
+        });
 
-})
+
+        return res.status(201).json({
+  status: 201,
+  student: { fullName, rollNo },
+  message: "Student registered successfully"
+});
+
+    })
 
 
 export const teacherLogin = asyncHandler(async (req, res) => {
 
-    const { collegeCode, userId, password } = req.body
+    const { collegeCode, loginId, password } = req.body
 
 
-    if (!collegeCode || !userId || !password) { return res.status(400).json({ message: "CollegeCode, UserId & Password Required" }); }
+    if (!collegeCode || !loginId || !password) { return res.status(400).json({ message: "CollegeCode, loginId & Password Required" }); }
 
     // 2️⃣ Connect MASTER DB
     const masterConn = connectMasterDB();
@@ -183,12 +212,12 @@ export const teacherLogin = asyncHandler(async (req, res) => {
 
     // 5️⃣ Attach Student model to THIS DB
     const Teacher = getCollegeTeacherModel(collegeConn);
-    const teacher = await Teacher.findOne(userId)
+    const teacher = await Teacher.findOne(loginId)
 
 
-    
+
     if (!teacher) {
-        return res.status(401).json({ message: "Invalid UserId/LoginId" });
+        return res.status(401).json({ message: "Invalid LoginId" });
     }
 
     if (!teacher.isActive) {
@@ -317,25 +346,25 @@ export const fetchAllTeachers = asyncHandler(async (req, res) => {
 
 
 export const toggleTeacherStatus = asyncHandler(async (req, res) => {
-  const { collegeCode } = req.User;
-  const { teacherId } = req.params;
+    const { collegeCode } = req.User;
+    const { teacherId } = req.params;
 
-  const masterConn = connectMasterDB();
-  const College = getCollegeModel(masterConn);
-  const college = await College.findOne({ collegeCode, status: "active" });
-  if (!college) return res.status(404).json({ message: "College not found" });
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
+    const college = await College.findOne({ collegeCode, status: "active" });
+    if (!college) return res.status(404).json({ message: "College not found" });
 
-  const collegeConn = getCollegeDB(college.dbName);
-  const Teacher = getCollegeTeacherModel(collegeConn);
+    const collegeConn = getCollegeDB(college.dbName);
+    const Teacher = getCollegeTeacherModel(collegeConn);
 
-  const teacher = await Teacher.findById(teacherId);
-  if (!teacher) return res.status(404).json({ message: "Teacher not found" });
+    const teacher = await Teacher.findById(teacherId);
+    if (!teacher) return res.status(404).json({ message: "Teacher not found" });
 
-  teacher.isActive = !teacher.isActive;
-  await teacher.save({ validateBeforeSave: false });
+    teacher.isActive = !teacher.isActive;
+    await teacher.save({ validateBeforeSave: false });
 
-  res.status(200).json({
-    message: `Teacher is now ${teacher.isActive ? "Active" : "Inactive"}`,
-    status: teacher.isActive
-  });
+    res.status(200).json({
+        message: `Teacher is now ${teacher.isActive ? "Active" : "Inactive"}`,
+        status: teacher.isActive
+    });
 });

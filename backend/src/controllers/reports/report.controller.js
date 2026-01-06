@@ -6,7 +6,7 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
-import { getStudentModel } from "../../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 
 /* =========================
    CREATE REPORT (Student)
@@ -98,7 +98,7 @@ export const getMyReports = asyncHandler(async (req, res) => {
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
-    const Student = getStudentModel(collegeConn)
+    const Student = getCollegeStudentModel(collegeConn)
     const reports = await Report.find({ studentId: userId })
     .populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
     .sort({ createdAt: -1 });
@@ -130,7 +130,7 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
 
-    const Student = getStudentModel(collegeConn)
+    const Student = getCollegeStudentModel(collegeConn)
 
     const report = await Report.find({ _id : reportId }).populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
 
@@ -193,7 +193,7 @@ export const getAllReports = asyncHandler(async (req, res) => {
 
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
-    const Student = getStudentModel(collegeConn);
+    const Student = getCollegeStudentModel(collegeConn);
     
     const reports = await Report.find({
         createdAt: { $gte: startDate }

@@ -65,7 +65,7 @@ const collegeteacherSchema = new Schema(
     // =======================
     department: {
       type: Schema.Types.ObjectId,
-      ref: "CollegeDepartment", 
+      ref: "CollegeDepartment",
     },
 
     designation: {
@@ -95,7 +95,7 @@ const collegeteacherSchema = new Schema(
     // =======================
     // 🔐 Authentication
     // =======================
-    userId: {
+    loginId: {
       type: String,
       required: true,
       unique: true
@@ -117,6 +117,15 @@ const collegeteacherSchema = new Schema(
       default: true
     },
 
+    resetPasswordOTP: {
+      type: String,
+      default: null
+    },
+
+    resetPasswordOTPExpiry: {
+      type: Date,
+      default: null
+    },
     // =======================
     // 📚 Academic Responsibilities
     // =======================
@@ -146,7 +155,7 @@ const collegeteacherSchema = new Schema(
     // =======================
     // 📊 Activity & Performance
     // =======================
-    
+
     totalLeaves: {
       type: Number,
       default: 0

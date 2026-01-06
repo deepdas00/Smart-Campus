@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { ApiError } from "../utils/apiError.js";
 import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
-import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 import { getCollegeTeacherModel } from "../models/collegeTeacher.model.js";
 
 export const verifyJWT = async (req, res, next) => {
@@ -22,6 +22,7 @@ export const verifyJWT = async (req, res, next) => {
 
     const { role, collegeCode, userId } = decoded;
 
+    if(["admin","canteen","librarian"].includes(role)) return next();
     // Resolve College
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
@@ -38,7 +39,7 @@ export const verifyJWT = async (req, res, next) => {
 
     //  Check account status by role
     if (role === "student") {
-      const Student = getStudentModel(collegeConn);
+      const Student = getCollegeStudentModel(collegeConn);
       account = await Student.findById(userId).select("isActive");
     }
 

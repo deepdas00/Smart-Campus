@@ -7,7 +7,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
-import { getStudentModel } from "../../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { log } from "console";
 
 //order placing by student
@@ -200,7 +200,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   }
 
   const collegeConn = getCollegeDB(college.dbName);
-  getStudentModel(collegeConn);
+  getCollegeStudentModel(collegeConn);
 
   const Order = getCanteenOrderModel(collegeConn);
 
@@ -247,7 +247,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
 
   const collegeConn = getCollegeDB(college.dbName);
   // 🔥 Register dependent models on this connection
-  getStudentModel(collegeConn);
+  getCollegeStudentModel(collegeConn);
   const Order = getCanteenOrderModel(collegeConn);
 
   // console.log(Order);

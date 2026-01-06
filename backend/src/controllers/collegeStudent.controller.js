@@ -6,138 +6,107 @@ import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 import { generateAccessAndRefreshTokens } from "../utils/tokenGenerator.js";
 import { getCollegeUserModel } from "../models/collegeUser.model.js";
 import { getLibraryTransactionModel } from "../models/libraryTransaction.model.js";
 import { getLibraryBookModel } from "../models/libraryBook.model.js";
+import { sendMail } from "../utils/sendMail.js";
+import { buildStudentCredentialsMailTemplate } from "../template/buildStudentCredentialsMailTemplate.js";
+
+const generatePassword = (collegeCode, rollNo) => {
+
+  // generate random 5 character mix
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let randomPart = "";
+
+  for (let i = 0; i < 5; i++) {
+    randomPart += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+
+  const password = `${collegeCode}_${randomPart}_${rollNo}`;
+
+  return password;
+};
 
 export const registerStudent = asyncHandler(async (req, res) => {
-  // 1️⃣ Get data from frontend
+  const { collegeCode, userId } = req.user;
+
   const {
-    collegeCode,
-    studentName,
+    fullName,
     rollNo,
-    mobileNo,
-    email,
-    password,
-    department,
+    registrationNo,
+    gender,
+    dob,
     admissionYear,
+    email,
+    phone,
+    department,
   } = req.body;
 
+  if (!fullName || !rollNo || !gender || !dob || !admissionYear || !email || !phone || !department) {
+    return res.status(400).json({ status: "failed", message: "Required fields missing" });
+  }
 
-
-  if(!collegeCode ||
-     !studentName ||
-     !rollNo ||
-     !mobileNo ||
-     !email ||
-     !password ||
-     !department ||
-     !admissionYear
-  ) { return res.status(400).json({ message: "All fields are required" }); }
-
-
-  // 2️⃣ Connect MASTER DB
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) return res.status(404).json({ status: "failed", message: "college not found or inactive" });
 
-  // 3️⃣ Find college
-  const college = await College.findOne({
-    collegeCode,
-    status: "active",
-  });
-  if (!college) {
-    return res.status(404).json({ message: "College not active or not found" })
 
-  }
-
-  // 4️⃣ Connect COLLEGE DB
   const collegeConn = getCollegeDB(college.dbName);
+  const Student = getCollegeStudentModel(collegeConn);
 
-  // 5️⃣ Attach Student model to THIS DB
-  const CollegeStudent = getStudentModel(collegeConn);
-
-  const existingStudent = await CollegeStudent.findOne({
-    $or: [
-      { email },
-      { mobileNo },
-      { rollNo }
-    ]
+  const existing = await Student.findOne({
+    $or: [{ rollNo }, { email }, { phone }, { registrationNo }]
   });
 
-  if (existingStudent) {
-    return res.status(409).json({ message: "student already exist with this Email or MobileNo. or RollNo" })
+  if (existing) return res.status(409).json({ status: "failed", message: "Student already exists with this email or roll or phone or registerationNo" });
+
+  let profilePhoto = "";
+  if (req.file?.path) {
+    const upload = await uploadOnCloudinary(req.file.path.replace(/\\/g, "/"));
+    profilePhoto = upload.url;
   }
 
-
-
-  // 6️⃣ Upload avatar (optional)
-  const avatarLocalPath = req.file?.path?.replace(/\\/g, "/");
-  if (!avatarLocalPath) {
-    return res.status(400).json({ message: "Avatar File is required!!(local)" })
-  }
-  let avatarUrl = "";
-  const avatarUploadResult = await uploadOnCloudinary(avatarLocalPath);
-  avatarUrl = avatarUploadResult.url;
-
-  // 7️⃣ Hash password
+  const password = generatePassword(collegeCode, rollNo)
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // 8️⃣ Save student in COLLEGE DB
-  const student = await CollegeStudent.create({
-    studentName,
-    rollNo,
-    mobileNo,
-    email,
+  const student = await Student.create({
+    ...req.body,
     password: hashedPassword,
-    avatar: avatarUrl,
-    department,
-    admissionYear,
+    profilePhoto,
+    collegeCode,
+    loginId: email,
+    createdBy: userId
   });
 
-  // 9️⃣ Generate tokens using your existing util
-  const { accessToken, refreshToken } =
-    await generateAccessAndRefreshTokens({
-      userId: student._id,
-      role: "student",
-      collegeCode
-    });
-
-  // 🍪 Cookie options
-  const options = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict"
-  };
+  await sendMail({
+    to: email,
+    subject: `${college.collegeName} - Student Login Credentials`,
+    html: buildStudentCredentialsMailTemplate(
+      college.collegeName,
+      fullName,
+      { loginId: email, password }
+    )
+  });
 
 
 
-  // 🔟 Send cookies + response
-  return res
-    .status(201)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        201,
-        {
-          student
-        },
-        "Student registered & logged in successfully"
-      )
-    );
+  res.status(201).json({
+    status: 201,
+    student: { fullName, rollNo },
+    message: "Student registered successfully"
+  });
+
 });
 
 export const studentLogin = asyncHandler(async (req, res) => {
-  const { collegeCode, mobileNo, email, password } = req.body;
 
-  console.log(req.body);
+  const { collegeCode, loginId, password } = req.body;
 
-  if (!collegeCode) {
-    return res.status(400).json({ message: "Select College!!" });
-  } else if (!(mobileNo || email)) {
-    return res.status(400).json({ message: "Mobile No. or Email is required!!" });
+  if (!collegeCode || !loginId || !password) {
+    return res.status(400).json({ status: "failed", message: "College code, Login ID and Password are required" });
   }
 
   // 1️⃣ Resolve college
@@ -146,38 +115,39 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) {
-    throw new ApiError(404, "College not found or inactive");
+    return res.status(404).json({ status: "failed", message: "college not found or inactive" });
   }
 
   // 2️⃣ Connect college DB
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
 
-  // 3️⃣ Find staff user
-  const student = await Student.findOne({
-    $or: [{ email }, { mobileNo }],
-  });
+  // 3️⃣ Find student
+  const student = await Student.findOne({ loginId }).select("+password");
 
   if (!student) {
-    return res.status(401).json({ message: "Invalid credentials" });
+    return res.status(401).json({ status: "failed", message: "Invalid login credentials" });
   }
 
-  // 4️⃣ Verify password
+  // 4️⃣ Block inactive accounts
+  if (!student.isActive) {
+    return res.status(404).jso3({ status: "failed", message: "Your account is deactivated. Contact administration" });
+  }
+
+  // 5️⃣ Verify password
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
-    return res.status(401).json({ message: "Invalid Password!!" });
+    return res.status(401).json({ status: "failed", message: "Invalid password" });
   }
 
-  // 5️⃣ Generate tokens
+  // 6️⃣ Generate tokens
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens({
     userId: student._id,
     role: student.role,
     collegeCode,
   });
 
-  // console.log(" GENERATION SUCCESSFULL", accessToken, refreshToken);
-
-  // 6️⃣ Save refresh token
+  // 7️⃣ Save refresh token
   student.refreshToken = refreshToken;
   await student.save({ validateBeforeSave: false });
 
@@ -188,12 +158,10 @@ export const studentLogin = asyncHandler(async (req, res) => {
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   };
 
-  // 7️⃣ Send response
+  // 8️⃣ Prepare response
+  const safeStudent = await Student.findById(student._id).select("-password -refreshToken");
 
-  const updatedStudent = await Student.findById(student._id).select(
-    "-password -refreshToken"
-  );
-
+  // 9️⃣ Send response
   res
     .status(200)
     .cookie("accessToken", accessToken, cookieOptions)
@@ -201,7 +169,7 @@ export const studentLogin = asyncHandler(async (req, res) => {
       ...cookieOptions,
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     })
-    .json(new ApiResponse(200, updatedStudent, "Login successful"));
+    .json(new ApiResponse(200, safeStudent, "Login successful"));
 });
 
 export const currentStudent = asyncHandler(async (req, res) => {
@@ -215,7 +183,7 @@ export const currentStudent = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const student = await Student.findById(userId).select(
     "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
   );
@@ -245,7 +213,7 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
   const LibraryBooks = getLibraryBookModel(collegeConn);
   const student = await Student.findById(userId).select(
@@ -294,7 +262,7 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Student = getStudentModel(collegeConn);
+  const Student = getCollegeStudentModel(collegeConn);
   const students = await Student.find().select(
     "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
   );
@@ -354,7 +322,7 @@ export const bulkRegisterStudents = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not active");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const CollegeStudent = getStudentModel(collegeConn);
+  const CollegeStudent = getCollegeStudentModel(collegeConn);
 
   const results = {
     inserted: 0,

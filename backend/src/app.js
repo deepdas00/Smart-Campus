@@ -74,9 +74,10 @@ app.use("/api/v1/auth", authRouter);
 
 // POST /api/v1/auth/refresh 
 // POST /api/v1/auth/logout
+// POST /api/v1/auth/reset-password-verify
+// POST /api/v1/auth/reset-password-new
 // POST /api/v1/auth/change-password  -p
 // POST /api/v1/auth/forgot-password  -p
-// POST /api/v1/auth/reset-password/:token -p
 
 
 app.use("/api/v1/public/registerCollege",registerCollege);

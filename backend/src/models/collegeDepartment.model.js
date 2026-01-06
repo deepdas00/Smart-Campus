@@ -20,7 +20,7 @@ const collegeDepartmentSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-academicDepartmentSchema.index({ departmentName: 1 }, { unique: true });
+collegeDepartmentSchema.index({ departmentName: 1 }, { unique: true });
 
 export const getCollegeDepartmentModel = (conn) => {
   return conn.models.CollegeDepartment ||

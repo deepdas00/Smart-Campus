@@ -3,7 +3,7 @@ import { getCollegeModel } from "../models/college.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 import { getCollegeUserModel } from "../models/collegeUser.model.js"
 
 export const logoutUser = asyncHandler(async (req, res) => {
@@ -28,7 +28,7 @@ export const logoutUser = asyncHandler(async (req, res) => {
 
 
   if (role === "student") {
-    const Student = getStudentModel(collegeConn);
+    const Student = getCollegeStudentModel(collegeConn);
     userDoc = await Student.findById(userId);
   } 
   else {

@@ -6,7 +6,7 @@ import { getCollegeModel } from "../models/college.model.js";
 import { getLibraryTransactionModel } from "../models/libraryTransaction.model.js";
 import { getCanteenOrderModel } from "../models/canteenOrder.model.js";
 import { getReportModel } from "../models/report.model.js";
-import { getStudentModel } from "../models/collegeStudent.model.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 
 
 export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
@@ -48,7 +48,7 @@ export const getAdminDashboardStatistics = asyncHandler(async (req, res) => {
     const LibraryTransaction = getLibraryTransactionModel(collegeConn);
     const CanteenOrder = getCanteenOrderModel(collegeConn);
     const Complaint = getReportModel(collegeConn);
-    const Student = getStudentModel(collegeConn);
+    const Student = getCollegeStudentModel(collegeConn);
 
 
 

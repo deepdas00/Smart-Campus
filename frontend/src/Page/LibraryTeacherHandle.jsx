@@ -15,6 +15,7 @@ import {
   PlusCircle,
   Loader2,
   RotateCcw,
+  Bell ,
   ArrowRight,
   ShieldCheck,
   Library,
@@ -30,7 +31,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import LibraryHeader from "../Components/LibraryHeader";
 import LibrarySidebar from "../Components/LibrarySidebar";
 import StatsGrid from "../Components/StatsGrid";
@@ -68,6 +69,36 @@ export default function LibraryTeacherHandle() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
+const [notifying, setNotifying] = useState(false);
+
+const handleNotifyReturnReminders = async () => {
+  try {
+    setNotifying(true);
+
+    const res = await axios.get(
+      "/api/v1/library/notify-return-reminders",
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      }
+    );
+
+    const count = res.data?.data?.notifiedCount || 0;
+
+    toast(`✅ Reminder emails sent to ${count} student(s)`);
+
+  } catch (error) {
+    console.error(error);
+    toast("❌ Failed to send return reminders");
+  } finally {
+    setNotifying(false);
+  }
+};
+
+
+
+
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -456,7 +487,7 @@ export default function LibraryTeacherHandle() {
       !newIssue.roll ||
       !newIssue.specificBookId
     ) {
-      alert("Please fill all fields.");
+      toast("Please fill all fields.");
       return;
     }
     const selectedBookType = books.find((b) => b.id === newIssue.bookTitleId);
@@ -682,6 +713,24 @@ export default function LibraryTeacherHandle() {
     setEditingBook(null); // Reset edit mode
   };
 
+   const handleMouseMove = (e) => {
+      if (!dragging.current) return;
+
+      const rect = e.currentTarget.getBoundingClientRect();
+      const newProgress = Math.min(
+        100,
+        Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)
+      );
+
+      setProgress(newProgress);
+
+      if (newProgress >= 98) {
+        dragging.current = false;
+        onConfirm();
+        setProgress(100);
+      }
+    };
+
   const SwipeToConfirm = ({ onConfirm, loading = false }) => {
     const [progress, setProgress] = useState(0);
     const dragging = useRef(false);
@@ -814,7 +863,7 @@ export default function LibraryTeacherHandle() {
     <>
       <Navbar />
       <div className="">
-        <CollegeInfo />
+        {/* <CollegeInfo /> */}
         <div className="min-h-screen bg-[#F0F4F8] p-4 md:p-8 font-sans text-slate-900 ">
           {/* --- TOP NAVIGATION BAR --- */}
 
@@ -907,6 +956,28 @@ export default function LibraryTeacherHandle() {
                       <Plus size={14} /> Add New Book
                     </button>
                   )}
+
+
+                  {activeTab === "transactions" && (
+    <button
+      onClick={handleNotifyReturnReminders}
+      disabled={notifying}
+      className="flex items-center gap-2 px-4 py-2 rounded-xl
+                 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest
+                 hover:bg-indigo-700 transition disabled:bg-slate-400"
+    >
+      {notifying ? (
+        "Sending…"
+      ) : (
+        <>
+          <Bell size={14} />
+          Notify Students
+        </>
+      )}
+    </button>
+  )}
+
+
                 </div>
 
                 {activeTab === "transactions" ? (

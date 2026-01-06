@@ -20,6 +20,7 @@ export default function CollegeInfo({ collegeData }) {
   const { user } = useAuth();
 
   const [collegeInfo, setCollegeInfo] = useState({});
+  const [collegeDept, setCollegeDept] = useState([]);
 
   const data = {
     collegeName: collegeInfo?.collegeName ?? "XYZ Institute of Technology",
@@ -42,7 +43,8 @@ export default function CollegeInfo({ collegeData }) {
         withCredentials: true,
       });
       console.log(res.data.data);
-      setCollegeInfo(res.data.data);
+      setCollegeInfo(res.data.data.collegeInfo);
+      setCollegeDept(res.data.data.departments);
     } catch (err) {
       console.error("Fetch college info failed", err);
     }
@@ -189,7 +191,7 @@ export default function CollegeInfo({ collegeData }) {
 
                 {/* Departments Ticker Style */}
                 <div className="mt-6 flex flex-wrap justify-center gap-2">
-                  {data.departmentName.slice().map((dept, idx) => (
+                  {collegeDept.slice().map((dept, idx) => (
                     <span
                       key={idx}
                       className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold text-slate-300 border border-white/5"

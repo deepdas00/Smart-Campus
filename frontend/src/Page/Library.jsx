@@ -23,7 +23,7 @@ import {
   Check,
   QrCode,
 } from "lucide-react";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 import logo from "../assets/logo.png";
 import profile from "../assets/profile.png";
 import { Link } from "react-router-dom";
@@ -390,7 +390,7 @@ export default function Library() {
       />
 
       {/*Banner*/}
-      <CollegeInfo />
+      {/* <CollegeInfo /> */}
 
       {libraryPolicy && (
         <div className="max-w-7xl mx-auto px-8 mt-4 ">

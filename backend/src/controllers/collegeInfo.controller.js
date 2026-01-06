@@ -100,6 +100,8 @@ export const getCollegeFullInfo = asyncHandler(async (req, res) => {
 
 //return limited information for studetn sand staff
 export const getCollegeLimitedInfo = asyncHandler(async (req, res) => {
+ 
+  
   const { collegeCode } = req.user;
 
   // Resolve college

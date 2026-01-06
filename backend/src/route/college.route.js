@@ -4,7 +4,7 @@ import { getAllColleges, getAllCollegesFullDetails } from "../controllers/colleg
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/authorize.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { createOrUpdateCollegeInfo, getCollegeFullInfo, getCollegeLimitedInfo, getDepartments } from "../controllers/collegeInfo.controller.js";
+import { createOrUpdateCollegeInfo, getCollegeFullInfo, getCollegeLimitedInfo } from "../controllers/collegeInfo.controller.js";
 import { addGalleryImage, deleteGalleryImage, getGalleryImages } from "../controllers/collegeGallery.controller.js";
 import { createNotification, deleteNotification, getNotifications, updateNotification } from "../controllers/collegeNotification.controller.js";
 import { getAdminDashboardStatistics } from "../controllers/collegeOverView.controller.js";
@@ -72,10 +72,10 @@ router.post(
 );
 
 // public department fetch
-router.get(
-    "/departments/:collegeCode",
-    getDepartments
-);
+// router.get(
+//     "/departments/:collegeCode",
+//     getDepartments
+// );
 
 //get full information of college admin
 router.get(

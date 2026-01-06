@@ -95,7 +95,7 @@ const collegeteacherSchema = new Schema(
     // =======================
     // 🔐 Authentication
     // =======================
-    userId: {
+    loginId: {
       type: String,
       required: true,
       unique: true

@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
-import CollegeInfo from "../Components/CollegeInfo";
+// import CollegeInfo from "../Components/CollegeInfo";
 
 export function KitchenKDS() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -544,7 +544,7 @@ export function KitchenKDS() {
 
       {/* College info */}
 
-      <CollegeInfo />
+      {/* <CollegeInfo /> */}
 
       <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 font-sans text-slate-900 pt-0 mt-0">
         {/* --- ENGAGING SMART HUD --- */}

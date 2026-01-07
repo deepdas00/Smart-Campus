@@ -71,6 +71,29 @@ export default function LibraryTeacherHandle() {
   const [isProcessing, setIsProcessing] = useState(false);
 const [notifying, setNotifying] = useState(false);
 
+
+
+
+  const normalizeTransaction = (tx) => ({
+    id: tx._id,
+    student: tx.studentId?.fullName || "Unknown",
+    roll: tx.studentId?.rollNo || "-",
+    email: tx.studentId?.email || "__",
+    book: tx.bookId?.title || "Unknown",
+    coverImage: tx.bookId?.coverImage || null, // ✅ ADD THIS
+    author: tx.bookId?.author || "", // optional
+
+    date: new Date(tx.createdAt).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+    }),
+    status: tx.transactionStatus,
+  });
+
+
+
+
+
 const handleNotifyReturnReminders = async () => {
   try {
     setNotifying(true);
@@ -416,21 +439,6 @@ const handleNotifyReturnReminders = async () => {
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [transactionError, setTransactionError] = useState(null);
 
-  const normalizeTransaction = (tx) => ({
-    id: tx._id,
-    student: tx.studentId?.studentName || "Unknown",
-    roll: tx.studentId?.rollNo || "-",
-
-    book: tx.bookId?.title || "Unknown",
-    coverImage: tx.bookId?.coverImage || null, // ✅ ADD THIS
-    author: tx.bookId?.author || "", // optional
-
-    date: new Date(tx.createdAt).toLocaleDateString("en-GB", {
-      day: "numeric",
-      month: "short",
-    }),
-    status: tx.transactionStatus,
-  });
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -452,6 +460,10 @@ const handleNotifyReturnReminders = async () => {
      
 
         const normalized = res.data.data.map(normalizeTransaction);
+
+        console.log("uhuhhuhu",res);
+        console.log("normalized",normalized);
+        
 
         setTransactions(normalized);
       } catch (err) {
@@ -1679,18 +1691,9 @@ const handleNotifyReturnReminders = async () => {
         )}
 
         {showQRScanner && (
-          <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-lg flex items-center justify-center">
+          <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-lg flex items-center justify-center">
             {/* Close */}
-            <button
-              onClick={() => {
-                setShowQRScanner(false);
-                stopCamera();
-              }}
-              className="absolute top-5 right-5 bg-white/10 hover:bg-red-500/20 text-white p-2 rounded-full transition"
-            >
-              <X size={22} />
-            </button>
-
+            
             {/* Main Scanner Card */}
             <div className="relative bg-white/5 border border-white/10 rounded-3xl p-6 w-[320px] shadow-2xl">
               {/* Header */}
@@ -1702,6 +1705,18 @@ const handleNotifyReturnReminders = async () => {
                   Scan Book Barcode
                 </p>
               </div>
+
+              <button
+              onClick={() => {
+                setShowQRScanner(false);
+                stopCamera();
+              }}
+              className="absolute top-5 right-5 z-[200] bg-white/10 hover:bg-red-500/20 text-white p-2 rounded-full transition"
+
+            >
+              <X size={20} />
+            </button>
+
 
               {/* Camera Area */}
               <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-white/10">
@@ -1801,7 +1816,7 @@ const handleNotifyReturnReminders = async () => {
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center bg-indigo-600 text-white font-bold text-xl">
-                          {scannedBook.studentName?.charAt(0)}
+                          {scannedBook.fullName?.charAt(0)}
                         </div>
                       )}
                     </div>
@@ -1810,7 +1825,7 @@ const handleNotifyReturnReminders = async () => {
                         Borrower
                       </p>
                       <h4 className="text-slate-900 font-bold text-base leading-none">
-                        {scannedBook.studentId.studentName}
+                        {scannedBook.studentId.fullName}
                       </h4>
                       <p className="text-xs text-slate-500 font-medium mt-1">
                         Roll No: {scannedBook.studentId.rollNo}
@@ -2100,7 +2115,7 @@ const handleNotifyReturnReminders = async () => {
                       Student
                     </span>
                     <span className="text-sm font-bold text-slate-800">
-                      {returnData.studentId.studentName}
+                      {returnData.studentId.fullName}
                     </span>
                   </div>
                   <div className="flex justify-between items-center border-t border-slate-100 pt-3">

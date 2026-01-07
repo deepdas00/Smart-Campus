@@ -29,6 +29,7 @@ import profile from "../assets/profile.png";
 import { Link } from "react-router-dom";
 import ProfileSidebar from "../Components/ProfileSidebar";
 import Navbar from "../Components/Navbar/Navbar";
+import Footer from "../Components/Footer";
 
 export default function Library() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -1324,6 +1325,8 @@ export default function Library() {
           ))}
         </div>
       </div>
+
+      <Footer/>
     </div>
   );
 }

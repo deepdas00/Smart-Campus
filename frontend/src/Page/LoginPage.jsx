@@ -491,10 +491,13 @@ const handleSelectCollege = (code) => {
               </div>
             </div>
 
+
+
+
             <button
               onClick={handleLogin}
               disabled={isSubmitting}
-              className="w-full mt-8 py-4 bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition disabled:opacity-50"
+              className="w-full mt-4 py-4 bg-blue-700 text-white rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-800 transition disabled:opacity-50"
             >
               {isSubmitting ? "Authenticating..." : "Login Now"}{" "}
               <ArrowRight className="w-5 h-5" />

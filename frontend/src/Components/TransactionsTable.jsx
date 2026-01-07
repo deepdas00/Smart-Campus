@@ -13,18 +13,18 @@ export default function TransactionsTable({
       <table className="w-full border-separate border-spacing-y-3">
         <thead>
           <tr className="text-[11px] font-bold text-slate-400 uppercase tracking-[0.2em]">
-            <th className="px-6 py-4 text-center">Borrower</th>
+            <th className="px-6 py-4 text-left">Borrower</th>
            
             <th className="px-6 py-4 text-center">Asset</th>
             <th className="px-6 py-4 text-center">Timeline</th>
             <th className="px-6 py-4 text-center">Status</th>
-            <th className="px-6 py-4 text-center">Action</th>
+            <th className="px-6 py-4 pl-10 text-left">Action</th>
           </tr>
         </thead>
         <tbody>
           {transactions.map((tx) => (
             <tr key={tx.id} className="group hover:bg-indigo-50/30">
-              <td className="px-6 py-5 text-center">
+              <td className="px-6 py-5 text-left">
                 <p className="font-bold">{tx.student}</p>
                 <p className="text-[10px] text-slate-400">#{tx.roll}</p>
               </td>
@@ -60,7 +60,7 @@ export default function TransactionsTable({
   </h4>
 </td>
 
-              <td className="px-6 py-5 t text-center">
+              <td className="px-6 py-5 t text-right">
                 <button
                   onClick={() =>
                     setShowReturnConfirm({

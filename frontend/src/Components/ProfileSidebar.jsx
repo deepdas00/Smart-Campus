@@ -9,7 +9,8 @@ import {
   Book,
   BookSearchIcon,
   BookDashed,
-  ShieldCheck ,
+  KeyRound,
+  ShieldCheck,
   BookDashedIcon,
   BookTemplate,
   ShieldAlert,
@@ -36,8 +37,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
   const [rollNo, setRollNo] = useState(user?.rollNo);
   const [shortName, setShortName] = useState("");
 
-
-  
   useEffect(() => {
     if (user?.studentName) {
       const words = user.studentName.trim().split(" "); // split by space
@@ -76,7 +75,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
     return (
       <button
         onClick={onLogout}
-        className="w-full group flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-red-50 text-red-600"
+        className="w-full group flex items-center justify-between px-4 py-3 rounded-lg transition hover:bg-red-50 text-red-600 cursor-pointer"
       >
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white shadow-sm rounded-md">{icon}</div>
@@ -102,7 +101,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <Utensils className="w-5 h-5" />,
         color: "green",
       },
-      
     ],
 
     librarian: [
@@ -118,7 +116,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <Book className="w-5 h-5" />,
         color: "orange",
       },
-     
     ],
 
     admin: [
@@ -134,7 +131,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
         icon: <BookTemplate className="w-5 h-5" />,
         color: "blue",
       },
-      
     ],
   };
 
@@ -181,7 +177,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
               <div>
                 <h3 className="text-lg font-semibold">
-                  {studentName} Dashboard
+                  {user.fullName} Dashboard
                 </h3>
                 <p className="text-sm text-blue-100">{rollNo}</p>
               </div>
@@ -194,8 +190,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
                 {canteen ? (
                   <img
                     src={canteen}
-
-
                     alt="Canteen Manager"
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -214,7 +208,6 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           {user?.role === "librarian" && (
             <div className="flex items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-
                 {librarian ? (
                   <img
                     src={librarian}
@@ -258,7 +251,10 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
         {/* Menu */}
 
-        <div className="flex-1 overflow-y-auto " style={{ maxHeight: "calc(100% - 11rem)" }}>
+        <div
+          className="flex-1 overflow-y-auto "
+          style={{ maxHeight: "calc(100% - 11rem)" }}
+        >
           {user?.role === "student" && (
             <div className="p-4 space-y-1">
               <SidebarItem
@@ -309,7 +305,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
               />
               <SidebarItem
                 to="/report-history"
-                icon={<ShieldCheck  className="w-5 h-5" />}
+                icon={<ShieldCheck className="w-5 h-5" />}
                 label="Report History"
                 color="#ff0000"
                 activeColor="bg-red-50 text-red-600"
@@ -317,11 +313,23 @@ export default function ProfileSidebar({ isOpen, onClose }) {
               />
               <SidebarItem
                 to="/"
-                icon={<img src={logo} alt="Smart Campus Logo" className="w-5 h-5" />}
+                icon={
+                  <img src={logo} alt="Smart Campus Logo" className="w-5 h-5" />
+                }
                 label="About Smart Campus"
                 color="#ff0000"
                 activeColor="bg-blue-50 text-blue-600"
               />
+
+              <SidebarItem
+                to="/change-password"
+                icon={<KeyRound className="w-5 h-5 " />}
+                label="Change Password"
+                color="#000000"
+                onClick={() => navigate("/change-password")}
+                onClose={onClose}
+              />
+
               <LogoutItem
                 icon={<LogOut className="w-5 h-5" />}
                 label="Logout"
@@ -346,23 +354,40 @@ export default function ProfileSidebar({ isOpen, onClose }) {
             {/* Logout always visible */}
             {user?.role !== "student" && (
               <>
+                <SidebarItem
+                  to="/"
+                  icon={
+                    <img
+                      src={logo}
+                      alt="Smart Campus Logo"
+                      className="w-5 h-5"
+                    />
+                  }
+                  label="About Smart Campus"
+                  color="#ff0000"
+                  activeColor="bg-blue-50 text-blue-600"
+                />
 
-              <SidebarItem
-                to="/"
-                icon={<img src={logo} alt="Smart Campus Logo" className="w-5 h-5" />}
-                label="About Smart Campus"
-                color="#ff0000"
-                activeColor="bg-blue-50 text-blue-600"
+
+
+                <SidebarItem
+                to="/change-password"
+                icon={<KeyRound className="w-5 h-5 " />}
+                label="Change Password"
+                color="#000000"
+                onClick={() => navigate("/change-password")}
+                onClose={onClose}
               />
 
 
-              <LogoutItem
-                icon={<LogOut className="w-5 h-5" />}
-                label="Logout"
-                onLogout={handleLogout}
-              />
+
+
+                <LogoutItem
+                  icon={<LogOut className="w-5 h-5" />}
+                  label="Logout"
+                  onLogout={handleLogout}
+                />
               </>
-              
             )}
           </div>
         </div>

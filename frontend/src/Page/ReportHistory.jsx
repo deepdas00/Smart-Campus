@@ -34,78 +34,59 @@ export default function ReportHistory() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedReport, setSelectedReport] = useState(null);
-const [rating, setRating] = useState(0);
-const [submittingRating, setSubmittingRating] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [submittingRating, setSubmittingRating] = useState(false);
 
+  const submitRating = async (value) => {
+    if (!selectedReport) return;
 
+    try {
+      setSubmittingRating(true);
+      setRating(value);
 
-const submitRating = async (value) => {
-  if (!selectedReport) return;
+      const res = await axios.post(
+        `${API_URL}/api/v1/reports/${selectedReport._id}/rate`,
+        { rating: value },
+        { withCredentials: true }
+      );
 
-  try {
+      // Update selected report immediately
+      setSelectedReport(res.data.data);
 
-    
-    setSubmittingRating(true);
-    setRating(value);
+      // Update list without refetch
+      setReports((prev) =>
+        prev.map((r) => (r._id === selectedReport._id ? res.data.data : r))
+      );
+    } catch (err) {
+      console.error("Rating failed", err);
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
-    const res = await axios.post(
-      `${API_URL}/api/v1/reports/${selectedReport._id}/rate`,
-      { rating: value },
-      { withCredentials: true }
-    );
+  const submitRatinghandle = async (reportId, star) => {
+    try {
+      setSubmittingRating(true);
+      setRating(star);
 
-    // Update selected report immediately
-    setSelectedReport(res.data.data);
+      const res = await axios.post(
+        `${API_URL}/api/v1/reports/${reportId}/rate`,
+        { rating: star },
+        { withCredentials: true }
+      );
 
-    // Update list without refetch
-    setReports((prev) =>
-      prev.map((r) =>
-        r._id === selectedReport._id ? res.data.data : r
-      )
-    );
-  } catch (err) {
-    console.error("Rating failed", err);
-  } finally {
-    setSubmittingRating(false);
-  }
-};
+      fetchMyReports();
 
+      // Update selected report immediately
+      // setSelectedReport(res.data.data);
 
-
-
-
-
-const submitRatinghandle = async (reportId, star) => {
-
-  try {
-
-    
-    setSubmittingRating(true);
-    setRating(star);
-
-    const res = await axios.post(
-      `${API_URL}/api/v1/reports/${reportId}/rate`,
-      { rating: star },
-      { withCredentials: true }
-    );
-
-
-fetchMyReports();
-
-    // Update selected report immediately
-    // setSelectedReport(res.data.data);
-
-    // Update list without refetch
-    
-  } catch (err) {
-    console.error("Rating failed", err);
-  } finally {
-    setSubmittingRating(false);
-  }
-};
-
-
-
+      // Update list without refetch
+    } catch (err) {
+      console.error("Rating failed", err);
+    } finally {
+      setSubmittingRating(false);
+    }
+  };
 
   useEffect(() => {
     fetchMyReports();
@@ -118,8 +99,6 @@ fetchMyReports();
         withCredentials: true,
       });
 
-    
-
       setReports(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch reports", error);
@@ -128,8 +107,6 @@ fetchMyReports();
     }
   };
 
-
-  
   const statusConfig = {
     submitted: {
       label: "Submitted",
@@ -163,20 +140,19 @@ fetchMyReports();
     },
   };
 
-const filteredReports = reports.filter((r) => {
-  const matchesSearch = r.title
-    .toLowerCase()
-    .includes(searchQuery.toLowerCase());
+  const filteredReports = reports.filter((r) => {
+    const matchesSearch = r.title
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
 
-  const matchesFilter =
-    activeFilter === "all" ||
-    (activeFilter === "resolved"
-      ? r.status === "resolved" || r.status === "closed"
-      : r.status === activeFilter);
+    const matchesFilter =
+      activeFilter === "all" ||
+      (activeFilter === "resolved"
+        ? r.status === "resolved" || r.status === "closed"
+        : r.status === activeFilter);
 
-  return matchesSearch && matchesFilter;
-});
-
+    return matchesSearch && matchesFilter;
+  });
 
   if (loading)
     return (
@@ -191,10 +167,11 @@ const filteredReports = reports.filter((r) => {
   const totalReports = reports.length;
   const closed = reports.filter((r) => r.status === "closed").length;
 
-  const resolvedCount = reports.filter((r) => r.status === "resolved").length + closed;
+  const resolvedCount =
+    reports.filter((r) => r.status === "resolved").length + closed;
   const rejectCount = reports.filter((r) => r.status === "rejected").length;
   const inProgress = reports.filter((r) => r.status === "in_progress").length;
-  
+
   const pendingCount = reports.filter(
     (r) => r.status === "submitted" || r.status === "in_progress"
   ).length;
@@ -203,16 +180,13 @@ const filteredReports = reports.filter((r) => {
   const resolutionRate =
     totalReports > 0 ? Math.round((resolvedCount / totalReports) * 100) : 0;
 
- // The Raw Count (How many total)
-const feedbackCount = closed; 
+  // The Raw Count (How many total)
+  const feedbackCount = closed;
 
-// The Engagement Score (How well you are doing)
+  // The Engagement Score (How well you are doing)
 
-
-
-const feedbackRate = resolvedCount > 0 
-  ? Math.round((closed / resolvedCount) * 100)
-  : 0;
+  const feedbackRate =
+    resolvedCount > 0 ? Math.round((closed / resolvedCount) * 100) : 0;
 
   const rejectionRate =
     totalReports > 0 ? Math.round((rejectCount / totalReports) * 100) : 0;
@@ -270,18 +244,6 @@ const feedbackRate = resolvedCount > 0
       fields: [{ key: "zone", label: "Zone" }],
     },
   };
-
-
-
-
-
- 
-
-
-
-
-
-  
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -500,7 +462,13 @@ const feedbackRate = resolvedCount > 0
 
               {/* Status Tabs */}
               <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl mb-6 w-fit">
-                {["all", "submitted", "in_progress", "resolved", "rejected"].map((tab) => (
+                {[
+                  "all",
+                  "submitted",
+                  "in_progress",
+                  "resolved",
+                  "rejected",
+                ].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveFilter(tab)}
@@ -516,125 +484,142 @@ const feedbackRate = resolvedCount > 0
               </div>
 
               {/* List */}
-            <div className="space-y-3">
-  {filteredReports.map((report) => {
-    const status = statusConfig[report.status];
-    const categoryLabel = {
-      researchandlab: "Research & Lab",
-      housinganddorms: "Housing & Dorms",
-      groundandpublic: "Ground & Public",
-    }[report.category] || report.category;
+              <div className="space-y-3">
+                {filteredReports.map((report) => {
+                  const status = statusConfig[report.status];
+                  const categoryLabel =
+                    {
+                      researchandlab: "Research & Lab",
+                      housinganddorms: "Housing & Dorms",
+                      groundandpublic: "Ground & Public",
+                    }[report.category] || report.category;
 
-    // Mapping priority to professional border colors
-    const priorityClasses = {
-      urgent: "border-l-red-500",
-      medium: "border-l-orange-500",
-      standard: "border-l-amber-400",
-    }[report.priority] || "border-l-slate-200";
+                  // Mapping priority to professional border colors
+                  const priorityClasses =
+                    {
+                      urgent: "border-l-red-500",
+                      medium: "border-l-orange-500",
+                      standard: "border-l-amber-400",
+                    }[report.priority] || "border-l-slate-200";
 
-    return (
-      <div
-        key={report._id}
-        className={`group bg-white border border-slate-200 border-l-[6px] ${priorityClasses} rounded-2xl overflow-hidden transition-all hover:shadow-md hover:border-slate-300`}
-      >
-        <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          
-          {/* LEFT: Clickable Info Section (Opens Sidebar) */}
-          <button
-            onClick={() => setSelectedReport(report)}
-            className="flex-1 text-left focus:outline-none"
-          >
-            <div className="flex items-center gap-3 mb-1.5">
-              <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                {report.title}
-              </h3>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-y-2 text-[12px] font-medium text-slate-500">
-              <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600">
-                {categoryLabel}
-              </span>
-              <span className="mx-2 text-slate-300">|</span>
-              <span className="capitalize">
-                Priority: <span className={report.priority === 'urgent' ? 'text-red-600' : 'text-slate-700'}>
-                  {report.priority}
-                </span>
-              </span>
-              <span className="mx-2 text-slate-300">|</span>
-              <span className="text-slate-400 flex items-center gap-1">
-                <Calendar className="w-3 h-3" />
-                {new Date(report.createdAt).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                  year: 'numeric'
-                })}
-              </span>
-            </div>
-          </button>
-
-          {/* RIGHT: Status & Interactive Rating (Does NOT open Sidebar) */}
-          <div className="flex flex-wrap items-center gap-3">
-            
-            {/* Interactive Rating: Only for 'resolved' status */}
-            {report.status === "resolved" && (
-              <div 
-                onClick={(e) => e.stopPropagation()} // STOPS SIDEBAR FROM OPENING
-                className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 pr-3 rounded-xl shadow-sm"
-              >
-                <span className="pl-1 text-[9px] font-black uppercase tracking-tighter text-slate-400">Rate</span>
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      disabled={submittingRating || report.rating}
-                      onClick={(e) => {
-                        e.stopPropagation(); // DOUBLE PROTECTION
-                        submitRatinghandle(report._id, star);
-                      }}
-                      className="transition-transform hover:scale-125 active:scale-90 disabled:opacity-40"
+                  return (
+                    <div
+                      key={report._id}
+                      className={`group bg-white border border-slate-200 border-l-[6px] ${priorityClasses} rounded-2xl overflow-hidden transition-all hover:shadow-md hover:border-slate-300 cursor-pointer`}
                     >
-                      <Star
-                        className={`w-4 h-4 transition-colors ${
-                          star <= (report.rating || rating)
-                            ? "text-amber-400 fill-amber-400"
-                            : "text-slate-300 hover:text-amber-200"
-                        }`}
-                      />
-                    </button>
-                  ))}
-                </div>
+                      <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer">
+                        {/* LEFT: Clickable Info Section (Opens Sidebar) */}
+                        <button
+                          onClick={() => setSelectedReport(report)}
+                          className="flex-1 text-left focus:outline-none"
+                        >
+                          <div className="flex items-center gap-3 mb-1.5 cursor-pointer">
+                            <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
+                              {report.title}
+                            </h3>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-y-2 text-[12px] font-medium text-slate-500 cursor-pointer">
+                            <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 ">
+                              {categoryLabel}
+                            </span>
+                            <span className="mx-2 text-slate-300">|</span>
+                            <span className="capitalize ">
+                              Priority:{" "}
+                              <span
+                                className={
+                                  report.priority === "urgent"
+                                    ? "text-red-600"
+                                    : "text-slate-700"
+                                }
+                              >
+                                {report.priority}
+                              </span>
+                            </span>
+                            <span className="mx-2 text-slate-300">|</span>
+                            <span className="text-slate-400 flex items-center gap-1">
+                              <Calendar className="w-3 h-3" />
+                              {new Date(report.createdAt).toLocaleDateString(
+                                undefined,
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </span>
+                          </div>
+                        </button>
+
+                        {/* RIGHT: Status & Interactive Rating (Does NOT open Sidebar) */}
+                        <div className="flex flex-wrap items-center gap-3 cursor-pointer">
+                          {/* Interactive Rating: Only for 'resolved' status */}
+                          {report.status === "resolved" && (
+                            <div
+                              onClick={(e) => e.stopPropagation()} // STOPS SIDEBAR FROM OPENING
+                              className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 pr-3 rounded-xl shadow-sm"
+                            >
+                              <span className="pl-1 text-[9px] font-black uppercase tracking-tighter text-slate-400">
+                                Rate
+                              </span>
+                              <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button
+                                    key={star}
+                                    disabled={submittingRating || report.rating}
+                                    onClick={(e) => {
+                                      e.stopPropagation(); // DOUBLE PROTECTION
+                                      submitRatinghandle(report._id, star);
+                                    }}
+                                    className="transition-transform hover:scale-125 active:scale-90 disabled:opacity-40"
+                                  >
+                                    <Star
+                                      className={`w-4 h-4 transition-colors ${
+                                        star <= (report.rating || rating)
+                                          ? "text-amber-400 fill-amber-400"
+                                          : "text-slate-300 hover:text-amber-200"
+                                      }`}
+                                    />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Read-Only Feedback: For 'closed' status */}
+                          {report.status === "closed" && report.rating && (
+                            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl shadow-sm">
+                              <div className="flex gap-0.5">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <Star
+                                    key={star}
+                                    className={`w-3 h-3 ${
+                                      star <= report.rating
+                                        ? "text-emerald-500 fill-emerald-500"
+                                        : "text-emerald-200"
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tighter">
+                                Verified
+                              </span>
+                            </div>
+                          )}
+
+                          {/* Main Status Badge */}
+                          <div
+                            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border ${status?.className}`}
+                          >
+                            {status?.icon}
+                            {status?.label}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-
-            {/* Read-Only Feedback: For 'closed' status */}
-            {report.status === "closed" && report.rating && (
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl shadow-sm">
-                <div className="flex gap-0.5">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-3 h-3 ${
-                        star <= report.rating ? "text-emerald-500 fill-emerald-500" : "text-emerald-200"
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tighter">Verified</span>
-              </div>
-            )}
-
-            {/* Main Status Badge */}
-            <div className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border ${status?.className}`}>
-              {status?.icon}
-              {status?.label}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  })}
-</div>
             </div>
           </div>
 
@@ -792,7 +777,7 @@ const feedbackRate = resolvedCount > 0
                     <div
                       className={`absolute top-4 left-0 h-0.5 -z-0 transition-all duration-1000 ${
                         selectedReport.status === "submitted" ||
-                            selectedReport.status === "viewed"
+                        selectedReport.status === "viewed"
                           ? "bg-indigo-500"
                           : selectedReport.status === "in_progress" ||
                             selectedReport.status === "processing"
@@ -808,7 +793,8 @@ const feedbackRate = resolvedCount > 0
                       style={{
                         width:
                           selectedReport.status === "submitted"
-                            ? "21%" : selectedReport.status === "viewed"
+                            ? "21%"
+                            : selectedReport.status === "viewed"
                             ? "31%"
                             : selectedReport.status === "in_progress" ||
                               selectedReport.status === "processing"
@@ -917,75 +903,64 @@ const feedbackRate = resolvedCount > 0
                   </div>
                 </div>
 
+                {selectedReport.status === "resolved" && (
+                  <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
+                    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">
+                      Rate Resolution
+                    </h3>
 
+                    <p className="text-sm text-slate-600 mb-4">
+                      How satisfied are you with the resolution?
+                    </p>
 
+                    <div className="flex gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          disabled={submittingRating}
+                          onClick={() => submitRating(star)}
+                          className="transition-transform hover:scale-110 active:scale-95 disabled:opacity-50"
+                        >
+                          <Star
+                            className={`w-7 h-7 ${
+                              star <= (selectedReport.rating || rating)
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-slate-300"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
 
+                    {submittingRating && (
+                      <p className="text-xs text-indigo-500 mt-3 font-bold">
+                        Submitting feedback...
+                      </p>
+                    )}
+                  </div>
+                )}
 
-{selectedReport.status === "resolved" && (
-  <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
-    <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">
-      Rate Resolution
-    </h3>
+                {selectedReport.status === "closed" &&
+                  selectedReport.rating && (
+                    <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6">
+                      <p className="text-sm font-bold text-emerald-700 mb-2">
+                        Thanks for your feedback!
+                      </p>
 
-    <p className="text-sm text-slate-600 mb-4">
-      How satisfied are you with the resolution?
-    </p>
-
-    <div className="flex gap-2">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <button
-          key={star}
-          disabled={submittingRating}
-          onClick={() => submitRating(star)}
-          className="transition-transform hover:scale-110 active:scale-95 disabled:opacity-50"
-        >
-          <Star
-            className={`w-7 h-7 ${
-              star <= (selectedReport.rating || rating)
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-slate-300"
-            }`}
-          />
-        </button>
-      ))}
-    </div>
-
-    {submittingRating && (
-      <p className="text-xs text-indigo-500 mt-3 font-bold">
-        Submitting feedback...
-      </p>
-    )}
-  </div>
-)}
-
-
-
-
-{selectedReport.status === "closed" && selectedReport.rating && (
-  <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-6">
-    <p className="text-sm font-bold text-emerald-700 mb-2">
-      Thanks for your feedback!
-    </p>
-
-   <div className="flex gap-1">
-  {[1, 2, 3, 4, 5].map((star) => (
-    <Star
-      key={star}
-      className={`w-5 h-5 ${
-        star <= selectedReport.rating
-          ? "text-yellow-400 fill-yellow-400"
-          : "text-slate-300"
-      }`}
-    />
-  ))}
-</div>
-  </div>
-)}
-
-
-
-
-
+                      <div className="flex gap-1">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-5 h-5 ${
+                              star <= selectedReport.rating
+                                ? "text-yellow-400 fill-yellow-400"
+                                : "text-slate-300"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                 {/* Location & Metadata Grid */}
                 <div className="grid grid-cols-2 gap-4">

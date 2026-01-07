@@ -35,6 +35,7 @@ import { CollegePolicy } from "./Page/CollegePolicy";
 import OfficeOverview from "./Page/OfficeOverview.jsx";
 import Teacher from "./Page/Teacher.jsx";
 import CollegeDept from "./Page/CollegeDept.jsx";
+import ChangePassword from "./Page/ChangePassword.jsx";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -75,6 +76,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Student Routes */}

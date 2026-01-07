@@ -282,12 +282,13 @@ export default function CanteenOrders() {
           <div className="relative bg-white w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300 rounded-[2.5rem] flex flex-col max-h-[98vh]">
             {/* 1. FIXED TOP: Decorative Bar & Header */}
             <div
-              className={`h-2 w-[98] rounded-t-full shrink-0 ${
-                selectedOrder.orderStatus === "served"
-                  ? "bg-green-500"
-                  : "bg-orange-500"
-              }`}
-            />
+  className={`h-2 w-[90%] mx-auto rounded-t-full flex items-center justify-center shrink-0 ${
+    selectedOrder.orderStatus === "served"
+      ? "bg-green-500"
+      : "bg-orange-500"
+  }`}
+/>
+
 
 
 
@@ -304,7 +305,7 @@ export default function CanteenOrders() {
                     className="w-45 h-45 object-contain"
                   />
                 ) : (
-                  <Package className="text-slate-900" size={24} />
+                  <Package className="text-slate-900" size={120} />
                 )}
               </div>
               <h2 className="text-xs uppercase tracking-[0.2em] font-black text-slate-400 mb-1">

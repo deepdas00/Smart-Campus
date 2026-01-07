@@ -485,8 +485,8 @@ export default function CampusReporterHome() {
                   className={`relative group transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]
                   ${
                     isMiddle
-              ? "z-30 lg:scale-100 w-full lg:w-[350px] h-[500px]"
-              : "z-10 lg:scale-98 w-full lg:w-[340px] h-[490px] lg:mt-10"
+              ? " lg:scale-100 w-full lg:w-[350px] h-[500px]"
+              : " lg:scale-100 w-full lg:w-[350px] h-[500px] lg:mt-10"
           }
         `}
                 >
@@ -508,7 +508,10 @@ export default function CampusReporterHome() {
 
                     {/* OVERLAYS */}
                     {/* 1. Base Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 group-hover:opacity-40 transition-opacity duration-700" />
+                    <div className="absolute inset-0 bg-gradient-to-t bg-gradient-to-t 
+             from-black/90
+             via-transparent 
+             to-transparent  opacity-100 group-hover:opacity-40 transition-opacity duration-700" />
 
                     {/* 2. Color Tint (Middle is Blue, Sides are Slate) */}
                     <div

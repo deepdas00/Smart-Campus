@@ -395,14 +395,20 @@ export default function HomeLogin() {
                 >
                   {index === 4 ? (
                     /* 150+ CARD */
-                    <div className="h-full flex items-center justify-between p-8 text-white">
-                      <div>
-                        <p className="text-5xl font-black italic">150+</p>
+                    <div className="h-full flex items-center justify-between p-8 text-white bg-black/50"
+                    style={{ backgroundImage: `url(${img.image})` }}>
+
+
+                      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
+
+
+                      <div className="z-5">
+                        <p className="text-5xl font-black italic">More </p>
                         <p className="text-[11px] uppercase tracking-widest opacity-80">
                           Interactive Spaces
                         </p>
                       </div>
-                      <ArrowRight size={36} />
+                      <ArrowRight size={36} className="z-5"/>
                     </div>
                   ) : (
                     <>

@@ -39,6 +39,7 @@ export default function Canteen() {
   const [qrCodeForDetails, setQrCodeForDetails] = useState(null);
   const [razorpayPaymentId, setRazorpayPaymentId] = useState(null);
   const [orderId, setOrderId] = useState(null);
+  const [transactionCode, setTransactionCode] = useState(null);
   const [orderStatus, setOrderStatus] = useState(null);
   const [paymentStatus, setPaymentStatus] = useState(null);
   const [isCanteenOpen, setIsCanteenOpen] = useState(null); // null = loading
@@ -309,10 +310,14 @@ const fetchCanteenPolicy = async () => {
       { withCredentials: true }
     );
 
+    console.log("ORREDEREDRERDERDRDEDREDRE",res);
+    
+
     const {
       qrCode,
       razorpayPaymentId,
       orderId,
+      transactionCode,
       orderStatus,
       paymentStatus,
       items,
@@ -323,6 +328,7 @@ const fetchCanteenPolicy = async () => {
     setQrCodeForDetails(qrCode);
     setRazorpayPaymentId(razorpayPaymentId);
     setOrderId(orderId);
+    setTransactionCode(transactionCode)
     setOrderStatus(orderStatus);
     setPaymentStatus(paymentStatus);
 
@@ -455,7 +461,7 @@ const fetchCanteenPolicy = async () => {
               <div className="bg-gray-50 rounded-xl p-4 py-2 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Order ID:</span>
-                  <span className="font-semibold">{orderId}</span>
+                  <span className="font-semibold">{transactionCode}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Order Status:</span>
@@ -466,15 +472,7 @@ const fetchCanteenPolicy = async () => {
                   <span className="text-gray-600">Time:</span>
                   <span className="font-semibold">{orderDetails?.time}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Items:</span>
-                  <span className="font-semibold">
-                    {orderDetails?.items?.reduce(
-                      (sum, item) => sum + item.quantity,
-                      0
-                    )}
-                  </span>
-                </div>
+                
 
                 <div className="flex justify-between text-lg pt-2 border-t border-gray-200">
                   <span className="font-semibold">Total:</span>

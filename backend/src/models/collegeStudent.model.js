@@ -116,7 +116,6 @@ const collegeStudentSchema = new Schema(
     password: {
       type: String,
       required: true,
-      select: false
     },
 
     role: {

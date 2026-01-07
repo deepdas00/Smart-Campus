@@ -37,25 +37,22 @@ export default function EduReportPortal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAiRefining, setIsAiRefining] = useState(false);
   const [selectedImageFile, setSelectedImageFile] = useState(null);
-
+  const [transactionCode, setTransactionCode] = useState(null);
   // Image Upload Logic
   const [selectedImage, setSelectedImage] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("idle");
 
   const categoryMap = {
-  Academic: "researchandlab",
-  Residential: "housinganddorms",
-  Campus: "groundandpublic",
-};
+    Academic: "researchandlab",
+    Residential: "housinganddorms",
+    Campus: "groundandpublic",
+  };
 
-const priorityMap = {
-  Standard: "standard",
-  Medium: "medium",
-  Urgent: "urgent",
-};
-
-
-
+  const priorityMap = {
+    Standard: "standard",
+    Medium: "medium",
+    Urgent: "urgent",
+  };
 
   // Location Logic
   const [location, setLocation] = useState({
@@ -163,55 +160,53 @@ const priorityMap = {
   const handleInputChange = (field, val) =>
     setFormData((prev) => ({ ...prev, [field]: val }));
 
-const handleSubmit = async () => {
-  try {
-    setIsSubmitting(true);
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
 
-    // BASIC VALIDATION
-    if (!formData.title || !formData.description) {
-      alert("Title and description are required");
-      return;
-    }
-
-    const payload = new FormData();
-
-    // REQUIRED FIELDS
-    payload.append("title", formData.title);
-    payload.append("description", formData.description);
-    payload.append("category", categoryMap[sector]); // ✅ FIX
-    payload.append("priority", priorityMap[urgency]); // ✅ FIX
-
-    // OPTIONAL FIELDS (SAFE)
-    if (formData.building) payload.append("building", formData.building);
-    if (formData.room) payload.append("room", formData.room);
-    if (formData.zone) payload.append("zone", formData.zone);
-
-    // IMAGE (ONLY IF UPLOADED)
-    if (selectedImageFile) {
-      payload.append("image", selectedImageFile);
-    }
-
-    const res = await axios.post(
-      `${API_URL}/api/v1/reports/createreport`,
-      payload,
-      {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
+      // BASIC VALIDATION
+      if (!formData.title || !formData.description) {
+        alert("Title and description are required");
+        return;
       }
-    );
 
- 
-    setStep(3);
-  } catch (error) {
-    console.error("CREATE REPORT ERROR:", error);
-    alert(error?.response?.data?.message || "Submission failed");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      const payload = new FormData();
 
+      // REQUIRED FIELDS
+      payload.append("title", formData.title);
+      payload.append("description", formData.description);
+      payload.append("category", categoryMap[sector]); // ✅ FIX
+      payload.append("priority", priorityMap[urgency]); // ✅ FIX
 
+      // OPTIONAL FIELDS (SAFE)
+      if (formData.building) payload.append("building", formData.building);
+      if (formData.room) payload.append("room", formData.room);
+      if (formData.zone) payload.append("zone", formData.zone);
 
+      // IMAGE (ONLY IF UPLOADED)
+      if (selectedImageFile) {
+        payload.append("image", selectedImageFile);
+      }
+
+      const res = await axios.post(
+        `${API_URL}/api/v1/reports/createreport`,
+        payload,
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
+      setTransactionCode(res.data.data.transactionCode);
+      console.log(res);
+
+      setStep(3);
+    } catch (error) {
+      console.error("CREATE REPORT ERROR:", error);
+      alert(error?.response?.data?.message || "Submission failed");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -228,9 +223,7 @@ const handleSubmit = async () => {
         {/* Header */}
         <Navbar />
 
-        <div className="">
-          {/* <CollegeInfo /> */}
-        </div>
+        <div className="">{/* <CollegeInfo /> */}</div>
       </div>
 
       <main className="max-w-6xl mx-auto py-10 px-6">
@@ -278,8 +271,6 @@ const handleSubmit = async () => {
                 }}
                 className="group bg-white border border-slate-200 p-8 rounded-[2.5rem] text-left transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1"
               >
-
-                
                 <div
                   className={`${value.bg} ${value.accent} w-14 h-14 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}
                 >
@@ -479,7 +470,7 @@ const handleSubmit = async () => {
             <p className="text-slate-500 font-medium mb-10 leading-relaxed">
               Mission{" "}
               <span className="text-indigo-600 font-bold font-mono">
-                #SENT-2025-09
+                {transactionCode}
               </span>{" "}
               is active. Our team has received your GPS coordinates and visual
               data.

@@ -107,6 +107,7 @@ export const verifyOldPassword = asyncHandler(async (req, res) => {
     const { prevPassword } = req.body
 
 
+
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
 
@@ -125,8 +126,13 @@ export const verifyOldPassword = asyncHandler(async (req, res) => {
         user = await getCollegeUserModel(collegeConn).findById(userId)
     }
 
-    if (!user) return res.status(404).json({ message: "User not found" });
 
+    
+    
+    
+    if (!user) return res.status(404).json({ message: "User not found" });
+    
+    console.log(user.password);
     // 4️⃣ Verify password
     const isMatch = await bcrypt.compare(prevPassword, user.password);
     if (!isMatch) {
@@ -139,6 +145,7 @@ export const verifyOldPassword = asyncHandler(async (req, res) => {
     user.resetPasswordOTPExpiry = Date.now() + 10 * 60 * 1000;  //👉 “Set the OTP expiry time to 10 minutes from the current moment.”
 
     await user.save({ validateBeforeSave: false });
+
 
 
     return res.status(201).json({ matchCase: `${otp}`, message: "Password Verify Successfully..." })

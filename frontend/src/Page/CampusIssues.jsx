@@ -75,7 +75,7 @@ const downloadReport = async (r) => {
     startY: y,
     head: [["Student Information", ""]],
     body: [
-      ["Name", r.studentId?.studentName],
+      ["Name", r.studentId?.fullName],
       ["Roll No", r.studentId?.rollNo],
       ["Department", r.studentId?.department],
       ["Batch", r.studentId?.admissionYear],
@@ -235,6 +235,7 @@ export default function CampusIssues() {
   const [adminResponse, setAdminResponse] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [studentInfo, setStudentInfo] = useState(null)
 
 
   const fetchReports = async () => {
@@ -277,8 +278,12 @@ export default function CampusIssues() {
         { reportId: r._id, collegeCode: collegeCode },
         { withCredentials: true }
       );
-      const reportData = res.data.data[0];
+
+      console.log(res);
+      
+      const reportData = res.data.data.report[0];
       setSelectedReport(reportData);
+      setStudentInfo(res.data.data.student)
       setAdminResponse(reportData.adminNote || "");
     } catch (error) {
       console.error("API ERROR:", error);
@@ -315,7 +320,7 @@ export default function CampusIssues() {
   return reports.filter((r) => {
     const matchesSearch =
       r.title?.toLowerCase().includes(search.toLowerCase()) ||
-      r.studentId?.studentName
+      r.studentId?.fullName
         ?.toLowerCase()
         .includes(search.toLowerCase());
 
@@ -472,7 +477,7 @@ export default function CampusIssues() {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm font-semibold text-slate-600">
-                      {r.studentId?.studentName}
+                      {r.studentId?.fullName}
                     </td>
                     <td className="px-4 py-4 text-center">
                       <span
@@ -548,7 +553,7 @@ export default function CampusIssues() {
 
                 <div>
                   <h3 className="font-black text-slate-900 text-lg tracking-tight">
-                    {selectedReport.studentId?.studentName}
+                    {selectedReport.studentId?.fullName}
                   </h3>
                   <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest bg-indigo-50 inline-block px-2 py-0.5 rounded-md mt-1">
                     {selectedReport.studentId?.rollNo}
@@ -585,7 +590,7 @@ export default function CampusIssues() {
                         Department
                       </p>
                       <p className="text-[11px] font-bold text-slate-700">
-                        {selectedReport.studentId?.department}
+                        {studentInfo.department?.shortCode}
                       </p>
                     </div>
                   </div>
@@ -650,14 +655,14 @@ export default function CampusIssues() {
                   </span>
                 </a>
                 <a
-                  href={`tel:${selectedReport.studentId?.mobileNo}`}
+                  href={`tel:${studentInfo.phone}`}
                   className="flex items-center gap-3 p-3 bg-white hover:bg-emerald-50 rounded-2xl text-[11px] font-bold text-slate-600 border border-slate-200 transition-all group"
                 >
                   <Phone
                     size={16}
                     className="text-slate-400 group-hover:text-emerald-500"
                   />
-                  <span>{selectedReport.studentId?.mobileNo}</span>
+                  <span>{studentInfo.phone}</span>
                 </a>
               </div>
             </div>
@@ -1018,7 +1023,7 @@ export default function CampusIssues() {
 
           <div className="absolute bottom-10 text-center">
             <h3 className="text-white text-xl font-black tracking-tight">
-              {selectedReport.studentId?.studentName}
+              {selectedReport.studentId?.fullName}
             </h3>
             <p className="text-slate-400 text-sm font-bold uppercase tracking-widest">
               Official Profile Photo

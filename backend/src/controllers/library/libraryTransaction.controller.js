@@ -340,14 +340,20 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
   const LibraryBooks = getLibraryBookModel(collegeConn);
   const Student = getCollegeStudentModel(collegeConn);
 
+
+
+  
   const transactions = await Transaction.find()
     .populate({
       path: "bookId",
       model: LibraryBooks,
       select: "title author coverImage coverImage",
     })
-    .populate({ path: "studentId", select: "studentName email rollNo " })
+    .populate({ path: "studentId", select: "fullName email rollNo" })
     .sort({ createdAt: -1 });
+
+    console.log(transactions);
+    
 
   res
     .status(200)

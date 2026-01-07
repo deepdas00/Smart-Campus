@@ -13,6 +13,7 @@ const router = express.Router();
 
 //Current staff
 router.get("/staff/me", verifyJWT, currentStaff);
+router.get("/student/me", verifyJWT, currentStudent);
 
 
 

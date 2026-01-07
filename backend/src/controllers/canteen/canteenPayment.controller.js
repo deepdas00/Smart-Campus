@@ -16,7 +16,7 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
   const { orderId } = req.params;
   const { collegeCode, userId } = req.user;
 
-  console.log(collegeCode, userId, orderId);
+ 
   
 
   // 1️⃣ Resolve college DB
@@ -38,7 +38,7 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
   // 2️⃣ Fetch order
   const order = await Order.findById(orderId);
 
-  console.log("ORDRERRRRRR", order);
+
   
 
   if (!order) {
@@ -56,8 +56,6 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
   }
 
 
-
-console.log("ORDER ID",order._id);
 
   // 5️⃣ Create Razorpay order
   const paymentData = await createRazorpayOrderUtil({

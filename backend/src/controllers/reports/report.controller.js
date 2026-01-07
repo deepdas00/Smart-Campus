@@ -7,6 +7,7 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
+import { getCollegeDepartmentModel } from "../../models/collegeDepartment.model.js";
 
 /* =========================
    CREATE REPORT (Student)
@@ -117,9 +118,7 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
      const { collegeCode, reportId } = req.body;
 
 
-     console.log(reportId);
-     console.log(reportId, collegeCode);
-     
+    
 
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
@@ -131,10 +130,11 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
     const Report = getReportModel(collegeConn);
 
     const Student = getCollegeStudentModel(collegeConn)
-
+    const Department = getCollegeDepartmentModel(collegeConn)
     const report = await Report.find({ _id : reportId }).populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
 
-    console.log(report);
+    const student = await Student.findById(report[0].studentId)
+    .populate({path : "department" })
     
 
     // const student = await Student.findById(report.studentId)
@@ -144,7 +144,7 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
     
 
     res.status(200).json(
-        new ApiResponse(200, report, "Reports fetched successfully")
+        new ApiResponse(200, {report, student}, "Reports fetched successfully")
     );
     
 

@@ -26,6 +26,7 @@ import ProfileSidebar from "../Components/ProfileSidebar";
 import { useAuth } from "../context/AuthContext";
 import Navbar from "../Components/Navbar/Navbar";
 import { Link } from "react-router-dom";
+import Footer from "../Components/Footer";
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function App() {
@@ -169,6 +170,9 @@ export default function App() {
     const res = await axios.get(`${API_URL}/api/v1/users/student/profile `, {
       withCredentials: true,
     });
+
+    console.log(res.data.data);
+    
 
     return res.data.data; // ApiResponse → data
   };
@@ -781,6 +785,7 @@ export default function App() {
   };
 
   return (
+    <>
     <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden">
       <Navbar />
       <ProfileSidebar
@@ -853,7 +858,7 @@ export default function App() {
                 Welcome back,
               </p>
               <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 mt-1">
-                Hey, {student?.studentName}! 👋
+                Hey, {student?.fullName}! 👋
               </h1>
             </header>
 
@@ -1130,6 +1135,11 @@ export default function App() {
         </div>
       </div>
     </div>
+
+    <Footer/>
+    </>
+
+
   );
 }
 

@@ -530,9 +530,9 @@ export default function CampusIssues() {
                     className="relative block transition-transform active:scale-95 duration-200"
                   >
                     <img
-                      src={selectedReport.studentId?.avatar}
+                      src={selectedReport.studentId?.profilePhoto}
                       className="w-24 h-24 rounded-[2rem] object-cover ring-4 ring-white shadow-xl group-hover:ring-indigo-100 transition-all"
-                      alt="Student avatar"
+                      alt="Student profilePhoto"
                     />
                     {/* Hover Overlay */}
                     <div className="absolute inset-0 bg-black/20 rounded-[2rem] opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
@@ -1010,7 +1010,7 @@ export default function CampusIssues() {
           </button>
 
           <img
-            src={selectedReport.studentId?.avatar}
+            src={selectedReport.studentId?.profilePhoto}
             className="max-w-full max-h-[80vh] rounded-[3rem] shadow-2xl border-8 border-white/10 animate-in zoom-in-95 duration-300"
             alt="Student Full Profile"
             onClick={(e) => e.stopPropagation()} // Prevents closing when clicking the image itself

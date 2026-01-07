@@ -362,7 +362,7 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 
 export const canteenSatusFetch = asyncHandler(async (req, res) => {
   
-  console.log("HELLO BHAIYAAAA");
+ 
   
   const { collegeCode } = req.user;
 
@@ -384,9 +384,9 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
 
   const canteenPolicy = await CanteenPolicyModel.findOne();
 
-  const canteenStatus = canteenPolicy.isActive;
+  const canteenStatus = canteenPolicy?.isActive;
 
-  
+   
   res
     .status(200)
     .json(

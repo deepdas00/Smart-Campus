@@ -42,9 +42,13 @@ export default function CollegeInfo({ collegeData }) {
       const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
         withCredentials: true,
       });
-      console.log(res.data.data);
+
+    
+      
+      const dept = res.data.data.departments.map((d) => d.shortCode);
+
       setCollegeInfo(res.data.data.collegeInfo);
-      setCollegeDept(res.data.data.departments);
+      setCollegeDept(dept);
     } catch (err) {
       console.error("Fetch college info failed", err);
     }

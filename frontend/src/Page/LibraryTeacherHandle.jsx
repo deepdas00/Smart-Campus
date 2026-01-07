@@ -1793,9 +1793,9 @@ const handleNotifyReturnReminders = async () => {
                   {/* Student "Identity Card" */}
                   <div className="flex items-center gap-4 p-4 bg-slate-50 border border-slate-100 rounded-[1.5rem] shadow-sm">
                     <div className="h-22  bg-indigo-100 rounded-2xl overflow-hidden shadow-lg shadow-indigo-200 border-2 border-white relative group">
-                      {scannedBook.studentId?.avatar ? (
+                      {scannedBook.studentId?.profilePhoto ? (
                         <img
-                          src={scannedBook.studentId.avatar}
+                          src={scannedBook.studentId.profilePhoto}
                           alt="Student"
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                         />

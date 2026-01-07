@@ -1675,7 +1675,7 @@ export function KitchenKDS() {
       )}
 
       {showQRScanner && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[120] bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-md overflow-hidden relative border border-white/20">
             {/* Top Decoration Bar */}
             <div className="h-1.5 w-full bg-gradient-to-r from-blue-400 via-indigo-500 to-blue-600" />
@@ -1744,93 +1744,85 @@ export function KitchenKDS() {
       )}
 
       {showConfirmModal && scannedOrder && (
-        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl flex items-center justify-center z-[110] p-4">
-          <div className="bg-white rounded-[3rem] w-full max-w-[420px] shadow-2xl overflow-hidden animate-in slide-in-from-bottom-12 duration-500">
-            {/* Top Banner: Status & User */}
-            <div className="relative bg-slate-50 pt-12 pb-8 px-10 text-center">
-              {/* Floating Paid Badge */}
-              <div className="absolute top-6 right-8">
-                <span
-                  className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${scannedOrder.paymentStatus === "paid"
-                    ? "bg-emerald-500 text-white"
-                    : "bg-red-500 text-white"
-                    }`}
-                >
-                  {scannedOrder.paymentStatus || "Unpaid"}
-                </span>
-              </div>
+        <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-xl flex items-center justify-center z-[110] p-4 overflow-y-auto">
+    <div className="bg-white rounded-[1rem] w-full max-w-[420px] shadow-2xl overflow-y-auto max-h-[calc(100vh-2rem)] animate-in slide-in-from-bottom-12 duration-500">
+      
+      {/* Top Banner: Status & User */}
+      <div className="relative bg-slate-50 pt-12 pb-8 px-10 text-center">
+        {/* Floating Paid Badge */}
+        <div className="absolute top-6 right-8">
+          <span
+            className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm ${
+              scannedOrder.paymentStatus === "paid"
+                ? "bg-emerald-500 text-white"
+                : "bg-red-500 text-white"
+            }`}
+          >
+            {scannedOrder.paymentStatus || "Unpaid"}
+          </span>
+        </div>
 
-              {/* User Avatar & Info */}
+        <div className="px-0 pb-0 -mt-1 text-center">
+          <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
+            <Check className="text-emerald-600" size={32} strokeWidth={3} />
+          </div>
+        </div>
 
+        <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
+          {scannedOrder.studentId.studentName || "Student User"}
+        </h3>
+        <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
+          ID: {scannedOrder.studentId.rollNo || "Not Provided"}
+        </p>
+      </div>
 
-
-              <div className="px-0 pb-0 -mt-1 text-center">
-                <div className="inline-flex p-4 bg-emerald-100 rounded-full mb-4">
-                  <Check
-                    className="text-emerald-600"
-                    size={32}
-                    strokeWidth={3}
-                  />
+      <div className="px-10 pb-10 pt-6 overflow-y-auto">
+        {/* Order Details Grid */}
+        <div className="bg-slate-50 rounded-[2rem] p-6 mb-8 border border-slate-100">
+          <div className="space-y-4">
+            {scannedOrder.items.map((item, i) => (
+              <div key={i} className="flex justify-between items-start">
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-700">{item.name}</p>
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">
+                    Qty: {item.quantity}
+                  </p>
                 </div>
+                <p className="text-sm font-black text-slate-800">
+                  ₹{item.price * item.quantity}
+                </p>
               </div>
+            ))}
 
-
-              <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
-                {scannedOrder.studentId.studentName || "Student User"}
-              </h3>
-              <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
-                ID: {scannedOrder.studentId.rollNo || "Not Provided"}
-              </p>
+            <div className="pt-4 mt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
+              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
+                Grand Total
+              </span>
+              <span className="text-2xl font-black text-blue-600">
+                ₹{scannedOrder.totalAmount}
+              </span>
             </div>
+          </div>
+        </div>
 
-            <div className="px-10 pb-10 pt-6">
-              {/* Order Details Grid */}
-              <div className="bg-slate-50 rounded-[2rem] p-6 mb-8 border border-slate-100">
-                <div className="space-y-4">
-                  {scannedOrder.items.map((item, i) => (
-                    <div key={i} className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <p className="text-sm font-bold text-slate-700">
-                          {item.name}
-                        </p>
-                        <p className="text-[10px] text-slate-400 font-bold uppercase">
-                          Qty: {item.quantity}
-                        </p>
-                      </div>
-                      <p className="text-sm font-black text-slate-800">
-                        ₹{item.price * item.quantity}
-                      </p>
-                    </div>
-                  ))}
+        {/* Transaction Reference Footer */}
+        <div className="text-center mb-8">
+          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+            Transaction Code :-
+          </p>
+          <p className="text-[11px] text-slate-600 font-mono mt-1">
+            {scannedOrder.transactionCode || "CASH_TRANSACTION"}
+          </p>
+        </div>
+        <div className="text-center mb-8">
+          <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
+            Transaction Reference :-
+          </p>
+          <p className="text-[11px] text-slate-600 font-mono mt-1">
+            {scannedOrder.razorpayPaymentId || "CASH_TRANSACTION"}
+          </p>
+        </div>
 
-                  <div className="pt-4 mt-4 border-t border-dashed border-slate-200 flex justify-between items-center">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                      Grand Total
-                    </span>
-                    <span className="text-2xl font-black text-blue-600">
-                      ₹{scannedOrder.totalAmount}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Transaction Reference Footer */}
-              <div className="text-center mb-8 ">
-                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-                  Transaction Code :-
-                </p>
-                <p className="text-[11px] text-slate-600 font-mono mt-1">
-                  {scannedOrder.transactionCode || "CASH_TRANSACTION"}
-                </p>
-              </div>
-              <div className="text-center mb-8 ">
-                <p className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">
-                  Transaction Reference :-
-                </p>
-                <p className="text-[11px] text-slate-600 font-mono mt-1">
-                  {scannedOrder.razorpayPaymentId || "CASH_TRANSACTION"}
-                </p>
-              </div>
 
               {/* --- THE MODERN SWIPE SLIDER --- */}
 
@@ -1907,7 +1899,7 @@ export function KitchenKDS() {
       )}
 
       {showSuccessModal && (
-        <div className="fixed inset-0 bg-emerald-500/20 backdrop-blur-md flex items-center justify-center z-[120] p-4">
+       <div className="fixed inset-0 bg-emerald-500/20 backdrop-blur-md flex items-center justify-center z-[120] p-4">
           <div className="bg-white rounded-[3rem] w-full max-w-[350px] shadow-2xl p-10 text-center animate-in zoom-in-95 duration-300">
             {/* Animated Checkmark Circle */}
             <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-200/50">

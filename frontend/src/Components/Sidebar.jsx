@@ -6,6 +6,7 @@ import {
   Library,
   Search,
   LogOut,
+  GraduationCap ,
   School ,
   FileText ,
   Users,
@@ -21,11 +22,11 @@ export default function Sidebar() {
     { path: "/admin/issues", icon: <AlertTriangle />, label: "Campus Issues" },
     { path: "/admin/canteen", icon: <Utensils />, label: "Canteen Authority" },
     { path: "/admin/library", icon: <Library />, label: "Library Authority" },
-    { path: "/admin/lost-found", icon: <Search />, label: "Lost & Found" },
+    // { path: "/admin/lost-found", icon: <Search />, label: "Lost & Found" },
     { path: "/admin/college-info", icon: <School />, label: "College-info" },
     { path: "/admin/college-policy", icon: <FileText />, label: "College-Policy" },
     { path: "/admin/teacher", icon: <Users />, label: "Teacher Management" },
-    { path: "/admin/department", icon: <Users />, label: "Department" },
+    { path: "/admin/department", icon: <GraduationCap  />, label: "Department" },
   ];
 
   // Filter menu items based on role

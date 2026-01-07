@@ -16,6 +16,7 @@ import {
   LogIn,
   House,
   LogOut,
+  Library,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -23,12 +24,15 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png";
+import admin from "../assets/Admin.png";
+import librarian from "../assets/LibraryAdmin.png";
+import canteen from "../assets/CanteenAdmin.png";
 export default function ProfileSidebar({ isOpen, onClose }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const [studentName, setStudentName] = useState(user?.studentName);
-  const [avatar, setAvatar] = useState(user?.avatar);
+  const [avatar, setAvatar] = useState(user?.profilePhoto);
   const [rollNo, setRollNo] = useState(user?.rollNo);
   const [shortName, setShortName] = useState("");
 
@@ -162,9 +166,9 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           {user?.role === "student" && (
             <div className="flex items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
+                {user?.profilePhoto ? (
                   <img
-                    src={user.avatar}
+                    src={user.profilePhoto}
                     alt={user.studentName}
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -187,9 +191,11 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           {user?.role === "canteen" && (
             <div className="flex items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
+                {canteen ? (
                   <img
-                    src={user.avatar}
+                    src={canteen}
+
+
                     alt="Canteen Manager"
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -208,9 +214,10 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           {user?.role === "librarian" && (
             <div className="flex items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
+
+                {librarian ? (
                   <img
-                    src={user.avatar}
+                    src={librarian}
                     alt="Canteen Manager"
                     className="w-full h-full object-cover rounded-full"
                   />
@@ -229,9 +236,9 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           {user?.role === "admin" && (
             <div className="flex items-center gap-4 mt-4">
               <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                {user?.avatar ? (
+                {admin ? (
                   <img
-                    src={user.avatar}
+                    src={admin}
                     alt="Canteen Manager"
                     className="w-full h-full object-cover rounded-full"
                   />

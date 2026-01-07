@@ -9,7 +9,8 @@ const router = express.Router();
 // Registration (public)
 router.post(
   "/register",
-  upload.single("avatar"),
+  verifyJWT,
+  upload.single("profilePhoto"),
   registerStudent
 );
 

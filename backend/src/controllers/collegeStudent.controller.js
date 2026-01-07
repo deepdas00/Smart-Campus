@@ -13,6 +13,8 @@ import { getLibraryTransactionModel } from "../models/libraryTransaction.model.j
 import { getLibraryBookModel } from "../models/libraryBook.model.js";
 import { sendMail } from "../utils/sendMail.js";
 import { buildStudentCredentialsMailTemplate } from "../template/buildStudentCredentialsMailTemplate.js";
+import { getCollegeDepartmentModel } from "../models/collegeDepartment.model.js";
+import { populate } from "dotenv";
 
 const generatePassword = (collegeCode, rollNo) => {
 
@@ -30,6 +32,9 @@ const generatePassword = (collegeCode, rollNo) => {
 };
 
 export const registerStudent = asyncHandler(async (req, res) => {
+
+  console.log(req.user);
+  
   const { collegeCode, userId } = req.user;
 
   const {
@@ -58,7 +63,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
   const Student = getCollegeStudentModel(collegeConn);
 
   const existing = await Student.findOne({
-    $or: [{ rollNo }, { email }, { phone }, { registrationNo }]
+    $or: [{ rollNo }, { email }, { phone }]
   });
 
   if (existing) return res.status(409).json({ status: "failed", message: "Student already exists with this email or roll or phone or registerationNo" });
@@ -102,6 +107,9 @@ export const registerStudent = asyncHandler(async (req, res) => {
 });
 
 export const studentLogin = asyncHandler(async (req, res) => {
+
+  console.log(req.body);
+  
 
   const { collegeCode, loginId, password } = req.body;
 
@@ -216,7 +224,9 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   const Student = getCollegeStudentModel(collegeConn);
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
   const LibraryBooks = getLibraryBookModel(collegeConn);
-  const student = await Student.findById(userId).select(
+  const student = await Student.findById(userId)
+  .populate({path:"department"})
+  .select(
     "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
   );
 
@@ -262,8 +272,11 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
+  const Department = getCollegeDepartmentModel(collegeConn)
   const Student = getCollegeStudentModel(collegeConn);
-  const students = await Student.find().select(
+  const students = await Student.find()
+  .populate({path: "department"})
+  .select(
     "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
   );
 

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useRef } from "react";
 
-
-
 import { useEffect } from "react";
 import {
   School,
@@ -12,11 +10,11 @@ import {
   Save,
   Plus,
   Trash2,
-  Edit3 ,
+  Edit3,
   MapPin,
-  Camera ,
+  Camera,
   Mail,
-  ArrowRight ,
+  ArrowRight,
   CheckCircle2,
   Phone,
   User as UserIcon,
@@ -78,12 +76,9 @@ export default function SmartCollegeAdmin() {
     preview: "",
   });
 
-
   const [notificationLoading, setNotificationLoading] = useState(false);
 
-
-
-const notificationFormRef = useRef(null);
+  const notificationFormRef = useRef(null);
   const [isSuccess, setIsSuccess] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -91,16 +86,11 @@ const notificationFormRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  const [newDept, setNewDept] = useState("");
-
   const addDepartment = () => {
-    if (!newDept.trim()) return;
-
     setCollegeData({
       ...collegeData,
-      departments: [...collegeData.departments, newDept.trim()],
+      departments: [...collegeData.departments],
     });
-    setNewDept("");
   };
 
   const deleteDepartment = (index) => {
@@ -122,12 +112,10 @@ const notificationFormRef = useRef(null);
 
     // Inspect formData content
     for (let pair of formData.entries()) {
-
     }
 
     try {
       const res = await api.post("/college/gallery", formData);
-    
     } catch (err) {
       console.error("Upload failed", err.response?.data || err);
     }
@@ -136,7 +124,6 @@ const notificationFormRef = useRef(null);
   const fetchGallery = async () => {
     try {
       const res = await api.get("/college/gallery");
-      
 
       setGallery(res.data.data);
     } catch (err) {
@@ -157,20 +144,19 @@ const notificationFormRef = useRef(null);
     }
   };
 
-const fetchNotifications = async () => {
-  try {
-    const res = await api.get("/college/notifications");
-    const data = res.data.data.map((n) => ({
-      ...n,
-      expireAt: n.expireAt || null,
-    }));
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get("/college/notifications");
+      const data = res.data.data.map((n) => ({
+        ...n,
+        expireAt: n.expireAt || null,
+      }));
 
-    
-    setNotices(data);
-  } catch (err) {
-    console.error("Fetch notifications failed", err);
-  }
-};
+      setNotices(data);
+    } catch (err) {
+      console.error("Fetch notifications failed", err);
+    }
+  };
 
   useEffect(() => {
     fetchNotifications();
@@ -226,8 +212,6 @@ const fetchNotifications = async () => {
       const res = await api.get("/college/info-full");
       const data = res.data.data;
 
-     
-
       setCollegeData({
         code: data.collegeCode || "",
         name: data.collegeName || "",
@@ -250,16 +234,7 @@ const fetchNotifications = async () => {
     }
   };
 
-
-
-
-  
   const saveCollegeInfo = async () => {
-    if (!collegeData.departments.length) {
-      alert("At least one department is required");
-      return;
-    }
-
     try {
       setSaving(true);
       setSaveSuccess(false);
@@ -308,167 +283,149 @@ const fetchNotifications = async () => {
     }
   };
 
-const createNotification = async (notificationPayload) => {
-  setNotificationLoading(true);
-  try {
-    const formData = new FormData();
-    formData.append("category", notificationPayload.category);
-    formData.append("title", notificationPayload.title.trim());
-    formData.append("description", notificationPayload.description.trim());
-    if (notificationPayload.expireAt)
-      formData.append("expireAt", notificationPayload.expireAt);
-    if (notificationPayload.imageFile)
-      formData.append("image", notificationPayload.imageFile);
-
-    const res = await api.post("/college/notifications", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    setNotices((prev) => [res.data.data, ...prev]);
-    return res.data.data;
-  } catch (err) {
-    console.error("Create notification failed", err.response?.data || err);
-    throw err;
-  }finally {
-    setNotificationLoading(false);
-  }
-};
-
-const updateNotification = async (id, notificationPayload) => {
-  setNotificationLoading(true);
-  try {
-    const formData = new FormData();
-    formData.append("category", notificationPayload.category);
-    formData.append("title", notificationPayload.title.trim());
-    formData.append("description", notificationPayload.description.trim());
-    if (notificationPayload.expireAt)
-      formData.append("expireAt", notificationPayload.expireAt);
-    if (notificationPayload.imageFile)
-      formData.append("image", notificationPayload.imageFile);
-
-    // Properly log FormData content
-    for (let pair of formData.entries()) {
-
-    }
-
-    const res = await api.patch(`/college/notifications/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
-
-    setNotices((prev) =>
-      prev.map((n) => (n._id === id ? res.data.data : n))
-    );
-    return res.data.data;
-  } catch (err) {
-    console.error("Update notification failed", err.response?.data || err);
-    throw err;
-  }finally
-  {    setNotificationLoading(false); }
-};
-
-
-
-const deleteNotification = async (id) => {
-  try {
+  const createNotification = async (notificationPayload) => {
     setNotificationLoading(true);
-    await api.delete(`/college/notifications/${id}`);
-    setNotices((prev) => prev.filter((n) => n._id !== id));
-  } catch (err) {
-    console.error("Delete notification failed", err.response?.data || err);
-    throw err;
-  } finally { 
-    setNotificationLoading(false);
-  }
-};
+    try {
+      const formData = new FormData();
+      formData.append("category", notificationPayload.category);
+      formData.append("title", notificationPayload.title.trim());
+      formData.append("description", notificationPayload.description.trim());
+      if (notificationPayload.expireAt)
+        formData.append("expireAt", notificationPayload.expireAt);
+      if (notificationPayload.imageFile)
+        formData.append("image", notificationPayload.imageFile);
 
+      const res = await api.post("/college/notifications", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-
-
-const handleCreateNotification = async () => {
-  if (!draftNotification.title.trim() || !draftNotification.description.trim()) {
-    alert("Title and description are required");
-    return;
-  }
-
-  try {
-    await createNotification(draftNotification);
-    setDraftNotification(null);
-  } catch {
-    alert("Failed to create notification");
-  }
-};
-
-
-
-
-const handleUpdateNotification = async (id) => {
-  try {
-    await updateNotification(id, draftNotification);
-    setDraftNotification(null);
-  } catch {
-    alert("Failed to update notification");
-  }
-};
-
-
-
-const handleDeleteNotification = async (id) => {
-  if (!confirm("Are you sure you want to delete this notification?")) return;
-
-  try {
-    await deleteNotification(id);
-  } catch {
-    alert("Failed to delete notification");
-  }
-};
-
-
-
-
-// Create / Update button handler
-const handleSaveDraftNotification = async () => {
-  if (!draftNotification.title.trim() || !draftNotification.description.trim()) {
-    alert("Title and description are required");
-    return;
-  }
-
-  try {
-    if (draftNotification._id) {
-      // Update existing notification
-      await updateNotification(draftNotification._id, draftNotification);
-    } else {
-      // Create new notification
-      await createNotification(draftNotification);
+      setNotices((prev) => [res.data.data, ...prev]);
+      return res.data.data;
+    } catch (err) {
+      console.error("Create notification failed", err.response?.data || err);
+      throw err;
+    } finally {
+      setNotificationLoading(false);
     }
-    setDraftNotification(null);
-  } catch {
-    alert("Notification save failed");
-  }
-};
+  };
 
-// Cancel draft
-const handleCancelDraftNotification = () => setDraftNotification(null);
+  const updateNotification = async (id, notificationPayload) => {
+    setNotificationLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("category", notificationPayload.category);
+      formData.append("title", notificationPayload.title.trim());
+      formData.append("description", notificationPayload.description.trim());
+      if (notificationPayload.expireAt)
+        formData.append("expireAt", notificationPayload.expireAt);
+      if (notificationPayload.imageFile)
+        formData.append("image", notificationPayload.imageFile);
 
+      // Properly log FormData content
+      for (let pair of formData.entries()) {
+      }
 
+      const res = await api.patch(`/college/notifications/${id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-// Open draft for edit
-const handleEditNotification = (note) => {
-  setDraftNotification(note);
-// Smooth scroll to form
-  setTimeout(() => {
-    notificationFormRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  }, 100);
+      setNotices((prev) => prev.map((n) => (n._id === id ? res.data.data : n)));
+      return res.data.data;
+    } catch (err) {
+      console.error("Update notification failed", err.response?.data || err);
+      throw err;
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
 
+  const deleteNotification = async (id) => {
+    try {
+      setNotificationLoading(true);
+      await api.delete(`/college/notifications/${id}`);
+      setNotices((prev) => prev.filter((n) => n._id !== id));
+    } catch (err) {
+      console.error("Delete notification failed", err.response?.data || err);
+      throw err;
+    } finally {
+      setNotificationLoading(false);
+    }
+  };
 
-};
+  const handleCreateNotification = async () => {
+    if (
+      !draftNotification.title.trim() ||
+      !draftNotification.description.trim()
+    ) {
+      alert("Title and description are required");
+      return;
+    }
 
+    try {
+      await createNotification(draftNotification);
+      setDraftNotification(null);
+    } catch {
+      alert("Failed to create notification");
+    }
+  };
 
+  const handleUpdateNotification = async (id) => {
+    try {
+      await updateNotification(id, draftNotification);
+      setDraftNotification(null);
+    } catch {
+      alert("Failed to update notification");
+    }
+  };
 
+  const handleDeleteNotification = async (id) => {
+    if (!confirm("Are you sure you want to delete this notification?")) return;
 
+    try {
+      await deleteNotification(id);
+    } catch {
+      alert("Failed to delete notification");
+    }
+  };
 
+  // Create / Update button handler
+  const handleSaveDraftNotification = async () => {
+    if (
+      !draftNotification.title.trim() ||
+      !draftNotification.description.trim()
+    ) {
+      alert("Title and description are required");
+      return;
+    }
+
+    try {
+      if (draftNotification._id) {
+        // Update existing notification
+        await updateNotification(draftNotification._id, draftNotification);
+      } else {
+        // Create new notification
+        await createNotification(draftNotification);
+      }
+      setDraftNotification(null);
+    } catch {
+      alert("Notification save failed");
+    }
+  };
+
+  // Cancel draft
+  const handleCancelDraftNotification = () => setDraftNotification(null);
+
+  // Open draft for edit
+  const handleEditNotification = (note) => {
+    setDraftNotification(note);
+    // Smooth scroll to form
+    setTimeout(() => {
+      notificationFormRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  };
 
   return (
     <div
@@ -576,6 +533,7 @@ const handleEditNotification = (note) => {
                 />
                 <InputGroup
                   label="Official Email"
+                  readOnly={true}
                   icon={<Mail size={20} />}
                   value={collegeData.email}
                   onChange={(v) => setCollegeData({ ...collegeData, email: v })}
@@ -650,51 +608,6 @@ const handleEditNotification = (note) => {
                 </div>
               </div>
 
-              {/* Departments Section */}
-              <div className="mt-8">
-                <label className="text-xs font-black uppercase text-blue-600 mb-3 block tracking-widest">
-                  Departments
-                </label>
-
-                {/* Department Addition UI */}
-                <div className="flex gap-2 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Enter department name..."
-                    value={newDept}
-                    onChange={(e) => setNewDept(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addDepartment()}
-                    className="flex-1 bg-white/80 p-3 px-5 rounded-xl border-2 border-transparent focus:border-blue-400 outline-none text-sm font-bold shadow-sm"
-                  />
-                  <button
-                    onClick={addDepartment}
-                    className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-xl transition-colors shadow-lg"
-                  >
-                    <Plus size={20} />
-                  </button>
-                </div>
-
-                {/* Display Departments: 4 per row */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  {collegeData.departments.map((dept, index) => (
-                    <div
-                      key={index}
-                      className="group relative bg-white/70 border border-blue-200 py-3 px-4 rounded-xl text-[10px] md:text-xs font-black text-blue-800 flex items-center justify-center text-center uppercase shadow-sm hover:bg-white transition-all"
-                    >
-                      {dept}
-
-                      {/* The Delete Button */}
-                      <button
-                        onClick={() => deleteDepartment(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                      >
-                        <X size={12} strokeWidth={4} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Address */}
               <div className="mt-8">
                 <label className="text-xs font-black uppercase text-blue-600 mb-2 block tracking-widest">
@@ -718,9 +631,9 @@ const handleEditNotification = (note) => {
                 </div>
                 <div className="relative">
                   <label className="text-xs font-black uppercase text-blue-600 mb-2 block tracking-widest mt-6">
-                  Campus Description
-                </label>
-                  <Info 
+                    Campus Description
+                  </label>
+                  <Info
                     className="absolute left-4 top-10 text-blue-500"
                     size={20}
                   />
@@ -1083,7 +996,10 @@ const handleEditNotification = (note) => {
 
         {/* --- 3. LIVE BROADCAST (NOTIFICATIONS) --- */}
         {activeTab === "feed" && (
-          <div ref={notificationFormRef} className="bg-[#ffe0ba] p-8 rounded-[2.5rem] border border-orange-100 shadow-inner animate-fadeIn">
+          <div
+            ref={notificationFormRef}
+            className="bg-[#ffe0ba] p-8 rounded-[2.5rem] border border-orange-100 shadow-inner animate-fadeIn"
+          >
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3 text-orange-800">
                 <Bell size={24} />
@@ -1107,225 +1023,283 @@ const handleEditNotification = (note) => {
             </div>
 
             {/* Notification Form Inline */}
-{draftNotification && (
-  <div className="relative overflow-hidden bg-white border-2 border-orange-200 rounded-[2rem] shadow-lg transition-all mb-12">
-    
-    {/* Top Status Bar */}
-    <div className="bg-orange-600 py-3 px-6 flex justify-between items-center rounded-t-[1.75rem]">
-      <div className="flex items-center gap-2">
-        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-        <span className="text-[10px] font-black text-white uppercase tracking-widest">
-          {draftNotification._id ? "Edit_Protocol" : "Create_New_Broadcast"}
-        </span>
-      </div>
-      <button 
-        onClick={handleCancelDraftNotification} 
-        className="text-white hover:text-orange-200 transition-colors"
-      >
-        <X size={18} />
-      </button>
-    </div>
-
-    <div className="grid lg:grid-cols-12">
-      {/* Sidebar */}
-      <div className="lg:col-span-4 p-8 bg-orange-50/50 space-y-6 border-r border-orange-100 rounded-bl-[2rem] rounded-tl-[0rem]">
-        
-        {/* Category */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
-            <div className="w-1 h-3 bg-orange-400 rounded-full"></div> Protocol_Type
-          </label>
-          <select
-            value={draftNotification.category}
-            onChange={(e) => setDraftNotification({ ...draftNotification, category: e.target.value })}
-            className="w-full bg-white px-4 py-3 rounded-xl border border-orange-200 focus:border-orange-500 outline-none font-black text-xs text-orange-700 uppercase transition cursor-pointer"
-          >
-            <option value={CATEGORY_ENUM.EVENT}>Event_Log</option>
-            <option value={CATEGORY_ENUM.ACADEMIC}>Academic_Sync</option>
-            <option value={CATEGORY_ENUM.SECURITY}>Security_Alert</option>
-            <option value={CATEGORY_ENUM.HOLIDAY}>Holiday_Node</option>
-            <option value={CATEGORY_ENUM.OTHER}>General_Data</option>
-          </select>
-        </div>
-
-        {/* Expiry */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
-            <div className="w-1 h-3 bg-orange-400 rounded-full"></div> Auto_Purge_Date
-          </label>
-          <input
-            type="date"
-            value={draftNotification.expireAt || ""}
-            onChange={(e) => setDraftNotification({ ...draftNotification, expireAt: e.target.value })}
-            className="w-full bg-white px-4 py-3 rounded-xl border border-orange-200 focus:border-orange-500 outline-none font-black text-xs text-orange-700 transition"
-          />
-        </div>
-
-        {/* Image Upload */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
-            <div className="w-1 h-3 bg-orange-400 rounded-full"></div> Visual_Asset
-          </label>
-          <div
-            onClick={() => document.getElementById('imagePicker').click()}
-            className="group relative aspect-video w-full bg-white border-2 border-dashed border-orange-200 rounded-xl flex flex-col items-center justify-center overflow-hidden hover:border-orange-500 transition cursor-pointer"
-          >
-            {draftNotification.imagePreview ? (
-              <>
-                <img src={draftNotification.imagePreview} className="w-full h-full object-cover" alt="Preview" />
-                <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-black uppercase tracking-widest">
-                  Replace Asset
+            {draftNotification && (
+              <div className="relative overflow-hidden bg-white border-2 border-orange-200 rounded-[2rem] shadow-lg transition-all mb-12">
+                {/* Top Status Bar */}
+                <div className="bg-orange-600 py-3 px-6 flex justify-between items-center rounded-t-[1.75rem]">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                      {draftNotification._id
+                        ? "Edit_Protocol"
+                        : "Create_New_Broadcast"}
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleCancelDraftNotification}
+                    className="text-white hover:text-orange-200 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
                 </div>
-              </>
-            ) : (
-              <div className="text-center p-4">
-                <Camera size={24} className="text-orange-300 mx-auto mb-2 group-hover:text-orange-500 transition-colors" />
-                <span className="text-[9px] font-black text-orange-400 uppercase">Attach Media</span>
+
+                <div className="grid lg:grid-cols-12">
+                  {/* Sidebar */}
+                  <div className="lg:col-span-4 p-8 bg-orange-50/50 space-y-6 border-r border-orange-100 rounded-bl-[2rem] rounded-tl-[0rem]">
+                    {/* Category */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
+                        <div className="w-1 h-3 bg-orange-400 rounded-full"></div>{" "}
+                        Protocol_Type
+                      </label>
+                      <select
+                        value={draftNotification.category}
+                        onChange={(e) =>
+                          setDraftNotification({
+                            ...draftNotification,
+                            category: e.target.value,
+                          })
+                        }
+                        className="w-full bg-white px-4 py-3 rounded-xl border border-orange-200 focus:border-orange-500 outline-none font-black text-xs text-orange-700 uppercase transition cursor-pointer"
+                      >
+                        <option value={CATEGORY_ENUM.EVENT}>Event_Log</option>
+                        <option value={CATEGORY_ENUM.ACADEMIC}>
+                          Academic_Sync
+                        </option>
+                        <option value={CATEGORY_ENUM.SECURITY}>
+                          Security_Alert
+                        </option>
+                        <option value={CATEGORY_ENUM.HOLIDAY}>
+                          Holiday_Node
+                        </option>
+                        <option value={CATEGORY_ENUM.OTHER}>
+                          General_Data
+                        </option>
+                      </select>
+                    </div>
+
+                    {/* Expiry */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
+                        <div className="w-1 h-3 bg-orange-400 rounded-full"></div>{" "}
+                        Auto_Purge_Date
+                      </label>
+                      <input
+                        type="date"
+                        value={draftNotification.expireAt || ""}
+                        onChange={(e) =>
+                          setDraftNotification({
+                            ...draftNotification,
+                            expireAt: e.target.value,
+                          })
+                        }
+                        className="w-full bg-white px-4 py-3 rounded-xl border border-orange-200 focus:border-orange-500 outline-none font-black text-xs text-orange-700 transition"
+                      />
+                    </div>
+
+                    {/* Image Upload */}
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-black text-orange-600 uppercase tracking-widest flex items-center gap-2">
+                        <div className="w-1 h-3 bg-orange-400 rounded-full"></div>{" "}
+                        Visual_Asset
+                      </label>
+                      <div
+                        onClick={() =>
+                          document.getElementById("imagePicker").click()
+                        }
+                        className="group relative aspect-video w-full bg-white border-2 border-dashed border-orange-200 rounded-xl flex flex-col items-center justify-center overflow-hidden hover:border-orange-500 transition cursor-pointer"
+                      >
+                        {draftNotification.imagePreview ? (
+                          <>
+                            <img
+                              src={draftNotification.imagePreview}
+                              className="w-full h-full object-cover"
+                              alt="Preview"
+                            />
+                            <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-black uppercase tracking-widest">
+                              Replace Asset
+                            </div>
+                          </>
+                        ) : (
+                          <div className="text-center p-4">
+                            <Camera
+                              size={24}
+                              className="text-orange-300 mx-auto mb-2 group-hover:text-orange-500 transition-colors"
+                            />
+                            <span className="text-[9px] font-black text-orange-400 uppercase">
+                              Attach Media
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <input
+                        id="imagePicker"
+                        type="file"
+                        accept="image/*"
+                        hidden
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file)
+                            setDraftNotification({
+                              ...draftNotification,
+                              imageFile: file,
+                              imagePreview: URL.createObjectURL(file),
+                            });
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Main Body */}
+                  <div className="lg:col-span-8 p-10 flex flex-col">
+                    <div className="space-y-6 flex-grow">
+                      <div className="space-y-2">
+                        <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest">
+                          Transmission_Title
+                        </span>
+                        <input
+                          placeholder="ENTER BROADCAST HEADING..."
+                          value={draftNotification.title}
+                          onChange={(e) =>
+                            setDraftNotification({
+                              ...draftNotification,
+                              title: e.target.value,
+                            })
+                          }
+                          className="text-3xl font-black text-orange-900 placeholder:text-orange-200 outline-none w-full bg-transparent italic uppercase tracking-tight"
+                        />
+                      </div>
+
+                      <div className="space-y-2 flex-grow">
+                        <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest">
+                          Signal_Body
+                        </span>
+                        <textarea
+                          placeholder="Detailed announcement parameters..."
+                          value={draftNotification.description}
+                          onChange={(e) =>
+                            setDraftNotification({
+                              ...draftNotification,
+                              description: e.target.value,
+                            })
+                          }
+                          className="w-full h-full min-h-[200px] text-lg text-orange-700 placeholder:text-orange-300 outline-none bg-transparent resize-none leading-relaxed font-medium"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="pt-6 border-t border-orange-100 flex items-center justify-between">
+                      <button
+                        onClick={handleCancelDraftNotification}
+                        className="text-[10px] font-black uppercase tracking-widest text-orange-400 hover:text-red-500 transition-colors"
+                      >
+                        Terminate_Draft
+                      </button>
+                      <button
+                        onClick={handleSaveDraftNotification}
+                        className="group flex items-center gap-3 bg-orange-600 hover:bg-orange-700 text-white pl-6 pr-4 py-3 rounded-2xl font-black text-[11px] tracking-widest uppercase transition-all shadow-lg"
+                      >
+                        {draftNotification._id
+                          ? "Update_Protocol"
+                          : "Execute_Broadcast"}
+                        <span className="bg-white/20 p-2 rounded-lg">
+                          <ArrowRight size={16} strokeWidth={3} />
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
-          </div>
-          <input
-            id="imagePicker"
-            type="file"
-            accept="image/*"
-            hidden
-            onChange={(e) => {
-              const file = e.target.files[0];
-              if(file) setDraftNotification({...draftNotification, imageFile: file, imagePreview: URL.createObjectURL(file)});
-            }}
-          />
-        </div>
-      </div>
 
-      {/* Main Body */}
-      <div className="lg:col-span-8 p-10 flex flex-col">
-        <div className="space-y-6 flex-grow">
-          <div className="space-y-2">
-            <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest">Transmission_Title</span>
-            <input
-              placeholder="ENTER BROADCAST HEADING..."
-              value={draftNotification.title}
-              onChange={(e) => setDraftNotification({ ...draftNotification, title: e.target.value })}
-              className="text-3xl font-black text-orange-900 placeholder:text-orange-200 outline-none w-full bg-transparent italic uppercase tracking-tight"
-            />
-          </div>
+            {notificationLoading && (
+              <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
+                <div className="bg-white px-10 py-8 rounded-2xl shadow-2xl flex items-center gap-4">
+                  <Loader2 className="animate-spin text-orange-600" size={32} />
+                  <span className="font-black text-orange-700 uppercase tracking-wider">
+                    Processing Broadcast...
+                  </span>
+                </div>
+              </div>
+            )}
 
-          <div className="space-y-2 flex-grow">
-            <span className="text-orange-600 font-black text-[10px] uppercase tracking-widest">Signal_Body</span>
-            <textarea
-              placeholder="Detailed announcement parameters..."
-              value={draftNotification.description}
-              onChange={(e) => setDraftNotification({ ...draftNotification, description: e.target.value })}
-              className="w-full h-full min-h-[200px] text-lg text-orange-700 placeholder:text-orange-300 outline-none bg-transparent resize-none leading-relaxed font-medium"
-            />
-          </div>
-        </div>
+            <div className="grid md:grid-cols-2 gap-6 mt-12">
+              {notices.map((note) => (
+                <div
+                  key={note._id}
+                  className="group relative bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all duration-300 flex items-center gap-6 p-4 mb-4 overflow-hidden"
+                >
+                  {/* Left Accent Bar - Aesthetic Unique Touch */}
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-100 group-hover:bg-blue-500 transition-colors" />
 
-        {/* Footer Actions */}
-        <div className="pt-6 border-t border-orange-100 flex items-center justify-between">
-          <button
-            onClick={handleCancelDraftNotification}
-            className="text-[10px] font-black uppercase tracking-widest text-orange-400 hover:text-red-500 transition-colors"
-          >
-            Terminate_Draft
-          </button>
-          <button
-            onClick={handleSaveDraftNotification}
-            className="group flex items-center gap-3 bg-orange-600 hover:bg-orange-700 text-white pl-6 pr-4 py-3 rounded-2xl font-black text-[11px] tracking-widest uppercase transition-all shadow-lg"
-          >
-            {draftNotification._id ? "Update_Protocol" : "Execute_Broadcast"}
-            <span className="bg-white/20 p-2 rounded-lg">
-              <ArrowRight size={16} strokeWidth={3} />
-            </span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+                  {/* 1. Image/Thumbnail Section - Compact Square */}
+                  <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-slate-50 border border-slate-100">
+                    {note.pic ? (
+                      <img
+                        src={note.pic}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        alt=""
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-slate-50">
+                        <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">
+                          No Media
+                        </span>
+                      </div>
+                    )}
+                  </div>
 
+                  {/* 2. Content Section - Expanded */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-1">
+                      <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 rounded-md border border-blue-100">
+                        {note.category}
+                      </span>
+                      <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase">
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            note.expireAt ? "bg-amber-400" : "bg-emerald-500"
+                          }`}
+                        />
+                        {note.expireAt
+                          ? `Expires: ${new Date(
+                              note.expireAt
+                            ).toLocaleDateString()}`
+                          : "Permanent"}
+                      </span>
+                    </div>
 
+                    <h4 className="text-lg font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
+                      {note.title}
+                    </h4>
 
-{notificationLoading && (
-  <div className="fixed inset-0 z-[9999] bg-black/40 flex items-center justify-center">
-    <div className="bg-white px-10 py-8 rounded-2xl shadow-2xl flex items-center gap-4">
-      <Loader2 className="animate-spin text-orange-600" size={32} />
-      <span className="font-black text-orange-700 uppercase tracking-wider">
-        Processing Broadcast...
-      </span>
-    </div>
-  </div>
-)}
+                    <p className="text-sm text-slate-500 line-clamp-1 mt-1 font-medium">
+                      {note.description}
+                    </p>
+                  </div>
 
+                  {/* 3. Action Section - Clean & Separated */}
+                  <div className="flex items-center gap-2 pl-6 border-l border-slate-100">
+                    <button
+                      onClick={() => handleEditNotification(note)}
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm"
+                      title="Edit Notice"
+                    >
+                      <Edit3 size={16} />
+                    </button>
 
-
-
-         <div className="grid md:grid-cols-2 gap-6 mt-12">
-{notices.map((note) => (
-  <div
-    key={note._id}
-    className="group relative bg-white rounded-xl border border-slate-200 hover:border-blue-400 hover:shadow-md transition-all duration-300 flex items-center gap-6 p-4 mb-4 overflow-hidden"
-  >
-    {/* Left Accent Bar - Aesthetic Unique Touch */}
-    <div className="absolute left-0 top-0 bottom-0 w-1 bg-slate-100 group-hover:bg-blue-500 transition-colors" />
-
-    {/* 1. Image/Thumbnail Section - Compact Square */}
-    <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg bg-slate-50 border border-slate-100">
-      {note.pic ? (
-        <img 
-          src={note.pic} 
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-          alt="" 
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center bg-slate-50">
-          <span className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter">No Media</span>
-        </div>
-      )}
-    </div>
-
-    {/* 2. Content Section - Expanded */}
-    <div className="flex-1 min-w-0">
-      <div className="flex items-center gap-3 mb-1">
-        <span className="px-2 py-0.5 text-[9px] font-black uppercase tracking-wider bg-blue-50 text-blue-600 rounded-md border border-blue-100">
-          {note.category}
-        </span>
-        <span className="flex items-center gap-1.5 text-[11px] font-bold text-slate-400 uppercase">
-          <div className={`w-1.5 h-1.5 rounded-full ${note.expireAt ? 'bg-amber-400' : 'bg-emerald-500'}`} />
-          {note.expireAt ? `Expires: ${new Date(note.expireAt).toLocaleDateString()}` : "Permanent"}
-        </span>
-      </div>
-      
-      <h4 className="text-lg font-bold text-slate-800 truncate group-hover:text-blue-600 transition-colors">
-        {note.title}
-      </h4>
-      
-      <p className="text-sm text-slate-500 line-clamp-1 mt-1 font-medium">
-        {note.description}
-      </p>
-    </div>
-
-    {/* 3. Action Section - Clean & Separated */}
-    <div className="flex items-center gap-2 pl-6 border-l border-slate-100">
-      <button
-        onClick={() => handleEditNotification(note)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-600 hover:bg-blue-600 hover:text-white transition-all duration-300 shadow-sm"
-        title="Edit Notice"
-      >
-        <Edit3 size={16} />
-      </button>
-      
-      <button
-        onClick={() => handleDeleteNotification(note._id)}
-        className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
-        title="Delete Notice"
-      >
-        <Trash2 size={16} />
-      </button>
-    </div>
-  </div>
-))}
-</div>
+                    <button
+                      onClick={() => handleDeleteNotification(note._id)}
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
+                      title="Delete Notice"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

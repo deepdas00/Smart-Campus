@@ -4,6 +4,9 @@ import { useNavigate, useLocation, Link } from "react-router-dom";
 import NavLinks from "./NavLinks";
 import MobileMenu from "./MobileMenu";
 import logo from "../../assets/logo.png";
+import admin from "../../assets/Admin.png";
+import librarian from "../../assets/LibraryAdmin.png";
+import canteen from "../../assets/CanteenAdmin.png";
 import { useAuth } from "../../context/AuthContext";
 import profile from "../../assets/profile.png";
 import ProfileSidebar from "../ProfileSidebar";
@@ -192,7 +195,7 @@ useEffect(() => {
 
                   <Link className="flex items-center space-x-2">
                     <img
-                      src={user?.avatar}
+                      src={user?.profilePhoto}
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
                       className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
@@ -234,7 +237,16 @@ useEffect(() => {
 
                   <Link className="flex items-center space-x-2">
                     <img
-                      src={user?.avatar}
+                      src={
+      user?.role === "librarian"
+        ? librarian
+        : user?.role === "canteen"
+        ? canteen
+        : user?.role === "admin"
+        ? admin
+        : user?.profilePhoto // fallback for regular users
+    }
+
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
                       className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"

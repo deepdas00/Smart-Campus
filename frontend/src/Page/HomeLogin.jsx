@@ -435,13 +435,7 @@ export default function HomeLogin() {
             )}
           </div>
 
-          {/* Interactive Pagination Look */}
-          <div className="mt-10 flex items-center gap-3 justify-center">
-            <div className="w-8 h-1 bg-blue-600 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
-            <div className="w-2 h-1 bg-slate-200 rounded-full"></div>
-          </div>
+          
         </div>
       </section>
 
@@ -753,76 +747,91 @@ export default function HomeLogin() {
           </div>
         </div>
       </section>
+<>
+     {showPopup ? (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
+    
+    {/* BACKDROP */}
+    <div
+      className="absolute inset-0 bg-slate-900/90 backdrop-blur-[1px]"
+      onClick={() => setShowPopup(false)}
+    ></div>
 
-      {showPopup && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
-          <div
-            className="absolute inset-0 bg-slate-900/95 backdrop-blur-[1px]"
-            onClick={() => setShowPopup(false)}
-          ></div>
+    {/* POPUP WRAPPER */}
+    <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
 
-          <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
-            {/* Header */}
-            <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
-              <div className="flex items-center gap-4">
-                <div className="bg-blue-600 p-2 rounded-1xl text-white">
-                  <ImageIcon size={28} />
-                </div>
-                <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
-                  Student <span className="text-blue-600">Gallery</span>
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowPopup(false)}
-                className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
-              >
-                <X size={30} />
-              </button>
-            </div>
-
-            {/* INTERACTIVE POPUP GRID */}
-            <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar group/gallery">
-              {/* We use gap-y-24 for huge vertical gaps and gap-x-12 for horizontal */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
-                {fullGallery.map((img) => (
-                  <div
-                    key={img._id}
-                    className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50
-               hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
-                  >
-                    <img
-                      src={img.image}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
-                      <p className="text-blue-400 text-[9px] uppercase tracking-widest">
-                        Campus Life
-                      </p>
-                      <p className="text-white font-bold text-sm">
-                        {img.description ? img.description : ""}
-                      </p>
-                      <h4 className="text-gray-400 flex w-full text-[11px] font-black items-end justify-end">
-                        {img.createdAt
-                          ? new Date(img.createdAt).toLocaleDateString()
-                          : ""}
-                      </h4>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Extra Bottom Padding to ensure the last row has gap below it */}
-              <div className="h-24"></div>
-            </div>
-
-            <div className="p-6 bg-white border-t border-slate-50 text-center">
-              <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-                Scroll to Explore • Hover to Focus
-              </p>
-            </div>
+      {/* HEADER */}
+      <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
+        <div className="flex items-center gap-4">
+          <div className="bg-blue-600 p-2 rounded-xl text-white">
+            <ImageIcon size={28} />
           </div>
+          <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
+            Student <span className="text-blue-600">Gallery</span>
+          </h3>
         </div>
-      )}
+
+        <button
+          onClick={() => setShowPopup(false)}
+          className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
+        >
+          <X size={30} />
+        </button>
+      </div>
+
+      {/* GALLERY GRID */}
+      <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar">
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
+          {fullGallery?.length > 0 ? (
+            fullGallery.map((img) => (
+              <div
+                key={img._id}
+                className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 
+                hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
+              >
+                <img
+                  src={img.image}
+                  alt="Gallery"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
+                  <p className="text-blue-400 text-[9px] uppercase tracking-widest">
+                    Campus Life
+                  </p>
+                  <p className="text-white font-bold text-sm">
+                    {img.description || ""}
+                  </p>
+                  <h4 className="text-gray-400 w-full text-[11px] font-black text-right">
+                    {img.createdAt
+                      ? new Date(img.createdAt).toLocaleDateString()
+                      : ""}
+                  </h4>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-center text-slate-400 col-span-full">
+              No images found.
+            </p>
+          )}
+        </div>
+
+        <div className="h-24"></div>
+      </div>
+
+      {/* FOOTER */}
+      <div className="p-6 bg-white border-t border-slate-50 text-center">
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+          Scroll to Explore • Hover to Focus
+        </p>
+      </div>
+    </div>
+  </div>
+) : null}
+
+</>
+
 
       <Footer />
     </div>

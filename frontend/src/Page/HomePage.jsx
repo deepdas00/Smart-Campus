@@ -13,11 +13,20 @@ import {
   X,
 } from "lucide-react";
 
-import { Linkedin, Twitter, Instagram, Github, ArrowUpRight, ShieldCheck } from 'lucide-react';
+import {
+  Linkedin,
+  Twitter,
+  Instagram,
+  Github,
+  ArrowUpRight,
+  ShieldCheck,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import Footer from "../Components/Footer";
 import Navbar from "../Components/Navbar/Navbar";
-
+import deep from "../assets/Deep.jpg";
+import trideep from "../assets/Trideep.jpg";
+import sangita from "../assets/Sangita.png";
 import { useAuth } from "../context/AuthContext";
 
 export default function CampusReporterHome() {
@@ -87,28 +96,28 @@ export default function CampusReporterHome() {
   const founders = [
     {
       name: "Deep Das",
-      role: "Chief Technology Officer",
-      bio: "Architecting the core engine and infrastructure of our ecosystem.",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=1000&auto=format&fit=crop",
-      social: { li: "#", ig: "#", gh: "#", tw: "#" },
-      side: "left"
+      role: "Founder",
+      bio: "Full Stack Web Developer and AI Engineer building modern, scalable web applications with Generative AI, intelligent automation, and clean, high-performance UI/UX.",
+      image: deep,
+      social: { li: "https://www.linkedin.com/in/deep-das-developer", gh: "https://github.com/deepdas00", tw: "https://twitter.com/DeepDas890", pf: "https://deep-das-dev.netlify.app/" },
+      side: "left",
     },
     {
       name: "Sangita Ghosh",
-      role: "Chief Product Officer",
-      bio: "Defining the human-centric product vision and high-fidelity user experiences.",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=1000&auto=format&fit=crop",
-      social: { li: "#", ig: "#", gh: "#", tw: "#" },
-      featured: true
+      role: "FOUNDER",
+      bio: "Frontend Developer specializing in building scalable, high-performance, and modern user interfaces, delivering seamless, responsive, and visually engaging digital experiences.",
+      image: sangita,
+      social: { li: "https://www.linkedin.com/in/sangita-ghosh-dev", gh: "https://github.com/sangita-ghosh" },
+      featured: true,
     },
     {
       name: "Trideep Ray",
-      role: "Chief Operations Officer",
-      bio: "Directing strategic institutional growth and operational excellence.",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1000&auto=format&fit=crop",
-      social: { li: "#", ig: "#", gh: "#", tw: "#" },
-      side: "right"
-    }
+      role: "Founder",
+      bio: "Backend Developer building scalable, multi-tenant, and hybrid systems, specializing in secure APIs, efficient server architectures, and high-performance cloud-integrated solutions.",
+      image: trideep,
+      social: { li: "https://www.linkedin.com/in/trideep-ray-670b36356", gh: "https://github.com/trideep00005" },
+      side: "right",
+    },
   ];
 
   return (
@@ -150,7 +159,6 @@ export default function CampusReporterHome() {
                   <span className="text-base sm:text-lg">Report an Issue</span>
                 </button>
 
-  
                 <button className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 border border-gray-200 flex items-center justify-center space-x-3 active:scale-95">
                   <BarChart3 className="w-5 h-5" />
                   <span className="text-base sm:text-lg">View Dashboard</span>
@@ -159,122 +167,122 @@ export default function CampusReporterHome() {
 
               {/* Stats - Grid 3 cols on mobile */}
               <div className="mt-12 pt-8 border-t border-gray-100 md:border-0 md:pt-0">
-  {/* - Used a flexible grid that handles small screens better
+                {/* - Used a flexible grid that handles small screens better
       - Added a slight background tint/shape for mobile to make it feel like a "Results" section
   */}
-  <div className="grid grid-cols-3 gap-2 sm:gap-8 items-start justify-center">
-    {stats.slice(0, 3).map((stat, idx) => (
-      <div 
-        key={idx} 
-        className="relative flex flex-col items-center md:items-start group"
-      >
-        {/* The Value: Scaled for mobile readability */}
-        <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
-          {stat.value}
-        </div>
+                <div className="grid grid-cols-3 gap-2 sm:gap-8 items-start justify-center">
+                  {stats.slice(0, 3).map((stat, idx) => (
+                    <div
+                      key={idx}
+                      className="relative flex flex-col items-center md:items-start group"
+                    >
+                      {/* The Value: Scaled for mobile readability */}
+                      <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
+                        {stat.value}
+                      </div>
 
-        {/* The Label: 
+                      {/* The Label: 
             - Extra small for a "pro" dashboard look
             - Added 'leading-tight' to prevent weird spacing if text wraps 
         */}
-        <div className="text-[10px] sm:text-xs md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
-          {stat.label}
-        </div>
+                      <div className="text-[10px] sm:text-xs md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
+                        {stat.label}
+                      </div>
 
-        {/* Optional: Subtle divider line between items on mobile only */}
-        {idx < 2 && (
-          <div className="absolute right-0 top-1/4 h-1/2 w-px bg-gray-200 sm:hidden" />
-        )}
-      </div>
-    ))}
-  </div>
-</div>
+                      {/* Optional: Subtle divider line between items on mobile only */}
+                      {idx < 2 && (
+                        <div className="absolute right-0 top-1/4 h-1/2 w-px bg-gray-200 sm:hidden" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
 
             {/* Right Side Visuals */}
-           <div className="relative mt-8 md:mt-0 w-full max-w-full overflow-hidden">
-  <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-3 sm:p-8 shadow-2xl">
-    
-    {/* Recent Reports Card */}
-    <div className="bg-white rounded-2xl p-3 sm:p-6 space-y-4">
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold text-gray-700">
-          Recent Reports
-        </span>
-        <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full animate-pulse">
-          Live
-        </span>
-      </div>
+            <div className="relative mt-8 md:mt-0 w-full max-w-full overflow-hidden">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-3 sm:p-8 shadow-2xl">
+                {/* Recent Reports Card */}
+                <div className="bg-white rounded-2xl p-3 sm:p-6 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-gray-700">
+                      Recent Reports
+                    </span>
+                    <span className="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full animate-pulse">
+                      Live
+                    </span>
+                  </div>
 
-      {[
-        {
-          issue: "Broken light in Library",
-          status: "Resolved",
-          time: "2m ago",
-          color: "green",
-        },
-        {
-          issue: "Water leakage in Hostel B",
-          status: "In Progress",
-          time: "15m ago",
-          color: "yellow",
-        },
-        {
-          issue: "Damaged road near Gate 2",
-          status: "Reported",
-          time: "1h ago",
-          color: "blue",
-        },
-      ].map((item, idx) => (
-        <div
-          key={idx}
-          className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-        >
-          <div
-            className={`w-2 h-2 rounded-full flex-shrink-0 ${statusStyles[item.color].dot}`}
-          />
+                  {[
+                    {
+                      issue: "Broken light in Library",
+                      status: "Resolved",
+                      time: "2m ago",
+                      color: "green",
+                    },
+                    {
+                      issue: "Water leakage in Hostel B",
+                      status: "In Progress",
+                      time: "15m ago",
+                      color: "yellow",
+                    },
+                    {
+                      issue: "Damaged road near Gate 2",
+                      status: "Reported",
+                      time: "1h ago",
+                      color: "blue",
+                    },
+                  ].map((item, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${
+                          statusStyles[item.color].dot
+                        }`}
+                      />
 
-          <div className="flex-1 min-w-0">
-            <div className="text-sm font-medium text-gray-900 truncate">
-              {item.issue}
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-gray-900 truncate">
+                          {item.issue}
+                        </div>
+                        <div className="text-xs text-gray-500">{item.time}</div>
+                      </div>
+
+                      <span
+                        className={`text-[10px] sm:text-xs px-2 py-1 rounded whitespace-nowrap ${
+                          statusStyles[item.color].badge
+                        }`}
+                      >
+                        {item.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Issue Types */}
+                <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3">
+                  {issueTypes.slice(0, 3).map((type, idx) => (
+                    <div
+                      key={idx}
+                      className={`${type.color} rounded-xl p-3 sm:p-4 text-white text-center hover:scale-105 transition cursor-pointer`}
+                    >
+                      <div className="text-lg sm:text-2xl mb-1">
+                        {type.icon}
+                      </div>
+                      <div className="text-[10px] sm:text-xs font-medium uppercase">
+                        {type.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Decorative blobs — hidden on mobile to avoid overflow */}
+              <div className="hidden sm:block absolute -top-6 -right-6 w-24 h-24 bg-yellow-400 rounded-full opacity-20 animate-pulse" />
+              <div className="hidden sm:block absolute -bottom-6 -left-6 w-32 h-32 bg-purple-400 rounded-full opacity-20 animate-pulse" />
             </div>
-            <div className="text-xs text-gray-500">
-              {item.time}
-            </div>
-          </div>
-
-          <span
-            className={`text-[10px] sm:text-xs px-2 py-1 rounded whitespace-nowrap ${statusStyles[item.color].badge}`}
-          >
-            {item.status}
-          </span>
-        </div>
-      ))}
-    </div>
-
-    {/* Issue Types */}
-    <div className="mt-4 sm:mt-6 grid grid-cols-3 gap-2 sm:gap-3">
-      {issueTypes.slice(0, 3).map((type, idx) => (
-        <div
-          key={idx}
-          className={`${type.color} rounded-xl p-3 sm:p-4 text-white text-center hover:scale-105 transition cursor-pointer`}
-        >
-          <div className="text-lg sm:text-2xl mb-1">
-            {type.icon}
-          </div>
-          <div className="text-[10px] sm:text-xs font-medium uppercase">
-            {type.name}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-
-  {/* Decorative blobs — hidden on mobile to avoid overflow */}
-  <div className="hidden sm:block absolute -top-6 -right-6 w-24 h-24 bg-yellow-400 rounded-full opacity-20 animate-pulse" />
-  <div className="hidden sm:block absolute -bottom-6 -left-6 w-32 h-32 bg-purple-400 rounded-full opacity-20 animate-pulse" />
-</div>
-
           </div>
         </div>
       </section>
@@ -446,148 +454,139 @@ export default function CampusReporterHome() {
       </section>
 
 
+      {/*FOUNDER SECTION */}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-   <section id="Founder-section" className="h-screen w-full bg-white overflow-hidden flex flex-col pt-10">
-      <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
-        
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
-            <ShieldCheck size={12} className="text-blue-600" />
-            <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">The Architectures</span>
-          </div>
-          <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
-            THE FOUNDING <span className="text-blue-600">TRIAD.</span>
-          </h2>
-        </div>
-
-        {/* Full Image Grid - No Scroll */}
-        <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
-          {founders.map((founder, index) => (
-            <div 
-              key={index} 
-              className="relative group rounded-[3.5rem] overflow-hidden bg-slate-200 shadow-2xl transition-all duration-500"
-            >
-              {/* IMAGE: Clear at all times. No Blur. */}
-              <img 
-                src={founder.image} 
-                alt={founder.name} 
-                className="absolute inset-0 w-full h-full object-cover transition-all duration-1000 group-hover:scale-110"
-              />
-
-              {/* INITIAL STATE: Light Shadow Overlay (Not full B&W, just a tint) */}
-              <div className="absolute inset-0 bg-black/30 group-hover:bg-transparent transition-all duration-500" />
-
-              {/* HOVER STATE: Glossy Shine streak */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-              </div>
-
-              {/* THE GLASS BOX: Black Drop Filter effect inside the box */}
-              <div className="absolute inset-x-6 bottom-6 z-20">
-                <div className="bg-black/40 backdrop-blur-xl border border-white/20 rounded-[2.5rem] p-7 shadow-2xl transform transition-all duration-500 group-hover:-translate-y-2">
-                  
-                  <div className="flex justify-between items-center mb-2">
-                    <h3 className="text-2xl font-black text-white uppercase tracking-tighter">
-                      {founder.name}
-                    </h3>
-                    <ArrowUpRight size={20} className="text-blue-400" />
-                  </div>
-                  
-                  <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.2em] mb-4">
-                    {founder.role}
-                  </p>
-                  
-                  {/* Bio and Socials: Hidden until hover */}
-                  <div className="max-h-0 opacity-0 group-hover:max-h-40 group-hover:opacity-100 transition-all duration-700 ease-in-out overflow-hidden">
-                    <p className="text-white/90 text-sm font-medium leading-relaxed mb-6">
-                      {founder.bio}
-                    </p>
-
-                    <div className="flex gap-3">
-                      {Object.entries(founder.social).map(([key, url]) => (
-                        <a 
-                          key={key} 
-                          href={url} 
-                          className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/10 text-white hover:bg-blue-600 hover:scale-110 transition-all"
-                        >
-                          {key === 'li' && <Linkedin size={18} />}
-                          {key === 'tw' && <Twitter size={18} />}
-                          {key === 'ig' && <Instagram size={18} />}
-                          {key === 'gh' && <Github size={18} />}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Top Badge */}
-              <div className="absolute top-8 right-8 bg-black/20 backdrop-blur-md text-white text-[9px] font-black px-4 py-2 rounded-full uppercase tracking-widest border border-white/10">
-                PARTNER_{founder.name.split(' ')[0]}
-              </div>
+      <section
+        id="Founder-section"
+        className="min-h-screen w-full bg-white overflow-hidden flex flex-col"
+      >
+        <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
+          {/* Header */}
+          <div className="text-center ">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
+              <ShieldCheck size={12} className="text-blue-600" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
+                The Architectures
+              </span>
             </div>
-          ))}
+            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
+              THE FOUNDING <span className="text-blue-600">TRIAD.</span>
+            </h2>
+          </div>
+
+          {/* Full Image Grid - No Scroll */}
+          <div className="flex-1 flex flex-col lg:flex-row items-baseline justify-center gap-6 lg:gap-2 pb-20 mt-1">
+            {founders.map((founder, index) => {
+              const isMiddle = index === 1;
+
+              return (
+                <div
+                  key={index}
+                  className={`relative group transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]
+                  ${
+                    isMiddle
+              ? "z-30 lg:scale-100 w-full lg:w-[350px] h-[500px]"
+              : "z-10 lg:scale-98 w-full lg:w-[340px] h-[490px] lg:mt-10"
+          }
+        `}
+                >
+                  {/* Main Card Container */}
+                  <div className="relative w-full h-full rounded-[3.5rem] overflow-hidden bg-slate-900 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-10px]">
+                    {/* IMAGE: Full cover with zoom effect */}
+                    <img
+                      src={founder.image}
+                      alt={founder.name}
+                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 
+              ${
+                isMiddle
+                  ? "scale-105 group-hover:scale-112"
+                  : "scale-110 group-hover:scale-120"
+              }
+              ${!isMiddle && "opacity-80 group-hover:opacity-100"}
+            `}
+                    />
+
+                    {/* OVERLAYS */}
+                    {/* 1. Base Gradient Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent opacity-90 group-hover:opacity-40 transition-opacity duration-700" />
+
+                    {/* 2. Color Tint (Middle is Blue, Sides are Slate) */}
+                    <div
+                      className={`absolute inset-0 mix-blend-overlay transition-opacity duration-700 
+            ${
+              isMiddle
+                ? "bg-blue-500/20 group-hover:opacity-0"
+                : "bg-slate-500/30 group-hover:opacity-0"
+            }`}
+                    />
+
+                    {/* 3. Glossy Shine streak */}
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                    </div>
+
+                    {/* CONTENT SECTION */}
+                    <div className="absolute inset-x-0 bottom-0 p-8 z-20">
+                      {/* Name and Role */}
+                      <div className="mb-4 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
+                        <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 leading-none">
+                          {founder.role}
+                        </p>
+                        <h3
+                          className={`font-black text-white uppercase tracking-tighter leading-none transition-all duration-500 flex gap-2
+                ${isMiddle ? "text-3xl" : "text-2xl"}
+              `}
+                        >
+                          {founder.name.split(" ")[0]} <br />
+                          <span className="text-white/50 group-hover:text-white transition-colors">
+                            {founder.name.split(" ")[1]}
+                          </span>
+                        </h3>
+                      </div>
+
+                      {/* Hidden Bio - Expands upward */}
+                      <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-700 ease-in-out">
+                        <div className="overflow-hidden">
+                          <p className="text-white/70 text-sm font-medium leading-relaxed mb-6 pr-4">
+                            {founder.bio}
+                          </p>
+
+                          {/* Social Dock */}
+                          <div className="flex gap-2 p-2 w-fit bg-black/1 backdrop-blur-sm border border-black/4 rounded-2xl">
+                            {Object.entries(founder.social).map(
+                              ([key, url]) => (
+                                <a
+                                  key={key}
+                                  href={url}
+                                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-blue-600 text-white transition-all duration-300"
+                                >
+                                  {key === "li" && <Linkedin size={18} />}
+                                  {key === "tw" && <Twitter size={18} />}
+                                  {key === "ig" && <Instagram size={18} />}
+                                  {key === "gh" && <Github size={18} />}
+                                  {key === "pf" && <ArrowUpRight size={18} />}
+                                </a>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Floating ID Badge */}
+                   
+                  </div>
+
+                  {/* Outer Glow for the Middle Founder */}
+                  {isMiddle && (
+                    <div className="absolute -inset-4 bg-blue-500/10 blur-[100px] -z-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    </section>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+      </section>
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 px-4 bg-blue-700">

@@ -70,6 +70,9 @@ export const setCanteenPolicy = asyncHandler(async (req, res) => {
 
 
 export const fetchPolicy = asyncHandler(async (req, res) => {
+
+  console.log("hiiihhi");
+  
   const { collegeCode, userId } = req.user;
 
 
@@ -86,7 +89,7 @@ export const fetchPolicy = asyncHandler(async (req, res) => {
   const Policy = getCanteenPolicyModel(collegeConn);
 
   let policy = await Policy.findOne();
-
+if(!policy) return res.status(404).json({message:"no policy is there!!"})
 
   res.status(200).json(
     new ApiResponse(200, policy, "Canteen policy updated successfully")

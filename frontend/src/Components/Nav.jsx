@@ -34,9 +34,9 @@ function Nav() {
                 {/* User Info */}
                 <div className="flex items-center gap-4 mt-4">
                   <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center overflow-hidden">
-                    {user?.avatar ? (
+                    {user?.profilePhoto ? (
                       <img
-                        src={user.avatar}
+                        src={user.profilePhoto}
                         alt={user.studentName}
                         className="w-full h-full object-cover rounded-full"
                       />

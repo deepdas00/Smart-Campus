@@ -51,8 +51,9 @@ export function CollegePolicy() {
   const fetchCanteenPolicy = async () => {
     try {
       setLoading(true);
-
       const statusRes = await api.get("/api/v1/canteen/canteenStatus");
+      
+      console.log("ihihih");
 
 
 
@@ -63,6 +64,8 @@ export function CollegePolicy() {
         updatedBy: "System",
       };
       try {
+        
+        
         const policyRes = await api.get("/api/v1/canteen/fetchpolicy");
 
        
@@ -84,14 +87,14 @@ export function CollegePolicy() {
         {
           id: "CAN-001",
           label: "Kitchen Opening Time",
-          value: policy.openingTime,
+          value: policy.openingTime || 4,
           detail: "Daily breakfast service commencement",
           lastModified: localTime,
         },
         {
           id: "CAN-002",
           label: "Kitchen Closing Time",
-          value: policy.closingTime,
+          value: policy.closingTime || 8,
           detail: "Final order processing deadline",
 
           updatedBy: localTime,
@@ -110,15 +113,18 @@ export function CollegePolicy() {
 
       const opening =
         editData.openingTime ||
-        canteenPolicy.find((p) => p.id === "CAN-001")?.value;
+        canteenPolicy.find((p) => p?.id === "CAN-001")?.value;
 
       const closing =
         editData.closingTime ||
-        canteenPolicy.find((p) => p.id === "CAN-002")?.value;
+        canteenPolicy.find((p) => p?.id === "CAN-002")?.value;
+
+        console.log(opening, closing);
+        
 
       await api.post("/api/v1/canteen/policy", {
-        openingTime: opening,
-        closingTime: closing,
+        openingTime: opening || "CAN-001",
+        closingTime: closing || "CAN-002",
       });
 
       await fetchCanteenPolicy();
@@ -330,31 +336,31 @@ export function CollegePolicy() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {data.map((item) => (
+                  {data?.map((item) => (
                     <tr
-                      key={item.id}
+                      key={item?.id}
                       className={`hover:bg-slate-50 transition-colors ${
                         selectedPolicy?.id === item.id ? "bg-blue-50/50" : ""
                       }`}
                     >
                       <td className="px-6 py-5 text-xs font-mono text-slate-400">
-                        {item.id}
+                        {item?.id}
                       </td>
                       <td className="px-6 py-5">
                         <p className="text-sm font-bold text-slate-800">
-                          {item.label}
+                          {item?.label}
                         </p>
                         <p className="text-xs text-slate-500 mt-0.5">
-                          {item.detail}
+                          {item?.detail}
                         </p>
                       </td>
                       <td className="px-6 py-5">
                         <span className="font-mono font-bold text-sm bg-slate-100 px-3 py-1 rounded border border-slate-200">
-                          {item.value}
+                          {item?.value}
                         </span>
                       </td>
                       <td className="px-6 py-5 text-xs text-slate-500">
-                        {item.lastModified} <br />{" "}
+                        {item?.lastModified} <br />{" "}
                       </td>
                       <td className="px-6 py-5 text-right">
                         <button

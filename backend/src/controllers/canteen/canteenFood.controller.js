@@ -81,7 +81,8 @@ export const addFood = asyncHandler(async (req, res) => {
 
 
 export const getAllFoods = asyncHandler(async (req, res) => {
-
+  console.log("ihhihihi");
+  
   const { collegeCode } = req.user;
 
   // 1️⃣ Resolve college DB
@@ -97,6 +98,8 @@ export const getAllFoods = asyncHandler(async (req, res) => {
     throw new ApiError(404, "College not found");
   }
 
+   
+
   const collegeConn = getCollegeDB(college.dbName);
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
@@ -105,7 +108,8 @@ export const getAllFoods = asyncHandler(async (req, res) => {
   const canteenPolicy = await CanteenPolicyModel.findOne();
 
   const canteenSatus = canteenPolicy.isActive;
-  console.log(canteenPolicy);
+
+ 
   
   const CanteenFood = getCanteenFoodModel(collegeConn);
   // res.status(200).json(
@@ -118,6 +122,10 @@ export const getAllFoods = asyncHandler(async (req, res) => {
   const foods = await CanteenFood.find()
     .sort({ createdAt: -1 })
     .select("-__v");
+
+
+    console.log(foods);
+    
 
   // 3️⃣ Response
   res.status(200).json(

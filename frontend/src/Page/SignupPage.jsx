@@ -60,6 +60,9 @@ export default function SignUpPage() {
           { withCredentials: true } // only if needed
         );
 
+
+        console.log(response.data.data);
+        
         // Use the correct path to your array
         setDepartments([""])
         setColleges(response.data.data);
@@ -513,8 +516,8 @@ export default function SignUpPage() {
                             <option
                               key={college.collegeCode}
                               value={college.collegeCode}
-                            >
-                              {college.collegeCode}. {college.collegeName}
+                              >
+                              ({college.collegeCode}) {college.collegeName}
                             </option>
                           ))}
                         </select>

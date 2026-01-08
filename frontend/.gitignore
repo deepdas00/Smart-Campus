@@ -24,8 +24,8 @@ dist-ssr
 *.sw?
 .env
 
-
+# Ignore ALL env files
 .env
-.env.test
-.env.production
-
+.env.*
+*.env
+**/.env

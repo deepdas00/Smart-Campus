@@ -394,7 +394,7 @@ export default function Library() {
       {/* <CollegeInfo /> */}
 
       {libraryPolicy && (
-        <div className="max-w-7xl mx-auto px-8 mt-4 ">
+        <div className="max-w-7xl mx-auto px-4 mt-4 ">
           {/* Container with a subtle "Glass & Steel" aesthetic */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             {/* Top Thin Accent Bar */}

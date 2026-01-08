@@ -30,7 +30,8 @@ export default function CollaborationHero({ collegeData, startupData }) {
         const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
           withCredentials: true,
         });
-    
+        
+        
         setCollegeInfo(res.data.data);
       } catch (err) {
         console.error("Fetch college info failed", err);
@@ -81,8 +82,8 @@ export default function CollaborationHero({ collegeData, startupData }) {
           <div className="relative group cursor-pointer">
             <div className="absolute -inset-2 bg-blue-600 rounded-[2.5rem] opacity-0 group-hover:opacity-10 transition-opacity" />
             <div className="w-40 h-40 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center p-4 border border-slate-100 transform group-hover:rotate-3 transition-transform duration-500">
-              {collegeInfo?.logo ? (
-                <img src={collegeInfo.logo} alt="College" className="w-full h-full object-contain" />
+              {collegeInfo?.collegeInfo?.logo? (
+                <img src={collegeInfo.collegeInfo.logo} alt="College" className="w-full h-full object-contain" />
               ) : (
                 <div className="font-black text-blue-600 text-3xl">INST</div>
               )}

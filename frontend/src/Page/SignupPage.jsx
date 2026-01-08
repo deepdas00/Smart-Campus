@@ -402,20 +402,8 @@ export default function SignUpPage() {
               </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8">
-              <UserTypeCard
-                type="student"
-                icon={<GraduationCap className="w-8 h-8" />}
-                title="Student Account"
-                description="Report and track campus issues"
-                benefits={[
-                  "Report issues with photos & location",
-                  "Track issue status in real-time",
-                  "Get notifications on updates",
-                  "View campus issue analytics",
-                  "Contribute to a better campus",
-                ]}
-              />
+            <div className="flex w-full justify-center items-center">
+              
 
               <UserTypeCard
                 type="institution"

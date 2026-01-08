@@ -364,7 +364,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
 
 export const notifyReturnReminders = asyncHandler(async (req, res) => {
-
+  console.log("///////////////")
   const { collegeCode } = req.user;
 
   const masterConn = connectMasterDB();

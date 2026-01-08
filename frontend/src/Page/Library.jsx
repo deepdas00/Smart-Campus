@@ -777,7 +777,7 @@ export default function Library() {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-xs text-yellow-800">
-                  <strong>Note:</strong> Books must be returned within 14 days.
+                  <strong>Note:</strong> Books must be returned within {libraryPolicy.returnPeriodDays} days.
                   Late returns may result in fines.
                 </p>
               </div>
@@ -1297,7 +1297,7 @@ export default function Library() {
                         Limit
                       </span>
                       <span className="text-sm font-bold text-slate-700">
-                        14d
+                        {libraryPolicy.returnPeriodDays}
                       </span>
                     </div>
                   </div>

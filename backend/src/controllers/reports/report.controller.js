@@ -199,7 +199,7 @@ export const getAllReports = asyncHandler(async (req, res) => {
         createdAt: { $gte: startDate }
     })
     .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "studentName rollNo mobileNo avatar department email admissionYear" })
+    .populate({ path: "studentId", select: "fullName rollNo mobileNo avatar department email admissionYear" })
 
     res.status(200).json(
         new ApiResponse(200, {reports, collegeCode}, "All reports fetched")

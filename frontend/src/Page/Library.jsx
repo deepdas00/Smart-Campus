@@ -215,6 +215,8 @@ export default function Library() {
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.message || "Failed to issue book");
+    } finally{
+      fetchLibraryHistory();
     }
   };
 

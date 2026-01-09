@@ -25,7 +25,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 // import CollegeInfo from "./Components/CollegeInfo.jsx";
 import HomeLogin from "./Page/HomeLogin.jsx";
 import CollegeHome from "./Page/CollegeHome.jsx";
-import Sidebar from "./components/Sidebar.jsx";
+import Sidebar from "./Components/Sidebar.jsx";
 import AdminOwner from "./Page/AdminOwner.jsx";
 import FounderConsole from "./Page/FounderConsole.jsx";
 import ForgotPassword from "./Page/ForgotPassword.jsx";

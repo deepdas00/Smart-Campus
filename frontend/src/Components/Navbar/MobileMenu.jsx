@@ -26,7 +26,7 @@ export default function MobileMenu() {
 
         <Link
           to="/report"
-          className="block w-full text-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg"
+          className="block w-full text-center px-4 py-2 bg-blue-700 text-white rounded-lg"
         >
           Report Issue
         </Link>

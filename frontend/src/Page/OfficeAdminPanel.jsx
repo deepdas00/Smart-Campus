@@ -1,6 +1,6 @@
 // layouts/AdminLayout.jsx
 import { Outlet } from "react-router-dom";
-import Sidebar from "../components/Sidebar";
+import Sidebar from "../Components/Sidebar";
 import Navbar from "../Components/Navbar/Navbar";
 
 export default function OfficeAdminPanel() {

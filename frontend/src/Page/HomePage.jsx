@@ -201,10 +201,10 @@ export default function CampusReporterHome() {
                       className="relative flex flex-col items-center md:items-start group"
                     >
                       {/* The Value: Scaled for mobile readability */}
-                      <div className="text-xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
+                      <div className="sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
                         {stat.value}
                       </div>
-                      <div className="text-[8px] sm:text-xs md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
+                      <div className="text-[6px] sm:text-[12px] lg:text-[10px] md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
                         {stat.label}
                       </div>
 
@@ -290,7 +290,7 @@ export default function CampusReporterHome() {
                       <div className="text-lg sm:text-2xl mb-1">
                         {type.icon}
                       </div>
-                      <div className="text-[10px] sm:text-xs font-medium uppercase">
+                      <div className="text-[8px] sm:text-xs font-medium uppercase">
                         {type.name}
                       </div>
                     </div>

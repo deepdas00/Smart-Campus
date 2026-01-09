@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import axios from "axios";
 import { useAuth } from "../context/AuthContext";
+const API_URL = import.meta.env.VITE_API_URL;
+
 
 export const useFetchUser = () => {
   const { setUser, setLoading } = useAuth();
@@ -9,7 +11,7 @@ export const useFetchUser = () => {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        const res = await axios.get("http://localhost:8000/api/v1/auth/me", {
+        const res = await axios.get(`${API_URL}/api/v1/auth/me`, {
           withCredentials: true,
         });
         setUser(res.data.data);

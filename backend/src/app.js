@@ -10,14 +10,11 @@ import { globalErrorHandler } from "./middlewares/error.multer.middleware.js";
 const app = express();
 
 
-
-
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"]
 }))
-
 
 
 app.use(express.json({limit: "16kb"})) // to take input from .json

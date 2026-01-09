@@ -11,6 +11,12 @@ import {
   ArrowRight,
   Menu,
   X,
+  LayoutGrid,
+  Building2,
+  Cpu,
+  BellRing,
+  BarChart2,
+  Leaf,
 } from "lucide-react";
 
 import {
@@ -50,38 +56,39 @@ export default function CampusReporterHome() {
     },
   };
 
-  const features = [
-    {
-      icon: <Camera className="w-8 h-8" />,
-      title: "Instant Reporting",
-      description:
-        "Snap a photo and report issues in seconds with AI-powered descriptions",
-    },
-    {
-      icon: <MapPin className="w-8 h-8" />,
-      title: "Location Tracking",
-      description:
-        "Auto-detect and pin exact locations using Google Maps integration",
-    },
-    {
-      icon: <Zap className="w-8 h-8" />,
-      title: "AI Classification",
-      description:
-        "Google Vision AI automatically categorizes and prioritizes issues",
-    },
-    {
-      icon: <Bell className="w-8 h-8" />,
-      title: "Real-Time Updates",
-      description:
-        "Get notified instantly when your reported issues are resolved",
-    },
-  ];
 
   const stats = [
-    { value: "500+", label: "Issues Resolved" },
-    { value: "2.5 Days", label: "Avg Response Time" },
-    { value: "95%", label: "Success Rate" },
-    { value: "1000+", label: "Active Users" },
+    { value: "1 Platform", label: "Unified Campus System" },
+    { value: "0 Queues ", label: "Fully Digital Services" },
+    { value: "100% Online ", label: "Paperless Operations" },
+    { value: "∞ Scale", label: "Built for Any Institution" },
+  ];
+
+  const features = [
+    {
+      icon: <LayoutGrid className="sm:w-8 sm:h-8" />,
+      title: "Unified Campus Platform",
+      description:
+        "All student and administrative services integrated into one seamless system",
+    },
+    {
+      icon: <Building2 className="sm:w-8 sm:h-8" />,
+      title: "Canteen & Library Management",
+      description:
+        "Order food, manage books, issue/return, payments, and tracking — fully digital",
+    },
+    {
+      icon: <Cpu className="sm:w-8 sm:h-8" />,
+      title: "Smart Automation",
+      description:
+        "Automated workflows, role-based access, and intelligent data handling",
+    },
+    {
+      icon: <BellRing className="sm:w-8 sm:h-8" />,
+      title: "Real-Time Communication",
+      description:
+        "Instant notifications, updates, and alerts for students and staf",
+    },
   ];
 
   const issueTypes = [
@@ -99,7 +106,12 @@ export default function CampusReporterHome() {
       role: "Founder",
       bio: "Full Stack Web Developer and AI Engineer building modern, scalable web applications with Generative AI, intelligent automation, and clean, high-performance UI/UX.",
       image: deep,
-      social: { li: "https://www.linkedin.com/in/deep-das-developer", gh: "https://github.com/deepdas00", tw: "https://twitter.com/DeepDas890", pf: "https://deep-das-dev.netlify.app/" },
+      social: {
+        li: "https://www.linkedin.com/in/deep-das-developer",
+        gh: "https://github.com/deepdas00",
+        tw: "https://twitter.com/DeepDas890",
+        pf: "https://deep-das-dev.netlify.app/",
+      },
       side: "left",
     },
     {
@@ -107,7 +119,10 @@ export default function CampusReporterHome() {
       role: "FOUNDER",
       bio: "Frontend Developer specializing in building scalable, high-performance, and modern user interfaces, delivering seamless, responsive, and visually engaging digital experiences.",
       image: sangita,
-      social: { li: "https://www.linkedin.com/in/sangita-ghosh-dev", gh: "https://github.com/sangita-ghosh" },
+      social: {
+        li: "https://www.linkedin.com/in/sangita-ghosh-dev",
+        gh: "https://github.com/sangita-ghosh",
+      },
       featured: true,
     },
     {
@@ -115,7 +130,10 @@ export default function CampusReporterHome() {
       role: "Founder",
       bio: "Backend Developer building scalable, multi-tenant, and hybrid systems, specializing in secure APIs, efficient server architectures, and high-performance cloud-integrated solutions.",
       image: trideep,
-      social: { li: "https://www.linkedin.com/in/trideep-ray-670b36356", gh: "https://github.com/trideep00005" },
+      social: {
+        li: "https://www.linkedin.com/in/trideep-ray-670b36356",
+        gh: "https://github.com/trideep00005",
+      },
       side: "right",
     },
   ];
@@ -131,45 +149,51 @@ export default function CampusReporterHome() {
       {/* Hero Section */}
       <section
         className={`${
-          user ? "pt-20 md:pt-24" : "pt-24 md:pt-28"
-        } px-4 sm:px-6 lg:px-8 `}
+          user ? "pt-20 md:pt-24 pb-5" : "pt-24 md:pt-28"
+        } px-4 sm:px-6 lg:px-8 pb-5`}
       >
         <div className="max-w-7xl mx-auto">
           {/* Stacked on mobile, 2 columns on medium screens */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
             <div className="text-center md:text-left">
-              <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-2">
+              {/* <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-medium mb-2">
                 <Zap className="w-4 h-4" />
                 <span>Powered by Google AI </span>
-              </div>
+              </div> */}
 
-              <h1 className="text-2xl sm:text-5xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Report Campus Issues{" "}
-                <span className="text-blue-600">Instantly</span>
+              <h1 className="text-[25px] pb-3 sm:text-5xl md:text-4xl font-bold text-gray-900 sm:mb-6 mb-2 leading-tight">
+                Build a Queue-less, Paperless <br />
+                <span className="text-blue-600 md:text-6xl sm:text-5xl text-[35px]">
+                  Smart Campus
+                </span>
               </h1>
-              <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-5 max-w-xl mx-auto md:mx-0 text-center md:text-left leading-relaxed">
-                An AI-powered platform to report, track, and resolve campus
-                infrastructure issues efficiently. Make your campus safer and
-                better.
+              <p className="text-[11px] sm:text-lg md:text-xl text-gray-600 mb-5 max-w-xl mx-auto md:mx-0 text-center md:text-left leading-relaxed">
+                Smart Campus is a complete digital platform that connects
+                students, faculty, and administrators to manage campus
+                operations seamlessly — from issue reporting and communication
+                to services like canteen, library, and notifications — all in
+                one intelligent system.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center md:justify-start mt-6 sm:mt-8 px-4 sm:px-0">
                 <button className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-blue-700 text-white rounded-xl font-bold hover:bg-blue-800 transition-all duration-200 flex items-center justify-center space-x-3 active:scale-95 shadow-md">
-                  <Camera className="w-5 h-5" />
-                  <span className="text-base sm:text-lg">Report an Issue</span>
+                  <Camera className="sm:w-5 w-4 sm:h-5 h-4" />
+                  <span className="text-[14px] sm:text-lg">
+                    Report an Issue
+                  </span>
                 </button>
 
                 <button className="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition-all duration-200 border border-gray-200 flex items-center justify-center space-x-3 active:scale-95">
-                  <BarChart3 className="w-5 h-5" />
-                  <span className="text-base sm:text-lg">View Dashboard</span>
+                  <BarChart3 className="sm:w-5 w-4 sm:h-5 h-4" />
+                  <span className="text-[14px] sm:text-lg">View Dashboard</span>
                 </button>
               </div>
 
               {/* Stats - Grid 3 cols on mobile */}
-              <div className="mt-12 pt-8 border-t border-gray-100 md:border-0 md:pt-0">
+              <div className="sm:mt-12 pt-8 border-t border-gray-100 md:border-0 md:pt-0">
                 {/* - Used a flexible grid that handles small screens better
-      - Added a slight background tint/shape for mobile to make it feel like a "Results" section
-  */}
+                   - Added a slight background tint/shape for mobile to make it feel like a "Results" section
+                */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-8 items-start justify-center">
                   {stats.slice(0, 3).map((stat, idx) => (
                     <div
@@ -177,15 +201,10 @@ export default function CampusReporterHome() {
                       className="relative flex flex-col items-center md:items-start group"
                     >
                       {/* The Value: Scaled for mobile readability */}
-                      <div className="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
+                      <div className="text-xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight transition-transform group-hover:scale-105">
                         {stat.value}
                       </div>
-
-                      {/* The Label: 
-            - Extra small for a "pro" dashboard look
-            - Added 'leading-tight' to prevent weird spacing if text wraps 
-        */}
-                      <div className="text-[10px] sm:text-xs md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
+                      <div className="text-[8px] sm:text-xs md:text-sm text-blue-600 font-bold uppercase tracking-widest mt-1 text-center md:text-left leading-tight">
                         {stat.label}
                       </div>
 
@@ -200,7 +219,7 @@ export default function CampusReporterHome() {
             </div>
 
             {/* Right Side Visuals */}
-            <div className="relative mt-8 md:mt-0 w-full max-w-full overflow-hidden">
+            <div className="relative sm:mt-8 md:mt-0 w-full max-w-full overflow-hidden">
               <div className="bg-gradient-to-br from-blue-600 to-blue-900 rounded-3xl p-3 sm:p-8 shadow-2xl">
                 {/* Recent Reports Card */}
                 <div className="bg-white rounded-2xl p-3 sm:p-6 space-y-4">
@@ -288,15 +307,15 @@ export default function CampusReporterHome() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-16 md:py-24 px-4 bg-white">
+      <section id="features" className="sm:py-16 py-10 md:py-24 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-4">
               Powerful Features
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Built with cutting-edge Google AI technologies to streamline issue
-              reporting.
+            <p className="text-[15px] sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              Built to digitize every aspect of campus life on a single
+              intelligent platform
             </p>
           </div>
 
@@ -304,23 +323,27 @@ export default function CampusReporterHome() {
             {features.map((feature, idx) => (
               <div
                 key={idx}
-                className="p-6 rounded-2xl bg-gray-50 border-2 border-transparent hover:border-blue-300 hover:bg-white hover:shadow-xl transition cursor-pointer"
+                className="sm:p-6 p-4 rounded-2xl bg-gray-50 border-2 border-transparent hover:border-blue-300 hover:bg-white hover:shadow-xl flex flex-col items-start sm:items-center transition cursor-pointer"
                 onMouseEnter={() => setActiveFeature(idx)}
                 onClick={() => setActiveFeature(idx)}
               >
                 <div
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                    activeFeature === idx
-                      ? "bg-blue-600 text-white"
-                      : "bg-blue-100 text-blue-600"
-                  } transition-colors`}
+                  className={`flex items-center mb-4 space-x-3 flex-row sm:flex-col`}
                 >
-                  {feature.icon}
+                  <div
+                    className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center mb-4 ${
+                      activeFeature === idx
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-100 text-blue-600"
+                    } transition-colors`}
+                  >
+                    {feature.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">
+                    {feature.title}
+                  </h3>
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-gray-600 leading-relaxed items-center">
                   {feature.description}
                 </p>
               </div>
@@ -332,40 +355,59 @@ export default function CampusReporterHome() {
       {/* How It Works */}
       <section
         id="how-it-works"
-        className="py-16 md:py-24 px-4 bg-gradient-to-br from-blue-50 to-purple-50"
+        className="py-8 sm:py-16 md:py-24 px-4 bg-gradient-to-br from-blue-50 to-purple-50"
       >
-        <div className="max-w-7xl mx-auto">
+        <div className="sm:max-w-7xl mx-auto">
           <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-extrabold sm:text-3xl md:text-5xl  text-gray-900 mb-4">
               How It Works
             </h2>
-            <p className="text-lg text-gray-600">Simple, fast, and efficient</p>
+            <p className="text-lg text-gray-600">Simple. Smart. Scalable.</p>
           </div>
+
+
+{/* 
+Subtitle (replace current one)
+
+Simple. Smart. Scalable.
+
+Step 1 — Access & Submit
+
+Students and staff access campus services, submit issues, place orders, and request services digitally
+
+Step 2 — Process & Manage
+
+The system automatically routes requests, manages workflows, and updates records in real time
+
+Step 3 — Track & Complete
+
+Users track progress, receive notifications, and complete tasks with full transparency */}
+
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
                 step: "1",
-                title: "Capture & Report",
-                desc: "Take a photo of the issue and let AI generate the description",
+                title: "Access & Submit",
+                desc: "Students and staff access campus services, submit issues, place orders, and request services digitally",
                 icon: <Camera />,
               },
               {
                 step: "2",
-                title: "AI Processing",
-                desc: "Google Vision AI classifies and prioritizes your report",
+                title: "Process & Manage",
+                desc: "The system automatically routes requests, manages workflows, and updates records in real time",
                 icon: <Zap />,
               },
               {
                 step: "3",
-                title: "Track & Resolve",
-                desc: "Monitor progress and get notified when it's fixed",
+                title: "Track & Complete",
+                desc: "Users track progress, receive notifications, and complete tasks with full transparency",
                 icon: <CheckCircle />,
               },
             ].map((item, idx) => (
               <div key={idx} className="relative group">
                 <div className="bg-white rounded-2xl p-8 shadow-md group-hover:shadow-xl transition-all text-center">
-                  <div className="w-14 h-14 bg-blue-700 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6 mx-auto">
+                  <div className="w-14 h-14 bg-blue-700 text-white rounded-full flex items-center justify-center text-xl font-bold mb-6 mx-auto item">
                     {item.step}
                   </div>
                   <div className="flex justify-center mb-4 text-blue-600">
@@ -374,12 +416,12 @@ export default function CampusReporterHome() {
                   <h3 className="text-xl font-bold text-gray-900 mb-3">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-600">{item.desc}</p>
+                  <p className="text-[11px] text-gray-600">{item.desc}</p>
                 </div>
                 {/* Hide arrows on mobile */}
                 {idx < 2 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                    <ArrowRight className="w-8 h-8 text-blue-300" />
+                  <div className="hidden md:block absolute top-1/2 -right-10 transform -translate-y-1/2 z-6">
+                    <ArrowRight className="w-12 h-8 text-blue-300" />
                   </div>
                 )}
               </div>
@@ -396,22 +438,28 @@ export default function CampusReporterHome() {
               <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 text-center lg:text-left">
                 Real-World Impact
               </h2>
+
               <div className="space-y-8 mt-10">
                 {[
                   {
                     icon: <Zap />,
-                    title: "Faster Response",
-                    desc: "AI reduces manual classification time by 80%",
+                    title: "Faster Operations",
+                    desc: "Digital workflows eliminate queues and reduce waiting time across campus services",
                   },
                   {
-                    icon: <Shield />,
-                    title: "Improved Safety",
-                    desc: "Quick resolution of critical safety issues",
+                    icon: <ShieldCheck />,
+                    title: "Improved Transparency",
+                    desc: "Students and administrators track requests and activities in real time",
                   },
                   {
                     icon: <BarChart3 />,
-                    title: "Data-Driven",
-                    desc: "Analytics help identify problem-prone areas",
+                    title: "Data-Driven Decisions",
+                    desc: "Centralized data helps institutions identify bottlenecks and improve performance",
+                  },
+                  {
+                    icon: <Leaf />,
+                    title: "Sustainable Campus",
+                    desc: "Paperless processes reduce waste and promote eco-friendly operations",
                   },
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start space-x-4">
@@ -439,10 +487,10 @@ export default function CampusReporterHome() {
                     key={idx}
                     className="bg-white/10 backdrop-blur-md rounded-2xl p-4 sm:p-6 text-center border border-white/10"
                   >
-                    <div className="text-2xl sm:text-4xl font-bold mb-1">
+                    <div className="text-lg sm:text-2xl md:text-4xl font-bold mb-1">
                       {stat.value}
                     </div>
-                    <div className="text-[10px] sm:text-xs text-blue-100 uppercase font-medium">
+                    <div className="text-[8px] sm:text-[12px] md:text-xs text-blue-100 uppercase font-medium">
                       {stat.label}
                     </div>
                   </div>
@@ -452,7 +500,6 @@ export default function CampusReporterHome() {
           </div>
         </div>
       </section>
-
 
       {/*FOUNDER SECTION */}
 
@@ -469,7 +516,7 @@ export default function CampusReporterHome() {
                 The Architectures
               </span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
+            <h2 className="text-3xl mb-2 sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
               THE FOUNDING <span className="text-blue-600">TRIAD.</span>
             </h2>
           </div>
@@ -485,9 +532,9 @@ export default function CampusReporterHome() {
                   className={`relative group transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]
                   ${
                     isMiddle
-              ? " lg:scale-100 w-full lg:w-[350px] h-[500px]"
-              : " lg:scale-100 w-full lg:w-[350px] h-[500px] lg:mt-10"
-          }
+                      ? " lg:scale-100 w-full lg:w-[350px] h-[500px]"
+                      : " lg:scale-100 w-full lg:w-[350px] h-[500px] lg:mt-10"
+                  }
         `}
                 >
                   {/* Main Card Container */}
@@ -508,10 +555,12 @@ export default function CampusReporterHome() {
 
                     {/* OVERLAYS */}
                     {/* 1. Base Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t bg-gradient-to-t 
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t bg-gradient-to-t 
              from-black/90
              via-transparent 
-             to-transparent  opacity-100 group-hover:opacity-40 transition-opacity duration-700" />
+             to-transparent  opacity-100 group-hover:opacity-40 transition-opacity duration-700"
+                    />
 
                     {/* 2. Color Tint (Middle is Blue, Sides are Slate) */}
                     <div
@@ -577,7 +626,6 @@ export default function CampusReporterHome() {
                     </div>
 
                     {/* Floating ID Badge */}
-                   
                   </div>
 
                   {/* Outer Glow for the Middle Founder */}
@@ -594,18 +642,18 @@ export default function CampusReporterHome() {
       {/* CTA Section */}
       <section className="py-16 md:py-24 px-4 bg-blue-700">
         <div className="max-w-4xl mx-auto text-center text-white">
-          <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-xl sm:text-4xl md:text-5xl font-bold mb-6">
             Ready to Make Your Campus Better?
           </h2>
-          <p className="text-lg mb-10 opacity-90 max-w-2xl mx-auto">
+          <p className="text-xs sm:text-lg mb-10 opacity-90 max-w-2xl mx-auto">
             Join hundreds of students already using Smart Campus to create a
             safer, cleaner environment.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-10 py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
+            <button className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
               Get Started Now
             </button>
-            <button className="px-10 py-4 bg-transparent border-2 border-white/50 text-white rounded-xl font-bold hover:bg-white/10 transition-all">
+            <button className="px-8 py-3 sm:px-10 sm:py-4 bg-transparent border-2 border-white/50 text-white rounded-xl font-bold hover:bg-white/10 transition-all">
               Watch Demo
             </button>
           </div>

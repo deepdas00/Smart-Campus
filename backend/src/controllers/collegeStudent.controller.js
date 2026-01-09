@@ -161,10 +161,16 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   const cookieOptions = {
     httpOnly: true,
-    secure: false,
-    sameSite: "lax",
+    secure: true,
+    sameSite: "strict",
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   };
+  // const cookieOptions = {
+  //   httpOnly: true,
+  //   secure: false,
+  //   sameSite: "lax",
+  //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+  // };
 
   // 8️⃣ Prepare response
   const safeStudent = await Student.findById(student._id).select("-password -refreshToken");

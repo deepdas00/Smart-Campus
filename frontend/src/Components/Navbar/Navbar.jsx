@@ -130,11 +130,11 @@ useEffect(() => {
                     <img
                       src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
-                    <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                    <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
-                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                      <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
                         Powered by <span className="font-semibold ">
                           Smart Campus
                         </span>
@@ -198,7 +198,7 @@ useEffect(() => {
                       src={user?.profilePhoto}
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
                     />
                   </Link>
                 </div>
@@ -214,11 +214,11 @@ useEffect(() => {
                     <img
                       src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
-                    <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                    <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
-                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                      <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
                         Powered by <span className="font-semibold ">
                           Smart Campus
                         </span>
@@ -249,7 +249,7 @@ useEffect(() => {
 
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
                     />
                   </Link>
                 </div>
@@ -258,7 +258,7 @@ useEffect(() => {
           </header>
         )
       ) : (
-        <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm py-1.5">
+        <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm md:py-1.5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo */}
@@ -269,10 +269,10 @@ useEffect(() => {
                 <img
                   src={logo}
                   alt="Smart Campus Logo"
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                  className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                 />
 
-                <span className="text-xl font-bold bg-blue-700 bg-clip-text text-transparent">
+                <span className="md:text-xl text-lg font-bold bg-blue-700 bg-clip-text text-transparent">
                   Smart Campus
                 </span>
               </button>

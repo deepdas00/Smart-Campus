@@ -332,7 +332,7 @@ export const teacherLogin = asyncHandler(async (req, res) => {
   const cookieOptions = {
     httpOnly: true,
     secure: false,
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 24 * 60 * 60 * 1000, // 1 day
   };
 

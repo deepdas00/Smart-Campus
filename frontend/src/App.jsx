@@ -67,6 +67,7 @@ export default function App() {
 
   const userRole = user?.role;
   console.log("USER ROLE HAI...", userRole);
+  console.log("ENVIRONMENT...", import.meta.env.VITE_API_URL);
 
   return (
     <>

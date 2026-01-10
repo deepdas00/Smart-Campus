@@ -504,98 +504,132 @@ const fetchCanteenPolicy = async () => {
       )}
 
       {/* Cart Sidebar */}
-      {showCart && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50">
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl">
-            <div className="flex flex-col h-full">
-              {/* Header */}
-              <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-6">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-2xl font-bold">Your Cart</h2>
-                  <button
-                    onClick={() => setShowCart(false)}
-                    className="text-white hover:bg-white/20 rounded-full p-2 transition"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-                <p className="text-orange-100 mt-2">{getTotalItems()} items</p>
-              </div>
+     {showCart && (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]">
+    {/* BACKDROP */}
+    <div
+      onClick={() => setShowCart(false)}
+      className="absolute inset-0"
+    />
 
-              {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                {Object.keys(cart).length === 0 ? (
-                  <div className="text-center py-12">
-                    <div className="text-6xl mb-4">🛒</div>
-                    <p className="text-gray-500">Your cart is empty</p>
-                  </div>
-                ) : (
-                  Object.entries(cart).map(([id, item]) => (
-                    <div
-                      key={id}
-                      className="bg-gray-50 rounded-xl p-4 flex items-center space-x-4"
-                    >
-                      <div className="text-4xl">
-                        <img
-                          src={item.image}
-                          alt={item.name}
-                          className="w-16 h-16 object-cover rounded-xl"
-                        />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">
-                          {item.name}
-                        </h3>
-                        <p className="text-orange-600 font-bold">
-                          ₹{item.price}
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => removeFromCart(id)}
-                          className="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center hover:bg-red-200 transition"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </button>
-                        <span className="w-8 text-center font-semibold">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => addToCart(item)}
-                          className="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+    {/* CART PANEL */}
+    <div
+      className="
+        fixed
+        bottom-0 sm:bottom-auto
+        right-0
+        sm:top-0
+        h-[85vh] sm:h-full
+        w-full sm:max-w-md
+        bg-white
+        shadow-2xl
+        rounded-t-2xl sm:rounded-none
+        flex flex-col
+        animate-in
+        slide-in-from-bottom sm:slide-in-from-right
+        duration-300
+      "
+    >
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 sm:p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg sm:text-2xl font-bold">Your Cart</h2>
+          <button
+            onClick={() => setShowCart(false)}
+            className="text-white hover:bg-white/20 rounded-full p-2 transition"
+          >
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+          </button>
+        </div>
+        <p className="text-orange-100 mt-1 sm:mt-2 text-sm sm:text-base">
+          {getTotalItems()} items
+        </p>
+      </div>
 
-              {/* Cart Totals */}
-              {Object.keys(cart).length > 0 && (
-                <div className="border-t border-gray-200 p-6 space-y-4">
-                  <div className="flex justify-between text-xl border-t border-gray-200 pt-4">
-                    <span className="font-bold">Total:</span>
-                    <span className="font-bold text-orange-600">
-                      ₹{getTotalPrice()}
-                    </span>
-                  </div>
-                  <button
-                    onClick={placeOrder}
-                    className="w-full py-4 bg-gradient-to-r from-orange-600 to-red-600 text-white rounded-lg font-semibold hover:shadow-xl transition"
-                  >
-                    Place Order
-                  </button>
-                </div>
-              )}
-            </div>
+      {/* ITEMS */}
+      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-3 sm:space-y-4">
+        {Object.keys(cart).length === 0 ? (
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🛒</div>
+            <p className="text-gray-500">Your cart is empty</p>
           </div>
+        ) : (
+          Object.entries(cart).map(([id, item]) => (
+            <div
+              key={id}
+              className="bg-gray-50 rounded-xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4"
+            >
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-xl"
+              />
+
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm sm:text-base text-gray-900">
+                  {item.name}
+                </h3>
+                <p className="text-orange-600 font-bold text-sm sm:text-base">
+                  ₹{item.price}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => removeFromCart(id)}
+                  className="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center"
+                >
+                  <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+
+                <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">
+                  {item.quantity}
+                </span>
+
+                <button
+                  onClick={() => addToCart(item)}
+                  className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"
+                >
+                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* FOOTER */}
+      {Object.keys(cart).length > 0 && (
+        <div className="border-t border-gray-200 p-4 sm:p-6 space-y-3">
+          <div className="flex justify-between text-lg sm:text-xl font-bold">
+            <span>Total:</span>
+            <span className="text-orange-600">₹{getTotalPrice()}</span>
+          </div>
+
+          <button
+            onClick={placeOrder}
+            className="
+              w-full
+              py-3 sm:py-4
+              bg-gradient-to-r from-orange-600 to-red-600
+              text-white
+              rounded-lg
+              font-semibold
+              hover:shadow-xl
+              transition
+            "
+          >
+            Place Order
+          </button>
         </div>
       )}
+    </div>
+  </div>
+)}
+
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="max-w-7xl mx-auto px-4 py-2 sm:py-8">
         {/* Search and Filter */}
         <div className="flex justify-between items-center w-full px-5 pb-4">
           <div className="">
@@ -608,20 +642,6 @@ const fetchCanteenPolicy = async () => {
             </div>
           </div>
 
-          {/* <div className="flex items-center space-x-4">
-            <button
-              onClick={() => setShowCart(true)}
-              className="relative px-4 py-2 bg-blue-600 text-white rounded-lg hover:shadow-lg transition flex items-center space-x-2"
-            >
-              <ShoppingCart className="w-5 h-5" />
-              <span className="hidden sm:inline">Cart</span>
-              {getTotalItems() > 0 && (
-                <span className="absolute -top-2 -right-2 w-6 h-6 bg-blue-900 text-white rounded-full text-xs flex items-center justify-center font-bold">
-                  {getTotalItems()}
-                </span>
-              )}
-            </button>
-          </div> */}
         </div>
 
         <SearchAndCategory

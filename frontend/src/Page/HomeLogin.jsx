@@ -141,7 +141,7 @@ export default function HomeLogin() {
       </style>
 
       {/* SECTION 1: WELCOME & PRO-COMMAND CENTER */}
-      <section className="pt-10 pb-20 px-6 bg-[#F1F7FE] relative overflow-hidden">
+      <section className="pt-10 pb-20 px-3 sm:px-6 bg-[#F1F7FE] relative overflow-hidden">
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -177,7 +177,7 @@ export default function HomeLogin() {
               <h1 className="text-2xl sm:text-5xl font-black tracking-tighter text-slate-900">
                 Welcome back, <br />
                 <span className="text-blue-600 italic">
-                  Champ {user?.studentName || "Alex"}!
+                  Champ {user?.fullName || "Alex"}!
                 </span>
               </h1>
             </div>
@@ -226,7 +226,7 @@ export default function HomeLogin() {
               <Link to={tile.link} key={idx}>
                 <div
                   key={idx}
-                  className={`group relative bg-white sm:p-10 p-4 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
+                  className={`group relative bg-white sm:p-10 p-4 sm:rounded-[3rem] shadow-sm border rounded-[1rem] border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
                 >
                   {/* THE TOP HOVER LINE - FIXED OVERFLOW */}
                   <div
@@ -350,7 +350,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 2: SMART CAMPUS GALLERY - HIGH-ENGAGEMENT MOSAIC */}
-      <section className="pt-0 pb-4 sm:py-20 px-6 bg-[#F8FAFC] relative overflow-hidden">
+      <section className="pt-0 pb-4 sm:py-20 px-3 sm:px-6 bg-[#F8FAFC] relative overflow-hidden">
         {/* Abstract Background Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
           <div className="absolute top-10 right-10 w-96 h-96 bg-blue-200 blur-[120px] rounded-full"></div>
@@ -392,17 +392,17 @@ export default function HomeLogin() {
               previewGallery.map((img, index) => (
                 <div
                   key={img._id}
-                  className={`relative group overflow-hidden  sm:rounded-[2.5rem] rounded-[0.5rem] shadow-lg bg-slate-200
+                  className={`relative group overflow-hidden  sm:rounded-[2.5rem] rounded-[0.5rem] shadow-lg bg-slate-200 min-h-[140px] sm:min-h-0
         ${
           index === 0
-            ? "col-span-4 row-span-2"
+            ? "col-span-4 row-span-5"
             : index === 1
-            ? "col-span-5"
+            ? "col-span-5 row-span-3"
             : index === 2
-            ? "col-span-3"
+            ? "col-span-3 row-span-3"
             : index === 3
-            ? "col-span-3"
-            : "col-span-5 bg-blue-600 cursor-pointer"
+            ? "col-span-3 row-span-2"
+            : "col-span-5 row-span-2 bg-blue-600 cursor-pointer"
         }
       `}
                   onClick={index === 4 ? () => setShowPopup(true) : undefined}
@@ -410,7 +410,7 @@ export default function HomeLogin() {
                   {index === 4 ? (
                     /* 150+ CARD */
                     <div
-                      className="h-full flex items-center justify-between py-8 px-2 sm:p-8 text-white bg-black/50"
+                      className="h-full flex items-center justify-between py-11 px-2 sm:p-8 text-white bg-black/50"
                       style={{ backgroundImage: `url(${img.image})` }}
                     >
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
@@ -464,7 +464,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 3: LIVE FEED (CYBER-WHITE DESIGN) */}
-      <section className="py-24 px-6 bg-white relative overflow-hidden">
+      <section className="py-24 px-3 sm:px-6 bg-white relative overflow-hidden">
         {/* Subtle grid pattern background for a "technical" feel */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -670,7 +670,7 @@ export default function HomeLogin() {
       <Collaboration />
 
       {/* SECTION 4: SMART CAMPUS CORE */}
-      <section className="py-24 px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
+      <section className="py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/20 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full"></div>

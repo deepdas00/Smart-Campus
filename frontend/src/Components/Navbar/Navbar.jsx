@@ -21,7 +21,10 @@ export default function Navbar({
   onMyBooksClick,
   myBooksCount,
   onCartClick,
+  orderPlaced,
+  orderReceived,
   cartCount,
+  showCart
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -35,6 +38,7 @@ export default function Navbar({
   const [collegeDept, setCollegeDept] = useState([])
   const { user } = useAuth();
   const { logout } = useAuth();
+  
 
 
   function FloatingCartButton({ children }) {
@@ -199,7 +203,7 @@ useEffect(() => {
 )}
 
 
-{isCanteenPage && (
+{isCanteenPage && !showCart && !orderPlaced && (
   <FloatingCartButton>
     <button
       onClick={onCartClick}

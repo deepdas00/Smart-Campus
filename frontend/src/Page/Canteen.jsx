@@ -372,6 +372,9 @@ const fetchCanteenPolicy = async () => {
       {/* Header */}
       <Navbar
         onCartClick={() => setShowCart(true)}
+        showCart={showCart}
+        orderReceived = {orderReceived}
+        orderPlaced = {orderPlaced}
         cartCount={getTotalItems()}
       />
 
@@ -410,7 +413,7 @@ const fetchCanteenPolicy = async () => {
 
       {/* Order Success & QR Code */}
       {orderPlaced && !orderReceived && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-100 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full ">
             <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3">
               <div className="flex items-center justify-between ">

@@ -149,7 +149,7 @@ export default function CampusReporterHome() {
       {/* Hero Section */}
       <section
         className={`${
-          user ? "pt-20 md:pt-24 pb-5" : "pt-24 md:pt-28"
+          user ? "pt-5 md:pt-24 pb-5" : "pt-24 md:pt-28"
         } px-4 sm:px-6 lg:px-8 pb-5`}
       >
         <div className="max-w-7xl mx-auto">
@@ -161,7 +161,7 @@ export default function CampusReporterHome() {
                 <span>Powered by Google AI </span>
               </div> */}
 
-              <h1 className="text-[25px] pb-3 sm:text-5xl md:text-4xl font-bold text-gray-900 sm:mb-6 mb-2 leading-tight">
+              <h1 className="text-[22px] pb-3 sm:text-5xl md:text-4xl font-bold text-gray-900 sm:mb-6 mb-2 leading-tight">
                 Build a Queue-less, Paperless <br />
                 <span className="text-blue-600 md:text-6xl sm:text-5xl text-[35px]">
                   Smart Campus

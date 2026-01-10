@@ -40,7 +40,9 @@ export default function TransactionsTable({
                     <span className="font-semibold">{tx.book}</span>
                   </div>
                 </td>
-                <td className="px-6 py-5 text-center bg-white shadow-sm">{tx.date}</td>
+                <td className="px-6 py-5 text-center bg-white shadow-sm">
+                  {tx.date}
+                </td>
                 <td className="px-6 py-5 text-center bg-white shadow-sm">
                   <h4
                     className={`inline-block px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider
@@ -81,58 +83,93 @@ export default function TransactionsTable({
       {/* --- MOBILE UI (RESPONSIVE - ALL DATA PRESERVED) --- */}
       <div className="lg:hidden flex flex-col gap-2 mt-2">
         {transactions.map((tx) => (
-          <div key={tx.id} className="bg-white rounded-[1rem] p-3 border border-slate-100 shadow-sm">
+          <div
+            key={tx.id}
+            className="bg-white rounded-[1rem] p-3 border border-slate-100 shadow-sm"
+          >
             {/* 1. Borrower Info */}
-            <div className="flex justify-between items-start mb-4">
+            <div className="flex justify-between items-start mb-2">
               <div className="flex items-start gap-3">
                 <div className="bg-indigo-50 p-2 rounded-xl text-indigo-600">
                   <Hash size={16} />
                 </div>
                 <div>
-                  <p className="font-black text-slate-800 text-sm leading-tight">{tx.student}</p>
-                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Roll: #{tx.roll}</p>
+                  <p className="font-black text-slate-800 text-sm leading-tight">
+                    {tx.student}
+                  </p>
+                  <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                    Roll: #{tx.roll}
+                  </p>
                 </div>
               </div>
-              <span className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                tx.status === "overdue" ? "bg-red-500 text-white" : 
-                tx.status === "issued" ? "bg-emerald-500 text-white" :
-                tx.status === 'returned' ? "bg-blue-500 text-white" : "bg-slate-400 text-white"
-              }`}>
+              <span
+                className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${
+                  tx.status === "overdue"
+                    ? "bg-red-500 text-white"
+                    : tx.status === "issued"
+                    ? "bg-emerald-500 text-white"
+                    : tx.status === "returned"
+                    ? "bg-blue-500 text-white"
+                    : "bg-slate-400 text-white"
+                }`}
+              >
                 {tx.status}
               </span>
             </div>
 
             {/* 2. Asset Details (Image + Book Title) */}
-            <div className="flex items-center gap-2 bg-slate-50/80 p-1 rounded-2xl mb-4 border border-slate-100">
+            <div className="flex items-center gap-2 bg-slate-50/80 p-1 rounded-2xl border border-slate-100">
               <div className="shrink-0 shadow-md">
                 {tx.coverImage ? (
-                  <img src={tx.coverImage} alt={tx.book} className="w-12 h-16 object-cover rounded-lg border-2 border-white" />
+                  <img
+                    src={tx.coverImage}
+                    alt={tx.book}
+                    className="w-12 h-16 object-cover rounded-lg border-2 border-white"
+                  />
                 ) : (
-                  <div className="w-12 h-16 bg-slate-200 rounded-lg flex items-center justify-center"><BookOpen size={16}/></div>
+                  <div className="w-12 h-16 bg-slate-200 rounded-lg flex items-center justify-center">
+                    <BookOpen size={16} />
+                  </div>
                 )}
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-black text-indigo-400 uppercase mb-1">Asset Name</p>
-                <p className="font-bold text-slate-700 leading-tight">{tx.book}</p>
+                <p className="text-[10px] font-black text-indigo-400 uppercase mb-1">
+                  Asset Name
+                </p>
+                <p className="font-bold text-slate-700 leading-tight">
+                  {tx.book}
+                </p>
               </div>
             </div>
 
             {/* 3. Timeline & Action */}
-            <div className="flex items-center justify-between pt-4 border-t border-dashed border-slate-200">
-               <div>
-                  <p className="text-[10px] font-black text-slate-300 uppercase">Return Date</p>
-                  <div className="flex items-center gap-1 text-slate-600 mt-1">
-                    <Calendar size={14} />
-                    <span className="text-xs font-bold">{tx.date}</span>
+            <div className="flex items-center justify-between pt-2 border-t border-dashed border-slate-200">
+              <div className="flex flex-row items-center gap-3 group">
+                <span className="text-[9px] font-black text-indigo-400 uppercase tracking-[0.15em] leading-none">
+                  Return Deadline
+                </span>
+                <div className="flex items-center gap-2 rounded-xl  transition-colors">
+                  <div className="p-1 bg-white rounded-md shadow-sm">
+                    <Calendar size={12} className="text-indigo-500" />
                   </div>
-               </div>
-               
-               <button
-                  onClick={() => setShowReturnConfirm({ id: tx.id, student: tx.student, bookTitle: tx.book })}
-                  className="bg-slate-900 text-white px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-slate-200"
-                >
-                  <CheckCircle size={13} /> Return
-                </button>
+                  <span className="text-[12px] font-extrabold text-slate-700 tabular-nums">
+                    {tx.date}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={() =>
+                  setShowReturnConfirm({
+                    id: tx.id,
+                    student: tx.student,
+                    bookTitle: tx.book,
+                  })
+                }
+                className="bg-slate-900 hidden text-white px-5 py-2 rounded-2xl text-[9px] font-black uppercase tracking-widest flex items-center gap-2 active:scale-95 transition-all shadow-lg shadow-slate-200"
+              >
+                <CheckCircle size={13} /> Return
+              </button>
             </div>
           </div>
         ))}

@@ -650,9 +650,10 @@ Users track progress, receive notifications, and complete tasks with full transp
             safer, cleaner environment.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
+            <Link
+                to={"/signup"} className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
               Get Started Now
-            </button>
+            </Link>
             <button className="px-8 py-3 sm:px-10 sm:py-4 bg-transparent border-2 border-white/50 text-white rounded-xl font-bold hover:bg-white/10 transition-all">
               Watch Demo
             </button>

@@ -41,9 +41,13 @@ import ChangePassword from "./Page/ChangePassword.jsx";
 // Layout Wrapper
 const AdminLayout = () => {
   return (
+
+    <>
+    <Navbar />
+   
     <div className="min-h-screen flex flex-col ">
       {/* Top Navbar */}
-      <Navbar />
+      
       {/* <CollegeInfo /> */}
 
       {/* Body */}
@@ -60,6 +64,7 @@ const AdminLayout = () => {
       {/* Footer */}
       <Footer />
     </div>
+     </>
   );
 };
 export default function App() {

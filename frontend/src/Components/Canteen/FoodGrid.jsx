@@ -35,7 +35,7 @@ export default function FoodGrid({
                 <div className="absolute inset-0 z-30 flex items-center justify-center">
                   <div className="absolute inset-0 bg-white/30 backdrop-blur-sm" />
                   <div className="relative z-10 bg-white/90 border-2 border-red-400 px-4 py-2 rounded-xl -rotate-12 shadow-xl">
-                    <p className="text-red-600 text-xl font-black uppercase tracking-widest">
+                    <p className="text-red-600 text-sm sm:text-xl font-black uppercase tracking-widest">
                       🚫 Sold Out
                     </p>
                     <p className="text-[10px] text-red-400 text-center font-bold">

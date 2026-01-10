@@ -166,8 +166,8 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const Student = getCollegeStudentModel(collegeConn);
 
   const transaction = await Transaction.findById(transactionId)
-    .populate({ path: "bookId", select: "title author coverImage " })
-    .populate({ path: "studentId", select: "studentName" })
+    .populate({ path: "bookId", select: "title author coverImage shelf" })
+    .populate({ path: "studentId", select: "fullName" })
 
 
   if (!transaction) throw new ApiError(404, "Transaction not found");
@@ -288,7 +288,7 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
     })
     .populate({
       path: "studentId",
-      select: "studentName rollNo mobileNo avatar",
+      select: "fullName rollNo mobileNo profilePhoto",
     });
 
   console.log("TRANSACTION", transaction);

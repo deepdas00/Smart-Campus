@@ -658,10 +658,10 @@ const fetchCanteenPolicy = async () => {
         <div className="relative">
           {/* 🔵 CLOSED OVERLAY */}
           {isCanteenOpen === false && (
-            <div className="absolute inset-0 z-20 bg-blue-900/40 backdrop-blur-sm flex items-center justify-center rounded-xl">
-              <div className="text-center text-white px-6">
+            <div className="absolute inset-0 z-20 bg-blue-900/40 backdrop-blur-sm flex ietms-start justify-center rounded-xl">
+              <div className="text-center mt-50 text-white px-6 ">
                 <AlertCircle className="w-12 h-12 mx-auto mb-3" />
-                <h2 className="text-xl font-bold">Canteen Closed</h2>
+                <h2 className="text-xl  font-bold">Canteen Closed</h2>
                 <p className="text-sm text-blue-100">
                   Please come back during working hours
                 </p>

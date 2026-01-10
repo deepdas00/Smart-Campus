@@ -91,12 +91,12 @@ export default function LibraryTeacherHandle() {
     try {
       setNotifying(true);
 
-      const res = await axios.get(`${API_URL}/api/v1/library/notify-return-reminders`, {
-        withCredentials:true,
-      });
-
-     
-      
+      const res = await axios.get(
+        `${API_URL}/api/v1/library/notify-return-reminders`,
+        {
+          withCredentials: true,
+        }
+      );
 
       const count = res.data?.data?.notifiedCount || 0;
 
@@ -430,7 +430,6 @@ export default function LibraryTeacherHandle() {
         );
 
         const normalized = res.data.data.map(normalizeTransaction);
-
 
         setTransactions(normalized);
       } catch (err) {
@@ -886,11 +885,11 @@ export default function LibraryTeacherHandle() {
             </div>
           </LibraryHeader>
 
-          <main className="max-w-full mx-auto flex gap- flex-col">
-            {/* --- LEFT SIDEBAR --- */}
-            <div className="w-full flex gap-8 items-start">
+          <main className="max-w-full mx-auto flex flex-col gap-6">
+            {/* --- TOP SECTION (SIDEBAR + STATS) --- */}
+            <div className="flex flex-col lg:flex-row gap-6 items-stretch">
               {/* Sidebar */}
-              <div className="w-64 shrink-0">
+              <div className="w-full lg:w-64 shrink-0">
                 <LibrarySidebar
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
@@ -900,26 +899,28 @@ export default function LibraryTeacherHandle() {
               </div>
 
               {/* Stats */}
-              <div className="flex-1">
-                <StatsGrid stats={stats} />
+              <div className="w-full flex-1">
+                <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+                  <StatsGrid stats={stats} />
+                </div>
               </div>
             </div>
 
             {/* --- MAIN CONTENT --- */}
-            <div className="lg:col-span-9 space-y-6 mt-6">
-              {/* STATS SECTION */}
-
-              <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
-                <div className="px-8 py-6 border-b border-slate-100 flex justify-between items-center  bg-blue-200 ">
-                  <div className="flex items-center gap-2 ">
+            <div className="space-y-6">
+              <div className="bg-white rounded-[1rem] sm:rounded-[2.5rem] shadow-sm border border-slate-200/60 overflow-hidden min-h-[400px]">
+                {/* HEADER */}
+                <div className="px-2 sm:px-6 lg:px-8 py-4 border-b border-slate-100 flex flex-wrap gap-3 sm:justify-between justify-center items-center bg-blue-200">
+                  <div className="flex items-center gap-2">
                     {selectedDept && (
                       <ArrowLeft
                         size={20}
-                        className="cursor-pointer text-slate-400 mr-2"
+                        className="cursor-pointer text-slate-400"
                         onClick={() => setSelectedDept(null)}
                       />
                     )}
-                    <h3 className="font-black text-slate-800 uppercase tracking-tighter text-lg">
+
+                    <h3 className="font-black text-slate-800 uppercase tracking-tight text-base  sm:text-lg">
                       {activeTab === "transactions"
                         ? "Active Borrowers"
                         : selectedDept
@@ -927,42 +928,44 @@ export default function LibraryTeacherHandle() {
                         : "Department Folders"}
                     </h3>
                   </div>
-                  {activeTab === "inventory" && !selectedDept && (
-                    <button
-                      onClick={() => setShowAddBookModal(true)}
-                      className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-colors"
-                    >
-                      <Plus size={14} /> Add New Book
-                    </button>
-                  )}
 
-                  {activeTab === "transactions" && (
-                    <button
-                      onClick={handleNotifyReturnReminders}
-                      disabled={notifying}
-                      className="flex items-center gap-2 px-4 py-2 rounded-xl
-                 bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest
-                 hover:bg-indigo-700 transition disabled:bg-slate-400"
-                    >
-                      {notifying ? (
-                        "Sending…"
-                      ) : (
-                        <>
-                          <Bell size={14} />
-                          Notify Students
-                        </>
-                      )}
-                    </button>
-                  )}
+                  {/* ACTION BUTTONS */}
+                  <div className="flex gap-2">
+                    {activeTab === "inventory" && !selectedDept && (
+                      <button
+                        onClick={() => setShowAddBookModal(true)}
+                        className="flex items-center gap-2 bg-slate-900 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 transition-colors"
+                      >
+                        <Plus size={14} /> Add New Book
+                      </button>
+                    )}
+
+                    {activeTab === "transactions" && (
+                      <button
+                        onClick={handleNotifyReturnReminders}
+                        disabled={notifying}
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition disabled:bg-slate-400"
+                      >
+                        {notifying ? (
+                          "Sending…"
+                        ) : (
+                          <>
+                            <Bell size={14} /> Notify Students
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
 
+                {/* CONTENT */}
                 {activeTab === "transactions" ? (
                   loadingTransactions ? (
-                    <div className="p-12 text-center font-bold text-slate-400">
+                    <div className="p-10 text-center font-bold text-slate-400">
                       Loading transactions...
                     </div>
                   ) : transactionError ? (
-                    <div className="p-12 text-center text-red-500 font-bold">
+                    <div className="p-10 text-center text-red-500 font-bold">
                       {transactionError}
                     </div>
                   ) : (
@@ -976,16 +979,14 @@ export default function LibraryTeacherHandle() {
                       />
 
                       {visibleTransactions < filteredTransactions.length && (
-                        <div className="flex justify-center mb-4">
+                        <div className="flex justify-center py-4">
                           <button
-                            onClick={() =>
-                              setVisibleTransactions((prev) => prev + 5)
-                            }
-                            className="group flex items-center gap-2 px-8 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-full text-sm font-semibold hover:border-indigo-600 hover:text-indigo-600 hover:shadow-sm transition-all duration-200 active:scale-95"
+                            onClick={() => setVisibleTransactions((p) => p + 5)}
+                            className="flex items-center gap-2 px-8 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-full text-sm font-semibold hover:border-indigo-600 hover:text-indigo-600 transition active:scale-95"
                           >
-                            <span>View More Transactions</span>
+                            View More Transactions
                             <svg
-                              className="w-4 h-4 group-hover:translate-y-0.5 transition-transform"
+                              className="w-4 h-4"
                               fill="none"
                               viewBox="0 0 24 24"
                               stroke="currentColor"
@@ -1003,29 +1004,39 @@ export default function LibraryTeacherHandle() {
                     </>
                   )
                 ) : (
-                  <div className="p-8">
+                  <div className="p-4 sm:p-6 lg:p-8">
                     {!selectedDept ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      /* DEPARTMENT GRID: Adapts from 1 column (mobile) to 3 columns (laptop) */
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 lg:gap-6">
                         {departments.map((dept) => (
                           <div
                             key={dept}
                             onClick={() => setSelectedDept(dept)}
-                            className="group p-6 bg-white border-2 border-slate-100 rounded-[2rem] hover:border-indigo-500 transition-all cursor-pointer"
+                            className="group p-1 pl-2 sm:p-5 lg:p-6 bg-white border-2 border-slate-100 rounded-[1rem] lg:rounded-[2rem] hover:border-indigo-500 transition-all cursor-pointer flex flex-row lg:flex-col items-center lg:items-start gap-4 lg:gap-0"
                           >
-                            <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            {/* Icon Container */}
+                            <div className="w-9 h-9 bg-indigo-50 text-indigo-600 rounded-xl lg:rounded-2xl flex items-center justify-center lg:mb-4 group-hover:bg-indigo-600 group-hover:text-white transition shrink-0">
                               <Folder size={24} />
                             </div>
-                            <h4 className="font-black text-slate-800 text-lg mb-1">
-                              {dept}
-                            </h4>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                              {books.filter((b) => b.category === dept).length}{" "}
-                              Titles
-                            </p>
+
+                            {/* Text Container */}
+                            <div className="flex flex-col">
+                              <h4 className="font-black text-slate-800 text-sm lg:text-lg mb-0 lg:mb-1 leading-tight">
+                                {dept}
+                              </h4>
+                              <p className="text-[8px] lg:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                                {
+                                  books.filter((b) => b.category === dept)
+                                    .length
+                                }{" "}
+                                Titles
+                              </p>
+                            </div>
                           </div>
                         ))}
                       </div>
                     ) : (
+                      /* BOOK LIST: Preserves laptop row layout, stacks on mobile */
                       <div className="flex flex-col gap-4">
                         {filteredBooks
                           .filter((b) => b.category === selectedDept)
@@ -1043,37 +1054,74 @@ export default function LibraryTeacherHandle() {
                                 }`}
                               />
 
-                              <div className="flex flex-col lg:flex-row p-5 gap-6">
+                              <div className="flex flex-col lg:flex-row p-5 gap-4 lg:gap-6">
                                 {/* Section 1: Visual Identity */}
                                 <div className="flex gap-4 shrink-0">
                                   <div className="relative">
                                     <img
                                       src={book.coverImage}
                                       alt={book.title}
-                                      className="w-20 lg:w-20 lg:mt-7 object-cover rounded-lg shadow-sm border border-slate-100 group-hover:rotate-1 transition-transform"
+                                      className="w-12 sm:w-20 lg:w-20 lg:mt-7 object-cover rounded-lg shadow-sm border border-slate-100 group-hover:rotate-1 transition-transform"
                                     />
-                                    <div className="absolute -bottom-2 -right-2 bg-white shadow-lg border border-slate-100 rounded-lg px-2 py-1 flex items-center gap-1">
-                                      <span className="text-amber-400 text-xs">
+                                    <div className="absolute -bottom-2 -right-2 bg-white shadow-lg border border-slate-100 rounded-lg px-1 sm:px-2 py-1 flex items-center gap-1">
+                                      <span className="text-amber-400 text-[9px]">
                                         ★
                                       </span>
-                                      <span className="text-[11px] font-bold text-slate-700">
+                                      <span className="text-[8px] font-bold text-slate-700">
                                         {book.rating}
                                       </span>
                                     </div>
                                   </div>
 
-                                  <div className="flex flex-col justify-center lg:hidden">
-                                    <h4 className="font-bold text-slate-900 text-lg leading-tight">
+                                  {/* Title/Author - Visible on Mobile (Hidden on Laptop to use the other title div) */}
+                                  <div className="flex flex-col justify-center lg:hidden flex-1 min-w-0">
+                                   <div className="flex justify-between w-full ">
+
+
+
+                                     <span className="text-[9px] font-black text-indigo-600 bg-indigo-50 w-fit px-2 py-0.5 rounded-full uppercase tracking-widest mb-1">
+                                      {book.category}
+
+                                      
+                                    </span>
+
+
+                                    <div className="flex lg:hidden gap-4">
+                                        <button
+                                          onClick={() => {
+                                            /* Edit Logic */
+                                          }}
+                                          className=" bg-slate-50 rounded-lg text-slate-500"
+                                        >
+                                          <Edit3 size={14} />
+                                        </button>
+                                        <button
+                                          onClick={() => {
+                                            /* Delete Logic */
+                                          }}
+                                          className=" bg-slate-50 rounded-lg text-red-500"
+                                        >
+                                          <Trash2 size={14} />
+                                        </button>
+                                      </div>
+
+
+
+                                    </div>
+                                    <h4 className="font-bold text-slate-900 sm:text-base leading-tight sm:truncate text[12px]">
                                       {book.title}
                                     </h4>
-                                    <p className="text-sm text-indigo-600 font-medium">
+                                    <p className="text-[8px] sm:text-sm text-indigo-600 font-medium">
                                       {book.author}
                                     </p>
                                   </div>
+
+                                  {/* Mobile Actions: Edit/Delete buttons visible on mobile header */}
                                 </div>
 
                                 {/* Section 2: Core Info */}
                                 <div className="flex-1 flex flex-col justify-between">
+                                  {/* Laptop Title Header - Hidden on Mobile */}
                                   <div className="hidden lg:block">
                                     <div className="flex justify-between items-start">
                                       <div>
@@ -1088,29 +1136,9 @@ export default function LibraryTeacherHandle() {
                                         </p>
                                       </div>
 
-                                      {/* Actions Integrated into Top Right */}
                                       <div className="flex items-center bg-slate-50 rounded-xl p-1 border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <button
                                           onClick={() => {
-                                            setEditingBook(book);
-                                            setNewBook({
-                                              title: book.title || "",
-                                              author: book.author || "",
-                                              category: book.category || "",
-                                              rating: book.rating || "",
-                                              totalCopies:
-                                                book.totalCopies || "",
-                                              availableCopies:
-                                                book.availableCopies || "",
-                                              shelf: book.shelf || "",
-                                              isbn: book.isbn || "",
-                                              publisher: book.publisher || "",
-                                              publishedYear:
-                                                book.publishedYear || "",
-                                              description:
-                                                book.description || "",
-                                              coverImage: null, // optional (don’t preload file)
-                                            });
                                             setEditingBook(book);
                                             setNewBook(book);
                                             setShowAddBookModal(true);
@@ -1129,14 +1157,14 @@ export default function LibraryTeacherHandle() {
                                     </div>
                                   </div>
 
-                                  <p className="mt-3 text-sm text-slate-500 line-clamp-2 max-w-2xl leading-relaxed">
+                                  <p className="text-sm text-slate-500 line-clamp-2 lg:max-w-2xl leading-relaxed">
                                     {book.description}
                                   </p>
 
                                   {/* Section 3: Professional Data Points */}
-                                  <div className="mt-4 flex flex-wrap items-center gap-y-4 gap-x-8 pt-4 border-t border-slate-100">
+                                  <div className="mt-4 grid grid-cols-2 lg:flex lg:flex-wrap items-center gap-y-4 lg:gap-x-8 pt-4 border-t border-slate-100">
                                     <div className="flex items-center gap-2">
-                                      <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
+                                      <div className="px-1 sm:p-2 bg-slate-50 rounded-lg text-slate-400">
                                         <span className="text-[10px] font-bold uppercase">
                                           Shelf
                                         </span>
@@ -1147,8 +1175,8 @@ export default function LibraryTeacherHandle() {
                                     </div>
 
                                     <div className="flex items-center gap-2">
-                                      <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
-                                        <span className="text-[10px] font-bold uppercase">
+                                      <div className="px-1 sm:p-2 bg-slate-50 rounded-lg text-slate-400">
+                                        <span className="text-[10px] font-black uppercase">
                                           Status
                                         </span>
                                       </div>
@@ -1166,13 +1194,15 @@ export default function LibraryTeacherHandle() {
                                               : "bg-red-500"
                                           }`}
                                         />
-                                        {book.availableCopies} of{" "}
-                                        {book.totalCopies} Available
+                                        <span className="whitespace-nowrap">
+                                          {book.availableCopies}/
+                                          {book.totalCopies}
+                                        </span>
                                       </div>
                                     </div>
 
-                                    <div className="flex items-center gap-2 ml-auto">
-                                      <span className="text-[10px] font-mono text-slate-300">
+                                    <div className="flex items-center col-span-2 lg:col-auto lg:ml-auto border-t lg:border-t-0 pt-2 lg:pt-0">
+                                      <span className="text-[10px] font-mono text-slate-400 bg-slate-50 px-2 py-1 rounded lg:bg-transparent">
                                         ID: {book._id.slice(-6).toUpperCase()}
                                       </span>
                                     </div>

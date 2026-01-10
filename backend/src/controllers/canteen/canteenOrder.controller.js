@@ -253,7 +253,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   // console.log(Order);
   // 3️⃣ Fetch filtered orders
   const order = await Order.findById(orderId)
-    .populate("studentId", "studentName rollNo mobileNo")
+    .populate("studentId", "fullName rollNo mobileNo")
     .select(
       "_id items transactionCode qrCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );

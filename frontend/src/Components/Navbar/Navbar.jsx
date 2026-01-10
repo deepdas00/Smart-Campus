@@ -92,15 +92,13 @@ export default function Navbar({
     
   const fetchCollegeInfo = async () => {
     try {
-      // console.log("huuuuuuu");
+
       
       const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
         withCredentials: true,
       });
 
-      // console.log("bywyyyyyyyyy");
-      
-      // console.log("infooofofooof",res);
+
       setCollegeInfo(res.data.data.collegeInfo);
       setCollegeDept(res.data.data.departments);
      

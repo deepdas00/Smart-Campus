@@ -197,7 +197,7 @@ export default function EduReportPortal() {
         }
       );
       setTransactionCode(res.data.data.transactionCode);
-      console.log(res);
+    
 
       setStep(3);
     } catch (error) {

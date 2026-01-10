@@ -245,7 +245,7 @@ export default function CampusIssues() {
         withCredentials: true,
       });
 
-      console.log("BASSSSSS",res.data.data);
+ 
       
  
       
@@ -282,7 +282,7 @@ export default function CampusIssues() {
         { withCredentials: true }
       );
 
-      console.log(res);
+
       
       const reportData = res.data.data.report[0];
       setSelectedReport(reportData);

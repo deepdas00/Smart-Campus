@@ -6,7 +6,7 @@ export default function FoodGrid({
   removeFromCart,
   getItemQuantity,
 }) {
-  console.log("quan", items);
+ 
 
   return (
     <>
@@ -15,7 +15,7 @@ export default function FoodGrid({
           const isUnavailable =
             item.isAvailable === false || item.quantityAvailable === 0; // Adjust based on your data key
           const quantity = getItemQuantity(item._id);
-          console.log(quantity);
+    
 
           return (
             <div

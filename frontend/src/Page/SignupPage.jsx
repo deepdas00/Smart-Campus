@@ -61,7 +61,7 @@ export default function SignUpPage() {
         );
 
 
-        console.log(response.data.data);
+
         
         // Use the correct path to your array
         setDepartments([""])

@@ -171,7 +171,6 @@ export default function App() {
       withCredentials: true,
     });
 
-    console.log(res.data.data);
     
 
     return res.data.data; // ApiResponse → data

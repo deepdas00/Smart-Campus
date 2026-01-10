@@ -67,7 +67,7 @@ function OfficeIntelligence() {
   const fetchDashboard = async () => {
     try {
       setLoading(true);
-      console.log("huuuuuuuuuuuuuuuu");
+
       
       const res = await axios.get(
         `${API_URL}/api/v1/college/admin/statistics?range=${range}`,

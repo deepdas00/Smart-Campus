@@ -36,7 +36,7 @@ export default function ChangePassword() {
     try {
       setLoading(true);
 
-      console.log(formData.oldPassword);
+  
       
 
       const res = await axios.post(

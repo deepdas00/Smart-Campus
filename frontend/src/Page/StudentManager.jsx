@@ -47,10 +47,7 @@ export function StudentManager() {
           { withCredentials: true }
         );
 
-        console.log(res,"ihhhhhhhh");
         
-
-        console.log(res.data);
         
         setCollegeCode(res.data.collegeCode);
         setStudents(res.data.students || []);
@@ -76,7 +73,7 @@ export function StudentManager() {
         { withCredentials: true }
       );
 
-    console.log("ONEEE DETAILS", res.data);
+
     
 
       setSelectedStudent(res.data); // Stores { student, libraryTransaction, message }
@@ -470,7 +467,7 @@ if (avatar) fd.append("profilePhoto", avatar);
     try {
       setLoading(true);
 
-   console.log(fd);
+
       
       await axios.post(
         `${import.meta.env.VITE_API_URL}/api/v1/users/student/register`,

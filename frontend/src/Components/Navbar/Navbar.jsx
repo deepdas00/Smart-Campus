@@ -24,7 +24,11 @@ export default function Navbar({
   orderPlaced,
   orderReceived,
   cartCount,
-  showCart
+  showCart,
+  bookReceived,
+  bookingSuccess,
+  showMyBooks,
+  showIssueModal
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -155,7 +159,7 @@ useEffect(() => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  {isLibraryPage && (
+{isLibraryPage && !showIssueModal && !showMyBooks && !bookingSuccess && !bookReceived && (
   <FloatingCartButton>
     <button
       onClick={onMyBooksClick}
@@ -250,8 +254,7 @@ useEffect(() => {
   </button>
 )}
 
-
-                 {isOrderPage && (
+{isOrderPage && (
   <FloatingCartButton>
     <Link
       to="/canteen"

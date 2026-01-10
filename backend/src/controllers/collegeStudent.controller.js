@@ -34,7 +34,7 @@ const generatePassword = (collegeCode, rollNo) => {
 export const registerStudent = asyncHandler(async (req, res) => {
 
   console.log(req.user);
-  
+
   const { collegeCode, userId } = req.user;
 
   const {
@@ -86,22 +86,29 @@ export const registerStudent = asyncHandler(async (req, res) => {
     createdBy: userId
   });
 
-  await sendMail({
-    to: email,
-    subject: `${college.collegeName} - Student Login Credentials`,
-    html: buildStudentCredentialsMailTemplate(
-      college.collegeName,
-      fullName,
-      { loginId: email, password }
-    )
-  });
+  let mailStatus = "sent";
 
+  try {
+    await sendMail({
+      to: email,
+      subject: `${college.collegeName} - Student Login Credentials`,
+      html: buildStudentCredentialsMailTemplate(
+        college.collegeName,
+        fullName,
+        { loginId: email, password }
+      )
+    });
+  } catch (error) {
+    mailStatus = "failed";
+    console.error("❌ Email failed:", error.message);
+  }
 
 
   res.status(201).json({
     status: 201,
     student: { fullName, rollNo },
-    message: "Student registered successfully"
+    message: "Student registered successfully",
+    mailStatus
   });
 
 });
@@ -109,7 +116,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
 export const studentLogin = asyncHandler(async (req, res) => {
 
   console.log(req.body);
-  
+
 
   const { collegeCode, loginId, password } = req.body;
 
@@ -225,10 +232,10 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
   const LibraryBooks = getLibraryBookModel(collegeConn);
   const student = await Student.findById(userId)
-  .populate({path:"department"})
-  .select(
-    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
-  );
+    .populate({ path: "department" })
+    .select(
+      "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+    );
 
 
 
@@ -275,10 +282,10 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   const Department = getCollegeDepartmentModel(collegeConn)
   const Student = getCollegeStudentModel(collegeConn);
   const students = await Student.find()
-  .populate({path: "department"})
-  .select(
-    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
-  );
+    .populate({ path: "department" })
+    .select(
+      "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+    );
 
   if (!students) {
     return res.status(404).json({ success: false, message: "User not found" });

@@ -8,6 +8,7 @@ import { asyncHandler } from "../../utils/asyncHandler.js";
 import { generateTransactionCode } from "../../utils/generateTransactionCode.js";
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { getCollegeDepartmentModel } from "../../models/collegeDepartment.model.js";
+import { populate } from "dotenv";
 
 /* =========================
    CREATE REPORT (Student)
@@ -154,7 +155,8 @@ ADMIN REPORT LIST (FOR INDEX)
 ========================= */
 
 export const getAllReports = asyncHandler(async (req, res) => {
-
+    console.log("HHIHIIHIHHIHI");
+    
     const { collegeCode } = req.user;
     
     const { range = "daily" } = req.params;
@@ -162,7 +164,7 @@ export const getAllReports = asyncHandler(async (req, res) => {
     // 1️⃣ Decide start date
     const now = new Date();
     let startDate;
-    console.log(range);
+
 
     switch (range) {
         case "daily":
@@ -194,12 +196,15 @@ export const getAllReports = asyncHandler(async (req, res) => {
     const collegeConn = getCollegeDB(college.dbName);
     const Report = getReportModel(collegeConn);
     const Student = getCollegeStudentModel(collegeConn);
+
+    console.log("hiihihhiih");
+    
     
     const reports = await Report.find({
         createdAt: { $gte: startDate }
     })
     .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "fullName rollNo mobileNo avatar department email admissionYear" })
+    .populate({ path: "studentId", select: "fullName rollNo phone profilePhoto department email admissionYear", populate: {path: "department"} })
 
     res.status(200).json(
         new ApiResponse(200, {reports, collegeCode}, "All reports fetched")

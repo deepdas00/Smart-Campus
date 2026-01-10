@@ -6,7 +6,8 @@ import {
   Award,
   GraduationCap,
   Star,
-  Mail, Phone,
+  Mail,
+  Phone,
   Building2,
   User,
 } from "lucide-react";
@@ -43,8 +44,6 @@ export default function CollegeInfo({ collegeData }) {
         withCredentials: true,
       });
 
-    
-      
       const dept = res.data.data.departments.map((d) => d.shortCode);
 
       setCollegeInfo(res.data.data.collegeInfo);
@@ -116,7 +115,7 @@ export default function CollegeInfo({ collegeData }) {
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                     Address
                   </p>
-                  <p className="text-sm font-bold text-slate-800 line-clamp-1">
+                  <p className="text-sm font-bold text-slate-800 whitespace-normal break-words">
                     {data.address}
                   </p>
                 </div>
@@ -124,7 +123,7 @@ export default function CollegeInfo({ collegeData }) {
 
               <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-md transition-all">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <Mail  size={20} />
+                  <Mail size={20} />
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">

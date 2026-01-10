@@ -15,7 +15,7 @@ import {
   PlusCircle,
   Loader2,
   RotateCcw,
-  Bell ,
+  Bell,
   ArrowRight,
   ShieldCheck,
   Library,
@@ -69,10 +69,7 @@ export default function LibraryTeacherHandle() {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [swipeProgress, setSwipeProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-const [notifying, setNotifying] = useState(false);
-
-
-
+  const [notifying, setNotifying] = useState(false);
 
   const normalizeTransaction = (tx) => ({
     id: tx._id,
@@ -90,38 +87,27 @@ const [notifying, setNotifying] = useState(false);
     status: tx.transactionStatus,
   });
 
+  const handleNotifyReturnReminders = async () => {
+    try {
+      setNotifying(true);
 
+      const res = await axios.get(`${API_URL}/api/v1/library/notify-return-reminders`, {
+        withCredentials:true,
+      });
 
+      console.log("huuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",res);
+      
 
+      const count = res.data?.data?.notifiedCount || 0;
 
-const handleNotifyReturnReminders = async () => {
-  try {
-    setNotifying(true);
-
-    const res = await axios.get(
-      "/api/v1/library/notify-return-reminders",
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-      }
-    );
-
-    const count = res.data?.data?.notifiedCount || 0;
-
-    toast(`✅ Reminder emails sent to ${count} student(s)`);
-
-  } catch (error) {
-    console.error(error);
-    toast("❌ Failed to send return reminders");
-  } finally {
-    setNotifying(false);
-  }
-};
-
-
-
-
+      toast(`✅ ${count}(s) reminder emails sent to  student`);
+    } catch (error) {
+      console.error(error);
+      toast("❌ Failed to send return reminders");
+    } finally {
+      setNotifying(false);
+    }
+  };
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -250,15 +236,11 @@ const handleNotifyReturnReminders = async () => {
 
   const fetchBookDetails = async (bookId) => {
     try {
-
-
       const token = Cookies.get("accessToken");
       const res = await axios.get(
         `${API_URL}/api/v1/library/transactions/${bookId}`,
         { withCredentials: true }
       );
-
-   
 
       setScannedBook(res.data.data);
 
@@ -270,14 +252,10 @@ const handleNotifyReturnReminders = async () => {
 
   const fetchReturnDetails = async (transactionId) => {
     try {
-    
-
       const res = await axios.get(
         `${API_URL}/api/v1/library/return/finalize/${transactionId}`,
         { withCredentials: true }
       );
-
-    
 
       setReturnData(res.data.data);
       setShowReturnModal(true); // 🔥 THIS IS REQUIRED
@@ -286,8 +264,6 @@ const handleNotifyReturnReminders = async () => {
       toast.error(err.response?.data?.message || "Invalid return request");
     }
   };
-
-
 
   //   useEffect(() => {
   //   if (scannedBook) {
@@ -308,8 +284,6 @@ const handleNotifyReturnReminders = async () => {
     try {
       setIssuing(true);
       setIsProcessing(true);
-
-  
 
       const token = Cookies.get("accessToken");
       await axios.get(
@@ -422,7 +396,6 @@ const handleNotifyReturnReminders = async () => {
             withCredentials: true,
           }
         );
-      
 
         setBooks(res.data.data);
       } catch (err) {
@@ -438,7 +411,6 @@ const handleNotifyReturnReminders = async () => {
   const [transactions, setTransactions] = useState([]);
   const [loadingTransactions, setLoadingTransactions] = useState(true);
   const [transactionError, setTransactionError] = useState(null);
-
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -457,13 +429,10 @@ const handleNotifyReturnReminders = async () => {
           }
         );
 
-     
-
         const normalized = res.data.data.map(normalizeTransaction);
 
-        console.log("uhuhhuhu",res);
-        console.log("normalized",normalized);
-        
+        console.log("uhuhhuhu", res);
+        console.log("normalized", normalized);
 
         setTransactions(normalized);
       } catch (err) {
@@ -725,23 +694,23 @@ const handleNotifyReturnReminders = async () => {
     setEditingBook(null); // Reset edit mode
   };
 
-   const handleMouseMove = (e) => {
-      if (!dragging.current) return;
+  const handleMouseMove = (e) => {
+    if (!dragging.current) return;
 
-      const rect = e.currentTarget.getBoundingClientRect();
-      const newProgress = Math.min(
-        100,
-        Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)
-      );
+    const rect = e.currentTarget.getBoundingClientRect();
+    const newProgress = Math.min(
+      100,
+      Math.max(0, ((e.clientX - rect.left) / rect.width) * 100)
+    );
 
-      setProgress(newProgress);
+    setProgress(newProgress);
 
-      if (newProgress >= 98) {
-        dragging.current = false;
-        onConfirm();
-        setProgress(100);
-      }
-    };
+    if (newProgress >= 98) {
+      dragging.current = false;
+      onConfirm();
+      setProgress(100);
+    }
+  };
 
   const SwipeToConfirm = ({ onConfirm, loading = false }) => {
     const [progress, setProgress] = useState(0);
@@ -969,27 +938,24 @@ const handleNotifyReturnReminders = async () => {
                     </button>
                   )}
 
-
                   {activeTab === "transactions" && (
-    <button
-      onClick={handleNotifyReturnReminders}
-      disabled={notifying}
-      className="flex items-center gap-2 px-4 py-2 rounded-xl
+                    <button
+                      onClick={handleNotifyReturnReminders}
+                      disabled={notifying}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl
                  bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest
                  hover:bg-indigo-700 transition disabled:bg-slate-400"
-    >
-      {notifying ? (
-        "Sending…"
-      ) : (
-        <>
-          <Bell size={14} />
-          Notify Students
-        </>
-      )}
-    </button>
-  )}
-
-
+                    >
+                      {notifying ? (
+                        "Sending…"
+                      ) : (
+                        <>
+                          <Bell size={14} />
+                          Notify Students
+                        </>
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 {activeTab === "transactions" ? (
@@ -1416,12 +1382,53 @@ const handleNotifyReturnReminders = async () => {
                               type={field.type}
                               className="w-full bg-slate-50 border-2 border-transparent group-hover:bg-slate-100 rounded-2xl px-5 py-3 outline-none focus:bg-white focus:border-indigo-500 transition-all font-black text-slate-700"
                               value={field.val}
-                              onChange={(e) =>
-                                setNewBook({
-                                  ...newBook,
-                                  [field.key]: e.target.value,
-                                })
-                              }
+                              onChange={(e) => {
+                                let value = e.target.value;
+
+                                // Convert to number only for numeric fields
+                                let num =
+                                  field.type === "number"
+                                    ? Number(value)
+                                    : value;
+
+                                if (field.key === "totalCopies") {
+                                  let total = num;
+                                  let available = Number(
+                                    newBook.availableCopies
+                                  );
+
+                                  // Ensure total >= available
+                                  if (total < available) total = available;
+
+                                  setNewBook({
+                                    ...newBook,
+                                    totalCopies: total,
+                                  });
+                                } else if (field.key === "availableCopies") {
+                                  let available = num;
+                                  let total = Number(newBook.totalCopies);
+
+                                  // If total is empty → auto-fill total
+                                  if (!total && available > 0) {
+                                    total = available;
+                                  }
+
+                                  // Ensure available never exceeds total
+                                  if (available > total) total = available;
+
+                                  setNewBook({
+                                    ...newBook,
+                                    availableCopies: available,
+                                    totalCopies: total,
+                                  });
+                                } else {
+                                  // For shelf or other string fields
+                                  setNewBook({
+                                    ...newBook,
+                                    [field.key]: value,
+                                  });
+                                }
+                              }}
                             />
                           </div>
                         ))}
@@ -1435,9 +1442,14 @@ const handleNotifyReturnReminders = async () => {
                         placeholder="Rating (1-5)"
                         className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
                         value={newBook.rating}
-                        onChange={(e) =>
-                          setNewBook({ ...newBook, rating: e.target.value })
-                        }
+                        onChange={(e) => {
+                          let value = Number(e.target.value);
+
+                          if (value < 0) value = 0;
+                          if (value > 5) value = 5;
+
+                          setNewBook({ ...newBook, rating: value });
+                        }}
                       />
                       <input
                         type="text"
@@ -1693,7 +1705,7 @@ const handleNotifyReturnReminders = async () => {
         {showQRScanner && (
           <div className="fixed inset-0 z-[120] bg-black/80 backdrop-blur-lg flex items-center justify-center">
             {/* Close */}
-            
+
             {/* Main Scanner Card */}
             <div className="relative bg-white/5 border border-white/10 rounded-3xl p-6 w-[320px] shadow-2xl">
               {/* Header */}
@@ -1707,16 +1719,14 @@ const handleNotifyReturnReminders = async () => {
               </div>
 
               <button
-              onClick={() => {
-                setShowQRScanner(false);
-                stopCamera();
-              }}
-              className="absolute top-5 right-5 z-[200] bg-white/10 hover:bg-red-500/20 text-white p-2 rounded-full transition"
-
-            >
-              <X size={20} />
-            </button>
-
+                onClick={() => {
+                  setShowQRScanner(false);
+                  stopCamera();
+                }}
+                className="absolute top-5 right-5 z-[200] bg-white/10 hover:bg-red-500/20 text-white p-2 rounded-full transition"
+              >
+                <X size={20} />
+              </button>
 
               {/* Camera Area */}
               <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-white/10">
@@ -2140,7 +2150,6 @@ const handleNotifyReturnReminders = async () => {
                     </span>
                     <span className="text-sm font-bold text-slate-800">
                       {new Date(returnData.issueDate).toLocaleString()}
-
                     </span>
                   </div>
                 </div>

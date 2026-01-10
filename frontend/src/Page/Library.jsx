@@ -216,6 +216,9 @@ export default function Library() {
       console.error(err);
       alert(err.response?.data?.message || "Failed to issue book");
     }
+    finally{
+      fetchLibraryHistory();
+    }
   };
 
   const fetchTransactionDetails = async (transactionId) => {
@@ -385,7 +388,7 @@ export default function Library() {
       <Toaster position="top-center" reverseOrder={false} />
 
       {/* Profile menu side bar */}
-      <ProfileSidebar
+      <ProfileSidebarmax-w-7xl
         isOpen={showProfileMenu}
         onClose={() => setShowProfileMenu(false)}
       />
@@ -394,7 +397,7 @@ export default function Library() {
       {/* <CollegeInfo /> */}
 
       {libraryPolicy && (
-        <div className="max-w-7xl mx-auto px-8 mt-4 ">
+        <div className="max-w-7xl mx-auto px-4 mt-4 ">
           {/* Container with a subtle "Glass & Steel" aesthetic */}
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
             {/* Top Thin Accent Bar */}
@@ -777,7 +780,7 @@ export default function Library() {
 
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
                 <p className="text-xs text-yellow-800">
-                  <strong>Note:</strong> Books must be returned within 14 days.
+                  <strong>Note:</strong> Books must be returned within {libraryPolicy.returnPeriodDays} days.
                   Late returns may result in fines.
                 </p>
               </div>
@@ -1297,7 +1300,7 @@ export default function Library() {
                         Limit
                       </span>
                       <span className="text-sm font-bold text-slate-700">
-                        14d
+                        {libraryPolicy.returnPeriodDays}
                       </span>
                     </div>
                   </div>

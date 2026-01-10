@@ -244,6 +244,9 @@ export default function CampusIssues() {
       const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, {
         withCredentials: true,
       });
+
+      console.log("BASSSSSS",res.data.data);
+      
  
       
       setReports(res.data.data.reports || []);
@@ -476,9 +479,23 @@ export default function CampusIssues() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm font-semibold text-slate-600">
-                      {r.studentId?.fullName}
-                    </td>
+                  <td className="px-4 py-4 text-sm flex flex-col font-medium text-slate-700 leading-relaxed">
+
+  <span className="text-slate-900 font-semibold text-[15px]">
+    {r.studentId?.fullName}
+  </span>
+
+  <span className="text-slate-600 text-[11px] tracking-wide">
+    Dept: {r.studentId?.department.shortCode}
+  </span>
+
+  <span className="text-slate-500 text-[11px] font-mono">
+    {r.studentId?.rollNo}
+  </span>
+
+</td>
+
+
                     <td className="px-4 py-4 text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${

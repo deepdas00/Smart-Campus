@@ -75,7 +75,7 @@ export default function CollegeInfo({ collegeData }) {
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-8 pb-5 sm:pb-16  lg:pb-24 sm:pt-10 pt-5 w-full">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 pb-5 sm:pb-16  lg:pb-24 sm:pt-10 pt-5 w-full">
         <div className="grid lg:grid-cols-2 sm:gap-16 gap-10 items-center">
           {/* --- LEFT SIDE: IDENTITY --- */}
           <div className="sm:space-y-10 space-y-6 animate-in slide-in-from-left-8 duration-1000">

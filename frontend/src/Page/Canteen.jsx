@@ -310,8 +310,7 @@ const fetchCanteenPolicy = async () => {
       { withCredentials: true }
     );
 
-    console.log("ORREDEREDRERDERDRDEDREDRE",res);
-    
+   
 
     const {
       qrCode,

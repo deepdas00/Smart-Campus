@@ -95,7 +95,7 @@ export default function LibraryTeacherHandle() {
         withCredentials:true,
       });
 
-      console.log("huuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu",res);
+     
       
 
       const count = res.data?.data?.notifiedCount || 0;
@@ -431,8 +431,6 @@ export default function LibraryTeacherHandle() {
 
         const normalized = res.data.data.map(normalizeTransaction);
 
-        console.log("uhuhhuhu", res);
-        console.log("normalized", normalized);
 
         setTransactions(normalized);
       } catch (err) {

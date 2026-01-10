@@ -672,7 +672,7 @@ export default function HomeLogin() {
       <Collaboration />
 
       {/* SECTION 4: SMART CAMPUS CORE */}
-      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-x-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/20 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full"></div>

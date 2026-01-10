@@ -60,7 +60,7 @@ export function KitchenKDS() {
   const [lastFetchedAt, setLastFetchedAt] = useState();
   const [startFetchedAt, setStartFetchedAt] = useState(16);
   const currentHour = new Date().getHours(); // 0–23
-const trackRef = useRef(null);
+  const trackRef = useRef(null);
 
   const isOnline = currentHour >= lastFetchedAt && currentHour < startFetchedAt;
 
@@ -77,42 +77,45 @@ const trackRef = useRef(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
 
-
-
-
   const updateSwipe = (clientX) => {
-  if (!trackRef.current) return;
+    if (!trackRef.current) return;
 
-  const rect = trackRef.current.getBoundingClientRect();
-  const progress = ((clientX - rect.left) / rect.width) * 100;
+    const rect = trackRef.current.getBoundingClientRect();
+    let progress = ((clientX - rect.left) / rect.width) * 100;
 
-  setSwipeProgress(Math.min(Math.max(progress, 0), 100));
-};
+    progress = Math.min(Math.max(progress, 0), 100);
+    setSwipeProgress(progress);
 
+    if (progress >= 95) {
+      isDragging.current = false;
+      setSwipeProgress(100);
+      handleServeOrder();
+      if (navigator.vibrate) navigator.vibrate(40);
+    }
+  };
 
-const startDrag = () => {
-  if (!isProcessing) isDragging.current = true;
-};
+  const startDrag = () => {
+    if (!isProcessing) isDragging.current = true;
+  };
 
-const onMouseMove = (e) => {
-  if (!isDragging.current) return;
-  updateSwipe(e.clientX);
-};
+  const onMouseMove = (e) => {
+    if (!isDragging.current) return;
+    updateSwipe(e.clientX);
+  };
 
+  const onTouchStart = () => {
+    if (!isProcessing) isDragging.current = true;
+  };
 
-const onTouchStart = () => {
-  if (!isProcessing) isDragging.current = true;
-};
+  const onTouchMove = (e) => {
+    if (!isDragging.current) return;
+    e.preventDefault(); // 🔥 THIS IS THE KEY
+    updateSwipe(e.touches[0].clientX);
+  };
 
-const onTouchMove = (e) => {
-  if (!isDragging.current) return;
-  updateSwipe(e.touches[0].clientX);
-};
-
-const onTouchEnd = () => {
-  stopDrag();
-};
-
+  const onTouchEnd = () => {
+    stopDrag();
+  };
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
@@ -132,16 +135,26 @@ const onTouchEnd = () => {
   };
 
   const stopDrag = () => {
+    if (!isDragging.current) return;
     isDragging.current = false;
-    if (swipeProgress < 95) setSwipeProgress(0);
+
+    if (swipeProgress < 95) {
+      setSwipeProgress(0);
+    }
   };
 
   useEffect(() => {
+    window.addEventListener("mousemove", onMouseMove);
     window.addEventListener("mouseup", stopDrag);
-    window.addEventListener("mousemove", handleMouseMove);
+
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", stopDrag);
+
     return () => {
+      window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("mouseup", stopDrag);
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", stopDrag);
     };
   }, [swipeProgress]);
 
@@ -2019,57 +2032,57 @@ const onTouchEnd = () => {
 
               {/* --- THE MODERN SWIPE SLIDER --- */}
 
-             {scannedOrder.orderStatus !== "served" && (
-  <div
-    ref={trackRef}
-    id="swipe-track"
-    className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
-    onMouseMove={onMouseMove}
-    onMouseUp={stopDrag}
-    onMouseLeave={stopDrag}
-    onTouchMove={onTouchMove}
-    onTouchEnd={onTouchEnd}
-  >
-    <div
-      className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
-      style={{ width: `${swipeProgress}%` }}
-    />
+              {scannedOrder.orderStatus !== "served" && (
+                <div
+                  ref={trackRef}
+                  id="swipe-track"
+                  className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden touch-none"
+                >
+                  <div
+                   onMouseDown={startDrag}
+    onTouchStart={startDrag}
+                    className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
+                    style={{ width: `${swipeProgress}%` }}
+                  />
 
-    <p
-      className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
+                  <p
+                    className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
       ${swipeProgress > 20 ? "opacity-0" : "opacity-40 text-slate-600"}`}
-    >
-      Swipe to Confirm
-    </p>
+                  >
+                    Swipe to Confirm
+                  </p>
 
-    <div
-      onMouseDown={startDrag}
-      onTouchStart={onTouchStart}
-      className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
+                  <div
+                    onMouseDown={startDrag}
+                    onTouchStart={onTouchStart}
+                    className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
       ${
         isProcessing
           ? "bg-slate-200 cursor-wait"
           : "bg-white cursor-grab active:cursor-grabbing"
       }`}
-      style={{
-        position: "absolute",
-        left: `calc(${swipeProgress}% - ${
-          swipeProgress > 85 ? "52px" : "0px"
-        })`,
-        transition: isDragging.current
-          ? "none"
-          : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-      }}
-    >
-      {isProcessing ? (
-        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <ChevronRight size={24} strokeWidth={3} className="text-emerald-500" />
-      )}
-    </div>
-  </div>
-)}
-
+                    style={{
+                      position: "absolute",
+                      left: `calc(${swipeProgress}% - ${
+                        swipeProgress > 85 ? "52px" : "0px"
+                      })`,
+                      transition: isDragging.current
+                        ? "none"
+                        : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    }}
+                  >
+                    {isProcessing ? (
+                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ChevronRight
+                        size={24}
+                        strokeWidth={3}
+                        className="text-emerald-500"
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {scannedOrder.orderStatus === "served" && (
                 <div

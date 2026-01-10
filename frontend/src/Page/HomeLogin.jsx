@@ -300,11 +300,11 @@ export default function HomeLogin() {
                         <ShoppingBag className="w-5 h-5 sm:w-7 sm:h-7" />
                       </div>
                 </div>
-                <div className="px-8 flex-1">
+                <div className="sm:px-8 px-2 flex-1">
                   <h4 className="font-black text-slate-800 text-lg uppercase italic tracking-tighter">
                     Order History
                   </h4>
-                  <p className="text-slate-400 text-[10px] font-bold tracking-widest mt-1">
+                  <p className="text-slate-400 text-[8px] sm:text-[10px] font-bold tracking-widest mt-1">
                     LATEST UPDATED: 2 MINS AGO
                   </p>
                 </div>
@@ -316,23 +316,29 @@ export default function HomeLogin() {
 
             {/* SOS HUB */}
             <Link to="/report">
-              <div className="group bg-rose-600 p-3 rounded-[2.5rem] shadow-2xl shadow-rose-900/20 flex items-center border border-rose-500 hover:bg-rose-700 transition-all duration-500 cursor-pointer">
-                <div className="w-20 h-20 bg-white rounded-3xl flex flex-col items-center justify-center text-rose-600 shrink-0 shadow-sm group-hover:scale-90 transition-transform">
-                  <AlertTriangle size={28} className="animate-pulse" />
+              <div className="group bg-rose-600 p-3 rounded-[2.5rem] shadow-2xl shadow-rose-900/20 flex items-center border border-rose-500 hover:bg-rose-700 transition-all duration-500 cursor-pointer ">
+                <div className="sm:w-20 w-8 h-8 sm:h-20 bg-white rounded-3xl flex flex-col items-center justify-center text-rose-600 shrink-0 shadow-sm group-hover:scale-90 transition-transform">
+               
+
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <AlertTriangle className="w-5 h-5 sm:w-7 sm:h-7" />
+                      </div>
                 </div>
-                <div className="px-8 flex-1">
+                <div className="px-2 sm:px-8 flex-1">
                   <h4 className="font-black text-white text-lg uppercase italic tracking-tighter">
                     SOS Hub
                   </h4>
-                  <p className="text-rose-100 text-[10px] font-bold tracking-widest mt-1 opacity-70">
+                  <p className="text-rose-100 text-[8px] sm:text-[10px] font-bold tracking-widest mt-1 opacity-70">
                     EMERGENCY ASSISTANCE
                   </p>
                 </div>
                 <div className="pr-8 text-white flex items-center gap-3">
-                  <Camera
-                    size={24}
-                    className="opacity-50 group-hover:opacity-100 transition-opacity"
-                  />
+                  
+
+
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <Camera className="w-6 h-6 sm:w-7 sm:h-7 opacity-50 group-hover:opacity-100 transition-opacity" />
+                      </div>
                   <ChevronRight size={28} />
                 </div>
               </div>
@@ -344,7 +350,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 2: SMART CAMPUS GALLERY - HIGH-ENGAGEMENT MOSAIC */}
-      <section className="py-20 px-6 bg-[#F8FAFC] relative overflow-hidden">
+      <section className="pt-0 pb-4 sm:py-20 px-6 bg-[#F8FAFC] relative overflow-hidden">
         {/* Abstract Background Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
           <div className="absolute top-10 right-10 w-96 h-96 bg-blue-200 blur-[120px] rounded-full"></div>
@@ -363,14 +369,14 @@ export default function HomeLogin() {
                   Campus Atmosphere
                 </span>
               </div>
-              <h2 className="text-5xl font-black uppercase italic tracking-tighter text-slate-900">
+              <h2 className="text-2xl sm:text-5xl font-black uppercase italic tracking-tighter text-slate-900">
                 Visual{" "}
                 <span className="text-blue-600 underline decoration-blue-200 decoration-8 underline-offset-4">
                   Visions.
                 </span>
               </h2>
             </div>
-            <p className="text-slate-500 text-sm font-medium max-w-xs md:text-right border-l-2 md:border-l-0 md:border-r-2 border-blue-600 px-4">
+            <p className="text-slate-500 text-[10px] sm:text-sm font-medium max-w-xs md:text-right border-l-2 md:border-l-0 md:border-r-2 border-blue-600 px-4">
               A curated glimpse into the architecture and energy of our smart
               ecosystem.
             </p>
@@ -378,24 +384,25 @@ export default function HomeLogin() {
 
           {/* THE MOSAIC GRID - Height reduced to 550px for decent showing */}
           {/* PREVIEW GALLERY (ONLY 4–5 IMAGES) */}
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-auto md:h-[550px]">
+          <div className="grid grid-cols-12 gap-1 sm:gap-4 h-auto md:h-[550px]">
+
             {loadingGallery ? (
               <p className="text-center text-slate-400">Loading gallery...</p>
             ) : (
               previewGallery.map((img, index) => (
                 <div
                   key={img._id}
-                  className={`relative group overflow-hidden rounded-[2.5rem] shadow-lg bg-slate-200
+                  className={`relative group overflow-hidden  sm:rounded-[2.5rem] rounded-[0.5rem] shadow-lg bg-slate-200
         ${
           index === 0
-            ? "md:col-span-4 md:row-span-2"
+            ? "col-span-4 row-span-2"
             : index === 1
-            ? "md:col-span-5"
+            ? "col-span-5"
             : index === 2
-            ? "md:col-span-3"
+            ? "col-span-3"
             : index === 3
-            ? "md:col-span-3"
-            : "md:col-span-5 bg-blue-600 cursor-pointer"
+            ? "col-span-3"
+            : "col-span-5 bg-blue-600 cursor-pointer"
         }
       `}
                   onClick={index === 4 ? () => setShowPopup(true) : undefined}
@@ -403,18 +410,23 @@ export default function HomeLogin() {
                   {index === 4 ? (
                     /* 150+ CARD */
                     <div
-                      className="h-full flex items-center justify-between p-8 text-white bg-black/50"
+                      className="h-full flex items-center justify-between py-8 px-2 sm:p-8 text-white bg-black/50"
                       style={{ backgroundImage: `url(${img.image})` }}
                     >
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
 
                       <div className="z-5">
-                        <p className="text-5xl font-black italic">More </p>
-                        <p className="text-[11px] uppercase tracking-widest opacity-80">
+                        <p className="text-[12px] sm:text-5xl font-black italic">More </p>
+                        <p className="text-[7px] sm:text-[11px] uppercase tracking-widest opacity-80">
                           Interactive Spaces
                         </p>
                       </div>
-                      <ArrowRight size={36} className="z-5" />
+                   
+
+
+                      <div className="w-7 h-7 sm:w-12 sm:h-12 flex items-center justify-center z-5">
+                        <ArrowRight className="w-4 h-4 sm:w-7 sm:h-7" />
+                      </div>
                     </div>
                   ) : (
                     <>

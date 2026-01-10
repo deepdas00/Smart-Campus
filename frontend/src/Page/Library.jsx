@@ -382,6 +382,10 @@ export default function Library() {
       <Navbar
         onMyBooksClick={() => setShowMyBooks(true)}
         myBooksCount={history.length}
+        showIssueModal={showIssueModal}
+        showMyBooks={showMyBooks}
+        bookingSuccess={bookingSuccess}
+        bookReceived={bookReceived}
       />
 
       <Toaster position="top-center" reverseOrder={false} />
@@ -547,7 +551,7 @@ export default function Library() {
                   <X className="w-6 h-6" />
                 </button>
               </div>
-              <p className="text-indigo-100 mt-1">
+              <p className="text-indigo-100 text-xs sm:text-md mt-1">
                 Show this QR code at the library counter
               </p>
             </div>
@@ -789,165 +793,187 @@ export default function Library() {
       )}
 
       {/* My Books Sidebar */}
-      {showMyBooks && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-[250] transition-all animate-in fade-in duration-300">
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white/90 backdrop-blur-xl shadow-[-20px_0_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col animate-in slide-in-from-right duration-500">
-            {/* Header: Minimalist & Bold */}
-            <div className="relative p-8 pb-6 mb-5 bg-blue-600">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-3xl text-white font-bold ">My Book</h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="flex h-2 w-2 rounded-full bg-green-400"></span>
-                    <p className="text-xs font-bold text-slate-100 uppercase tracking-widest">
-                      {history.length} active sessions
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setShowMyBooks(false)}
-                  className="group bg-slate-100 hover:bg-slate-900 text-slate-500 hover:text-white rounded-full p-3 transition-all duration-300"
-                >
-                  <X className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                </button>
-              </div>
-            </div>
+     {showMyBooks && (
+  <div className="fixed inset-0 z-[250] bg-slate-900/40 backdrop-blur-md animate-in fade-in duration-300">
+    {/* RIGHT SLIDE PANEL */}
+    <div
+      className="
+        absolute right-0 top-0 h-full w-full max-w-md
+        bg-white/95 backdrop-blur-xl
+        shadow-[-20px_0_50px_rgba(0,0,0,0.12)]
+        flex flex-col
+        animate-in slide-in-from-right duration-500
+      "
+    >
+      {/* ================= HEADER ================= */}
+      <div className="bg-blue-600 px-4 py-4 md:px-8 md:py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-xl md:text-3xl font-bold text-white">
+              My Books
+            </h2>
 
-            {/* Content Area */}
-            <div className="flex-1 overflow-y-auto px-6 space-y-6 pb-10 scrollbar-hide">
-              {loadingHistory ? (
-                <div className="flex flex-col items-center justify-center h-40 space-y-4">
-                  <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  <p className="text-slate-400 text-sm font-medium">
-                    Syncing your records...
-                  </p>
-                </div>
-              ) : history.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64 text-center">
-                  <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                    <BookOpen className="w-10 h-10 text-slate-200" />
-                  </div>
-                  <p className="text-slate-400 font-medium">
-                    Your shelf is empty.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {history.map((item) => {
-                    const isPending = item.paymentStatus === "pending";
-
-                    const isFined = isPending && item.fineAmount > 0;
-
-                    const isReturn = item.transactionStatus === "return";
-
-                    return (
-                      <div
-                        key={item._id}
-                        onClick={() => fetchTransactionDetails(item._id)}
-                        className={`group relative overflow-hidden rounded-2xl border transition-all duration-500 ${
-                          isFined
-                            ? "bg-rose-100/40 border-rose-100"
-                            : "bg-white border-slate-100 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1"
-                        }`}
-                      >
-                        {/* The Layout Container - Forced Vertical on Mobile to avoid X-scroll */}
-                        <div className="p-4 flex flex-col gap-4">
-                          {/* Top Section: Cover and Title */}
-                          <div className="flex items-start gap-4">
-                            <div className="relative shrink-0">
-                              <img
-                                src={item.bookId.coverImage}
-                                alt={item.bookId.title}
-                                className="w-16 h-22 object-cover rounded-xl shadow-lg ring-1 ring-black/5"
-                              />
-                              {isFined && (
-                                <div className="absolute -top-2 -left-2 bg-rose-500 text-white p-1 rounded-lg shadow-lg">
-                                  <AlertCircle className="w-3 h-3" />
-                                </div>
-                              )}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <h3
-                                className={`font-bold text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors ${
-                                  isFined ? "text-rose-900" : ""
-                                }`}
-                              >
-                                {item.bookId.title}
-                              </h3>
-                              <p className="text-xs font-semibold text-slate-400 mt-1 italic uppercase tracking-tighter">
-                                {item.bookId.author}
-                              </p>
-
-                              {/* Inline Status Badge */}
-                              <div className="flex items-center gap-2 mt-3">
-                                <span
-                                  className={`text-[9px] px-2 py-0.5 rounded-md font-black uppercase tracking-widest border ${
-                                    item.transactionStatus === "pending"
-                                      ? "bg-amber-50 text-amber-600 border-amber-200"
-                                      : item.transactionStatus === "issued"
-                                      ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                                      : "bg-indigo-50 text-indigo-600 border-indigo-200"
-                                  }`}
-                                >
-                                  {item.transactionStatus}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Bottom Section: Details Grid (2-column grid for compactness) */}
-                          <div
-                            className={`grid grid-cols-2 gap-2 p-3 rounded-xl ${
-                              isFined ? "bg-rose-100/50" : "bg-slate-50"
-                            }`}
-                          >
-                            <div>
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                Issue Date
-                              </p>
-                              <p className="text-xs font-bold text-slate-700">
-                                {new Date(item.createdAt).toLocaleDateString(
-                                  "en-GB",
-                                  { day: "2-digit", month: "short" }
-                                )}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
-                                Fine Accrued
-                              </p>
-                              <p
-                                className={`text-xs font-black ${
-                                  isFined ? "text-rose-600" : "text-emerald-600"
-                                }`}
-                              >
-                                {isFined ? `$${item.fineAmount}` : "None"}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Red Accent for Fines */}
-                        {isFined && (
-                          <div className="absolute top-0 right-0 w-24 h-24 -mr-12 -mt-12 bg-rose-500/10 rounded-full blur-xl" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Footer Branding */}
-            <div className="p-6 border-t border-slate-50 text-center bg-blue-500">
-              <p className="text-[10px] text-slate-200 font-bold uppercase tracking-[0.3em]">
-                College Library Management
+            <div className="flex items-center gap-2 mt-1">
+              <span className="w-2 h-2 bg-green-400 rounded-full" />
+              <p className="text-[10px] md:text-xs font-bold text-blue-100 uppercase tracking-widest">
+                {history.length} active sessions
               </p>
             </div>
           </div>
+
+          <button
+            onClick={() => setShowMyBooks(false)}
+            className="
+              bg-white/90 text-slate-600
+              hover:bg-slate-900 hover:text-white
+              rounded-full p-2 md:p-3
+              transition-all
+            "
+          >
+            <X className="w-4 h-4 md:w-5 md:h-5 hover:rotate-90 transition-transform" />
+          </button>
         </div>
-      )}
+      </div>
+
+      {/* ================= CONTENT ================= */}
+      <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 space-y-4 scrollbar-hide">
+        {loadingHistory ? (
+          <div className="flex flex-col items-center justify-center h-40 gap-4">
+            <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-sm text-slate-400 font-medium">
+              Syncing your records…
+            </p>
+          </div>
+        ) : history.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-center">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <BookOpen className="w-10 h-10 text-slate-300" />
+            </div>
+            <p className="text-slate-400 font-medium">
+              Your shelf is empty.
+            </p>
+          </div>
+        ) : (
+          history.map((item) => {
+            const isPending = item.paymentStatus === "pending";
+            const isFined = isPending && item.fineAmount > 0;
+
+            return (
+              <div
+                key={item._id}
+                onClick={() => fetchTransactionDetails(item._id)}
+                className={`
+                  relative rounded-xl md:rounded-2xl border
+                  transition-all duration-300
+                  ${
+                    isFined
+                      ? "bg-rose-100/40 border-rose-200"
+                      : "bg-white border-slate-100 md:hover:shadow-xl md:hover:-translate-y-1"
+                  }
+                `}
+              >
+                {/* CARD CONTENT */}
+                <div className="p-3 md:p-4 flex flex-col gap-3">
+                  {/* TOP ROW */}
+                  <div className="flex gap-3">
+                    {/* COVER */}
+                    <div className="relative shrink-0">
+                      <img
+                        src={item.bookId.coverImage}
+                        alt={item.bookId.title}
+                        className="w-14 h-20 md:w-16 md:h-22 object-cover rounded-lg shadow ring-1 ring-black/5"
+                      />
+                      {isFined && (
+                        <div className="absolute -top-2 -left-2 bg-rose-500 text-white p-1 rounded-md">
+                          <AlertCircle className="w-3 h-3" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* INFO */}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm md:text-base font-bold text-slate-900 leading-tight">
+                        {item.bookId.title}
+                      </h3>
+
+                      <p className="text-[10px] md:text-xs text-slate-400 uppercase italic mt-0.5 tracking-tight">
+                        {item.bookId.author}
+                      </p>
+
+                      <div className="mt-2">
+                        <span
+                          className={`
+                            inline-block px-2 py-0.5 rounded-md
+                            text-[9px] font-black uppercase tracking-widest border
+                            ${
+                              item.transactionStatus === "pending"
+                                ? "bg-amber-50 text-amber-600 border-amber-200"
+                                : item.transactionStatus === "issued"
+                                ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                : "bg-indigo-50 text-indigo-600 border-indigo-200"
+                            }
+                          `}
+                        >
+                          {item.transactionStatus}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* BOTTOM GRID */}
+                  <div
+                    className={`
+                      grid grid-cols-2 gap-2 p-2 rounded-lg
+                      ${isFined ? "bg-rose-100/60" : "bg-slate-50"}
+                    `}
+                  >
+                    <div>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">
+                        Issue Date
+                      </p>
+                      <p className="text-xs font-bold text-slate-700">
+                        {new Date(item.createdAt).toLocaleDateString("en-GB", {
+                          day: "2-digit",
+                          month: "short",
+                        })}
+                      </p>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-[9px] font-bold text-slate-400 uppercase">
+                        Fine
+                      </p>
+                      <p
+                        className={`text-xs font-black ${
+                          isFined ? "text-rose-600" : "text-emerald-600"
+                        }`}
+                      >
+                        {isFined ? `₹${item.fineAmount}` : "None"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* FINE GLOW */}
+                {isFined && (
+                  <div className="absolute top-0 right-0 w-24 h-24 -mr-10 -mt-10 bg-rose-500/10 rounded-full blur-xl" />
+                )}
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* ================= FOOTER ================= */}
+      <div className="bg-blue-500 p-3 md:p-6 text-center border-t border-blue-400">
+        <p className="text-[9px] md:text-[10px] text-blue-100 font-bold uppercase tracking-[0.3em]">
+          College Library Management
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
 
       {/* Book Details Modal */}
       {showIssueModal && (

@@ -197,7 +197,6 @@ export default function EduReportPortal() {
         }
       );
       setTransactionCode(res.data.data.transactionCode);
-    
 
       setStep(3);
     } catch (error) {
@@ -209,43 +208,45 @@ export default function EduReportPortal() {
   };
 
   return (
-    <div
-      className={`min-h-screen transition-colors duration-700 font-sans text-slate-900 ${
-        urgency === "Urgent"
-          ? "bg-red-300/50"
-          : urgency === "Medium"
-          ? "bg-amber-300/30"
-          : "bg-[#F8FAFC]"
-      }`}
-    >
-      {/* Navbar */}
-      <div>
-        {/* Header */}
-        <Navbar />
+    <>
+      <Navbar />
 
-        <div className="">{/* <CollegeInfo /> */}</div>
-      </div>
+      <div
+        className={`min-h-screen transition-colors duration-700 font-sans text-slate-900 ${
+          urgency === "Urgent"
+            ? "bg-red-300/50"
+            : urgency === "Medium"
+            ? "bg-amber-300/30"
+            : "bg-[#F8FAFC]"
+        }`}
+      >
+        {/* Navbar */}
+        <div>
+          {/* Header */}
 
-     <main className="max-w-6xl mx-auto py-6 px-3 md:py-10 md:px-6">
-  {/* HEADER */}
-  {step < 3 && (
-    <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-      <div className="flex flex-col justify-center items-center">
-        <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900">
-          Submit <span className="text-indigo-600 italic">Report</span>
-        </h1>
-        <p className="text-slate-500 font-medium text-sm md:text-base">
-          Step {step} of 2: Mission Parameters
-        </p>
-      </div>
+          <div className="">{/* <CollegeInfo /> */}</div>
+        </div>
 
-      {/* URGENCY SELECTOR */}
-      <div className="flex gap-1 justify-between items-center md:gap-2 bg-white p-1 md:p-2 rounded-xl md:rounded-2xl shadow-sm border border-slate-100">
-        {["Standard", "Medium", "Urgent"].map((level) => (
-          <button
-            key={level}
-            onClick={() => setUrgency(level)}
-            className={`px-3 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all
+        <main className="max-w-6xl mx-auto py-6 px-3 md:py-10 md:px-6">
+          {/* HEADER */}
+          {step < 3 && (
+            <div className="mb-8 md:mb-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex flex-col justify-center items-center">
+                <h1 className="text-2xl md:text-4xl font-black tracking-tight text-slate-900">
+                  Submit <span className="text-indigo-600 italic">Report</span>
+                </h1>
+                <p className="text-slate-500 font-medium text-sm md:text-base">
+                  Step {step} of 2: Mission Parameters
+                </p>
+              </div>
+
+              {/* URGENCY SELECTOR */}
+              <div className="flex gap-1 justify-between items-center md:gap-2 bg-white p-1 md:p-2 rounded-xl md:rounded-2xl shadow-sm border border-slate-100">
+                {["Standard", "Medium", "Urgent"].map((level) => (
+                  <button
+                    key={level}
+                    onClick={() => setUrgency(level)}
+                    className={`px-3 md:px-6 py-1.5 md:py-2 rounded-lg md:rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest transition-all
               ${
                 urgency === level
                   ? level === "Urgent"
@@ -255,176 +256,197 @@ export default function EduReportPortal() {
                     : "bg-indigo-600 text-white"
                   : "bg-transparent text-slate-400 hover:bg-slate-50"
               }`}
-          >
-            {level}
-          </button>
-        ))}
-      </div>
-    </div>
-  )}
+                  >
+                    {level}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-  {/* STEP 1 – SECTOR SELECTION */}
-  {step === 1 && (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in fade-in duration-500">
-      {Object.entries(sectors).map(([key, value]) => (
-        <button
-          key={key}
-          onClick={() => {
-            setSector(key);
-            setStep(2);
-          }}
-          className="group bg-white border border-slate-200 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-left transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1"
-        >
-          <div
-            className={`${value.bg} ${value.accent} w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform`}
-          >
-            {value.icon}
-          </div>
-          <h3 className="text-lg md:text-xl font-black mb-2">
-            {value.label}
-          </h3>
-          <p className="text-slate-500 text-sm leading-relaxed mb-4 md:mb-6">
-            {value.desc}
-          </p>
-          <div className="flex w-full sm:items-center gap-2 text-indigo-600 font-bold text-sm items-end justify-end">
-            Start Entry <ChevronRight size={16} />
-          </div>
-        </button>
-      ))}
-    </div>
-  )}
+          {/* STEP 1 – SECTOR SELECTION */}
+          {step === 1 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 animate-in fade-in duration-500">
+              {Object.entries(sectors).map(([key, value]) => (
+                <button
+                  key={key}
+                  onClick={() => {
+                    setSector(key);
+                    setStep(2);
+                  }}
+                  className="group bg-white border border-slate-200 p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] text-left transition-all hover:shadow-2xl hover:shadow-indigo-100 hover:-translate-y-1"
+                >
+                  <div
+                    className={`${value.bg} ${value.accent} w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:scale-110 transition-transform`}
+                  >
+                    {value.icon}
+                  </div>
+                  <h3 className="text-lg md:text-xl font-black mb-2">
+                    {value.label}
+                  </h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-4 md:mb-6">
+                    {value.desc}
+                  </p>
+                  <div className="flex w-full sm:items-center gap-2 text-indigo-600 font-bold text-sm items-end justify-end">
+                    Start Entry <ChevronRight size={16} />
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
 
-  {/* STEP 2 – FORM */}
-  {step === 2 && (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 animate-in slide-in-from-bottom-4 duration-500">
-      
-      {/* LEFT PANEL */}
-      <div className="lg:col-span-4 space-y-6">
-        <div className="bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] p-4 md:p-6 shadow-sm">
-          <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 block">
-            Evidence Attachment
-          </label>
+          {/* STEP 2 – FORM */}
+          {step === 2 && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 animate-in slide-in-from-bottom-4 duration-500">
+              {/* LEFT PANEL */}
+              <div className="lg:col-span-4 space-y-6">
+                <div className="bg-white border border-slate-200 rounded-2xl md:rounded-[2rem] p-4 md:p-6 shadow-sm">
+                  <label className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 block">
+                    Evidence Attachment
+                  </label>
 
-          <div className="relative group">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-            />
-            <div
-              className={`h-40 md:h-48 border-2 border-dashed rounded-2xl md:rounded-3xl flex items-center justify-center transition-all
+                  <div className="relative group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                    />
+                    <div
+                      className={`h-40 md:h-48 border-2 border-dashed rounded-2xl md:rounded-3xl flex items-center justify-center transition-all
                 ${
                   uploadStatus === "success"
                     ? "border-emerald-500 bg-emerald-50"
                     : "border-slate-200 group-hover:border-indigo-400 group-hover:bg-indigo-50"
                 }`}
-            >
-              {uploadStatus === "idle" && (
-                <div className="text-center">
-                  <Camera className="mx-auto text-slate-400 mb-2" size={28} />
-                  <span className="text-xs font-bold text-slate-500">
-                    Upload Photo
-                  </span>
-                </div>
-              )}
+                    >
+                      {uploadStatus === "idle" && (
+                        <div className="text-center">
+                          <Camera
+                            className="mx-auto text-slate-400 mb-2"
+                            size={28}
+                          />
+                          <span className="text-xs font-bold text-slate-500">
+                            Upload Photo
+                          </span>
+                        </div>
+                      )}
 
-              {uploadStatus === "uploading" && (
-                <Loader2 className="animate-spin text-indigo-600" size={28} />
-              )}
+                      {uploadStatus === "uploading" && (
+                        <Loader2
+                          className="animate-spin text-indigo-600"
+                          size={28}
+                        />
+                      )}
 
-              {uploadStatus === "success" && (
-                <div className="relative w-full h-full p-2">
-                  <img
-                    src={selectedImage}
-                    className="w-full h-full object-cover rounded-xl md:rounded-2xl"
-                    alt="Preview"
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setSelectedImage(null);
-                      setUploadStatus("idle");
-                    }}
-                    className="absolute top-3 right-3 bg-red-500 text-white p-1 rounded-full"
-                  >
-                    <X size={14} />
-                  </button>
+                      {uploadStatus === "success" && (
+                        <div className="relative w-full h-full p-2">
+                          <img
+                            src={selectedImage}
+                            className="w-full h-full object-cover rounded-xl md:rounded-2xl"
+                            alt="Preview"
+                          />
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedImage(null);
+                              setUploadStatus("idle");
+                            }}
+                            className="absolute top-3 right-3 bg-red-500 text-white p-1 rounded-full"
+                          >
+                            <X size={14} />
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              {/* RIGHT PANEL – FORM */}
+              <div className="lg:col-span-8">
+                <div
+                  className={`border-2 rounded-2xl md:rounded-[2.5rem] shadow-xl overflow-hidden ${urgencyStyles[urgency]}`}
+                >
+                  <div className="bg-white/50 px-4 md:px-8 py-3 md:py-4 border-b border-inherit flex justify-between items-center">
+                    <span className="text-xs font-black uppercase tracking-widest text-slate-500">
+                      Field Report: {sector}
+                    </span>
+                    <Zap
+                      size={16}
+                      className={
+                        urgency === "Urgent"
+                          ? "text-red-500"
+                          : "text-indigo-400"
+                      }
+                    />
+                  </div>
+
+                  <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+                    <input
+                      className="w-full bg-white border border-slate-200 rounded-xl md:rounded-2xl p-3 md:p-4 font-bold"
+                      placeholder="Summarize the incident..."
+                      value={formData.title}
+                      onChange={(e) =>
+                        handleInputChange("title", e.target.value)
+                      }
+                    />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                      {sectors[sector].fields.map((field) => (
+                        <input
+                          key={field}
+                          className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-semibold"
+                          placeholder={field}
+                          onChange={(e) =>
+                            handleInputChange(field, e.target.value)
+                          }
+                        />
+                      ))}
+                    </div>
+
+                    <textarea
+                      rows={4}
+                      className="w-full bg-white border border-slate-200 rounded-xl md:rounded-[1.5rem] p-3 md:p-4 text-sm"
+                      placeholder="What exactly happened?"
+                      value={formData.description}
+                      onChange={(e) =>
+                        handleInputChange("description", e.target.value)
+                      }
+                    />
+
+                    <div className="flex flex-col md:flex-row gap-3 pt-4">
+                      <button
+                        onClick={handleSubmit}
+                        disabled={isSubmitting}
+                        className="flex-1 bg-slate-900 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
+                      >
+                        {isSubmitting ? (
+                          <Loader2 className="animate-spin" />
+                        ) : (
+                          <>Submit Ticket</>
+                        )}
+                      </button>
+
+                      <button
+                        onClick={() => setStep(1)}
+                        className="p-3 md:p-4 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-slate-400 justify-center items-center flex"
+                      >
+                        <ArrowLeft size={20} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+        </main>
+
+        <div>
+          <Footer />
         </div>
       </div>
 
-      {/* RIGHT PANEL – FORM */}
-      <div className="lg:col-span-8">
-        <div className={`border-2 rounded-2xl md:rounded-[2.5rem] shadow-xl overflow-hidden ${urgencyStyles[urgency]}`}>
-          
-          <div className="bg-white/50 px-4 md:px-8 py-3 md:py-4 border-b border-inherit flex justify-between items-center">
-            <span className="text-xs font-black uppercase tracking-widest text-slate-500">
-              Field Report: {sector}
-            </span>
-            <Zap
-              size={16}
-              className={urgency === "Urgent" ? "text-red-500" : "text-indigo-400"}
-            />
-          </div>
-
-          <div className="p-4 md:p-8 space-y-4 md:space-y-6">
-            <input
-              className="w-full bg-white border border-slate-200 rounded-xl md:rounded-2xl p-3 md:p-4 font-bold"
-              placeholder="Summarize the incident..."
-              value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-              {sectors[sector].fields.map((field) => (
-                <input
-                  key={field}
-                  className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm font-semibold"
-                  placeholder={field}
-                  onChange={(e) => handleInputChange(field, e.target.value)}
-                />
-              ))}
-            </div>
-
-            <textarea
-              rows={4}
-              className="w-full bg-white border border-slate-200 rounded-xl md:rounded-[1.5rem] p-3 md:p-4 text-sm"
-              placeholder="What exactly happened?"
-              value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
-            />
-
-            <div className="flex flex-col md:flex-row gap-3 pt-4">
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex-1 bg-slate-900 text-white py-3 md:py-4 rounded-xl md:rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2"
-              >
-                {isSubmitting ? <Loader2 className="animate-spin" /> : <>Submit Ticket</>}
-              </button>
-
-              <button
-                onClick={() => setStep(1)}
-                className="p-3 md:p-4 bg-white border border-slate-200 rounded-xl md:rounded-2xl text-slate-400 justify-center items-center flex"
-              >
-                <ArrowLeft size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )}
-</main>
-
-
-      <div>
-        <Footer />
-      </div>
-    </div>
+    </>
   );
 }

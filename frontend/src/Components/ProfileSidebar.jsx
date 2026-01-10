@@ -146,14 +146,14 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <div
-        className={`z-900 fixed right-0 top-0 h-full w-80 bg-white z-110 shadow-2xl transform transition-transform duration-300 ease-in-out
+        className={`z-900 fixed right-0 top-0 h-full sm:w-80 bg-white z-110 shadow-2xl transform transition-transform duration-300 ease-in-out
         ${isOpen ? "translate-x-0" : "translate-x-full"}`}
       >
         {/* Header */}
-        <div className="relative px-6 pt-6 pb-5 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
+        <div className="relative px-4 sm:px-6 pt-3 sm:pt-6 sm:pb-5 pb-3 bg-gradient-to-br from-blue-600 to-indigo-600 text-white">
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full hover:bg-white/20 transition"
+            className="absolute top-1 right-4 sm:top-4 sm:right-4 p-2 rounded-full hover:bg-white/20 transition"
           >
             <X className="w-5 h-5" />
           </button>
@@ -177,7 +177,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
 
               <div>
                 <h3 className="text-lg font-semibold">
-                  {user.fullName} Dashboard
+                  {user.fullName}
                 </h3>
                 <p className="text-sm text-blue-100">{rollNo}</p>
               </div>
@@ -256,7 +256,7 @@ export default function ProfileSidebar({ isOpen, onClose }) {
           style={{ maxHeight: "calc(100% - 11rem)" }}
         >
           {user?.role === "student" && (
-            <div className="p-4 space-y-1">
+            <div className="sm:p-4 space-y-1">
               <SidebarItem
                 to="/home"
                 icon={<House className="w-5 h-5 text-[#ff00f7]" />}

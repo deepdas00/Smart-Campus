@@ -1299,7 +1299,7 @@ export default function Library() {
                         Limit
                       </span>
                       <span className="text-sm font-bold text-slate-700">
-                        {libraryPolicy.returnPeriodDays}
+                        {libraryPolicy?.returnPeriodDays}
                       </span>
                     </div>
                   </div>

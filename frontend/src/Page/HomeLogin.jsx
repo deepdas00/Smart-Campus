@@ -182,7 +182,7 @@ export default function HomeLogin() {
               </h1>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md p-4 pr-8 rounded-2xl border border-white shadow-xl shadow-blue-900/5 flex items-center gap-4 hover:bg-white transition-colors scale-90 sm:scale-100">
+            <div className="bg-white/70 backdrop-blur-md p-4 pr-8 rounded-2xl border border-white shadow-xl shadow-blue-900/5 flex items-center gap-4 hover:bg-white transition-colors scale-90 sm:scale-100 hidden sm:flex">
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                 <Globe size={24} />
               </div>
@@ -670,7 +670,7 @@ export default function HomeLogin() {
       <Collaboration />
 
       {/* SECTION 4: SMART CAMPUS CORE */}
-      <section className="py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/20 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full"></div>
@@ -679,13 +679,13 @@ export default function HomeLogin() {
           {/* Text Content Area */}
           <div className="space-y-8">
             <div>
-              <h2 className="text-6xl font-black italic uppercase tracking-tighter leading-none">
+              <h2 className="text-3xl sm:text-6xl font-black italic uppercase tracking-tighter leading-none">
                 Smart <br />
                 <span className="text-yellow-300 underline decoration-4 underline-offset-8">
                   Campus.
                 </span>
               </h2>
-              <p className="text-blue-100/80 text-lg leading-relaxed mt-8 max-w-lg font-medium">
+              <p className="text-blue-100/80 sm:text-lg text-xs leading-relaxed mt-8 max-w-lg font-medium">
                 Revolutionizing the student experience through seamless
                 integration. We bridge the gap between physical infrastructure
                 and digital efficiency.
@@ -693,12 +693,12 @@ export default function HomeLogin() {
             </div>
 
             {/* Stats Widgets */}
-            <div className="grid grid-cols-2 gap-6">
-              <div className="bg-white/5 backdrop-blur-2xl p-8 rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-all group">
+            <div className="grid grid-cols-2 sm:gap-6 gap-2">
+              <div className="bg-white/5 backdrop-blur-2xl py-8 px-2 sm:p-8 rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-all group items-center justify-center flex flex-col">
                 <p className="text-4xl font-black mb-1 text-yellow-300 group-hover:scale-110 transition-transform origin-left">
                   50+
                 </p>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
+                <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
                   Global Partners
                 </p>
               </div>
@@ -706,7 +706,7 @@ export default function HomeLogin() {
                 <p className="text-4xl font-black mb-1 text-yellow-300 group-hover:scale-110 transition-transform origin-left">
                   24/7
                 </p>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
+                <p className="text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] text-blue-200">
                   Cloud Uptime
                 </p>
               </div>
@@ -714,7 +714,7 @@ export default function HomeLogin() {
           </div>
 
           {/* THE 4 OPTIONS: CLIP GRID STYLE */}
-          <div className="grid grid-cols-2 gap-6 relative">
+          <div className="grid grid-cols-2 gap-2 sm:gap-6 relative">
             {[
               {
                 icon: Trophy,
@@ -747,16 +747,16 @@ export default function HomeLogin() {
             ].map((item, index) => (
               <div
                 key={index}
-                className={`group relative bg-white rounded-[3rem] p-10 flex flex-col items-center justify-center text-center transition-all duration-700 hover:-translate-y-4 hover:rotate-2 shadow-2xl ${item.shadow} ${item.delay}`}
+                className={`group relative bg-white sm:rounded-[3rem] rounded-[1rem] sm:p-10 py-5 justify-center items-center flex flex-col text-center transition-all duration-700 hover:-translate-y-4 hover:rotate-2 shadow-2xl ${item.shadow} ${item.delay}`}
               >
                 {/* Inner Decorative Ring */}
                 <div className="absolute inset-4 border border-slate-50 rounded-[2.2rem] pointer-events-none group-hover:scale-105 transition-transform duration-500"></div>
 
-                <div className="relative z-10">
+                <div className="relative z-10 flex items-center justify-center flex-col">
                   <div
                     className={`mb-6 transform group-hover:scale-125 group-hover:-rotate-12 transition-all duration-500 ${item.color}`}
                   >
-                    <item.icon size={48} strokeWidth={1.5} />
+                    <item.icon size={4} strokeWidth={1.5} />
                   </div>
                   <h5 className="font-black text-slate-900 uppercase text-sm tracking-widest italic">
                     {item.label}

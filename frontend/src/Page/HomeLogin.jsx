@@ -441,16 +441,16 @@ export default function HomeLogin() {
                       {/* DESCRIPTION OVERLAY */}
                       <div
                         className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent 
-                          opacity-0 group-hover:opacity-100 transition-all duration-500 p-6 flex flex-col justify-end"
+                          opacity-0 group-hover:opacity-100 transition-all duration-500 p-2 sm:p-6 flex flex-col justify-end"
                       >
-                        <p className="text-blue-400 text-[10px] font-black uppercase tracking-widest">
+                        <p className="text-blue-400 text-[11px] font-black uppercase tracking-widest">
                           Campus Life
                         </p>
-                        <h4 className="text-white text-xl font-black italic uppercase">
+                        <h4 className="text-white text-[9px] sm:text-xl font-black italic uppercase">
                           {img.description}
                         </h4>
 
-                        <h4 className="text-gray-400 flex w-full text-[11px] font-black items-end justify-end">
+                        <h4 className="text-gray-400 flex w-full text-[7px] font-black items-end justify-end">
                           {new Date(img.createdAt).toLocaleDateString()}
                         </h4>
                       </div>

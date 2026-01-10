@@ -12,6 +12,7 @@ import profile from "../../assets/profile.png";
 import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { createPortal } from "react-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 import { BookMarked, ChevronRight, ShoppingCart, ChefHat } from "lucide-react";
@@ -34,6 +35,14 @@ export default function Navbar({
   const [collegeDept, setCollegeDept] = useState([])
   const { user } = useAuth();
   const { logout } = useAuth();
+
+
+  function FloatingCartButton({ children }) {
+  return createPortal(children, document.body);
+}
+
+
+
 
   const handleLogout = async () => {
     try {
@@ -143,46 +152,137 @@ useEffect(() => {
 
                 <div className="flex items-center space-x-4">
                   {isLibraryPage && (
-                    <button
-                      onClick={onMyBooksClick}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <BookMarked className="w-4 h-4" />
-                      <span className="hidden sm:inline">My Books</span>
+  <FloatingCartButton>
+    <button
+      onClick={onMyBooksClick}
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <BookMarked className="w-5 h-5" />
 
-                      {myBooksCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          {myBooksCount}
-                        </span>
-                      )}
-                    </button>
-                  )}
+      {myBooksCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          {myBooksCount}
+        </span>
+      )}
+    </button>
+  </FloatingCartButton>
+)}
 
-                  {isCanteenPage && (
-                    <button
-                      onClick={onCartClick}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      <span className="hidden sm:inline">Cart</span>
 
-                      {cartCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          {cartCount}
-                        </span>
-                      )}
-                    </button>
-                  )}
+{isLibraryPage && (
+  <button
+    onClick={onMyBooksClick}
+    className="
+      hidden sm:flex
+      relative items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+    "
+  >
+    <BookMarked className="w-4 h-4" />
+    <span>My Books</span>
 
-                  {isOrderPage && (
-                    <Link
-                      to={"/canteen"}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <ChefHat className="w-4 h-4" />
-                      <span className="hidden sm:inline">Canteen</span>
-                    </Link>
-                  )}
+    {myBooksCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        {myBooksCount}
+      </span>
+    )}
+  </button>
+)}
+
+
+{isCanteenPage && (
+  <FloatingCartButton>
+    <button
+      onClick={onCartClick}
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <ShoppingCart className="w-5 h-5" />
+
+      {cartCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          {cartCount}
+        </span>
+      )}
+    </button>
+  </FloatingCartButton>
+)}
+
+{isCanteenPage && (
+  <button
+    onClick={onCartClick}
+    className="
+      hidden sm:flex
+      items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+      relative
+    "
+  >
+    <ShoppingCart className="w-4 h-4" />
+    <span>Cart</span>
+
+    {cartCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        {cartCount}
+      </span>
+    )}
+  </button>
+)}
+
+
+                 {isOrderPage && (
+  <FloatingCartButton>
+    <Link
+      to="/canteen"
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <ChefHat className="w-5 h-5" />
+    </Link>
+  </FloatingCartButton>
+)}
+
+
+{isOrderPage && (
+  <Link
+    to="/canteen"
+    className="
+      hidden sm:flex
+      relative items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+    "
+  >
+    <ChefHat className="w-4 h-4" />
+    <span>Canteen</span>
+  </Link>
+)}
+
+
 
                   <span
                     onClick={handleLogout}

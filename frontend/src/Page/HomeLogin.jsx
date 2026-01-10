@@ -74,8 +74,6 @@ export default function HomeLogin() {
         withCredentials: true,
       });
 
-
-
       // Expecting array from backend
       setGallery(res.data.data || []);
     } catch (err) {
@@ -168,15 +166,15 @@ export default function HomeLogin() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* HEADER AREA */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between sm:mb-16 mb-8 gap-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-blue-600/70">
+                <span className="sm:text-[10px] text-[8px] font-black uppercase tracking-[0.2em] text-blue-600/70">
                   Intelligence Dashboard
                 </span>
               </div>
-              <h1 className="text-5xl font-black tracking-tighter text-slate-900">
+              <h1 className="text-2xl sm:text-5xl font-black tracking-tighter text-slate-900">
                 Welcome back, <br />
                 <span className="text-blue-600 italic">
                   Champ {user?.studentName || "Alex"}!
@@ -184,7 +182,7 @@ export default function HomeLogin() {
               </h1>
             </div>
 
-            <div className="bg-white/70 backdrop-blur-md p-4 pr-8 rounded-2xl border border-white shadow-xl shadow-blue-900/5 flex items-center gap-4 hover:bg-white transition-colors">
+            <div className="bg-white/70 backdrop-blur-md p-4 pr-8 rounded-2xl border border-white shadow-xl shadow-blue-900/5 flex items-center gap-4 hover:bg-white transition-colors scale-90 sm:scale-100">
               <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
                 <Globe size={24} />
               </div>
@@ -198,7 +196,7 @@ export default function HomeLogin() {
           </div>
 
           {/* PRIMARY TILES: FIXED OVERFLOW & ALIGNMENT */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-8 sm:mb-12 mb-8 items-stretch">
             {[
               {
                 link: "/canteen",
@@ -228,7 +226,7 @@ export default function HomeLogin() {
               <Link to={tile.link} key={idx}>
                 <div
                   key={idx}
-                  className={`group relative bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
+                  className={`group relative bg-white sm:p-10 p-4 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl hover:-translate-y-3 transition-all duration-500 cursor-pointer overflow-hidden flex flex-col ${tile.style}`}
                 >
                   {/* THE TOP HOVER LINE - FIXED OVERFLOW */}
                   <div
@@ -244,8 +242,9 @@ export default function HomeLogin() {
                   ></div>
 
                   <div className="relative z-10 flex flex-col h-full">
-                    <div
-                      className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-8 text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}
+                    <div className="flex sm:flex-col gap-2">
+                      <div
+                      className={`sm:w-16 w-8 h-8 sm:h-16 rounded-2xl flex items-center justify-center mb-4 sm:mb-8 text-white shadow-xl group-hover:scale-110 transition-transform duration-500`}
                       style={{
                         backgroundColor:
                           tile.icon === Coffee
@@ -255,19 +254,22 @@ export default function HomeLogin() {
                             : "#0f172a",
                       }}
                     >
-                      <tile.icon size={30} />
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <tile.icon className="w-5 h-5 sm:w-7 sm:h-7" />
+                      </div>
                     </div>
 
                     <h3 className="text-xl font-black text-slate-800 tracking-tight mb-3">
                       {tile.title}
                     </h3>
+                    </div>
 
-                    <p className="text-slate-500 text-sm leading-relaxed font-medium flex-grow">
+                    <p className="text-slate-500 text-sm leading-relaxed font-medium flex-grow px-4 sm:px-0">
                       {tile.desc}
                     </p>
 
                     <div
-                      className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="mt-8 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest sm:opacity-0 group-hover:opacity-100 px-4 sm:px-0 transition-opacity"
                       style={{
                         color:
                           tile.icon === Coffee
@@ -286,12 +288,17 @@ export default function HomeLogin() {
           </div>
 
           {/* SECONDARY ROW: WIDGETS */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 sm:gap-8 gap-4">
             {/* ORDER HISTORY */}
             <Link to="/orders">
               <div className="group bg-white p-3 rounded-[2.5rem] shadow-xl shadow-blue-900/5 flex items-center border border-white hover:border-purple-200 transition-all duration-500 cursor-pointer">
-                <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center text-white shrink-0 shadow-lg shadow-purple-100 group-hover:rotate-6 transition-transform">
-                  <ShoppingBag size={28} />
+                <div className="sm:w-20 w-8 h-8 sm:h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-3xl flex flex-col items-center justify-center text-white shrink-0 shadow-lg shadow-purple-100 group-hover:rotate-6 transition-transform">
+         
+
+
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                        <ShoppingBag className="w-5 h-5 sm:w-7 sm:h-7" />
+                      </div>
                 </div>
                 <div className="px-8 flex-1">
                   <h4 className="font-black text-slate-800 text-lg uppercase italic tracking-tighter">
@@ -395,12 +402,11 @@ export default function HomeLogin() {
                 >
                   {index === 4 ? (
                     /* 150+ CARD */
-                    <div className="h-full flex items-center justify-between p-8 text-white bg-black/50"
-                    style={{ backgroundImage: `url(${img.image})` }}>
-
-
+                    <div
+                      className="h-full flex items-center justify-between p-8 text-white bg-black/50"
+                      style={{ backgroundImage: `url(${img.image})` }}
+                    >
                       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-
 
                       <div className="z-5">
                         <p className="text-5xl font-black italic">More </p>
@@ -408,7 +414,7 @@ export default function HomeLogin() {
                           Interactive Spaces
                         </p>
                       </div>
-                      <ArrowRight size={36} className="z-5"/>
+                      <ArrowRight size={36} className="z-5" />
                     </div>
                   ) : (
                     <>
@@ -440,8 +446,6 @@ export default function HomeLogin() {
               ))
             )}
           </div>
-
-          
         </div>
       </section>
 
@@ -753,91 +757,86 @@ export default function HomeLogin() {
           </div>
         </div>
       </section>
-<>
-     {showPopup ? (
-  <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
-    
-    {/* BACKDROP */}
-    <div
-      className="absolute inset-0 bg-slate-900/90 backdrop-blur-[1px]"
-      onClick={() => setShowPopup(false)}
-    ></div>
+      <>
+        {showPopup ? (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-2 md:p-10 animate-in fade-in duration-300">
+            {/* BACKDROP */}
+            <div
+              className="absolute inset-0 bg-slate-900/90 backdrop-blur-[1px]"
+              onClick={() => setShowPopup(false)}
+            ></div>
 
-    {/* POPUP WRAPPER */}
-    <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
-
-      {/* HEADER */}
-      <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
-        <div className="flex items-center gap-4">
-          <div className="bg-blue-600 p-2 rounded-xl text-white">
-            <ImageIcon size={28} />
-          </div>
-          <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
-            Student <span className="text-blue-600">Gallery</span>
-          </h3>
-        </div>
-
-        <button
-          onClick={() => setShowPopup(false)}
-          className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
-        >
-          <X size={30} />
-        </button>
-      </div>
-
-      {/* GALLERY GRID */}
-      <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar">
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
-          {fullGallery?.length > 0 ? (
-            fullGallery.map((img) => (
-              <div
-                key={img._id}
-                className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 
-                hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
-              >
-                <img
-                  src={img.image}
-                  alt="Gallery"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
-                  <p className="text-blue-400 text-[9px] uppercase tracking-widest">
-                    Campus Life
-                  </p>
-                  <p className="text-white font-bold text-sm">
-                    {img.description || ""}
-                  </p>
-                  <h4 className="text-gray-400 w-full text-[11px] font-black text-right">
-                    {img.createdAt
-                      ? new Date(img.createdAt).toLocaleDateString()
-                      : ""}
-                  </h4>
+            {/* POPUP WRAPPER */}
+            <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
+              {/* HEADER */}
+              <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
+                <div className="flex items-center gap-4">
+                  <div className="bg-blue-600 p-2 rounded-xl text-white">
+                    <ImageIcon size={28} />
+                  </div>
+                  <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
+                    Student <span className="text-blue-600">Gallery</span>
+                  </h3>
                 </div>
+
+                <button
+                  onClick={() => setShowPopup(false)}
+                  className="p-2 bg-slate-50 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all border border-slate-100"
+                >
+                  <X size={30} />
+                </button>
               </div>
-            ))
-          ) : (
-            <p className="text-center text-slate-400 col-span-full">
-              No images found.
-            </p>
-          )}
-        </div>
 
-        <div className="h-24"></div>
-      </div>
+              {/* GALLERY GRID */}
+              <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
+                  {fullGallery?.length > 0 ? (
+                    fullGallery.map((img) => (
+                      <div
+                        key={img._id}
+                        className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 
+                hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
+                      >
+                        <img
+                          src={img.image}
+                          alt="Gallery"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
+                          <p className="text-blue-400 text-[9px] uppercase tracking-widest">
+                            Campus Life
+                          </p>
+                          <p className="text-white font-bold text-sm">
+                            {img.description || ""}
+                          </p>
+                          <h4 className="text-gray-400 w-full text-[11px] font-black text-right">
+                            {img.createdAt
+                              ? new Date(img.createdAt).toLocaleDateString()
+                              : ""}
+                          </h4>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-slate-400 col-span-full">
+                      No images found.
+                    </p>
+                  )}
+                </div>
 
-      {/* FOOTER */}
-      <div className="p-6 bg-white border-t border-slate-50 text-center">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
-          Scroll to Explore • Hover to Focus
-        </p>
-      </div>
-    </div>
-  </div>
-) : null}
+                <div className="h-24"></div>
+              </div>
 
-</>
-
+              {/* FOOTER */}
+              <div className="p-6 bg-white border-t border-slate-50 text-center">
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+                  Scroll to Explore • Hover to Focus
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
+      </>
 
       <Footer />
     </div>

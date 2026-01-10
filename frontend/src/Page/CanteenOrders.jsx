@@ -359,14 +359,14 @@ export default function CanteenOrders() {
 
           {/* Right Sidebar: Filters & Info */}
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden">
-              <div className="relative z-10">
+            <div className="bg-slate-900 rounded-[1rem] sm:rounded-[2.5rem] p-3 sm:p-8 text-white relative overflow-hidden">
+              <div className="relative">
                 <h4 className="text-xl font-bold mb-2">Need Help?</h4>
-                <p className="text-slate-400 text-sm mb-6">
+                <p className="text-slate-400 text-[10px] sm:text-sm mb-6">
                   If you have issues with a specific order, please contact the
                   canteen manager.
                 </p>
-                <button className="w-full py-4 bg-orange-500 hover:bg-orange-600 rounded-2xl font-bold transition-all shadow-xl shadow-orange-900/20">
+                <button className="w-full py-4 bg-orange-500 hover:bg-orange-600 rounded-2xl font-bold transition-all shadow-xl shadow-orange-900/20 text-sm">
                   Contact Support
                 </button>
               </div>

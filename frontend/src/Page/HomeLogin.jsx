@@ -112,8 +112,10 @@ export default function HomeLogin() {
   }, [user]);
 
   return (
+    <>
+    <Navbar />
     <div className="min-h-screen font-sans text-[#1E293B] bg-white overflow-x-hidden">
-      <Navbar />
+      
       <HomepageHeaderCollegeInfo />
 
       <style>
@@ -141,7 +143,7 @@ export default function HomeLogin() {
       </style>
 
       {/* SECTION 1: WELCOME & PRO-COMMAND CENTER */}
-      <section className="pt-10 pb-20 px-3 sm:px-6 bg-[#F1F7FE] relative overflow-hidden">
+      <section className="pt-10 pb-20 px-3 sm:px-6 bg-[#F1F7FE] relative overflow-x-hidden">
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -350,7 +352,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 2: SMART CAMPUS GALLERY - HIGH-ENGAGEMENT MOSAIC */}
-      <section className="pt-0 pb-4 sm:py-20 px-3 sm:px-6 bg-[#F8FAFC] relative overflow-hidden">
+      <section className="pt-0 pb-4 sm:py-20 px-3 sm:px-6 bg-[#F8FAFC] relative overflow-x-hidden">
         {/* Abstract Background Accent */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full opacity-30 pointer-events-none">
           <div className="absolute top-10 right-10 w-96 h-96 bg-blue-200 blur-[120px] rounded-full"></div>
@@ -464,7 +466,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 3: LIVE FEED (CYBER-WHITE DESIGN) */}
-      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-white relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-white relative overflow-x-hidden">
         {/* Subtle grid pattern background for a "technical" feel */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -670,7 +672,7 @@ export default function HomeLogin() {
       <Collaboration />
 
       {/* SECTION 4: SMART CAMPUS CORE */}
-      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-gradient-to-br from-blue-700 via-blue-900 to-black text-white relative overflow-x-hidden">
         {/* Ambient Background Glow */}
         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/20 blur-[120px] rounded-full animate-pulse"></div>
         <div className="absolute -bottom-20 -left-20 w-96 h-96 bg-indigo-500/10 blur-[100px] rounded-full"></div>
@@ -855,5 +857,6 @@ export default function HomeLogin() {
 
       <Footer />
     </div>
+    </>
   );
 }

@@ -89,7 +89,7 @@ export default function CanteenOrders() {
 
   return (
     <div className="min-h-screen bg-[#fcfcfd]">
-      <Navbar />
+      <Navbar selectedOrder={selectedOrder}/>
       <ProfileSidebar
         isOpen={showProfileMenu}
         onClose={() => setShowProfileMenu(false)}

@@ -46,121 +46,169 @@ export default function CollaborationHero({ collegeData, startupData }) {
 
 
   return (
-    <section className="relative h-screen w-full flex items-center justify-center overflow-hidden bg-white">
-      
-      {/* --- BACKGROUND ENGINE: SPLIT DESIGN --- */}
-      <div className="absolute inset-0 flex">
-        {/* Left Side: Traditional/Clean */}
-        <div className="w-1/2 h-full bg-[#f8fbff]" />
-        {/* Right Side: Modern/Deep */}
-        <div className="w-1/2 h-full bg-slate-900" />
-        
-        {/* Central Blur Core */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-500/20 blur-[120px] rounded-full animate-pulse" />
+<section className="relative min-h-screen lg:h-screen w-full overflow-hidden bg-white flex items-center justify-center">
+
+  {/* ================= BACKGROUND ================= */}
+  <div className="absolute inset-0 flex flex-col lg:flex-row">
+    <div className="h-1/2 lg:h-full w-full lg:w-1/2 bg-[#f8fbff]" />
+    <div className="h-1/2 lg:h-full w-full lg:w-1/2 bg-slate-900" />
+
+    {/* Softer glow on mobile */}
+    <div
+      className="
+        absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+        w-[240px] h-[240px]
+        sm:w-[420px] sm:h-[420px]
+        lg:w-[600px] lg:h-[600px]
+        bg-blue-500/20 blur-[100px] rounded-full
+      "
+    />
+  </div>
+
+  {/* ================= CONTENT ================= */}
+  <div className="
+    relative z-10
+    w-full max-w-[1600px]
+    px-6 sm:px-10 lg:px-12
+    grid grid-rows-2 lg:grid-rows-1 lg:grid-cols-2
+    items-center gap-10 lg:gap-0
+  ">
+
+    {/* ========== TOP / LEFT ========== */}
+    <div className="
+      flex flex-col items-center text-center
+      lg:items-start lg:text-left
+      space-y-5 pt-4 sm:pt-0 sm:space-y-8
+    ">
+      <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm">
+        <Globe className="w-3 h-3 text-slate-400" />
+        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-500">
+          Academic Foundation
+        </span>
       </div>
 
-      {/* --- CONTENT LAYER --- */}
-      <div className="relative z-10 w-full max-w-[1600px] px-12 grid lg:grid-cols-2 gap-0 items-center h-full">
-        
-        {/* LEFT: THE INSTITUTION */}
-        <div className="flex flex-col items-start space-y-8 pr-12 animate-in slide-in-from-left-20 duration-1000">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm">
-            <Globe size={14} className="text-slate-400" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Academic Foundation</span>
-          </div>
-          
-          <div className="space-y-4">
-            <h2 className="text-5xl md:text-7xl font-black text-slate-900 leading-[0.9] tracking-tighter">
-              Legacy of <br/> Excellence.
-            </h2>
-            <p className="text-lg text-slate-500 font-medium max-w-md">
-              A century of academic prowess meeting the next generation of student management.
-            </p>
-          </div>
+      <h2 className="
+        text-3xl sm:text-4xl md:text-6xl lg:text-7xl
+        font-black text-slate-900
+        leading-tight sm:leading-[0.95]
+      ">
+        Legacy of <br /> Excellence.
+      </h2>
 
-          {/* College Logo Hexagon */}
-          <div className="relative group cursor-pointer">
-            <div className="absolute -inset-2 bg-blue-600 rounded-[2.5rem] opacity-0 group-hover:opacity-10 transition-opacity" />
-            <div className="w-40 h-40 bg-white rounded-[2.5rem] shadow-2xl flex items-center justify-center p-4 border border-slate-100 transform group-hover:rotate-3 transition-transform duration-500">
-              {collegeInfo?.collegeInfo?.logo? (
-                <img src={collegeInfo.collegeInfo.logo} alt="College" className="w-full h-full object-contain" />
-              ) : (
-                <div className="font-black text-blue-600 text-3xl">INST</div>
-              )}
-            </div>
-          </div>
-        </div>
+      <p className="text-sm sm:text-base lg:text-lg text-slate-500 font-medium max-w-md">
+        A century of academic prowess meeting the next generation of student management.
+      </p>
 
-        {/* RIGHT: THE STARTUP ACCELERATION */}
-        <div className="flex flex-col items-end text-right space-y-8 pl-12 animate-in slide-in-from-right-20 duration-1000">
-          <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full backdrop-blur-md">
-            <span className="text-[10px] font-black uppercase tracking-widest text-blue-400">Digital Intelligence</span>
-            <Cpu size={14} className="text-blue-400" />
-          </div>
-
-          <div className="space-y-4">
-            <h2 className="text-5xl md:text-7xl font-black text-white leading-[0.9] tracking-tighter">
-              Driven by <br/> <span className="text-blue-500">Innovation.</span>
-            </h2>
-            <p className="text-lg text-slate-400 font-medium max-w-md ml-auto">
-              Real-time analytics, automated workflows, and instant connectivity for every student.
-            </p>
-          </div>
-
-          {/* Startup Logo Hexagon */}
-          <div className="relative group cursor-pointer">
-            <div className="absolute -inset-2 bg-white rounded-[2.5rem] opacity-0 group-hover:opacity-20 transition-opacity" />
-            <div className="w-40 h-40 bg-white/10 backdrop-blur-xl rounded-[2.5rem] shadow-2xl flex items-center justify-center p-4 border border-white/10 transform group-hover:-rotate-3 transition-transform duration-500">
-              {logo ? (
-                <img src={logo} alt="Startup" className="w-full h-full object-contain" />
-              ) : (
-                <Zap size={40} className="text-white fill-white" />
-              )}
-            </div>
-          </div>
+      {/* College Logo */}
+      <div className="mb-8 sm:mb-0 sm:mt-2">
+        <div className="
+          w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40
+          bg-white rounded-[2rem]
+          shadow-xl border border-slate-100
+          flex items-center justify-center p-4
+        ">
+          {collegeInfo?.collegeInfo?.logo ? (
+            <img
+              src={collegeInfo.collegeInfo.logo}
+              alt="College"
+              className="w-full h-full object-contain"
+            />
+          ) : (
+            <div className="font-black text-blue-600 text-2xl">INST</div>
+          )}
         </div>
       </div>
+    </div>
 
-      {/* --- CENTRAL SYNERGY CORE (The Link) --- */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center z-20">
-        <div className="relative">
-          {/* Animated Energy Rings */}
-          <div className="absolute inset-0 -m-4 border border-blue-400/30 rounded-full animate-ping" />
-          <div className="absolute inset-0 -m-8 border border-blue-500/20 rounded-full animate-pulse" />
-          
-          {/* Handshake Badge */}
-          <div className="relative w-24 h-24 bg-blue-600 rounded-[2rem] flex items-center justify-center text-white shadow-[0_0_50px_rgba(37,99,235,0.5)] rotate-45 hover:rotate-0 transition-transform duration-700">
-            <div className="-rotate-45 group-hover:rotate-0 transition-transform">
-              <Handshake size={36} strokeWidth={1.5} />
-            </div>
-          </div>
-        </div>
-        
-        <div className="mt-8 px-4 py-1.5 bg-slate-900 border border-white/10 rounded-xl text-[10px] font-black text-white uppercase tracking-[0.4em] backdrop-blur-xl">
-           Live Collaboration
-        </div>
-      </div>
+    {/* ========== BOTTOM / RIGHT ========== */}
+    <div className="
+      flex flex-col items-center text-center
+      lg:items-end lg:text-right
+      space-y-6 sm:space-y-8
+    ">
 
-      {/* --- BOTTOM FLOATING STATS --- */}
-      <div className="absolute bottom-12 left-0 w-full flex justify-center gap-12 z-30 opacity-60">
-        <div className="flex items-center gap-3">
-          <ShieldCheck size={18} className="text-blue-600" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">AES-256 Encrypted</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Workflow size={18} className="text-slate-400" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Deep Integration</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <Sparkles size={18} className="text-blue-400" />
-          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">Smart Campus</span>
+
+      <div className="sm:mt-2 sm:hidden mt-8">
+        <div className="
+          w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40
+          bg-white/10 backdrop-blur-xl
+          rounded-[2rem] shadow-xl
+          border border-white/10
+          flex items-center justify-center p-4
+        ">
+          {logo ? (
+            <img src={logo} alt="Startup" className="w-full h-full object-contain" />
+          ) : (
+            <Zap className="w-7 h-7 sm:w-9 sm:h-9 text-white fill-white" />
+          )}
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-bounce opacity-20">
-        <ChevronDown size={24} />
+
+
+      <div className="hidden sm:inline-flex items-center gap-2 px-3 py-1 bg-white/10 border border-white/10 rounded-full backdrop-blur-md">
+        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-blue-400">
+          Digital Intelligence
+        </span>
+        <Cpu className="w-3 h-3 text-blue-400" />
       </div>
-    </section>
+
+      <h2 className="
+        text-3xl sm:text-4xl md:text-6xl lg:text-7xl
+        font-black text-white
+        leading-tight sm:leading-[0.95]
+      ">
+        Driven by <br />
+        <span className="text-blue-500">Innovation.</span>
+      </h2>
+
+      <p className="text-sm sm:text-base lg:text-lg text-slate-400 font-medium max-w-md">
+        Real-time analytics, automated workflows, and instant connectivity for every student.
+      </p>
+
+
+
+      <div className="inline-flex sm:hidden items-center gap-2 px-3 py-1 bg-white/10 border border-white/10 rounded-full backdrop-blur-md">
+        <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-blue-400">
+          Digital Intelligence
+        </span>
+        <Cpu className="w-3 h-3 text-blue-400" />
+      </div>
+
+      {/* Startup Logo */}
+      <div className="mt-2 hidden sm:block">
+        <div className="
+          w-28 h-28 sm:w-32 sm:h-32 lg:w-40 lg:h-40
+          bg-white/10 backdrop-blur-xl
+          rounded-[2rem] shadow-xl
+          border border-white/10
+          flex items-center justify-center p-4
+        ">
+          {logo ? (
+            <img src={logo} alt="Startup" className="w-full h-full object-contain" />
+          ) : (
+            <Zap className="w-7 h-7 sm:w-9 sm:h-9 text-white fill-white" />
+          )}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {/* ================= CENTER BADGE ================= */}
+  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+    <div className="
+      w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24
+      bg-blue-600 rounded-[1.5rem]
+      flex items-center justify-center
+      shadow-[0_0_40px_rgba(37,99,235,0.5)]
+      rotate-45
+    ">
+      <Handshake className="w-5 h-5 sm:w-7 sm:h-7 text-white -rotate-45" />
+    </div>
+  </div>
+
+</section>
+
+
   );
 }

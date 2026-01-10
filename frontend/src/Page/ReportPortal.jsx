@@ -286,7 +286,7 @@ export default function EduReportPortal() {
           <p className="text-slate-500 text-sm leading-relaxed mb-4 md:mb-6">
             {value.desc}
           </p>
-          <div className="flex items-center gap-2 text-indigo-600 font-bold text-sm">
+          <div className="flex w-full sm:items-center gap-2 text-indigo-600 font-bold text-sm items-end justify-end">
             Start Entry <ChevronRight size={16} />
           </div>
         </button>

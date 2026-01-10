@@ -129,7 +129,7 @@ useEffect(() => {
     <>
       {user ? (
         user.role === "student" ? (
-          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-60">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">

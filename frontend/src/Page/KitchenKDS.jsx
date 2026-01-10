@@ -2048,7 +2048,7 @@ const handleRelease = () => {
   >
     {/* Animated Background Progress */}
     <div
-      className={`absolute left-0 top-0 h-full bg-emerald-500/20 ${
+      className={`absolute left-0 top-0 h-full bg-emerald-500/70 ${
         !isDragging.current ? "transition-all duration-500 ease-out" : "transition-none"
       }`}
       style={{ width: `${swipeProgress}%` }}

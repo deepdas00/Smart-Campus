@@ -76,7 +76,15 @@ export function KitchenKDS() {
   const [scannedOrder, setScannedOrder] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
-
+const handleRelease = () => {
+  isDragging.current = false; // Transition starts here
+  if (swipeProgress < 95) {
+    setSwipeProgress(0); // This will now animate smoothly because of the CSS transition
+  } else {
+    setSwipeProgress(100);
+    handleConfirmOrder(); // Your function to serve the order
+  }
+};
   const updateSwipe = (clientX) => {
     if (!trackRef.current) return;
 
@@ -2032,57 +2040,56 @@ export function KitchenKDS() {
 
               {/* --- THE MODERN SWIPE SLIDER --- */}
 
-              {scannedOrder.orderStatus !== "served" && (
-                <div
-                  ref={trackRef}
-                  id="swipe-track"
-                  className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden touch-none"
-                >
-                  <div
-                   onMouseDown={startDrag}
-    onTouchStart={startDrag}
-                    className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
-                    style={{ width: `${swipeProgress}%` }}
-                  />
+             {scannedOrder.orderStatus !== "served" && (
+  <div
+    ref={trackRef}
+    id="swipe-track"
+    className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden touch-none border border-slate-200"
+  >
+    {/* Animated Background Progress */}
+    <div
+      className={`absolute left-0 top-0 h-full bg-emerald-500/20 ${
+        !isDragging.current ? "transition-all duration-500 ease-out" : "transition-none"
+      }`}
+      style={{ width: `${swipeProgress}%` }}
+    />
 
-                  <p
-                    className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
-      ${swipeProgress > 20 ? "opacity-0" : "opacity-40 text-slate-600"}`}
-                  >
-                    Swipe to Confirm
-                  </p>
+    {/* Hint Text */}
+    <p
+      className={`absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] pointer-events-none transition-all duration-300 
+      ${swipeProgress > 20 ? "opacity-0 translate-x-4" : "opacity-40 text-slate-600"}`}
+    >
+      Swipe to Confirm
+    </p>
 
-                  <div
-                    onMouseDown={startDrag}
-                    onTouchStart={onTouchStart}
-                    className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
-      ${
+    {/* Handle (The Knob) */}
+    <div
+      onMouseDown={startDrag}
+      onTouchStart={startDrag}
+      className={`relative z-10 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-95 ${
         isProcessing
           ? "bg-slate-200 cursor-wait"
-          : "bg-white cursor-grab active:cursor-grabbing"
+          : "bg-white cursor-grab active:cursor-grabbing border border-slate-100"
       }`}
-                    style={{
-                      position: "absolute",
-                      left: `calc(${swipeProgress}% - ${
-                        swipeProgress > 85 ? "52px" : "0px"
-                      })`,
-                      transition: isDragging.current
-                        ? "none"
-                        : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    }}
-                  >
-                    {isProcessing ? (
-                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <ChevronRight
-                        size={24}
-                        strokeWidth={3}
-                        className="text-emerald-500"
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
+      style={{
+        transform: `translateX(${((trackRef.current?.offsetWidth - 56) * swipeProgress) / 100}px)`,
+        transition: isDragging.current
+          ? "none" 
+          : "transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)", // Elastic snap-back
+      }}
+    >
+      {isProcessing ? (
+        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+      ) : (
+        <ChevronRight
+          size={24}
+          strokeWidth={3}
+          className={`transition-colors ${swipeProgress > 90 ? "text-emerald-600" : "text-slate-400"}`}
+        />
+      )}
+    </div>
+  </div>
+)}
 
               {scannedOrder.orderStatus === "served" && (
                 <div

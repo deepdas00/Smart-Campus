@@ -110,8 +110,6 @@ export default function App() {
     return orderDate >= startOfDay && orderDate <= endOfDay;
   };
 
- 
-
   const todayExpense = orderHistory
     .filter((order) => isToday(order.createdAt))
     .reduce((sum, order) => sum + (order.total || 0), 0);
@@ -121,8 +119,6 @@ export default function App() {
       const res = await axios.get(`${API_URL}/api/v1/canteen/foods`, {
         withCredentials: true,
       });
-
-     
 
       setCanteenFoods(res.data.data.foods || []);
     };
@@ -134,9 +130,7 @@ export default function App() {
     // Filter for ONLY available food
     // We use Boolean(food.isAvailable) to handle true/false/undefined safely
 
-  
     const available = canteenFoods.filter((item) => item.isAvailable === true);
-
 
     // If this is for a "Top Picks" or "Preview" section, keep the slice
     // Otherwise, remove .slice(0, 5) to show the full menu
@@ -144,11 +138,8 @@ export default function App() {
   }, [canteenFoods]);
 
   useEffect(() => {
-   
-
     if (orderHistory.length <= 0) {
       setActiveOrderCount(0);
-   
 
       return;
     }
@@ -160,18 +151,13 @@ export default function App() {
       (order) => order.status === "order_received"
     );
 
-  
     setActiveOrderCount(activeOrders.length);
   }, [orderHistory]);
 
   const fetchCurrentStudent = async () => {
-
-
     const res = await axios.get(`${API_URL}/api/v1/users/student/profile `, {
       withCredentials: true,
     });
-
-    
 
     return res.data.data; // ApiResponse → data
   };
@@ -181,7 +167,6 @@ export default function App() {
     const loadStudent = async () => {
       try {
         const data = await fetchCurrentStudent();
-     
 
         setStudent(data);
       } catch (err) {
@@ -288,7 +273,6 @@ export default function App() {
         //    await axios.post(`${API_URL}/api/v1/library/return/verify`, response);
         //    refreshHistory();
         // });
-      
       } else {
         // If no fine, the student usually just goes to the librarian to scan QR
         alert("Please visit the librarian to finalize the return via QR Scan.");
@@ -661,13 +645,17 @@ export default function App() {
                 resolutions in real-time.
               </p>
               <Link to={"/report"}>
-              <button className="group/btn relative px-8 py-5 bg-white rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95">
-                <span className="relative z-10 flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest">
-                  File New Report{" "}
-                  <Plus size={18} strokeWidth={3} className="text-orange-500" />
-                </span>
-                <div className="absolute inset-0 bg-orange-50 translate-y-full group-hover/btn:translate-y-0 transition-transform"></div>
-              </button>
+                <button className="group/btn relative px-8 py-5 bg-white rounded-2xl overflow-hidden transition-all hover:scale-105 active:scale-95">
+                  <span className="relative z-10 flex items-center gap-3 text-slate-900 font-black text-xs uppercase tracking-widest">
+                    File New Report{" "}
+                    <Plus
+                      size={18}
+                      strokeWidth={3}
+                      className="text-orange-500"
+                    />
+                  </span>
+                  <div className="absolute inset-0 bg-orange-50 translate-y-full group-hover/btn:translate-y-0 transition-transform"></div>
+                </button>
               </Link>
             </div>
 
@@ -785,359 +773,343 @@ export default function App() {
 
   return (
     <>
-    <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden">
-      <Navbar />
-      <ProfileSidebar
-        isOpen={showProfileMenu}
-        onClose={() => setShowProfileMenu(false)}
-      />
+      <div className="min-h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden">
+        <Navbar />
+        <ProfileSidebar
+          isOpen={showProfileMenu}
+          onClose={() => setShowProfileMenu(false)}
+        />
 
-      {/* Background Decorative Blobs */}
-      <div className="fixed top-20 left-10 w-72 h-72 bg-indigo-200/30 rounded-full blur-[120px] -z-10" />
-      <div className="fixed bottom-10 right-10 w-96 h-96 bg-orange-200/20 rounded-full blur-[120px] -z-10" />
+        {/* Background Decorative Blobs */}
+        <div className="fixed top-20 left-10 w-72 h-72 bg-indigo-200/30 rounded-full blur-[120px] -z-10" />
+        <div className="fixed bottom-10 right-10 w-96 h-96 bg-orange-200/20 rounded-full blur-[120px] -z-10" />
 
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden ">
-        {/* --- LEFT NAVIGATION --- */}
-        <aside className="w-20 lg:w-72 flex flex-col border-r border-slate-200/60 bg-white/80 backdrop-blur-md">
-          <div className="p-8 hidden lg:flex items-center gap-3">
-            <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
-              <Zap size={20} fill="currentColor" />
+        <div className="flex h-[calc(100vh-64px)] overflow-hidden pt-20 lg:pt-0">
+          {/* --- LEFT NAVIGATION --- */}
+          <aside className="w-20 lg:w-72 hidden lg:flex flex-col border-r border-slate-200/60 bg-white/80 backdrop-blur-md">
+            <div className="p-8 hidden lg:flex items-center gap-3">
+              <div className="w-10 h-10 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-slate-200">
+                <Zap size={20} fill="currentColor" />
+              </div>
+              <span className="font-black text-2xl tracking-tighter">
+                STUDENT<span className="text-indigo-600">HUB.</span>
+              </span>
             </div>
-            <span className="font-black text-2xl tracking-tighter">
-              STUDENT<span className="text-indigo-600">HUB.</span>
-            </span>
-          </div>
 
-          <nav className="flex-1 px-4 space-y-2 mt-4">
-            <NavItem
-              icon={<LayoutGrid size={20} />}
-              label="Dashboard"
-              active={activeTab === "Overview"}
-              onClick={() => setActiveTab("Overview")}
-            />
-            <NavItem
-              icon={<BookOpen size={20} />}
-              label="My Library"
-              active={activeTab === "Library"}
-              onClick={() => setActiveTab("Library")}
-            />
-            <NavItem
-              icon={<ShoppingBag size={20} />}
-              label="Food Orders"
-              active={activeTab === "Orders"}
-              onClick={() => setActiveTab("Orders")}
-            />
-            <NavItem
-              icon={<AlertCircle size={20} />}
-              label="Support"
-              active={activeTab === "Complaints"}
-              onClick={() => setActiveTab("Complaints")}
-            />
-          </nav>
+            <nav className="flex-1 px-4 space-y-2 mt-4">
+              <NavItem
+                icon={<LayoutGrid size={20} />}
+                label="Dashboard"
+                active={activeTab === "Overview"}
+                onClick={() => setActiveTab("Overview")}
+              />
+              <NavItem
+                icon={<BookOpen size={20} />}
+                label="My Library"
+                active={activeTab === "Library"}
+                onClick={() => setActiveTab("Library")}
+              />
+              <NavItem
+                icon={<ShoppingBag size={20} />}
+                label="Food Orders"
+                active={activeTab === "Orders"}
+                onClick={() => setActiveTab("Orders")}
+              />
+              <NavItem
+                icon={<AlertCircle size={20} />}
+                label="Support"
+                active={activeTab === "Complaints"}
+                onClick={() => setActiveTab("Complaints")}
+              />
+            </nav>
 
-          <div className="p-6 m-4 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] text-white hidden lg:block">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
-              Need Help?
-            </p>
-            <p className="text-xs leading-relaxed opacity-80">
-              Contact administration for campus inquiries.
-            </p>
-            <button className="mt-4 w-full py-2 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-50 transition-colors">
-              Contact
-            </button>
-          </div>
-        </aside>
-
-        {/* --- MAIN CONTENT AREA --- */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-y-auto no-scrollbar bg-transparent">
-          <main className="p-6 lg:p-12">
-            {/* Header / Greeting */}
-            <header className="mb-10">
-              <p className="text-indigo-600 font-bold text-sm tracking-wide">
-                Welcome back,
+            <div className="p-6 m-4 bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2rem] text-white hidden lg:block">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                Need Help?
               </p>
-              <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-slate-900 mt-1">
-                Hey, {student?.fullName}! 👋
-              </h1>
-            </header>
+              <p className="text-xs leading-relaxed opacity-80">
+                Contact administration for campus inquiries.
+              </p>
+              <button className="mt-4 w-full py-2 bg-white text-slate-900 rounded-xl text-[10px] font-black uppercase hover:bg-indigo-50 transition-colors">
+                Contact
+              </button>
+            </div>
+          </aside>
 
-            {/* Dynamic Content Switcher */}
-            {activeTab === "Overview" ? (
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                {/* 1. Hero Bento Card: The Dynamic Spotlight */}
-                <section className="relative group">
-                  {/* Animated background glow */}
-                  <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-[3.5rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+          {/* ===== MOBILE TOP NAV ===== */}
+          <div className="lg:hidden fixed top-[64px] left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200">
+            <nav className="flex justify-around px-2 py-2">
+              <button
+                onClick={() => setActiveTab("Overview")}
+                className={`flex flex-col items-center gap-1 text-xs font-bold ${
+                  activeTab === "Overview"
+                    ? "text-indigo-600"
+                    : "text-slate-400"
+                }`}
+              >
+                <LayoutGrid size={20} />
+                Dashboard
+              </button>
 
-                  <div className="relative overflow-hidden bg-white rounded-[3rem] p-8 lg:p-14 shadow-2xl shadow-indigo-100/50 border border-slate-100">
-                    <div className="relative z-10 grid lg:grid-cols-5 items-center gap-12">
-                      <div className="lg:col-span-3 space-y-6">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-indigo-600 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-indigo-200">
-                            {userData.issuedBooks
-                              ? "Reading Now"
-                              : "Discovery Mode"}
-                          </span>
-                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        </div>
+              <button
+                onClick={() => setActiveTab("Library")}
+                className={`flex flex-col items-center gap-1 text-xs font-bold ${
+                  activeTab === "Library" ? "text-indigo-600" : "text-slate-400"
+                }`}
+              >
+                <BookOpen size={20} />
+                Library
+              </button>
 
-                        <h2 className="text-5xl lg:text-6xl font-black text-slate-900 tracking-tighter leading-[0.9]">
-                          {userData.issuedBooks ? (
-                            <>
-                              Focusing on{" "}
-                              <span className="text-indigo-600 italic">
-                                "{userData.issuedBooks.bookId.title}"
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              Fuel your{" "}
-                              <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-500">
-                                Curiosity.
-                              </span>
-                            </>
-                          )}
-                        </h2>
+              <button
+                onClick={() => setActiveTab("Orders")}
+                className={`flex flex-col items-center gap-1 text-xs font-bold ${
+                  activeTab === "Orders" ? "text-indigo-600" : "text-slate-400"
+                }`}
+              >
+                <ShoppingBag size={20} />
+                Orders
+              </button>
 
-                        <p className="text-slate-500 text-lg font-medium leading-relaxed max-w-md">
-                          {userData.activeIssue
-                            ? `You've got until ${new Date(
-                                userData.activeIssue.expiresAt
-                              ).toLocaleDateString("en-US", {
-                                month: "short",
-                                day: "numeric",
-                              })} to finish this masterpiece.`
-                            : "Access over 50,000 titles instantly. Your next big idea is waiting in the stacks."}
-                        </p>
+              <button
+                onClick={() => setActiveTab("Complaints")}
+                className={`flex flex-col items-center gap-1 text-xs font-bold ${
+                  activeTab === "Complaints"
+                    ? "text-indigo-600"
+                    : "text-slate-400"
+                }`}
+              >
+                <AlertCircle size={20} />
+                Support
+              </button>
+            </nav>
+          </div>
 
-                        <div className="flex items-center gap-4 pt-4">
-                          <Link to={"/library"}>
-                            <button
-                              onClick={() => setActiveTab("Library")}
-                              className="group/btn relative px-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest overflow-hidden transition-all hover:scale-105 active:scale-95"
-                            >
-                              <span className="relative z-10 flex items-center gap-3">
-                                {userData.activeIssue
-                                  ? "Open Reader"
-                                  : "Explore Library"}{" "}
-                                <ArrowRight
-                                  size={18}
-                                  className="group-hover/btn:translate-x-1 transition-transform"
-                                />
-                              </span>
-                              <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover/btn:opacity-100 transition-opacity"></div>
-                            </button>
-                          </Link>
-                        </div>
-                      </div>
+          {/* --- MAIN CONTENT AREA --- */}
+          <div className="flex-1 flex flex-col min-w-0 overflow-y-auto no-scrollbar bg-transparent">
+            <main className="p-6 lg:p-12">
+              {/* Header / Greeting */}
+              <header className="mb-10">
+                <p className="text-indigo-600 font-bold text-sm tracking-wide">
+                  Welcome back,
+                </p>
+                <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-slate-900 mt-1">
+                  Hey, {student?.fullName}! 👋
+                </h1>
+              </header>
 
-                      {/* 3D Floating Book Visual */}
-                      <div className="lg:col-span-2 flex justify-center perspective-1000">
-                        <div className="relative w-56 h-72 bg-slate-900 rounded-[2rem] shadow-[25px_25px_50px_-12px_rgba(0,0,0,0.5)] transform rotate-y-12 -rotate-x-6 group-hover:rotate-0 transition-all duration-700 ease-out overflow-hidden border-r-[12px] border-slate-800">
-                          <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent"></div>
-                          <div className="h-full w-full flex flex-col items-center justify-center p-8 text-center">
-                            <BookOpen
-                              size={60}
-                              className="text-indigo-400 mb-4 animate-float"
-                            />
-                            <div className="h-1 w-12 bg-indigo-500 rounded-full mb-2"></div>
-                            <p className="text-white/40 text-[8px] font-black uppercase tracking-[0.3em]">
-                              Official Archive
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
+              {/* Dynamic Content Switcher */}
+              {activeTab === "Overview" ? (
+                <div className="space-y-6 sm:space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-1000">
+  {/* 1. HERO BENTO CARD */}
+  <section className="relative group">
+    {/* Glow */}
+    <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-purple-600 
+      rounded-[2.5rem] lg:rounded-[3.5rem] blur opacity-25 
+      group-hover:opacity-50 transition duration-1000 group-hover:duration-200" />
 
-                {/* 2. Secondary Bento Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Canteen: Glassmorphic Minimalist List */}
-                  <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl rounded-[3rem] border border-white p-10 pb-1 shadow-xl shadow-slate-200/50">
-                    <div className="mb-4">
-                      {/* Header */}
-                      <div className="flex justify-between items-end mb-6">
-                        <div>
-                          <h3 className="font-black text-2xl text-slate-900 tracking-tight">
-                            Recent Cravings
-                          </h3>
-                          <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
-                            Live from the canteen
-                          </p>
-                        </div>
+    <div className="relative overflow-hidden bg-white 
+      rounded-[2.5rem] lg:rounded-[3rem] 
+      p-5 sm:p-8 lg:p-14 
+      shadow-2xl shadow-indigo-100/50 border border-slate-100">
 
-                        <button
-                          onClick={() => navigate("/canteen")}
-                          className="p-3 bg-slate-50 hover:bg-slate-900 hover:text-white rounded-2xl transition-all"
-                        >
-                          <LayoutGrid size={20} />
-                        </button>
-                      </div>
+      <div className="relative z-10 grid grid-cols-1 lg:grid-cols-5 items-center gap-6 sm:gap-12">
+        {/* LEFT CONTENT */}
+        <div className="lg:col-span-3 space-y-4 sm:space-y-6">
+          <div className="flex items-center gap-2">
+            <span className="bg-indigo-600 text-white px-3 sm:px-4 py-1.5 
+              rounded-full text-[9px] sm:text-[10px] 
+              font-black uppercase tracking-[0.2em] shadow-lg shadow-indigo-200">
+              {userData.issuedBooks ? "Reading Now" : "Discovery Mode"}
+            </span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          </div>
 
-                      {/* Food Preview */}
-                      <div
-                        onClick={() => navigate("/canteen")}
-                        className="cursor-pointer bg-white border border-slate-100 rounded-[2rem] p-1
-                         hover:shadow-xl hover:shadow-orange-100          transition-all duration-500
-                         max-h-[270px] overflow-hidden"
-                      >
-                        <div className="grid grid-cols-1 gap-2">
-                          {previewFoods.map((food) => (
-                            <div
-                              key={food._id}
-                              className="group relative flex items-center justify-between p-2 bg-white border border-slate-100 rounded-[2rem] transition-all duration-500 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] hover:border-orange-200 overflow-hidden"
-                            >
-                              {/* 1. Content Left: Visual & Text */}
-                              <div className="flex items-center gap-4 relative z-10">
-                                {/* Image with 3D Float effect */}
-                                <div className="relative">
-                                  <img
-                                    src={food.image}
-                                    alt={food.name}
-                                    className="w-14 h-14 rounded-2xl object-cover shadow-md group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-500"
-                                  />
-                                  <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full"></div>
-                                </div>
-
-                                <div>
-                                  <h4 className="font-black text-slate-900 text-sm tracking-tight group-hover:text-orange-600 transition-colors">
-                                    {food.name}
-                                  </h4>
-                                  <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest bg-slate-50 px-2 py-0.5 rounded">
-                                      {food.category || "Main"}
-                                    </span>
-                                    <span className="text-slate-200 text-xs">
-                                      •
-                                    </span>
-                                    <span className="text-[9px] font-bold text-orange-500 uppercase">
-                                      Available
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-
-                              {/* 2. Content Right: Price & Interaction */}
-                              <div className="flex items-center gap-4 relative z-10">
-                                <div className="text-right">
-                                  <span className="block font-black text-base text-slate-900 tracking-tighter italic">
-                                    ₹{food.price}
-                                  </span>
-                                </div>
-
-                                {/* Modern Minimal Plus Button */}
-                                <button className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center group-hover:bg-slate-900 group-hover:text-white transition-all duration-300">
-                                  <Plus size={18} strokeWidth={3} />
-                                </button>
-                              </div>
-
-                              {/* Subtle Background Accent on Hover */}
-                              <div className="absolute inset-0 bg-gradient-to-r from-orange-50/0 to-orange-50/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
-                            </div>
-                          ))}
-                        </div>
-
-                        {/* Footer hint */}
-                        <div className="mt-5 text-center">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-orange-500">
-                            Tap to explore full canteen →
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {userData.canteenOrders.slice(0, 2).map((order) => (
-                        <div
-                          key={order._id}
-                          className="p-6 bg-white border border-slate-100 rounded-[2.5rem] hover:shadow-lg transition-all group cursor-pointer"
-                        >
-                          <div className="flex items-center gap-4 mb-4">
-                            <div className="p-4 bg-orange-50 text-orange-500 rounded-2xl group-hover:bg-orange-500 group-hover:text-white transition-colors">
-                              <Coffee size={24} />
-                            </div>
-                            <div>
-                              <p className="font-black text-slate-900 leading-tight">
-                                {order.item}
-                              </p>
-                              <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
-                                Ordered 2h ago
-                              </p>
-                            </div>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-xs font-black text-slate-900 tracking-tighter">
-                              ₹45.00
-                            </span>
-                            <span
-                              className={`px-4 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                                order.status === "Ready"
-                                  ? "bg-emerald-100 text-emerald-600"
-                                  : "bg-slate-100 text-slate-500"
-                              }`}
-                            >
-                              {order.status}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Campus Health: The High-Contrast Alert Card */}
-                  <div className="bg-slate-900 rounded-[3.5rem] p-10 text-white relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-8">
-                      <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:rotate-12 transition-transform">
-                        <AlertCircle size={24} className="text-indigo-400" />
-                      </div>
-                    </div>
-
-                    <div className="relative z-10 h-full flex flex-col">
-                      <h3 className="font-black text-3xl tracking-tight mb-2 italic">
-                        Campus Pulse<span className="text-indigo-500">.</span>
-                      </h3>
-                      <p className="text-slate-400 text-sm font-medium mb-auto max-w-[180px]">
-                        All infrastructure systems are performing at peak.
-                      </p>
-
-                      <div className="mt-8 p-5 bg-white/5 border border-white/10 rounded-[2rem] hover:bg-white/10 transition-colors">
-                        <p className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400 mb-2">
-                          Recent Report Status
-                        </p>
-                        <p className="font-bold text-sm leading-snug">
-                          {userData.campusComplaints[0]?.subject ||
-                            "System Clear: No active hazards detected."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Background Decorative Element */}
-                    <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-600/20 rounded-full blur-[80px]"></div>
-                  </div>
-                </div>
-              </div>
-            ) : activeTab === "Library" ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <LibraryPage userData={userData} />
-              </div>
-            ) : activeTab === "Orders" ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <OrdersPage canteenOrders={userData.canteenOrders} />
-              </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-6xl 
+            font-black text-slate-900 tracking-tighter 
+            leading-tight lg:leading-[0.9]">
+            {userData.issuedBooks ? (
+              <>
+                Focusing on{" "}
+                <span className="text-indigo-600 italic">
+                  "{userData.issuedBooks.bookId.title}"
+                </span>
+              </>
             ) : (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <ComplaintsPage campusComplaints={userData.campusComplaints} />
-              </div>
+              <>
+                Fuel your{" "}
+                <span className="text-transparent bg-clip-text 
+                  bg-gradient-to-r from-indigo-600 to-purple-500">
+                  Curiosity.
+                </span>
+              </>
             )}
-          </main>
+          </h2>
+
+          <p className="text-sm sm:text-base lg:text-lg 
+            text-slate-500 font-medium leading-relaxed max-w-md">
+            {userData.activeIssue
+              ? `You've got until ${new Date(
+                  userData.activeIssue.expiresAt
+                ).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                })} to finish this masterpiece.`
+              : "Access over 50,000 titles instantly. Your next big idea is waiting in the stacks."}
+          </p>
+
+          <div className="pt-2 sm:pt-4">
+            <Link to="/library">
+              <button
+                onClick={() => setActiveTab("Library")}
+                className="group/btn relative 
+                  px-6 sm:px-8 py-3 sm:py-4 
+                  bg-slate-900 text-white 
+                  rounded-xl sm:rounded-2xl 
+                  font-black text-[10px] sm:text-xs 
+                  uppercase tracking-widest 
+                  overflow-hidden transition-all 
+                  hover:scale-105 active:scale-95">
+                <span className="relative z-10 flex items-center gap-2 sm:gap-3">
+                  {userData.activeIssue ? "Open Reader" : "Explore Library"}
+                  <ArrowRight size={16} className="group-hover/btn:translate-x-1 transition-transform" />
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r 
+                  from-indigo-600 to-purple-600 opacity-0 
+                  group-hover/btn:opacity-100 transition-opacity" />
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* RIGHT VISUAL */}
+        <div className="lg:col-span-2 flex justify-center">
+          <div className="relative 
+            w-44 h-56 sm:w-56 sm:h-72 
+            bg-slate-900 rounded-[2rem] 
+            shadow-[25px_25px_50px_-12px_rgba(0,0,0,0.5)] 
+            transform rotate-y-12 -rotate-x-6 
+            group-hover:rotate-0 transition-all duration-700 
+            overflow-hidden border-r-[12px] border-slate-800">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
+            <div className="h-full w-full flex flex-col items-center justify-center p-6 sm:p-8 text-center">
+              <BookOpen size={48} className="sm:size-[60px] text-indigo-400 mb-4 animate-float" />
+              <div className="h-1 w-10 sm:w-12 bg-indigo-500 rounded-full mb-2" />
+              <p className="text-white/40 text-[8px] font-black uppercase tracking-[0.3em]">
+                Official Archive
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+  </section>
 
-    <Footer/>
+  {/* 2. SECONDARY GRID */}
+  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+    {/* CANTEEN */}
+    <div className="lg:col-span-2 bg-white/70 backdrop-blur-xl 
+      rounded-[2.5rem] lg:rounded-[3rem] 
+      border border-white 
+      p-5 sm:p-8 lg:p-10 pb-1 
+      shadow-xl shadow-slate-200/50">
+
+      <div className="flex justify-between items-end mb-6">
+        <div>
+          <h3 className="font-black text-xl sm:text-2xl text-slate-900">
+            Recent Cravings
+          </h3>
+          <p className="text-slate-400 text-[10px] sm:text-xs font-bold uppercase tracking-widest">
+            Live from the canteen
+          </p>
+        </div>
+
+        <button
+          onClick={() => navigate("/canteen")}
+          className="p-3 bg-slate-50 hover:bg-slate-900 hover:text-white rounded-2xl transition-all">
+          <LayoutGrid size={18} />
+        </button>
+      </div>
+
+      <div className="grid gap-3">
+        {previewFoods.map((food) => (
+          <div
+            key={food._id}
+            className="flex items-center justify-between 
+              p-3 bg-white border border-slate-100 
+              rounded-2xl transition-all hover:shadow-md">
+
+            <div className="flex items-center gap-3">
+              <img
+                src={food.image}
+                alt={food.name}
+                className="w-12 h-12 rounded-xl object-cover shadow"
+              />
+              <div>
+                <h4 className="font-black text-sm text-slate-900">
+                  {food.name}
+                </h4>
+                <p className="text-[9px] uppercase font-bold text-slate-400">
+                  {food.category || "Main"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="font-black text-sm italic">₹{food.price}</span>
+              <button className="w-9 h-9 rounded-xl bg-slate-50 flex items-center justify-center hover:bg-slate-900 hover:text-white">
+                <Plus size={16} strokeWidth={3} />
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* CAMPUS PULSE */}
+    <div className="bg-slate-900 rounded-[2.5rem] lg:rounded-[3.5rem] 
+      p-6 sm:p-8 lg:p-10 text-white relative overflow-hidden">
+      <h3 className="font-black text-2xl sm:text-3xl italic mb-2">
+        Campus Pulse<span className="text-indigo-500">.</span>
+      </h3>
+      <p className="text-slate-400 text-sm mb-6">
+        All infrastructure systems are performing at peak.
+      </p>
+      <div className="p-4 bg-white/5 border border-white/10 rounded-2xl">
+        <p className="text-[9px] uppercase tracking-widest text-indigo-400 mb-1">
+          Recent Report Status
+        </p>
+        <p className="font-bold text-sm">
+          {userData.campusComplaints[0]?.subject ||
+            "System Clear: No active hazards detected."}
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+              ) : activeTab === "Library" ? (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <LibraryPage userData={userData} />
+                </div>
+              ) : activeTab === "Orders" ? (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <OrdersPage canteenOrders={userData.canteenOrders} />
+                </div>
+              ) : (
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <ComplaintsPage
+                    campusComplaints={userData.campusComplaints}
+                  />
+                </div>
+              )}
+            </main>
+          </div>
+        </div>
+      </div>
+
+      <Footer />
     </>
-
   );
 }
 

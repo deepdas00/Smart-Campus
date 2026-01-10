@@ -413,15 +413,17 @@ export default function ReportHistory() {
             <div className="bg-slate-900 rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 text-white relative overflow-hidden group">
               <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                  <div className="w-9 h-9 md:w-10 md:h-10 bg-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-4 border border-white/10 group-hover:rotate-12 transition-transform">
+                  <div className="flex gap-2 items-center sm: flex-col sm:gap-0 sm:items-start sm:justify-start">
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-4 border border-white/10 group-hover:rotate-12 transition-transform">
                     <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />
                   </div>
 
                   <p className="text-[9px] md:text-[10px] font-black uppercase text-indigo-300 tracking-widest mb-1">
                     Status Summary
                   </p>
+                  </div>
 
-                  <h3 className="text-sm md:text-lg font-bold italic leading-tight">
+                  <h3 className="text-sm md:text-lg font-bold italic leading-tight flex justify-center items-center">
                     "Your impact is making the campus safer."
                   </h3>
                 </div>

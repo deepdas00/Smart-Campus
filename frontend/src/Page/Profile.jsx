@@ -796,7 +796,7 @@ export default function App() {
       <div className="fixed top-20 left-10 w-72 h-72 bg-indigo-200/30 rounded-full blur-[120px] -z-10" />
       <div className="fixed bottom-10 right-10 w-96 h-96 bg-orange-200/20 rounded-full blur-[120px] -z-10" />
 
-      <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+      <div className="flex h-[calc(100vh-64px)] overflow-hidden ">
         {/* --- LEFT NAVIGATION --- */}
         <aside className="w-20 lg:w-72 flex flex-col border-r border-slate-200/60 bg-white/80 backdrop-blur-md">
           <div className="p-8 hidden lg:flex items-center gap-3">
@@ -1137,7 +1137,6 @@ export default function App() {
 
     <Footer/>
     </>
-
 
   );
 }

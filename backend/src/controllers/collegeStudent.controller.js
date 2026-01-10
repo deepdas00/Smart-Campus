@@ -17,7 +17,6 @@ import { getCollegeDepartmentModel } from "../models/collegeDepartment.model.js"
 import { populate } from "dotenv";
 
 const generatePassword = (collegeCode, rollNo) => {
-
   // generate random 5 character mix
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   let randomPart = "";
@@ -32,9 +31,8 @@ const generatePassword = (collegeCode, rollNo) => {
 };
 
 export const registerStudent = asyncHandler(async (req, res) => {
-
   console.log(req.user);
-  
+
   const { collegeCode, userId } = req.user;
 
   const {
@@ -49,24 +47,44 @@ export const registerStudent = asyncHandler(async (req, res) => {
     department,
   } = req.body;
 
-  if (!fullName || !rollNo || !gender || !dob || !admissionYear || !email || !phone || !department) {
-    return res.status(400).json({ status: "failed", message: "Required fields missing" });
+  if (
+    !fullName ||
+    !rollNo ||
+    !gender ||
+    !dob ||
+    !admissionYear ||
+    !email ||
+    !phone ||
+    !department
+  ) {
+    return res
+      .status(400)
+      .json({ status: "failed", message: "Required fields missing" });
   }
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
   const college = await College.findOne({ collegeCode, status: "active" });
-  if (!college) return res.status(404).json({ status: "failed", message: "college not found or inactive" });
-
+  if (!college)
+    return res
+      .status(404)
+      .json({ status: "failed", message: "college not found or inactive" });
 
   const collegeConn = getCollegeDB(college.dbName);
   const Student = getCollegeStudentModel(collegeConn);
 
   const existing = await Student.findOne({
-    $or: [{ rollNo }, { email }, { phone }]
+    $or: [{ rollNo }, { email }, { phone }],
   });
 
-  if (existing) return res.status(409).json({ status: "failed", message: "Student already exists with this email or roll or phone or registerationNo" });
+  if (existing)
+    return res
+      .status(409)
+      .json({
+        status: "failed",
+        message:
+          "Student already exists with this email or roll or phone or registerationNo",
+      });
 
   let profilePhoto = "";
   if (req.file?.path) {
@@ -74,7 +92,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
     profilePhoto = upload.url;
   }
 
-  const password = generatePassword(collegeCode, rollNo)
+  const password = generatePassword(collegeCode, rollNo);
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const student = await Student.create({
@@ -83,38 +101,47 @@ export const registerStudent = asyncHandler(async (req, res) => {
     profilePhoto,
     collegeCode,
     loginId: email,
-    createdBy: userId
+    createdBy: userId,
   });
 
-  await sendMail({
-    to: email,
-    subject: `${college.collegeName} - Student Login Credentials`,
-    html: buildStudentCredentialsMailTemplate(
-      college.collegeName,
-      fullName,
-      { loginId: email, password }
-    )
-  });
+  let mailStatus = "sent";
 
+  try {
+    await sendMail({
+      to: email,
+      subject: `${college.collegeName} - Student Login Credentials`,
+      html: buildStudentCredentialsMailTemplate(college.collegeName, fullName, {
+        loginId: email,
+        password,
+      }),
+    });
+  } catch (error) {
+    mailStatus = "failed";
+    console.error("❌ Email failed:", error.message);
+  }
 
+  console.log("ResPONSE FROM THE SMTP....");
 
   res.status(201).json({
     status: 201,
     student: { fullName, rollNo },
-    message: "Student registered successfully"
+    message: "Student registered successfully",
   });
-
 });
 
 export const studentLogin = asyncHandler(async (req, res) => {
-
   console.log(req.body);
-  
 
   const { collegeCode, loginId, password } = req.body;
 
   if (!collegeCode || !loginId || !password) {
-    return res.status(400).json({ status: "failed", message: "College code, Login ID and Password are required" });
+    return res
+      .status(400)
+      .json({
+        status: "failed",
+        message: "College code, Login ID and Password are required",
+        mailStatus
+      });
   }
 
   // 1️⃣ Resolve college
@@ -123,7 +150,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({ collegeCode, status: "active" });
   if (!college) {
-    return res.status(404).json({ status: "failed", message: "college not found or inactive" });
+    return res
+      .status(404)
+      .json({ status: "failed", message: "college not found or inactive" });
   }
 
   // 2️⃣ Connect college DB
@@ -134,18 +163,27 @@ export const studentLogin = asyncHandler(async (req, res) => {
   const student = await Student.findOne({ loginId }).select("+password");
 
   if (!student) {
-    return res.status(401).json({ status: "failed", message: "Invalid login credentials" });
+    return res
+      .status(401)
+      .json({ status: "failed", message: "Invalid login credentials" });
   }
 
   // 4️⃣ Block inactive accounts
   if (!student.isActive) {
-    return res.status(404).jso3({ status: "failed", message: "Your account is deactivated. Contact administration" });
+    return res
+      .status(404)
+      .jso3({
+        status: "failed",
+        message: "Your account is deactivated. Contact administration",
+      });
   }
 
   // 5️⃣ Verify password
   const isMatch = await bcrypt.compare(password, student.password);
   if (!isMatch) {
-    return res.status(401).json({ status: "failed", message: "Invalid password" });
+    return res
+      .status(401)
+      .json({ status: "failed", message: "Invalid password" });
   }
 
   // 6️⃣ Generate tokens
@@ -173,7 +211,9 @@ export const studentLogin = asyncHandler(async (req, res) => {
   // };
 
   // 8️⃣ Prepare response
-  const safeStudent = await Student.findById(student._id).select("-password -refreshToken");
+  const safeStudent = await Student.findById(student._id).select(
+    "-password -refreshToken"
+  );
 
   // 9️⃣ Send response
   res
@@ -210,8 +250,6 @@ export const currentStudent = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, student, "GOT STUDENT"));
 });
 
-
-
 export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   // verifyJWT middleware should attach 'user' to 'req'
   console.log("hiiiiiiii");
@@ -219,7 +257,6 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   const { collegeCode, userId } = req.body;
 
   console.log(collegeCode, userId);
-
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -231,22 +268,20 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   const LibraryTransaction = getLibraryTransactionModel(collegeConn);
   const LibraryBooks = getLibraryBookModel(collegeConn);
   const student = await Student.findById(userId)
-  .populate({path:"department"})
-  .select(
-    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
-  );
-
-
-
+    .populate({ path: "department" })
+    .select(
+      "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+    );
 
   const libraryTransaction = await LibraryTransaction.find({
     studentId: userId,
     transactionStatus: "issued",
-
   })
-    .populate({ path: "bookId", select: "title coverImage author category isbn" })
-    .select("-qrCode")
-
+    .populate({
+      path: "bookId",
+      select: "title coverImage author category isbn",
+    })
+    .select("-qrCode");
 
   console.log(libraryTransaction);
   if (!student) {
@@ -254,19 +289,12 @@ export const currentStudentAllDetails = asyncHandler(async (req, res) => {
   }
 
   // Change 'data' to 'user' to match your React AuthContext expectations
-  res
-    .status(200)
-    .json(
-      {
-        student,
-        libraryTransaction,
-        message: "GOT STUDENT"
-      });
-
-
-
+  res.status(200).json({
+    student,
+    libraryTransaction,
+    message: "GOT STUDENT",
+  });
 });
-
 
 export const allStudentFetch = asyncHandler(async (req, res) => {
   // verifyJWT middleware should attach 'user' to 'req'
@@ -278,13 +306,13 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
-  const Department = getCollegeDepartmentModel(collegeConn)
+  const Department = getCollegeDepartmentModel(collegeConn);
   const Student = getCollegeStudentModel(collegeConn);
   const students = await Student.find()
-  .populate({path: "department"})
-  .select(
-    "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
-  );
+    .populate({ path: "department" })
+    .select(
+      "-password -refreshToken -resetPasswordOTP -resetPasswordOTPExpiry"
+    );
 
   if (!students) {
     return res.status(404).json({ success: false, message: "User not found" });
@@ -292,22 +320,14 @@ export const allStudentFetch = asyncHandler(async (req, res) => {
 
   // Change 'data' to 'user' to match your React AuthContext expectations
 
-
   res.status(200).json({
     students,
     collegeCode,
-    message: "Student details fetched"
-  })
-
-
+    message: "Student details fetched",
+  });
 
   // res.status(200).json(new ApiResponse(200, students,collegeCode, "GOT STUDENT"));
 });
-
-
-
-
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                 BULK REGISTRATION OF STUDENT

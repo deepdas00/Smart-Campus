@@ -60,6 +60,7 @@ export function KitchenKDS() {
   const [lastFetchedAt, setLastFetchedAt] = useState();
   const [startFetchedAt, setStartFetchedAt] = useState(16);
   const currentHour = new Date().getHours(); // 0–23
+const trackRef = useRef(null);
 
   const isOnline = currentHour >= lastFetchedAt && currentHour < startFetchedAt;
 
@@ -75,6 +76,43 @@ export function KitchenKDS() {
   const [scannedOrder, setScannedOrder] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
+
+
+
+
+  const updateSwipe = (clientX) => {
+  if (!trackRef.current) return;
+
+  const rect = trackRef.current.getBoundingClientRect();
+  const progress = ((clientX - rect.left) / rect.width) * 100;
+
+  setSwipeProgress(Math.min(Math.max(progress, 0), 100));
+};
+
+
+const startDrag = () => {
+  if (!isProcessing) isDragging.current = true;
+};
+
+const onMouseMove = (e) => {
+  if (!isDragging.current) return;
+  updateSwipe(e.clientX);
+};
+
+
+const onTouchStart = () => {
+  if (!isProcessing) isDragging.current = true;
+};
+
+const onTouchMove = (e) => {
+  if (!isDragging.current) return;
+  updateSwipe(e.touches[0].clientX);
+};
+
+const onTouchEnd = () => {
+  stopDrag();
+};
+
 
   const handleMouseMove = (e) => {
     if (!isDragging.current) return;
@@ -458,6 +496,8 @@ export function KitchenKDS() {
           { withCredentials: true }
         );
 
+        // console.log(res);
+
         const rawOrders =
           res.data?.orders || res.data?.data?.orders || res.data?.data || [];
 
@@ -469,7 +509,7 @@ export function KitchenKDS() {
 
         const formattedOrders = rawOrders.map((o) => ({
           id: o.transactionCode,
-          student: o.studentId.studentName || "Student",
+          student: o.studentId.fullName || "Student",
           rollNo: o.studentId.rollNo || "---",
           items: Array.isArray(o.items)
             ? o.items.map((i) => `${i.foodName || i.name} x${i.quantity || 1}`)
@@ -1921,7 +1961,7 @@ export function KitchenKDS() {
               </div>
 
               <h3 className="text-xl font-black text-slate-800 tracking-tight leading-none">
-                {scannedOrder.studentId.studentName || "Student User"}
+                {scannedOrder.studentId.fullName || "Student User"}
               </h3>
               <p className="text-xs text-blue-600 font-bold uppercase tracking-[0.15em] mt-2">
                 ID: {scannedOrder.studentId.rollNo || "Not Provided"}
@@ -1979,55 +2019,57 @@ export function KitchenKDS() {
 
               {/* --- THE MODERN SWIPE SLIDER --- */}
 
-              {scannedOrder.orderStatus !== "served" && (
-                <div
-                  id="swipe-track"
-                  className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
-                >
-                  <div
-                    className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
-                    style={{ width: `${swipeProgress}%` }}
-                  />
+             {scannedOrder.orderStatus !== "served" && (
+  <div
+    ref={trackRef}
+    id="swipe-track"
+    className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden"
+    onMouseMove={onMouseMove}
+    onMouseUp={stopDrag}
+    onMouseLeave={stopDrag}
+    onTouchMove={onTouchMove}
+    onTouchEnd={onTouchEnd}
+  >
+    <div
+      className="absolute left-0 top-0 h-full bg-emerald-500 transition-all duration-75"
+      style={{ width: `${swipeProgress}%` }}
+    />
 
-                  <p
-                    className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
-            ${swipeProgress > 20 ? "opacity-0" : "opacity-40 text-slate-600"}`}
-                  >
-                    Swipe to Confirm
-                  </p>
+    <p
+      className={`absolute inset-0 flex items-center justify-center text-xs font-black uppercase tracking-[0.2em] transition-opacity duration-300 
+      ${swipeProgress > 20 ? "opacity-0" : "opacity-40 text-slate-600"}`}
+    >
+      Swipe to Confirm
+    </p>
 
-                  <div
-                    onMouseDown={() =>
-                      !isProcessing && (isDragging.current = true)
-                    }
-                    className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
-    ${
-      isProcessing
-        ? "bg-slate-200 cursor-wait"
-        : "bg-white cursor-grab active:cursor-grabbing"
-    }`}
-                    style={{
-                      position: "absolute",
-                      left: `calc(${swipeProgress}% - ${
-                        swipeProgress > 85 ? "52px" : "0px"
-                      })`,
-                      transition: isDragging.current
-                        ? "none"
-                        : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    }}
-                  >
-                    {isProcessing ? (
-                      <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                    ) : (
-                      <ChevronRight
-                        className="text-emerald-500"
-                        size={24}
-                        strokeWidth={3}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
+    <div
+      onMouseDown={startDrag}
+      onTouchStart={onTouchStart}
+      className={`relative z-10 h-12 w-12 rounded-full shadow-xl flex items-center justify-center 
+      ${
+        isProcessing
+          ? "bg-slate-200 cursor-wait"
+          : "bg-white cursor-grab active:cursor-grabbing"
+      }`}
+      style={{
+        position: "absolute",
+        left: `calc(${swipeProgress}% - ${
+          swipeProgress > 85 ? "52px" : "0px"
+        })`,
+        transition: isDragging.current
+          ? "none"
+          : "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+      }}
+    >
+      {isProcessing ? (
+        <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+      ) : (
+        <ChevronRight size={24} strokeWidth={3} className="text-emerald-500" />
+      )}
+    </div>
+  </div>
+)}
+
 
               {scannedOrder.orderStatus === "served" && (
                 <div

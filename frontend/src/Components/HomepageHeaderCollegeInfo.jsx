@@ -145,10 +145,10 @@ export default function CollegeInfo({ collegeData }) {
           {/* --- RIGHT SIDE: THE MONUMENT --- */}
           <div className="relative flex justify-center lg:justify-end animate-in slide-in-from-right-8 duration-1000 scale-x-90 scale-y-90 sm:scale-100">
             {/* Rotating Decorative Background Ring */}
-            <div className="absolute inset-0 scale-110 rounded-[4rem] border border-blue-200/40 animate-pulse-slow border-dashed -rotate-6" />
+            <div className="absolute inset-0 scale-110 rounded-[1rem] sm:rounded-[4rem] border border-blue-200/40 animate-pulse-slow border-dashed -rotate-6" />
 
-            <div className="relative w-full max-w-[420px] bg-white rounded-[4rem] p-4 shadow-2xl border border-slate-100 group">
-              <div className="bg-slate-900 rounded-[3.5rem] sm:p-10 p-5 text-white text-center overflow-hidden">
+            <div className="relative w-full max-w-[420px] bg-white rounded-[1rem] sm:rounded-[4rem] p-4 shadow-2xl border border-slate-100 group">
+              <div className="bg-slate-900 rounded-[0.8rem] sm:rounded-[3.5rem] sm:p-10 p-5 text-white text-center overflow-hidden">
                 {/* Logo or Graduation Cap */}
                 <div className="mx-auto w-24 h-24 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl flex items-center justify-center mb-4 sm:mb-8 transform group-hover:scale-110 transition-transform duration-500">
                   {data.logo ? (

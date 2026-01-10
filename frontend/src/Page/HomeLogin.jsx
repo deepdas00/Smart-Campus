@@ -464,7 +464,7 @@ export default function HomeLogin() {
       <hr className="border-slate-100" />
 
       {/* SECTION 3: LIVE FEED (CYBER-WHITE DESIGN) */}
-      <section className="py-24 px-3 sm:px-6 bg-white relative overflow-hidden">
+      <section className="py-10 sm:py-24 px-3 sm:px-6 bg-white relative overflow-hidden">
         {/* Subtle grid pattern background for a "technical" feel */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -476,8 +476,8 @@ export default function HomeLogin() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header Section */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between mb-16 gap-6">
-            <div className="space-y-2">
+          <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 sm:mb-16 gap-6">
+            <div className="space-y-2 sm:scale">
               <div className="flex items-center gap-3">
                 <div className="flex gap-1">
                   <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce"></span>
@@ -488,7 +488,7 @@ export default function HomeLogin() {
                   Broadcast Stream
                 </span>
               </div>
-              <h2 className="text-5xl font-black italic uppercase tracking-tighter text-slate-900">
+              <h2 className="text-3xl sm:text-5xl font-black italic uppercase tracking-tighter text-slate-900">
                 Live <span className="text-blue-600">Feed.</span>
               </h2>
             </div>
@@ -516,14 +516,14 @@ export default function HomeLogin() {
           <div
             ref={scrollRef}
             onScroll={handleScroll}
-            className="flex overflow-x-auto gap-8 pb-12 modern-scroll snap-x snap-mandatory px-4"
+            className="flex overflow-x-auto gap-5 sm:gap-8 pb-8 sm:pb-12 modern-scroll snap-x snap-mandatory px-4"
           >
             {notices.map((note) => (
               <div
                 key={note._id}
-                className="min-w-[340px] md:min-w-[440px] snap-center"
+                className="min-w-[75vw] sm:min-w-[340px] md:min-w-[440px] snap-center"
               >
-                <div className="group relative bg-white p-10 rounded-[3rem] border-2 border-slate-100 hover:border-blue-600 transition-all duration-500 shadow-xl shadow-slate-200/50 hover:shadow-blue-500/10 h-full flex flex-col">
+                <div className="group relative bg-white px-4 py-4 sm:p-10 sm:rounded-[3rem] rounded-[1rem] border-2 border-slate-100 hover:border-blue-600 transition-all duration-500 shadow-xl shadow-slate-200/50 hover:shadow-blue-500/10 h-full flex flex-col">
                   {/* Indexing Badge */}
                   <div className="absolute top-8 right-10">
                     <span className="text-4xl font-black text-slate-50 italic group-hover:text-blue-50 transition-colors">
@@ -548,10 +548,10 @@ export default function HomeLogin() {
 
                   {/* Title & Content */}
                   <div className="flex-1">
-                    <h4 className="text-2xl font-black text-slate-900 leading-[1.2] mb-4 group-hover:text-blue-600 transition-colors italic uppercase tracking-tight">
+                    <h4 className="text-md sm:text-2xl font-black text-slate-900 leading-[1.2] mb-4 group-hover:text-blue-600 transition-colors italic uppercase tracking-tight">
                       {note.title}
                     </h4>
-                    <p className="text-slate-500 text-sm leading-relaxed font-medium">
+                    <p className="text-slate-500 sm:text-sm text-xs leading-relaxed font-medium">
                       {note.description}
                     </p>
                   </div>
@@ -588,7 +588,7 @@ export default function HomeLogin() {
       </section>
 
       {open && selectedNote && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
           {/* Backdrop with Blur */}
           <div
             className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
@@ -608,7 +608,7 @@ export default function HomeLogin() {
               </div>
             )}
 
-            <div className="p-8">
+            <div className="py-8 px-4 sm:p-8">
               {/* Category Badge & Date */}
               <div className="flex justify-between items-center mb-4">
                 <span className="px-3 py-1 rounded-full bg-indigo-50 text-indigo-600 text-[10px] font-bold uppercase tracking-wider">
@@ -627,11 +627,11 @@ export default function HomeLogin() {
               </div>
 
               {/* Content */}
-              <h2 className="text-2xl font-black text-slate-800 leading-tight">
+              <h2 className="text-md sm:text-2xl font-black text-slate-800 leading-tight">
                 {selectedNote.title}
               </h2>
 
-              <p className="mt-4 text-slate-600 leading-relaxed">
+              <p className="sm:text-md text-xs mt-4 text-slate-600 leading-relaxed">
                 {selectedNote.description}
               </p>
 
@@ -781,12 +781,15 @@ export default function HomeLogin() {
             {/* POPUP WRAPPER */}
             <div className="relative bg-white w-full max-w-6xl max-h-[90vh] rounded-[1rem] overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.3)] flex flex-col animate-in zoom-in-95 duration-500">
               {/* HEADER */}
-              <div className="p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
+              <div className="p-4 sm:p-10 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-30">
                 <div className="flex items-center gap-4">
                   <div className="bg-blue-600 p-2 rounded-xl text-white">
-                    <ImageIcon size={28} />
+                    
+<div className=" sm:w-12 sm:h-12 flex items-center justify-center ">
+                        <ImageIcon className="w-5 h-5 sm:w-8 sm:h-8" />
+                      </div>
                   </div>
-                  <h3 className="text-3xl font-black italic uppercase tracking-tight text-slate-900">
+                  <h3 className="text-md sm:text-3xl font-black italic uppercase tracking-tight text-slate-900">
                     Student <span className="text-blue-600">Gallery</span>
                   </h3>
                 </div>
@@ -801,12 +804,12 @@ export default function HomeLogin() {
 
               {/* GALLERY GRID */}
               <div className="flex-1 overflow-y-auto p-5 md:p-10 custom-scrollbar">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-10 gap-y-10">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-1 sm:gap-x-10 sm:gap-y-10 gap-y-1">
                   {fullGallery?.length > 0 ? (
                     fullGallery.map((img) => (
                       <div
                         key={img._id}
-                        className="relative aspect-[4/5] rounded-[2rem] overflow-hidden bg-slate-50 
+                        className="relative aspect-[4/5] rounded-[1rem] sm:rounded-[2rem] overflow-hidden bg-slate-50 
                 hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
                       >
                         <img
@@ -815,13 +818,13 @@ export default function HomeLogin() {
                           className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
-                          <p className="text-blue-400 text-[9px] uppercase tracking-widest">
+                          <p className="text-blue-400 sm:text-[9px] text-[6px] uppercase tracking-widest">
                             Campus Life
                           </p>
-                          <p className="text-white font-bold text-sm">
+                          <p className="text-white sm:font-bold text-[7px] sm:text-sm">
                             {img.description || ""}
                           </p>
-                          <h4 className="text-gray-400 w-full text-[11px] font-black text-right">
+                          <h4 className="text-gray-400 w-full text-[7px] sm:text-[11px] font-black text-right">
                             {img.createdAt
                               ? new Date(img.createdAt).toLocaleDateString()
                               : ""}
@@ -836,12 +839,12 @@ export default function HomeLogin() {
                   )}
                 </div>
 
-                <div className="h-24"></div>
+               
               </div>
 
               {/* FOOTER */}
               <div className="p-6 bg-white border-t border-slate-50 text-center">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
+                <p className="text-[6px] sm:text-[10px] font-black text-slate-300 uppercase tracking-[0.5em]">
                   Scroll to Explore • Hover to Focus
                 </p>
               </div>

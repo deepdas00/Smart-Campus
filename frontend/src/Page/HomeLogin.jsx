@@ -756,7 +756,7 @@ export default function HomeLogin() {
                   <div
                     className={`mb-6 transform group-hover:scale-125 group-hover:-rotate-12 transition-all duration-500 ${item.color}`}
                   >
-                    <item.icon size={4} strokeWidth={1.5} />
+                    <item.icon size={40} strokeWidth={1.5} />
                   </div>
                   <h5 className="font-black text-slate-900 uppercase text-sm tracking-widest italic">
                     {item.label}

@@ -18,7 +18,7 @@ import {
   BarChart2,
   Leaf,
 } from "lucide-react";
-
+import { motion } from "framer-motion";
 import {
   Linkedin,
   Twitter,
@@ -34,6 +34,18 @@ import deep from "../assets/Deep.jpg";
 import trideep from "../assets/Trideep.jpg";
 import sangita from "../assets/Sangita.png";
 import { useAuth } from "../context/AuthContext";
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  whileInView: { opacity: 1, y: 0 },
+  viewport: { once: true },
+  transition: { duration: 0.6, ease: "easeOut" },
+};
+
+const staggerContainer = {
+  initial: {},
+  whileInView: { transition: { staggerChildren: 0.1 } },
+};
 
 export default function CampusReporterHome() {
   const { user } = useAuth();
@@ -55,7 +67,6 @@ export default function CampusReporterHome() {
       badge: "bg-blue-100 text-blue-700",
     },
   };
-
 
   const stats = [
     { value: "1 Platform", label: "Unified Campus System" },
@@ -162,11 +173,52 @@ export default function CampusReporterHome() {
               </div> */}
 
               <h1 className="text-[22px] pb-3 sm:text-5xl md:text-4xl font-bold text-gray-900 sm:mb-6 mb-2 leading-tight">
-                Build a Queue-less, Paperless <br />
-                <span className="text-blue-600 md:text-6xl sm:text-5xl text-[35px]">
-                  Smart Campus
-                </span>
-              </h1>
+
+  {/* FIRST LINE — different style */}
+  <motion.span
+    initial={{ opacity: 0, y: -30, filter: "blur(6px)" }}
+    animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+    transition={{
+      duration: 0.8,
+      ease: "easeOut"
+    }}
+    className="block"
+  >
+    Build a Queue-less, Paperless
+  </motion.span>
+
+  {/* SECOND LINE — your letter animation */}
+  <span className="flex flex-wrap justify-center md:justify-start mt-2">
+    {"Smart Campus".split("").map((letter, i) => (
+      <motion.span
+        key={i}
+        initial={{
+          opacity: 0,
+          y: -60,
+          rotateX: -90,
+          scale: 0.5,
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+        }}
+        transition={{
+          duration: 0.6,
+          delay: i * 0.05,
+          type: "spring",
+          damping: 10,
+          stiffness: 150,
+        }}
+        className="text-blue-600 md:text-6xl sm:text-5xl text-[35px] font-bold inline-block"
+        style={{ whiteSpace: "pre" }}
+      >
+        {letter}
+      </motion.span>
+    ))}
+  </span>
+</h1>
               <p className="text-[11px] sm:text-lg md:text-xl text-gray-600 mb-5 max-w-xl mx-auto md:mx-0 text-center md:text-left leading-relaxed">
                 Smart Campus is a complete digital platform that connects
                 students, faculty, and administrators to manage campus
@@ -365,8 +417,7 @@ export default function CampusReporterHome() {
             <p className="text-lg text-gray-600">Simple. Smart. Scalable.</p>
           </div>
 
-
-{/* 
+          {/* 
 Subtitle (replace current one)
 
 Simple. Smart. Scalable.
@@ -382,7 +433,6 @@ The system automatically routes requests, manages workflows, and updates records
 Step 3 — Track & Complete
 
 Users track progress, receive notifications, and complete tasks with full transparency */}
-
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
@@ -651,7 +701,9 @@ Users track progress, receive notifications, and complete tasks with full transp
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
-                to={"/signup"} className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg">
+              to={"/signup"}
+              className="px-8 py-3 sm:px-10 sm:py-4 bg-white text-blue-700 rounded-xl font-bold hover:bg-blue-50 transition-colors shadow-lg"
+            >
               Get Started Now
             </Link>
             <button className="px-8 py-3 sm:px-10 sm:py-4 bg-transparent border-2 border-white/50 text-white rounded-xl font-bold hover:bg-white/10 transition-all">

@@ -554,140 +554,144 @@ Users track progress, receive notifications, and complete tasks with full transp
       {/*FOUNDER SECTION */}
 
       <section
-        id="Founder-section"
-        className="min-h-screen w-full bg-white overflow-hidden flex flex-col"
-      >
-        <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
-          {/* Header */}
-          <div className="text-center ">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
-              <ShieldCheck size={12} className="text-blue-600" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
-                The Architectures
-              </span>
-            </div>
-            <h2 className="text-3xl mb-2 sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
-              THE FOUNDING <span className="text-blue-600">TRIAD.</span>
-            </h2>
-          </div>
+  id="Founder-section"
+  className="min-h-screen w-full bg-white overflow-hidden flex flex-col"
+>
+  <div className="max-w-7xl mx-auto px-6 w-full h-full flex flex-col">
+    {/* Header - Added Scroll Fade Down */}
+    <motion.div 
+      initial={{ opacity: 0, y: -30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-100px" }}
+      transition={{ duration: 0.8 }}
+      className="text-center"
+    >
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 mb-2">
+        <ShieldCheck size={12} className="text-blue-600" />
+        <span className="text-[10px] font-bold uppercase tracking-widest text-blue-600">
+          The Architectures
+        </span>
+      </div>
+      <h2 className="text-3xl mb-2 sm:text-4xl md:text-5xl font-black text-slate-900 tracking-tight leading-none italic uppercase">
+        THE FOUNDING <span className="text-blue-600">TRIAD.</span>
+      </h2>
+    </motion.div>
 
-          {/* Full Image Grid - No Scroll */}
-          <div className="flex-1 flex flex-col lg:flex-row items-baseline justify-center gap-6 lg:gap-2 pb-20 mt-1">
-            {founders.map((founder, index) => {
-              const isMiddle = index === 1;
+    {/* Full Image Grid - Staggered Scroll Rise */}
+    <motion.div 
+      initial="hidden"
+      whileInView="show"
+      viewport={{ once: true, amount: 0.2 }}
+      variants={{
+        hidden: { opacity: 0 },
+        show: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.2 // Cards appear one after another
+          }
+        }
+      }}
+      className="flex-1 flex flex-col lg:flex-row items-baseline justify-center gap-6 lg:gap-2 pb-20 mt-1"
+    >
+      {founders.map((founder, index) => {
+        const isMiddle = index === 1;
 
-              return (
-                <div
-                  key={index}
-                  className={`relative group transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]
-                  ${
-                    isMiddle
-                      ? " lg:scale-100 w-full lg:w-[350px] h-[500px]"
-                      : " lg:scale-100 w-full lg:w-[350px] h-[500px] lg:mt-10"
-                  }
-        `}
-                >
-                  {/* Main Card Container */}
-                  <div className="relative w-full h-full rounded-[3.5rem] overflow-hidden bg-slate-900 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-10px]">
-                    {/* IMAGE: Full cover with zoom effect */}
-                    <img
-                      src={founder.image}
-                      alt={founder.name}
-                      className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 
-              ${
-                isMiddle
-                  ? "scale-105 group-hover:scale-112"
-                  : "scale-110 group-hover:scale-120"
-              }
-              ${!isMiddle && "opacity-80 group-hover:opacity-100"}
-            `}
-                    />
-
-                    {/* OVERLAYS */}
-                    {/* 1. Base Gradient Overlay */}
-                    <div
-                      className="absolute inset-0 bg-gradient-to-t bg-gradient-to-t 
-             from-black/90
-             via-transparent 
-             to-transparent  opacity-100 group-hover:opacity-40 transition-opacity duration-700"
-                    />
-
-                    {/* 2. Color Tint (Middle is Blue, Sides are Slate) */}
-                    <div
-                      className={`absolute inset-0 mix-blend-overlay transition-opacity duration-700 
+        return (
+          <motion.div
+            key={index}
+            variants={{
+              hidden: { opacity: 0, y: 50 },
+              show: { opacity: 1, y: 0 }
+            }}
+            transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
+            className={`relative group transition-all duration-1000 ease-[cubic-bezier(0.23,1,0.32,1)]
             ${
               isMiddle
-                ? "bg-blue-500/20 group-hover:opacity-0"
-                : "bg-slate-500/30 group-hover:opacity-0"
+                ? " lg:scale-100 w-full lg:w-[350px] h-[500px]"
+                : " lg:scale-100 w-full lg:w-[350px] h-[500px] lg:mt-10"
             }`}
-                    />
+          >
+            {/* Main Card Container */}
+            <div className="relative w-full h-full rounded-[3.5rem] overflow-hidden bg-slate-900 shadow-2xl transition-transform duration-700 group-hover:translate-y-[-10px]">
+              {/* IMAGE: Full cover with zoom effect */}
+              <img
+                src={founder.image}
+                alt={founder.name}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 
+                ${
+                  isMiddle
+                    ? "scale-105 group-hover:scale-112"
+                    : "scale-110 group-hover:scale-120"
+                }
+                ${!isMiddle && "opacity-80 group-hover:opacity-100"}`}
+              />
 
-                    {/* 3. Glossy Shine streak */}
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
-                      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
-                    </div>
+              {/* OVERLAYS */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-100 group-hover:opacity-40 transition-opacity duration-700" />
 
-                    {/* CONTENT SECTION */}
-                    <div className="absolute inset-x-0 bottom-0 p-8 z-20">
-                      {/* Name and Role */}
-                      <div className="mb-4 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
-                        <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 leading-none">
-                          {founder.role}
-                        </p>
-                        <h3
-                          className={`font-black text-white uppercase tracking-tighter leading-none transition-all duration-500 flex gap-2
-                ${isMiddle ? "text-3xl" : "text-2xl"}
-              `}
-                        >
-                          {founder.name.split(" ")[0]} <br />
-                          <span className="text-white/50 group-hover:text-white transition-colors">
-                            {founder.name.split(" ")[1]}
-                          </span>
-                        </h3>
-                      </div>
+              <div className={`absolute inset-0 mix-blend-overlay transition-opacity duration-700 
+                ${isMiddle ? "bg-blue-500/20 group-hover:opacity-0" : "bg-slate-500/30 group-hover:opacity-0"}`}
+              />
 
-                      {/* Hidden Bio - Expands upward */}
-                      <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-700 ease-in-out">
-                        <div className="overflow-hidden">
-                          <p className="text-white/70 text-sm font-medium leading-relaxed mb-6 pr-4">
-                            {founder.bio}
-                          </p>
+              {/* Glossy Shine streak */}
+              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none">
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+              </div>
 
-                          {/* Social Dock */}
-                          <div className="flex gap-2 p-2 w-fit bg-black/1 backdrop-blur-sm border border-black/4 rounded-2xl">
-                            {Object.entries(founder.social).map(
-                              ([key, url]) => (
-                                <a
-                                  key={key}
-                                  href={url}
-                                  className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-blue-600 text-white transition-all duration-300"
-                                >
-                                  {key === "li" && <Linkedin size={18} />}
-                                  {key === "tw" && <Twitter size={18} />}
-                                  {key === "ig" && <Instagram size={18} />}
-                                  {key === "gh" && <Github size={18} />}
-                                  {key === "pf" && <ArrowUpRight size={18} />}
-                                </a>
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Floating ID Badge */}
-                  </div>
-
-                  {/* Outer Glow for the Middle Founder */}
-                  {isMiddle && (
-                    <div className="absolute -inset-4 bg-blue-500/10 blur-[100px] -z-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-                  )}
+              {/* CONTENT SECTION */}
+              <div className="absolute inset-x-0 bottom-0 p-8 z-20">
+                <div className="mb-4 transform transition-transform duration-500 group-hover:translate-y-[-10px]">
+                  <p className="text-blue-400 text-[10px] font-black uppercase tracking-[0.3em] mb-2 leading-none">
+                    {founder.role}
+                  </p>
+                  <h3 className={`font-black text-white uppercase tracking-tighter leading-none transition-all duration-500 flex gap-2
+                    ${isMiddle ? "text-3xl" : "text-2xl"}`}
+                  >
+                    {founder.name.split(" ")[0]} <br />
+                    <span className="text-white/50 group-hover:text-white transition-colors">
+                      {founder.name.split(" ")[1]}
+                    </span>
+                  </h3>
                 </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+
+                {/* Hidden Bio - Expands upward */}
+                <div className="grid grid-rows-[0fr] group-hover:grid-rows-[1fr] transition-all duration-700 ease-in-out">
+                  <div className="overflow-hidden">
+                    <p className="text-white/70 text-sm font-medium leading-relaxed mb-6 pr-4">
+                      {founder.bio}
+                    </p>
+
+                    {/* Social Dock */}
+                    <div className="flex gap-2 p-2 w-fit bg-black/1 backdrop-blur-sm border border-black/4 rounded-2xl">
+                      {Object.entries(founder.social).map(([key, url]) => (
+                        <a
+                          key={key}
+                          href={url}
+                          className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-blue-600 text-white transition-all duration-300"
+                        >
+                          {key === "li" && <Linkedin size={18} />}
+                          {key === "tw" && <Twitter size={18} />}
+                          {key === "ig" && <Instagram size={18} />}
+                          {key === "gh" && <Github size={18} />}
+                          {key === "pf" && <ArrowUpRight size={18} />}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Outer Glow for the Middle Founder */}
+            {isMiddle && (
+              <div className="absolute -inset-4 bg-blue-500/10 blur-[100px] -z-10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+            )}
+          </motion.div>
+        );
+      })}
+    </motion.div>
+  </div>
+</section>
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 px-4 bg-blue-700">

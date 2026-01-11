@@ -357,6 +357,8 @@ export default function App() {
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mt-6 sm:mt-10">
       {activeBooks.length > 0 ? (
         activeBooks.map((record, index) => (
+        <Link to="/library">
+
           <div
             key={record._id}
             className={`
@@ -474,6 +476,7 @@ export default function App() {
               </div>
             </div>
           </div>
+        </Link>
         ))
       ) : (
         <p className="text-center text-slate-300 italic py-10">

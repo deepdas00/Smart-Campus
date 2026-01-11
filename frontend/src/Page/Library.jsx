@@ -241,13 +241,13 @@ const FullScreenLoader = () => {
           <div className="absolute w-40 h-40 rounded-full border-2 border-indigo-500/20 animate-ping opacity-20" />
           
           {/* Rotating Data Ring */}
-          <div className="absolute w-32 h-32 rounded-full border-t-4 border-b-4 border-indigo-500 animate-spin" />
+          <div className="absolute w-32 h-32 rounded-full border-t-4 border-b-4 border-blue-500 animate-spin" />
           
           {/* Static Inner Border */}
           <div className="absolute w-28 h-28 rounded-full border border-white/10" />
 
           {/* Core Content */}
-          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-indigo-600 to-violet-700 flex flex-col items-center justify-center shadow-[0_0_50px_-12px_rgba(79,70,229,0.6)] border border-white/20">
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex flex-col items-center justify-center shadow-[0_0_50px_-12px_rgba(79,70,229,0.6)] border border-white/20">
             {/* Animated Book Icon */}
             <div className="animate-bounce mb-1">
               <BookOpen size={28} className="text-white" strokeWidth={2.5} />
@@ -263,7 +263,7 @@ const FullScreenLoader = () => {
           <h3 className="text-white font-bold text-lg tracking-tight uppercase">
             Processing Transaction
           </h3>
-          <p className="text-indigo-400/60 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+          <p className="text-blue-400/60 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
             Updating Library Records...
           </p>
         </div>

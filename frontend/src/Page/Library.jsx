@@ -191,8 +191,15 @@ export default function Library() {
     paymentStatus: tx.paymentStatus,
   });
 
+
+  const [issuing, setIssuing] = useState(false);
+
+
+
+
   const issueBook = async (book) => {
     try {
+      setIssuing(true);
       const token = Cookies.get("accessToken");
 
 
@@ -217,8 +224,58 @@ export default function Library() {
       alert(err.response?.data?.message || "Failed to issue book");
     } finally{
       fetchLibraryHistory();
+      setIssuing(false);
     }
   };
+
+
+
+const FullScreenLoader = () => {
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-2xl transition-all duration-500">
+      
+      <div className="flex flex-col items-center gap-8">
+        <div className="relative flex items-center justify-center">
+          
+          {/* Outer Pulsing Halo */}
+          <div className="absolute w-40 h-40 rounded-full border-2 border-indigo-500/20 animate-ping opacity-20" />
+          
+          {/* Rotating Data Ring */}
+          <div className="absolute w-32 h-32 rounded-full border-t-4 border-b-4 border-indigo-500 animate-spin" />
+          
+          {/* Static Inner Border */}
+          <div className="absolute w-28 h-28 rounded-full border border-white/10" />
+
+          {/* Core Content */}
+          <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-indigo-600 to-violet-700 flex flex-col items-center justify-center shadow-[0_0_50px_-12px_rgba(79,70,229,0.6)] border border-white/20">
+            {/* Animated Book Icon */}
+            <div className="animate-bounce mb-1">
+              <BookOpen size={28} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span className="text-white text-[10px] font-black tracking-[0.2em] uppercase">
+              Issuing
+            </span>
+          </div>
+        </div>
+
+        {/* Status Message */}
+        <div className="text-center space-y-2">
+          <h3 className="text-white font-bold text-lg tracking-tight uppercase">
+            Processing Transaction
+          </h3>
+          <p className="text-indigo-400/60 text-[10px] font-black uppercase tracking-[0.3em] animate-pulse">
+            Updating Library Records...
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+
+
 
   const fetchTransactionDetails = async (transactionId) => {
     try {
@@ -1131,7 +1188,10 @@ export default function Library() {
         </div>
       </div>
     </div>
+    {issuing && <FullScreenLoader />}
+
   </div>
+  
 )}
 
       {/* Main Content */}

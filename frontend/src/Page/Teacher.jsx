@@ -28,6 +28,7 @@ export default function TeacherManager() {
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+const [showSuccess, setShowSuccess] = useState(false);
 
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -147,6 +148,9 @@ export default function TeacherManager() {
           );
           setIsAddOpen(false);
           setSelectedTeacher(null);
+
+           setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
         }}
       />
 
@@ -350,6 +354,32 @@ export default function TeacherManager() {
           </table>
         </div>
       </div>
+
+
+
+      {showSuccess && (
+  <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div className="bg-white rounded-2xl px-8 py-6 shadow-2xl animate-in zoom-in duration-300">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center">
+          <CheckCircle className="w-8 h-8 text-emerald-600" />
+        </div>
+
+        <h3 className="text-lg font-black text-slate-900">
+          Teacher Added Successfully
+        </h3>
+
+        <p className="text-xs text-slate-500 text-center">
+          The faculty profile has been created and saved.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
+
+
+
+
     </div>
   );
 }

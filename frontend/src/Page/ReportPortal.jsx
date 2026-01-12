@@ -127,6 +127,21 @@ export default function EduReportPortal() {
     reader.readAsDataURL(file);
   };
 
+
+
+  useEffect(() => {
+  if (step === 3) {
+    const t = setTimeout(() => {
+      navigate("/dashboard");
+    }, 5000);
+    return () => clearTimeout(t);
+  }
+}, [step]);
+
+
+
+
+
   const detectLocation = () => {
     setIsLocating(true);
     if ("geolocation" in navigator) {
@@ -440,6 +455,81 @@ export default function EduReportPortal() {
               </div>
             </div>
           )}
+
+
+
+
+          {/* STEP 3 – SUCCESS */}
+{step === 3 && (
+  <div className="flex flex-col items-center justify-center text-center py-20 animate-in zoom-in-95 duration-500">
+    
+    {/* Icon */}
+    <div className="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center mb-6 shadow-inner">
+      <CheckCircle2 size={48} className="text-emerald-600" />
+    </div>
+
+    {/* Title */}
+    <h2 className="text-3xl font-black text-slate-900 mb-2">
+      Report Submitted Successfully
+    </h2>
+
+    {/* Subtitle */}
+    <p className="text-slate-500 font-medium max-w-md mb-6">
+      Your incident has been logged and forwarded to the campus administration.
+      Our team will review it shortly.
+    </p>
+
+    {/* Transaction Code */}
+    <div className="bg-slate-50 border border-slate-200 rounded-2xl px-6 py-4 mb-8">
+      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
+        Transaction ID
+      </p>
+      <p className="font-mono text-lg font-bold text-indigo-600">
+        {transactionCode}
+      </p>
+    </div>
+
+    {/* Actions */}
+    <div className="flex gap-4">
+      <button
+        onClick={() => {
+          setStep(1);
+          setFormData({
+            title: "",
+            description: "",
+            building: "",
+            room: "",
+            zone: "",
+            labId: "",
+            floor: "",
+            wing: "",
+            equipmentId: "",
+          });
+          setSelectedImage(null);
+          setSelectedImageFile(null);
+          setUploadStatus("idle");
+          setUrgency("Standard");
+          setSector("Academic");
+        }}
+        className="px-6 py-3 bg-indigo-600 text-white rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition"
+      >
+        Submit Another Report
+      </button>
+
+      <Link
+        to="/report-history"
+        className="px-6 py-3 bg-white border border-slate-200 text-slate-600 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition"
+      >
+        Go to Dashboard
+      </Link>
+    </div>
+  </div>
+)}
+
+
+
+
+
         </main>
 
         <div>

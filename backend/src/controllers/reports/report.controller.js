@@ -17,7 +17,7 @@ import { populate } from "dotenv";
 export const createReport = asyncHandler(async (req, res) => {
 
     const { collegeCode, userId } = req.user;
-    const { building, room, title, description, zone, category,  priority } = req.body;
+    const { building, room, title, description, zone, category, priority } = req.body;
 
 
     if (!title || !description || !category) {
@@ -37,14 +37,13 @@ export const createReport = asyncHandler(async (req, res) => {
     // Upload images
 
     let imageUrl;
-    console.log(req.file);
-    
+  
+
     if (req.file?.path) {
         const coverPath = req.file?.path.replace(/\\/g, "/");
         try {
             imageUrl = await uploadOnCloudinary(coverPath);
-            console.log("IMGAAAGAGGA", imageUrl);
-            
+
         } catch (err) {
             return res.status(500).json({ message: "Failed to upload book cover image" });
         }
@@ -55,15 +54,8 @@ export const createReport = asyncHandler(async (req, res) => {
     const transactionCode = await generateTransactionCode(collegeCode, "RPT", Report);
 
 
-
-
-
-
-    console.log("TRARARARA", transactionCode);
-    
-
     const report = await Report.create({
-        transactionCode : transactionCode,
+        transactionCode: transactionCode,
         studentId: userId,
         title,
         description,
@@ -72,10 +64,11 @@ export const createReport = asyncHandler(async (req, res) => {
         priority,
         building,
         room,
-        zone
+        zone,
+        statusDates: [new Date()]
     });
 
-    
+
 
     res.status(201).json(
         new ApiResponse(201, report, "Report submitted successfully")
@@ -102,8 +95,8 @@ export const getMyReports = asyncHandler(async (req, res) => {
 
     const Student = getCollegeStudentModel(collegeConn)
     const reports = await Report.find({ studentId: userId })
-    .populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
-    .sort({ createdAt: -1 });
+        .populate({ path: "studentId", select: "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP" })
+        .sort({ createdAt: -1 });
 
     res.status(200).json(
         new ApiResponse(200, reports, "Reports fetched successfully")
@@ -115,11 +108,11 @@ export const getMyReports = asyncHandler(async (req, res) => {
 /* =========================
    STUDENT REPORT LIST
 ========================= */
-export const getMySingleReport = asyncHandler(async(req,res)=>{
-     const { collegeCode, reportId } = req.body;
+export const getMySingleReport = asyncHandler(async (req, res) => {
+    const { collegeCode, reportId } = req.body;
 
 
-    
+
 
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
@@ -132,22 +125,22 @@ export const getMySingleReport = asyncHandler(async(req,res)=>{
 
     const Student = getCollegeStudentModel(collegeConn)
     const Department = getCollegeDepartmentModel(collegeConn)
-    const report = await Report.find({ _id : reportId }).populate({path : "studentId", select : "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP"})
+    const report = await Report.find({ _id: reportId }).populate({ path: "studentId", select: "-password -refreshToken -isActive -resetPasswordOTP -resetPasswordOTP" })
 
     const student = await Student.findById(report[0].studentId)
-    .populate({path : "department" })
-    
+        .populate({ path: "department" })
+
 
     // const student = await Student.findById(report.studentId)
     // .select("studentName rollNo mobileNo avatar")
 
     // console.log(student);
-    
+
 
     res.status(200).json(
-        new ApiResponse(200, {report, student}, "Reports fetched successfully")
+        new ApiResponse(200, { report, student }, "Reports fetched successfully")
     );
-    
+
 
 })
 /* =========================
@@ -155,10 +148,10 @@ ADMIN REPORT LIST (FOR INDEX)
 ========================= */
 
 export const getAllReports = asyncHandler(async (req, res) => {
-    console.log("HHIHIIHIHHIHI");
     
+
     const { collegeCode } = req.user;
-    
+
     const { range = "daily" } = req.params;
 
     // 1️⃣ Decide start date
@@ -197,17 +190,16 @@ export const getAllReports = asyncHandler(async (req, res) => {
     const Report = getReportModel(collegeConn);
     const Student = getCollegeStudentModel(collegeConn);
 
-    console.log("hiihihhiih");
-    
-    
+
+
     const reports = await Report.find({
         createdAt: { $gte: startDate }
     })
-    .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "fullName rollNo phone profilePhoto department email admissionYear", populate: {path: "department"} })
+        .sort({ createdAt: -1 })
+        .populate({ path: "studentId", select: "fullName rollNo phone profilePhoto department email admissionYear", populate: { path: "department" } })
 
     res.status(200).json(
-        new ApiResponse(200, {reports, collegeCode}, "All reports fetched")
+        new ApiResponse(200, { reports, collegeCode }, "All reports fetched")
     );
 });
 
@@ -240,13 +232,32 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
     const report = await Report.findById(reportId);
     if (!report) throw new ApiError(404, "Report not found");
 
+    // Status → index mapping
+    //   enum: ["submitted", "viewed", "in_progress", "resolved", "rejected", "closed"],
+    
+    const statusIndexMap = {
+        submitted: 0,
+        viewed: 1,
+        in_progress: 2,
+        resolved: 3,
+        rejected: 4,
+        closed: 5
+    };
+
+
+    const index = statusIndexMap[status];
+
+    while (report.statusDates.length <= index) {
+        report.statusDates.push(null);
+    }
+    report.statusDates[index] = new Date();
+
+    if(status==="resolved" && report.statusDates[2]== null)
+        report.statusDates[2] = new Date();
+
     report.status = status;
     if (adminNote) report.adminNote = adminNote;
     if (assignedAdmin) report.assignedAdmin = assignedAdmin;
-
-    console.log(report.status);
-
-
 
     await report.save();
 
@@ -289,10 +300,47 @@ export const submitRating = asyncHandler(async (req, res) => {
 
     report.rating = rating;
     report.status = "closed";
-
+    report.statusDates[5] = new Date();
     await report.save();
 
     res.status(200).json(
         new ApiResponse(200, report, "Thank you for your feedback")
     );
 });
+
+/* =========================
+   ADMIN CHANGE PRIORITY
+========================= */
+
+export const updateReportPriority = asyncHandler(async (req, res) => {
+    const { reportId } = req.params;
+    const { priority } = req.body;
+    const { collegeCode } = req.user;
+
+    const allowedPriority = ["standard", "medium", "urgent"]
+
+    if (allowedPriority.includes(priority)) {
+        return res.status(400).json("Invalid Priority");
+    }
+
+
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
+
+    const college = await College.findOne({ collegeCode, status: "active" });
+    if (!college) throw new ApiError(404, "College not found");
+
+    const collegeConn = getCollegeDB(college.dbName);
+    const Report = getReportModel(collegeConn);
+
+    const report = await Report.findById(reportId);
+    if (!report) throw new ApiError(404, "Report not found");
+
+    report.priority = priority
+    await report.save();
+
+    return res.status(200).json(
+        new ApiResponse(200, report, "Report priority updated successfully")
+    );
+})
+

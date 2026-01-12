@@ -9,7 +9,8 @@ import {
   getAllReports,
   updateReportStatus,
   submitRating,
-  getMySingleReport
+  getMySingleReport,
+  updateReportPriority
 } from "../controllers/reports/report.controller.js";
 
 const router = express.Router();
@@ -58,6 +59,14 @@ router.patch(
   verifyJWT,
   authorizeRoles("admin"),
   updateReportStatus
+);
+
+
+router.patch(
+  "/:reportId/priority",
+  verifyJWT,
+  authorizeRoles("admin"),
+  updateReportPriority
 );
 
 export default router;

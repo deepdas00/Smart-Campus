@@ -219,12 +219,7 @@ const handleSelectCollege = (code) => {
                 Don’t have an account?
               </span>
 
-              <Link
-                to={"/signup"}
-                className="px-4 py-2 text-blue-600 hover:bg-blue-50 rounded-lg transition font-medium"
-              >
-                Signup
-              </Link>
+              
             </div>
           </div>
         </div>

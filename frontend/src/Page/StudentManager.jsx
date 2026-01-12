@@ -248,12 +248,12 @@ export function StudentManager() {
                       <div className="flex items-center gap-4">
                         <img
                           src={s.profilePhoto}
-                          alt={s.studentName}
+                          alt={s.fullName}
                           className="w-11 h-11 rounded-full object-cover border-2 border-white shadow-sm ring-1 ring-slate-100"
                         />
                         <div>
                           <p className="font-bold text-slate-900 text-sm">
-                            {s.studentName}
+                            {s.fullName}
                           </p>
                           <p className="text-[12px] font-medium text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded inline-block mt-1">
                             {s.rollNo}

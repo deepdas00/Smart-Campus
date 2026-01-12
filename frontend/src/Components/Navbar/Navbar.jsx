@@ -28,6 +28,7 @@ export default function Navbar({
   bookReceived,
   bookingSuccess,
   showMyBooks,
+  selectedOrder,
   showIssueModal
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -36,7 +37,6 @@ export default function Navbar({
   const isLibraryPage = location.pathname === "/library";
   const isCanteenPage = location.pathname === "/canteen";
   const isOrderPage = location.pathname === "/orders";
-
 
   const [collegeInfo, setCollegeInfo] = useState("")
   const [collegeDept, setCollegeDept] = useState([])
@@ -159,7 +159,7 @@ useEffect(() => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-{isLibraryPage && !showIssueModal && !showMyBooks && !bookingSuccess && !bookReceived && (
+{isLibraryPage && !showIssueModal && !showMyBooks && !bookingSuccess && !bookReceived && !showProfileMenu && (
   <FloatingCartButton>
     <button
       onClick={onMyBooksClick}
@@ -207,7 +207,7 @@ useEffect(() => {
 )}
 
 
-{isCanteenPage && !showCart && !orderPlaced && (
+{isCanteenPage && !showCart && !orderPlaced && !showProfileMenu && (
   <FloatingCartButton>
     <button
       onClick={onCartClick}
@@ -254,7 +254,7 @@ useEffect(() => {
   </button>
 )}
 
-{isOrderPage && (
+{isOrderPage && !showProfileMenu && !selectedOrder && (
   <FloatingCartButton>
     <Link
       to="/canteen"

@@ -210,7 +210,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
     createdAt: { $gte: startDate },
   })
     .sort({ createdAt: -1 })
-    .populate({ path: "studentId", select: "studentName rollNo mobileNo" })
+    .populate({ path: "studentId", select: "fullName rollNo mobileNo" })
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
@@ -253,7 +253,7 @@ export const fetchedSingleOrder = asyncHandler(async (req, res) => {
   // console.log(Order);
   // 3️⃣ Fetch filtered orders
   const order = await Order.findById(orderId)
-    .populate("studentId", "studentName rollNo mobileNo")
+    .populate("studentId", "fullName rollNo mobileNo")
     .select(
       "_id items transactionCode qrCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );

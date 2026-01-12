@@ -68,8 +68,6 @@ export default function NavLinks() {
   }
 
 
-  console.log(user, "hai re bahi");
-
   return (
     <>
       {/* Section Links */}

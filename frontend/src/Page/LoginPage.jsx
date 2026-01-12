@@ -78,7 +78,7 @@ export default function LoginPage() {
       }
 
 
-      console.log("logn detaillsllsmajcnakjc ajk cajk cskjac",payload);
+      
       
       const res = await axios.post(url, payload, { withCredentials: true });
       const userData = res.data.data || res.data.user;
@@ -132,7 +132,7 @@ useEffect(() => {
     try {
       setLoadingColleges(true);
       const response = await axios.get(`${API_URL}/api/v1/college/data`);
-      console.log(response);
+
       
       if (response.data?.data) {
         setColleges(response.data.data);

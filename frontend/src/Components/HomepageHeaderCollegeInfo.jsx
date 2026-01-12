@@ -75,20 +75,20 @@ export default function CollegeInfo({ collegeData }) {
         />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-8 pb-16  lg:pb-24 pt-10 w-full">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 pb-5 sm:pb-16  lg:pb-24 sm:pt-10 pt-5 w-full">
+        <div className="grid lg:grid-cols-2 sm:gap-16 gap-10 items-center">
           {/* --- LEFT SIDE: IDENTITY --- */}
-          <div className="space-y-10 animate-in slide-in-from-left-8 duration-1000">
+          <div className="sm:space-y-10 space-y-6 animate-in slide-in-from-left-8 duration-1000">
             {/* NAAC Badge */}
-            <div className="inline-flex items-center gap-3 px-4 py-2 bg-white/90 backdrop-blur-md border border-blue-100 shadow-sm rounded-2xl">
-              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-              <span className="text-[12px] font-black uppercase tracking-[0.2em] text-slate-700">
+            <div className="inline-flex items-center sm:gap-3 gap-1 sm:px-4 sm:py-2 px-2 py-1 bg-white/90 backdrop-blur-md border border-blue-100 shadow-sm rounded-2xl">
+              <Star className="sm:w-4 sm:h-4 w-2 h-2 text-yellow-500 fill-yellow-500" />
+              <span className="text-[7px] sm:text-[12px] font-black uppercase tracking-[0.2em] text-slate-700">
                 NAAC Accredited: {data.NAAC || "N/A"}
               </span>
             </div>
 
-            <div className="space-y-6">
-              <h1 className="text-5xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1]">
+            <div className="sm:space-y-6 space-y-3">
+              <h1 className="text-2xl sm:text-5xl md:text-7xl font-black text-slate-900 tracking-tight leading-[1.1]">
                 {data.collegeName && (
                   <>
                     {data.collegeName.split(" ").slice(0, -1).join(" ")} <br />
@@ -99,37 +99,42 @@ export default function CollegeInfo({ collegeData }) {
                 )}
               </h1>
 
-              <p className="text-lg text-slate-500 font-medium max-w-xl leading-relaxed">
+              <p className="sm:text-lg text-[11px] text-slate-500 font-medium max-w-xl leading-relaxed">
                 {data.description ||
                   "Streamlining campus operations with real-time digital access. Students and staff can now access resources efficiently."}
               </p>
             </div>
 
             {/* Feature Cards based on Schema Data */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-md transition-all">
-                <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
-                  <MapPin size={20} />
+            <div
+              className="shrink sm:shrink-0 md:shrink-0
+                  grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
+              <div className="flex items-center sm:gap-4 sm:p-5 p-2 gap-1 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-md transition-all ">
+                <div className="sm:w-12 w-6 sm:h-12 h-6 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600">
+                  <MapPin size={15} className="sm:hidden" />
+                  <MapPin size={20} className="hidden sm:block" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                  <p className="sm:text-[10px] text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                     Address
                   </p>
-                  <p className="text-sm font-bold text-slate-800 whitespace-normal break-words">
+                  <p className="sm:text-sm text-[11px] font-bold text-slate-800 whitespace-normal break-words">
                     {data.address}
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 p-5 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-md transition-all">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
-                  <Mail size={20} />
+              <div className="flex items-center sm:gap-4 sm:p-5 p-2 gap-1 bg-white border border-slate-100 shadow-sm rounded-[2rem] hover:shadow-md transition-all">
+                <div className="sm:w-12 w-6 sm:h-12 h-6 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Mail size={15} className="sm:hidden" />
+                  <Mail size={20} className="hidden sm:block" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
+                  <p className="sm:text-[10px] text-[8px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
                     Contact
                   </p>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="sm:text-sm text-[11px] font-bold text-slate-800">
                     {data.officialEmail}
                   </p>
                 </div>
@@ -138,14 +143,14 @@ export default function CollegeInfo({ collegeData }) {
           </div>
 
           {/* --- RIGHT SIDE: THE MONUMENT --- */}
-          <div className="relative flex justify-center lg:justify-end animate-in slide-in-from-right-8 duration-1000">
+          <div className="relative flex justify-center lg:justify-end animate-in slide-in-from-right-8 duration-1000 scale-x-90 scale-y-90 sm:scale-100">
             {/* Rotating Decorative Background Ring */}
-            <div className="absolute inset-0 scale-110 rounded-[4rem] border border-blue-200/40 animate-pulse-slow border-dashed -rotate-6" />
+            <div className="absolute inset-0 scale-110 rounded-[1rem] sm:rounded-[4rem] border border-blue-200/40 animate-pulse-slow border-dashed -rotate-6" />
 
-            <div className="relative w-full max-w-[420px] bg-white rounded-[4rem] p-4 shadow-2xl border border-slate-100 group">
-              <div className="bg-slate-900 rounded-[3.5rem] p-10 text-white text-center overflow-hidden">
+            <div className="relative w-full max-w-[420px] bg-white rounded-[1rem] sm:rounded-[4rem] p-4 shadow-2xl border border-slate-100 group">
+              <div className="bg-slate-900 rounded-[0.8rem] sm:rounded-[3.5rem] sm:p-10 p-5 text-white text-center overflow-hidden">
                 {/* Logo or Graduation Cap */}
-                <div className="mx-auto w-24 h-24 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl flex items-center justify-center mb-8 transform group-hover:scale-110 transition-transform duration-500">
+                <div className="mx-auto w-24 h-24 bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl flex items-center justify-center mb-4 sm:mb-8 transform group-hover:scale-110 transition-transform duration-500">
                   {data.logo ? (
                     <img
                       src={data.logo}
@@ -205,7 +210,7 @@ export default function CollegeInfo({ collegeData }) {
                 </div>
 
                 {/* Registration Number Footer */}
-                <p className="mt-8 text-[10px] font-medium text-slate-500 tracking-widest uppercase">
+                <p className="mt-4 sm:mt-8 text-[10px] font-medium text-slate-500 tracking-widest uppercase">
                   Reg No: {data.registrationNumber || "N/A"}
                 </p>
               </div>

@@ -6,7 +6,7 @@ export default function TransactionsTable({
 }) {
 
 
-  console.log("HUYAAAAA",transactions);
+
   
   return (
     <div className="px-6 pb-6 overflow-x-auto w-full">

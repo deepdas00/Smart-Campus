@@ -12,6 +12,7 @@ import profile from "../../assets/profile.png";
 import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { createPortal } from "react-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
 import { BookMarked, ChevronRight, ShoppingCart, ChefHat } from "lucide-react";
@@ -20,7 +21,14 @@ export default function Navbar({
   onMyBooksClick,
   myBooksCount,
   onCartClick,
+  orderPlaced,
+  orderReceived,
   cartCount,
+  showCart,
+  bookReceived,
+  bookingSuccess,
+  showMyBooks,
+  showIssueModal
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -34,6 +42,15 @@ export default function Navbar({
   const [collegeDept, setCollegeDept] = useState([])
   const { user } = useAuth();
   const { logout } = useAuth();
+  
+
+
+  function FloatingCartButton({ children }) {
+  return createPortal(children, document.body);
+}
+
+
+
 
   const handleLogout = async () => {
     try {
@@ -92,15 +109,13 @@ export default function Navbar({
     
   const fetchCollegeInfo = async () => {
     try {
-      // console.log("huuuuuuu");
+
       
       const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
         withCredentials: true,
       });
 
-      // console.log("bywyyyyyyyyy");
-      
-      // console.log("infooofofooof",res);
+
       setCollegeInfo(res.data.data.collegeInfo);
       setCollegeDept(res.data.data.departments);
      
@@ -122,7 +137,7 @@ useEffect(() => {
     <>
       {user ? (
         user.role === "student" ? (
-          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-10">
+          <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-60">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
@@ -130,11 +145,11 @@ useEffect(() => {
                     <img
                       src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
-                    <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                    <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
-                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                      <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
                         Powered by <span className="font-semibold ">
                           Smart Campus
                         </span>
@@ -144,47 +159,137 @@ useEffect(() => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                  {isLibraryPage && (
-                    <button
-                      onClick={onMyBooksClick}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <BookMarked className="w-4 h-4" />
-                      <span className="hidden sm:inline">My Books</span>
+{isLibraryPage && !showIssueModal && !showMyBooks && !bookingSuccess && !bookReceived && (
+  <FloatingCartButton>
+    <button
+      onClick={onMyBooksClick}
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <BookMarked className="w-5 h-5" />
 
-                      {myBooksCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          {myBooksCount}
-                        </span>
-                      )}
-                    </button>
-                  )}
+      {myBooksCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          {myBooksCount}
+        </span>
+      )}
+    </button>
+  </FloatingCartButton>
+)}
 
-                  {isCanteenPage && (
-                    <button
-                      onClick={onCartClick}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <ShoppingCart className="w-4 h-4" />
-                      <span className="hidden sm:inline">Cart</span>
 
-                      {cartCount > 0 && (
-                        <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-                          {cartCount}
-                        </span>
-                      )}
-                    </button>
-                  )}
+{isLibraryPage && (
+  <button
+    onClick={onMyBooksClick}
+    className="
+      hidden sm:flex
+      relative items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+    "
+  >
+    <BookMarked className="w-4 h-4" />
+    <span>My Books</span>
 
-                  {isOrderPage && (
-                    <Link
-                      to={"/canteen"}
-                      className="relative flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                    >
-                      <ChefHat className="w-4 h-4" />
-                      <span className="hidden sm:inline">Canteen</span>
-                    </Link>
-                  )}
+    {myBooksCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        {myBooksCount}
+      </span>
+    )}
+  </button>
+)}
+
+
+{isCanteenPage && !showCart && !orderPlaced && (
+  <FloatingCartButton>
+    <button
+      onClick={onCartClick}
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <ShoppingCart className="w-5 h-5" />
+
+      {cartCount > 0 && (
+        <span className="absolute -top-1 -right-1 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          {cartCount}
+        </span>
+      )}
+    </button>
+  </FloatingCartButton>
+)}
+
+{isCanteenPage && (
+  <button
+    onClick={onCartClick}
+    className="
+      hidden sm:flex
+      items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+      relative
+    "
+  >
+    <ShoppingCart className="w-4 h-4" />
+    <span>Cart</span>
+
+    {cartCount > 0 && (
+      <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        {cartCount}
+      </span>
+    )}
+  </button>
+)}
+
+{isOrderPage && (
+  <FloatingCartButton>
+    <Link
+      to="/canteen"
+      className="
+        fixed bottom-7 right-6 z-[9999]
+        flex items-center justify-center
+        w-12 h-12 rounded-full
+        bg-blue-600 text-white
+        hover:bg-blue-700 transition
+        sm:hidden
+      "
+    >
+      <ChefHat className="w-5 h-5" />
+    </Link>
+  </FloatingCartButton>
+)}
+
+
+{isOrderPage && (
+  <Link
+    to="/canteen"
+    className="
+      hidden sm:flex
+      relative items-center gap-2
+      px-3 py-1.5
+      bg-blue-600 text-white rounded-lg
+      hover:bg-blue-700 transition
+    "
+  >
+    <ChefHat className="w-4 h-4" />
+    <span>Canteen</span>
+  </Link>
+)}
+
+
 
                   <span
                     onClick={handleLogout}
@@ -198,7 +303,7 @@ useEffect(() => {
                       src={user?.profilePhoto}
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
                     />
                   </Link>
                 </div>
@@ -214,11 +319,11 @@ useEffect(() => {
                     <img
                       src={collegeInfo?.logo || logo}
                       alt="Smart Campus Logo"
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                     />
-                    <span className="text-xl font-bold bg-blue-700  bg-clip-text text-transparent">
+                    <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
-                      <p className="text-[11px] font-normal bg-gray-500 bg-clip-text text-transparent ">
+                      <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
                         Powered by <span className="font-semibold ">
                           Smart Campus
                         </span>
@@ -249,7 +354,7 @@ useEffect(() => {
 
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
-                      className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
+                      className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"
                     />
                   </Link>
                 </div>
@@ -258,7 +363,7 @@ useEffect(() => {
           </header>
         )
       ) : (
-        <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm py-1.5">
+        <nav className="bg-white/80 backdrop-blur-md fixed w-full z-50 shadow-sm md:py-1.5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between items-center h-16">
               {/* Logo */}
@@ -269,10 +374,10 @@ useEffect(() => {
                 <img
                   src={logo}
                   alt="Smart Campus Logo"
-                  className="w-13.5 h-13.5 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
+                  className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border border-white/40 shadow"
                 />
 
-                <span className="text-xl font-bold bg-blue-700 bg-clip-text text-transparent">
+                <span className="md:text-xl text-lg font-bold bg-blue-700 bg-clip-text text-transparent">
                   Smart Campus
                 </span>
               </button>

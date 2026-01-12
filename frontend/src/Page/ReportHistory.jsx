@@ -249,19 +249,22 @@ export default function ReportHistory() {
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-4 py-8 lg:py-12">
+      <main className="max-w-7xl mx-auto px-2 py-4 sm:px-4 sm:py-8 lg:py-12">
         {/* --- TOP ANALYTICS BAR (Now Fully Dynamic) --- */}
         {/* --- TOP ANALYTICS DASHBOARD --- */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-black text-slate-900 tracking-tight">
+        <div className="mb-8 md:mb-12">
+          {/* HEADER */}
+          <div className="flex items-start md:items-center justify-between mb-4 md:mb-6 gap-3">
+            <div className="flex justify-center items-center flex-col w-full sm:w-auto">
+              <h3 className="text-base md:text-lg font-black text-slate-900 tracking-tight">
                 System Insights
               </h3>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-[11px] md:text-xs text-slate-500 font-medium">
                 Real-time performance of your submissions
               </p>
             </div>
+
+            {/* Desktop badge only */}
             <div className="hidden md:flex gap-2">
               <div className="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-400">
                 LIVE DATA
@@ -269,46 +272,55 @@ export default function ReportHistory() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            {/* 1. Resolution Health (Circular Progress) */}
+          {/* GRID */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6">
+            {/* 1. RESOLUTION HEALTH */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="lg:col-span-2 bg-white border border-slate-200 rounded-[2.5rem] p-6 flex items-center gap-8 relative overflow-hidden"
+              className="
+        lg:col-span-2
+        bg-white border border-slate-200
+        rounded-[1.5rem] md:rounded-[2.5rem]
+        p-4 md:p-6
+        flex flex-col sm:flex-row items-center gap-4 md:gap-8
+        relative overflow-hidden
+      "
             >
+              {/* CIRCLE */}
               <div className="relative flex-shrink-0">
-                {/* Simple SVG Circle Progress */}
-                <svg className="w-32 h-32 transform -rotate-90">
+                <svg className="w-24 h-24 md:w-32 md:h-32 transform -rotate-90">
                   <circle
-                    cx="64"
-                    cy="64"
-                    r="58"
+                    cx="50%"
+                    cy="50%"
+                    r="42"
                     stroke="currentColor"
-                    strokeWidth="12"
+                    strokeWidth="10"
                     fill="transparent"
                     className="text-slate-100"
                   />
                   <motion.circle
-                    cx="64"
-                    cy="64"
-                    r="58"
+                    cx="50%"
+                    cy="50%"
+                    r="42"
                     stroke="currentColor"
-                    strokeWidth="12"
+                    strokeWidth="10"
                     fill="transparent"
-                    strokeDasharray={364.4}
-                    initial={{ strokeDashoffset: 364.4 }}
+                    strokeDasharray={263.8}
+                    initial={{ strokeDashoffset: 263.8 }}
                     animate={{
-                      strokeDashoffset: 364.4 - (364.4 * resolutionRate) / 100,
+                      strokeDashoffset: 263.8 - (263.8 * resolutionRate) / 100,
                     }}
                     className="text-indigo-600"
                     transition={{ duration: 1.5, ease: "easeOut" }}
                   />
                 </svg>
+
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-2xl font-black text-slate-900">
+                  <span className="text-lg md:text-2xl font-black text-slate-900">
                     {resolutionRate}%
                   </span>
-                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-tighter text-center leading-none">
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-tight text-center leading-none">
                     Resolution
                     <br />
                     Score
@@ -316,33 +328,36 @@ export default function ReportHistory() {
                 </div>
               </div>
 
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
+              {/* TEXT */}
+              <div className="flex-1 text-center sm:text-left">
+                <div className="flex items-center gap-2 mb-1 md:mb-2 justify-center sm:justify-start">
                   <div className="p-1.5 bg-emerald-100 rounded-lg text-emerald-600">
                     <Activity className="w-4 h-4" />
                   </div>
-                  <span className="text-xs font-black uppercase text-slate-400 tracking-widest">
+                  <span className="text-[10px] md:text-xs font-black uppercase text-slate-400 tracking-widest">
                     Efficiency
                   </span>
                 </div>
-                <h4 className="text-xl font-black text-slate-900">
+
+                <h4 className="text-base md:text-xl font-black text-slate-900">
                   {resolutionRate >= 70
                     ? "Excellent Progress"
                     : resolutionRate >= 40
                     ? "Steady Growth"
                     : "Monitoring Phase"}
                 </h4>
-                <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                  {resolvedCount} out of {totalReports} cases resolved. Your
-                  feedback completion is at{" "}
+
+                <p className="text-xs md:text-sm text-slate-500 mt-1 md:mt-2 leading-relaxed">
+                  {resolvedCount} out of {totalReports} cases resolved. Feedback
+                  at{" "}
                   <span className="text-indigo-600 font-bold">
                     {feedbackRate}%
                   </span>
                   .
                 </p>
 
-                {/* Progress bar for feedback */}
-                <div className="mt-4 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                {/* FEEDBACK BAR */}
+                <div className="mt-3 md:mt-4 w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
                   <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${feedbackRate}%` }}
@@ -351,41 +366,35 @@ export default function ReportHistory() {
                 </div>
               </div>
 
-              {/* Decorative background element */}
-              <TrendingUp className="absolute -bottom-4 -right-4 w-24 h-24 text-slate-50 opacity-[0.03]" />
+              <TrendingUp className="absolute -bottom-6 -right-6 w-24 h-24 text-slate-50 opacity-[0.03]" />
             </motion.div>
 
-            {/* 2. Volume Breakdown */}
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6">
-              <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-6">
+            {/* 2. VOLUME BREAKDOWN */}
+            <div className="bg-white border border-slate-200 rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6">
+              <p className="text-[9px] md:text-[10px] font-black uppercase text-slate-400 tracking-[0.2em] mb-4 md:mb-6">
                 Volume Analysis
               </p>
-              <div className="space-y-4">
+
+              <div className="space-y-3 md:space-y-4">
                 {[
                   {
                     label: "Active",
                     val: unresolvedCount,
                     color: "bg-orange-400",
-                    total: totalReports,
                   },
                   {
                     label: "Resolved",
                     val: resolvedCount,
                     color: "bg-emerald-500",
-                    total: totalReports,
                   },
-                  {
-                    label: "Rejected",
-                    val: rejectCount,
-                    color: "bg-red-400",
-                    total: totalReports,
-                  },
+                  { label: "Rejected", val: rejectCount, color: "bg-red-400" },
                 ].map((item, idx) => (
-                  <div key={idx} className="space-y-1.5">
-                    <div className="flex justify-between items-end text-[11px] font-bold uppercase tracking-tight">
+                  <div key={idx} className="space-y-1">
+                    <div className="flex justify-between items-end text-[10px] md:text-[11px] font-bold uppercase">
                       <span className="text-slate-500">{item.label}</span>
-                      <span className="text-slate-900">{item.val} Cases</span>
+                      <span className="text-slate-900">{item.val}</span>
                     </div>
+
                     <div className="h-2 bg-slate-50 rounded-full overflow-hidden border border-slate-100">
                       <motion.div
                         initial={{ width: 0 }}
@@ -400,68 +409,77 @@ export default function ReportHistory() {
               </div>
             </div>
 
-            {/* 3. Quick Summary Card */}
-            <div className="bg-slate-900 rounded-[2.5rem] p-6 text-white relative overflow-hidden group">
-              <div className="relative z-0 h-full flex flex-col justify-between">
+            {/* 3. QUICK SUMMARY */}
+            <div className="bg-slate-900 rounded-[1.5rem] md:rounded-[2.5rem] p-4 md:p-6 text-white relative overflow-hidden group">
+              <div className="relative z-10 h-full flex flex-col justify-between">
                 <div>
-                  <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center mb-4 border border-white/10 group-hover:rotate-12 transition-transform">
-                    <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                  <div className="flex gap-2 items-center sm: flex-col sm:gap-0 sm:items-start sm:justify-start">
+                    <div className="w-9 h-9 md:w-10 md:h-10 bg-white/10 rounded-xl flex items-center justify-center mb-3 md:mb-4 border border-white/10 group-hover:rotate-12 transition-transform">
+                    <ShieldCheck className="w-4 h-4 md:w-5 md:h-5 text-indigo-400" />
                   </div>
-                  <p className="text-[10px] font-black uppercase text-indigo-300 tracking-widest mb-1">
+
+                  <p className="text-[9px] md:text-[10px] font-black uppercase text-indigo-300 tracking-widest mb-1">
                     Status Summary
                   </p>
-                  <h3 className="text-lg font-bold leading-tight italic">
+                  </div>
+
+                  <h3 className="text-sm md:text-lg font-bold italic leading-tight flex justify-center items-center">
                     "Your impact is making the campus safer."
                   </h3>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-white/10">
+                <div className="mt-3 md:mt-4 pt-3 md:pt-4 border-t border-white/10">
                   <div className="flex justify-between items-center text-xs">
                     <span className="text-slate-400">Total Contributions</span>
-                    <span className="font-black text-2xl">{totalReports}</span>
+                    <span className="font-black text-xl md:text-2xl">
+                      {totalReports}
+                    </span>
                   </div>
                 </div>
               </div>
-              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-[80px] -z-0" />
+
+              <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 blur-[80px]" />
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* --- LEFT: MAIN LIST AREA --- */}
-          <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] p-6 lg:p-8">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start">
+          {/* ================= LEFT: MAIN LIST ================= */}
+          <div className="lg:col-span-8 space-y-4 lg:space-y-6">
+            <div className="bg-white border border-slate-200 rounded-2xl lg:rounded-[2.5rem] p-4 lg:p-8">
+              {/* HEADER */}
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6 lg:mb-8">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <h2 className="text-xl lg:text-2xl font-black text-slate-900 flex items-center gap-2">
                     Case Records
-                    <span className="bg-slate-100 text-slate-500 text-xs px-2 py-1 rounded-lg">
+                    <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-1 rounded-lg">
                       {filteredReports.length}
                     </span>
                   </h2>
-                  <p className="text-slate-400 text-sm font-medium mt-1">
+                  <p className="text-xs lg:text-sm text-slate-400 font-medium mt-1">
                     Manage and track your active submissions
                   </p>
                 </div>
 
-                <div className="flex gap-2">
-                  <div className="relative group">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-indigo-500 transition-colors" />
+                {/* SEARCH + FILTER */}
+                <div className="flex flex-row sm:flex-row gap-2 w-full lg:w-auto">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
                     <input
                       type="text"
                       placeholder="Search cases..."
-                      className="pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all w-full md:w-64"
+                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-500/20"
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <button className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-500 hover:bg-white hover:border-indigo-200 transition-all">
+                  <button className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-500">
                     <Filter className="w-4 h-4" />
                   </button>
                 </div>
               </div>
 
-              {/* Status Tabs */}
-              <div className="flex gap-1 p-1 bg-slate-100 rounded-2xl mb-6 w-fit">
+              {/* STATUS TABS (SCROLLABLE ON MOBILE) */}
+              <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-6 overflow-x-auto no-scrollbar">
                 {[
                   "all",
                   "submitted",
@@ -472,10 +490,10 @@ export default function ReportHistory() {
                   <button
                     key={tab}
                     onClick={() => setActiveFilter(tab)}
-                    className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
+                    className={`px-3 lg:px-4 py-2 rounded-lg text-[10px] font-black uppercase whitespace-nowrap transition-all ${
                       activeFilter === tab
                         ? "bg-white text-indigo-600 shadow-sm"
-                        : "text-slate-500 hover:text-slate-700"
+                        : "text-slate-500"
                     }`}
                   >
                     {tab}
@@ -483,19 +501,11 @@ export default function ReportHistory() {
                 ))}
               </div>
 
-              {/* List */}
+              {/* LIST */}
               <div className="space-y-3">
                 {filteredReports.map((report) => {
                   const status = statusConfig[report.status];
-                  const categoryLabel =
-                    {
-                      researchandlab: "Research & Lab",
-                      housinganddorms: "Housing & Dorms",
-                      groundandpublic: "Ground & Public",
-                    }[report.category] || report.category;
-
-                  // Mapping priority to professional border colors
-                  const priorityClasses =
+                  const priorityBorder =
                     {
                       urgent: "border-l-red-500",
                       medium: "border-l-orange-500",
@@ -505,26 +515,23 @@ export default function ReportHistory() {
                   return (
                     <div
                       key={report._id}
-                      className={`group bg-white border border-slate-200 border-l-[6px] ${priorityClasses} rounded-2xl overflow-hidden transition-all hover:shadow-md hover:border-slate-300 cursor-pointer`}
+                      className={`bg-white border border-slate-200 border-l-[5px] ${priorityBorder} rounded-xl lg:rounded-2xl transition hover:shadow-md`}
                     >
-                      <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer">
-                        {/* LEFT: Clickable Info Section (Opens Sidebar) */}
+                      <div className="p-3 lg:p-4 flex flex-col lg:flex-row gap-4 lg:items-center justify-between">
+                        {/* INFO */}
                         <button
                           onClick={() => setSelectedReport(report)}
-                          className="flex-1 text-left focus:outline-none"
+                          className="flex-1 text-left"
                         >
-                          <div className="flex items-center gap-3 mb-1.5 cursor-pointer">
-                            <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">
-                              {report.title}
-                            </h3>
-                          </div>
+                          <h3 className="font-bold text-sm lg:text-base text-slate-900 mb-1">
+                            {report.title}
+                          </h3>
 
-                          <div className="flex flex-wrap items-center gap-y-2 text-[12px] font-medium text-slate-500 cursor-pointer">
-                            <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 ">
-                              {categoryLabel}
+                          <div className="flex flex-wrap gap-2 text-[10px] text-slate-500">
+                            <span className="bg-slate-100 px-2 py-0.5 rounded">
+                              {report.category}
                             </span>
-                            <span className="mx-2 text-slate-300">|</span>
-                            <span className="capitalize ">
+                            <span>
                               Priority:{" "}
                               <span
                                 className={
@@ -536,84 +543,45 @@ export default function ReportHistory() {
                                 {report.priority}
                               </span>
                             </span>
-                            <span className="mx-2 text-slate-300">|</span>
-                            <span className="text-slate-400 flex items-center gap-1">
+                            <span className="flex items-center gap-1 text-slate-400">
                               <Calendar className="w-3 h-3" />
-                              {new Date(report.createdAt).toLocaleDateString(
-                                undefined,
-                                {
-                                  month: "short",
-                                  day: "numeric",
-                                  year: "numeric",
-                                }
-                              )}
+                              {new Date(report.createdAt).toLocaleDateString()}
                             </span>
                           </div>
                         </button>
 
-                        {/* RIGHT: Status & Interactive Rating (Does NOT open Sidebar) */}
-                        <div className="flex flex-wrap items-center gap-3 cursor-pointer">
-                          {/* Interactive Rating: Only for 'resolved' status */}
+                        {/* STATUS + RATING */}
+                        <div className="flex flex-wrap items-center gap-2 justify-between lg:justify-end">
                           {report.status === "resolved" && (
                             <div
-                              onClick={(e) => e.stopPropagation()} // STOPS SIDEBAR FROM OPENING
-                              className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-1.5 pr-3 rounded-xl shadow-sm"
+                              onClick={(e) => e.stopPropagation()}
+                              className="flex gap-1 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg"
                             >
-                              <span className="pl-1 text-[9px] font-black uppercase tracking-tighter text-slate-400">
-                                Rate
-                              </span>
-                              <div className="flex gap-0.5">
-                                {[1, 2, 3, 4, 5].map((star) => (
-                                  <button
-                                    key={star}
-                                    disabled={submittingRating || report.rating}
-                                    onClick={(e) => {
-                                      e.stopPropagation(); // DOUBLE PROTECTION
-                                      submitRatinghandle(report._id, star);
-                                    }}
-                                    className="transition-transform hover:scale-125 active:scale-90 disabled:opacity-40"
-                                  >
-                                    <Star
-                                      className={`w-4 h-4 transition-colors ${
-                                        star <= (report.rating || rating)
-                                          ? "text-amber-400 fill-amber-400"
-                                          : "text-slate-300 hover:text-amber-200"
-                                      }`}
-                                    />
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Read-Only Feedback: For 'closed' status */}
-                          {report.status === "closed" && report.rating && (
-                            <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-xl shadow-sm">
-                              <div className="flex gap-0.5">
-                                {[1, 2, 3, 4, 5].map((star) => (
+                              {[1, 2, 3, 4, 5].map((star) => (
+                                <button
+                                  key={star}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    submitRatinghandle(report._id, star);
+                                  }}
+                                >
                                   <Star
-                                    key={star}
-                                    className={`w-3 h-3 ${
-                                      star <= report.rating
-                                        ? "text-emerald-500 fill-emerald-500"
-                                        : "text-emerald-200"
+                                    className={`w-4 h-4 ${
+                                      star <= (report.rating || rating)
+                                        ? "text-amber-400 fill-amber-400"
+                                        : "text-slate-300"
                                     }`}
                                   />
-                                ))}
-                              </div>
-                              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tighter">
-                                Verified
-                              </span>
+                                </button>
+                              ))}
                             </div>
                           )}
 
-                          {/* Main Status Badge */}
-                          <div
-                            className={`shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm border ${status?.className}`}
+                          <span
+                            className={`px-3 py-1 rounded-full text-[10px] font-black uppercase border ${status?.className}`}
                           >
-                            {status?.icon}
                             {status?.label}
-                          </div>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -623,79 +591,47 @@ export default function ReportHistory() {
             </div>
           </div>
 
-          {/* --- RIGHT: SIDEBAR WIDGETS --- */}
+          {/* ================= RIGHT: SIDEBAR ================= */}
           <aside className="lg:col-span-4 space-y-6">
-            {/* Call to Action Widget */}
-            <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white relative overflow-hidden group shadow-xl shadow-indigo-200">
-              <div className="relative z-0">
-                <Link to={"/report"}>
-                  <div className="bg-white/20 w-12 h-12 rounded-2xl flex items-center justify-center mb-6">
-                    <Plus className="w-6 h-6" />
-                  </div>
-                </Link>
-                <h3 className="text-xl font-black leading-tight mb-2">
-                  Need to report <br />
-                  something new?
-                </h3>
-                <p className="text-indigo-100 text-xs font-medium mb-6 leading-relaxed">
-                  Your voice matters. Submit a new case and our team will review
-                  it immediately.
-                </p>
-                <Link to={"/report"}>
-                  <button className="w-full py-4 bg-white text-indigo-600 rounded-2xl font-black text-sm hover:bg-indigo-50 transition-colors shadow-lg shadow-black/10">
-                    Create New Case
-                  </button>
-                </Link>
-              </div>
-              <Activity className="absolute -bottom-4 -right-4 w-32 h-32 text-white/10 group-hover:scale-110 transition-transform duration-700" />
+            {/* CTA */}
+            <div className="bg-indigo-600 rounded-2xl lg:rounded-[2.5rem] p-6 lg:p-8 text-white shadow-xl">
+              <Link to="/report">
+                <button className="w-full py-4 bg-white text-indigo-600 rounded-xl font-black text-sm">
+                  Create New Case
+                </button>
+              </Link>
             </div>
 
-            {/* Support Widget */}
-            <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="p-2 bg-slate-50 rounded-lg text-slate-400">
-                  <HelpCircle className="w-4 h-4" />
-                </div>
-                <h4 className="text-xs font-black uppercase tracking-widest text-slate-900">
-                  Support Center
-                </h4>
-              </div>
-
-              <div className="space-y-4">
+            {/* SUPPORT */}
+            <div className="bg-white border border-slate-200 rounded-2xl lg:rounded-[2.5rem] p-6">
+              <h4 className="text-xs font-black uppercase tracking-widest mb-4">
+                Support Center
+              </h4>
+              <div className="space-y-3">
                 {[
-                  { t: "Guidance on Evidence", i: Info },
-                  { t: "Whistleblower Rights", i: ShieldCheck },
-                  { t: "Contact Investigator", i: ExternalLink },
-                ].map((item, idx) => (
+                  "Guidance on Evidence",
+                  "Whistleblower Rights",
+                  "Contact Investigator",
+                ].map((t, i) => (
                   <div
-                    key={idx}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 cursor-pointer group transition-colors"
+                    key={i}
+                    className="flex justify-between items-center p-3 rounded-lg hover:bg-slate-50"
                   >
-                    <div className="flex items-center gap-3">
-                      <item.i className="w-4 h-4 text-slate-400 group-hover:text-indigo-600 transition-colors" />
-                      <span className="text-xs font-bold text-slate-600 group-hover:text-slate-900">
-                        {item.t}
-                      </span>
-                    </div>
-                    <ChevronRight className="w-3 h-3 text-slate-300 group-hover:translate-x-1 transition-all" />
+                    <span className="text-xs font-bold text-slate-600">
+                      {t}
+                    </span>
+                    <ChevronRight className="w-3 h-3 text-slate-300" />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Privacy Shield Info */}
-            <div className="p-6 bg-emerald-50/50 border border-emerald-100 rounded-3xl flex gap-4">
-              <ShieldCheck className="w-6 h-6 text-emerald-600 shrink-0" />
-              <div>
-                <h5 className="text-[11px] font-black text-emerald-900 uppercase tracking-widest">
-                  End-to-End Encrypted
-                </h5>
-                <p className="text-[10px] text-emerald-700 font-medium mt-1 leading-relaxed">
-                  Your identity and report data are secured with AES-256
-                  encryption. Only authorized investigators can access your
-                  data.
-                </p>
-              </div>
+            {/* SECURITY */}
+            <div className="p-5 bg-emerald-50 border border-emerald-100 rounded-2xl flex gap-3">
+              <ShieldCheck className="w-5 h-5 text-emerald-600" />
+              <p className="text-[10px] text-emerald-700 font-medium">
+                End-to-end encrypted with AES-256 security.
+              </p>
             </div>
           </aside>
         </div>
@@ -708,7 +644,7 @@ export default function ReportHistory() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSelectedReport(null)} // Close on backdrop click
-            className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex justify-end"
+            className="fixed inset-0 z-110 bg-slate-900/60 backdrop-blur-sm flex justify-end"
           >
             <motion.div
               initial={{ x: "100%" }}
@@ -719,10 +655,10 @@ export default function ReportHistory() {
               className="w-full max-w-xl bg-[#F8FAFC] h-full shadow-2xl flex flex-col"
             >
               {/* --- STICKY HEADER --- */}
-              <div className="bg-white/80 backdrop-blur-md sticky top-0 z-10 border-b border-slate-100 p-6">
+              <div className="bg-white/10  backdrop-blur-md sticky top-0 z-10 border-b border-slate-300 sm:p-6 p-2 ">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-col sm:flex-row items-start">
                       <span
                         className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
                           selectedReport.priority === "high"
@@ -736,7 +672,7 @@ export default function ReportHistory() {
                         ID: #{selectedReport.transactionCode}
                       </span>
                     </div>
-                    <h2 className="text-2xl font-black text-slate-900 leading-tight">
+                    <h2 className="text-md sm:text-2xl font-black text-slate-900 leading-tight">
                       {selectedReport.title}
                     </h2>
                   </div>
@@ -762,7 +698,7 @@ export default function ReportHistory() {
               </div>
 
               {/* --- SCROLLABLE CONTENT --- */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-8">
+              <div className="flex-1 overflow-y-auto sm:p-6 p-2 space-y-8">
                 {/* Timeline Tracker (Visual Engagement) */}
                 <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm">
                   <h3 className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center gap-2">
@@ -1020,11 +956,11 @@ export default function ReportHistory() {
               </div>
 
               {/* --- ACTIONS FOOTER --- */}
-              <div className="p-6 bg-white border-t border-slate-100 flex gap-3">
-                <button className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-2">
+              <div className="p-4 sm:p-6 bg-white border-t border-slate-100 flex gap-3">
+                <button className="flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black text-sm shadow-lg shadow-indigo-200 hover:bg-indigo-700 active:scale-95 transition-all flex items-center justify-center gap-2 scale-90">
                   <Activity className="w-4 h-4" /> Download Report
                 </button>
-                <button className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all">
+                <button className="px-6 py-4 bg-slate-100 text-slate-600 rounded-2xl font-black text-sm hover:bg-slate-200 transition-all scale-90">
                   Print
                 </button>
               </div>

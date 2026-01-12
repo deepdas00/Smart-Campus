@@ -45,7 +45,7 @@ export default function TeacherManager() {
       const res = await axios.get(`${API_BASE}/api/v1/teacher/all`, {
         withCredentials: true,
       });
-      console.log(res.data.data);
+     
 
       setTeachers(res.data.data || []);
     } catch (err) {
@@ -68,13 +68,12 @@ export default function TeacherManager() {
       setIsDrawerOpen(true);
       setDetailsLoading(true);
 
-      console.log(id);
 
       const res = await axios.get(`${API_BASE}/api/v1/teacher/${id}`, {
         withCredentials: true, // sends cookies for JWT auth
       });
 
-      console.log("HIIHIHHI", res.data.data);
+
 
       setSelectedTeacher(res.data.data); // store the teacher object
     } catch (err) {
@@ -604,7 +603,7 @@ function AddTeacherDrawer({
       if (mode === "edit") {
         // 🔴 UPDATE TEACHER
 
-        console.log("UPDATEEEEEEEE",submitForm);
+
         
         res = await axios.post(
           `${import.meta.env.VITE_API_URL}/api/v1/teacher/update/${
@@ -625,7 +624,7 @@ function AddTeacherDrawer({
           }
         });
 
-        console.log(formData);
+
         
 
         res = await axios.post(

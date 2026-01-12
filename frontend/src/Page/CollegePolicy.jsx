@@ -53,8 +53,7 @@ export function CollegePolicy() {
       setLoading(true);
       const statusRes = await api.get("/api/v1/canteen/canteenStatus");
       
-      console.log("ihihih");
-
+    
 
 
       let policy = {
@@ -119,7 +118,7 @@ export function CollegePolicy() {
         editData.closingTime ||
         canteenPolicy.find((p) => p?.id === "CAN-002")?.value;
 
-        console.log(opening, closing);
+
         
 
       await api.post("/api/v1/canteen/policy", {

@@ -44,12 +44,19 @@ export const logoutUser = asyncHandler(async (req, res) => {
   userDoc.refreshToken = null;
   await userDoc.save({ validateBeforeSave: false });
 
-
+// For deploy 
   const options = {
     httpOnly: true,
     secure: true,
     sameSite: "None"
   };
+
+//For local host
+  // const options = {
+  //   httpOnly: true,
+  //   secure: false,
+  //   sameSite: "Lax"
+  // };
 
   return res
     .status(200)

@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useRef } from "react";
+import { requestPermission } from "../notifications";
+
 
 import { useEffect } from "react";
 import {
@@ -69,6 +71,11 @@ export default function SmartCollegeAdmin() {
     OTHER: "other",
   };
 
+useEffect(() => {
+    requestPermission();
+  }, []);
+
+  
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [newGalleryImage, setNewGalleryImage] = useState({
     file: null,

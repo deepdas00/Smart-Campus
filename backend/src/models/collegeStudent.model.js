@@ -140,7 +140,7 @@ const collegeStudentSchema = new Schema(
     fcmToken: {
       type: String,
       default: null
-    }
+    },
 
 
 

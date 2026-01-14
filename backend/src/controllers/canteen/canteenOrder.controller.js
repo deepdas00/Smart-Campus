@@ -9,6 +9,7 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { log } from "console";
+import { sendNotification } from "../../utils/sendNotification.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
@@ -56,7 +57,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
     }
 
     if (food.quantityAvailable < item.quantity) {
-      return res.status(400).json({message:`Insufficient quantity for ${food.name}`})
+      return res.status(400).json({ message: `Insufficient quantity for ${food.name}` })
     }
 
     const itemTotal = food.price * item.quantity;
@@ -88,6 +89,9 @@ export const placeOrder = asyncHandler(async (req, res) => {
     transactionCode,
   });
 
+
+
+
   res.status(201).json(
     new ApiResponse(
       201,
@@ -98,6 +102,14 @@ export const placeOrder = asyncHandler(async (req, res) => {
       },
       "Order placed successfully"
     )
+  );
+
+
+
+  sendNotification(
+    student.fcmToken,
+    "Order Update 🍔",
+    "Your Order placed successfully!"
   );
 });
 
@@ -165,8 +177,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   // 1️⃣ Decide start date
   const now = new Date();
   let startDate;
- console.log( range );
- 
+  console.log(range);
+
   switch (range) {
     case "daily":
       startDate = new Date(now.setHours(0, 0, 0, 0));
@@ -214,8 +226,8 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
-    console.log(orders);
-    
+  console.log(orders);
+
 
   // 4️⃣ Response
   res
@@ -361,9 +373,9 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
 // });
 
 export const canteenSatusFetch = asyncHandler(async (req, res) => {
-  
- 
-  
+
+
+
   const { collegeCode } = req.user;
 
   // 1️⃣ Resolve college DB
@@ -386,7 +398,7 @@ export const canteenSatusFetch = asyncHandler(async (req, res) => {
 
   const canteenStatus = canteenPolicy?.isActive;
 
-   
+
   res
     .status(200)
     .json(

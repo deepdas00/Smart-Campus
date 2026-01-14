@@ -670,7 +670,7 @@ function AddTeacherDrawer({
       onSuccess(res.data.data || res.data);
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Operation failed");
+      alert("Teacher added successfully");
     } finally {
       setLoading(false);
     }

@@ -37,6 +37,74 @@ export default function ReportHistory() {
   const [rating, setRating] = useState(0);
   const [submittingRating, setSubmittingRating] = useState(false);
 
+const [categoryFilter, setCategoryFilter] = useState("all");
+
+  const [urgency, setUrgency] = useState("Standard");
+
+const [priorityFilter, setPriorityFilter] = useState("all");
+const [showFilters, setShowFilters] = useState(false);
+
+
+const priorityMap = {
+  Standard: "standard",
+  Medium: "medium",
+  Urgent: "urgent",
+};
+
+const urgencyStyles = {
+  Low: "bg-green-200/50 border-green-400",
+  Standard: "bg-slate-200 border-slate-400",
+  Medium: "bg-amber-200/50 border-amber-400",
+  Urgent: "bg-red-200/50 border-red-400",
+};
+
+
+const categoryConfig = {
+  researchandlab: {
+    label: "Research & Labs",
+    color: "bg-blue-100 text-blue-700",
+  },
+  housinganddorms: {
+    label: "Housing & Dorms",
+    color: "bg-emerald-100 text-emerald-700",
+  },
+  groundandpublic: {
+    label: "Grounds & Public",
+    color: "bg-purple-100 text-purple-700",
+  },
+};
+
+
+
+
+
+const priorityConfig = {
+ 
+  standard: {
+    label: "Standard",
+    color: "text-amber-600",
+    bg: "bg-amber-100",
+    border: "border-l-amber-400",
+  },
+  medium: {
+    label: "Medium",
+    color: "text-orange-600",
+    bg: "bg-orange-100",
+    border: "border-l-orange-500",
+  },
+  urgent: {
+    label: "Urgent",
+    color: "text-red-600",
+    bg: "bg-red-100",
+    border: "border-l-red-500",
+  },
+};
+
+
+const PRIORITIES = [ "standard", "medium", "urgent"];
+
+
+
   const submitRating = async (value) => {
     if (!selectedReport) return;
 
@@ -50,6 +118,10 @@ export default function ReportHistory() {
         { withCredentials: true }
       );
 
+      
+
+
+       console.log(res.data.data);
       // Update selected report immediately
       setSelectedReport(res.data.data);
 
@@ -99,6 +171,11 @@ export default function ReportHistory() {
         withCredentials: true,
       });
 
+
+      
+
+       console.log(res.data.data);
+
       setReports(res.data.data || []);
     } catch (error) {
       console.error("Failed to fetch reports", error);
@@ -140,19 +217,31 @@ export default function ReportHistory() {
     },
   };
 
-  const filteredReports = reports.filter((r) => {
-    const matchesSearch = r.title
-      .toLowerCase()
-      .includes(searchQuery.toLowerCase());
+const filteredReports = reports.filter((r) => {
+  const matchesSearch = r.title
+    .toLowerCase()
+    .includes(searchQuery.toLowerCase());
 
-    const matchesFilter =
-      activeFilter === "all" ||
-      (activeFilter === "resolved"
-        ? r.status === "resolved" || r.status === "closed"
-        : r.status === activeFilter);
+  const matchesStatus =
+    activeFilter === "all" ||
+    (activeFilter === "resolved"
+      ? r.status === "resolved" || r.status === "closed"
+      : r.status === activeFilter);
 
-    return matchesSearch && matchesFilter;
-  });
+  const matchesPriority =
+    priorityFilter === "all" || r.priority === priorityFilter;
+
+  const matchesCategory =
+    categoryFilter === "all" || r.category === categoryFilter;
+
+  return (
+    matchesSearch &&
+    matchesStatus &&
+    matchesPriority &&
+    matchesCategory
+  );
+});
+
 
   if (loading)
     return (
@@ -244,6 +333,51 @@ export default function ReportHistory() {
       fields: [{ key: "zone", label: "Zone" }],
     },
   };
+
+
+const statusIndexMap = {
+  submitted: 0,
+  viewed: 1,
+  in_progress: 2,
+  resolved: 3,
+  rejected: 4,
+  closed: 5,
+};
+
+
+
+const getStatusDate = (report, status) => {
+  if (!report?.statusDates?.length) return null;
+
+  // ✅ Special handling for rejected
+  if (status === "rejected") {
+    const lastDate = report.statusDates[report.statusDates.length - 1];
+    return lastDate
+      ? new Date(lastDate).toLocaleDateString("en-GB", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : null;
+  }
+
+  const index = statusIndexMap[status];
+  if (index === undefined) return null;
+
+  const rawDate = report.statusDates[index];
+  if (!rawDate) return null;
+
+  return new Date(rawDate).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+
+
+
+
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -472,45 +606,169 @@ export default function ReportHistory() {
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
                   </div>
-                  <button className="p-2.5 bg-slate-50 border border-slate-100 rounded-xl text-slate-500">
-                    <Filter className="w-4 h-4" />
-                  </button>
+             <button
+  onClick={() => setShowFilters((prev) => !prev)}
+  className={`p-2.5 border rounded-xl transition ${
+    showFilters
+      ? "bg-indigo-600 text-white border-indigo-600"
+      : "bg-slate-50 text-slate-500 border-slate-100"
+  }`}
+>
+  <Filter className="w-4 h-4" />
+</button>
+
+
+
+
+
+<AnimatePresence>
+  {showFilters && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center"
+      onClick={() => setShowFilters(false)}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, y: 20 }}
+        transition={{ type: "spring", damping: 20, stiffness: 250 }}
+        onClick={(e) => e.stopPropagation()}
+        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-5 space-y-5"
+      >
+        {/* HEADER */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">
+            Filter Reports
+          </h3>
+          <button
+            onClick={() => setShowFilters(false)}
+            className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-600"
+          >
+            <XCircle className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* STATUS */}
+        <div>
+          <p className="text-[10px] font-black uppercase text-slate-400 mb-2">
+            Status
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["all", "submitted", "in_progress", "resolved", "rejected"].map(
+              (s) => (
+                <button
+                  key={s}
+                  onClick={() => setActiveFilter(s)}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                    activeFilter === s
+                      ? "bg-indigo-600 text-white"
+                      : "bg-slate-100 text-slate-600"
+                  }`}
+                >
+                  {s}
+                </button>
+              )
+            )}
+          </div>
+        </div>
+
+        {/* PRIORITY */}
+        <div>
+          <p className="text-[10px] font-black uppercase text-slate-400 mb-2">
+            Priority
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {["all", ...PRIORITIES].map((p) => (
+              <button
+                key={p}
+                onClick={() => setPriorityFilter(p)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                  priorityFilter === p
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* CATEGORY */}
+        <div>
+          <p className="text-[10px] font-black uppercase text-slate-400 mb-2">
+            Category
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setCategoryFilter("all")}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                categoryFilter === "all"
+                  ? "bg-indigo-600 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              All
+            </button>
+
+            {Object.entries(categoryConfig).map(([key, cfg]) => (
+              <button
+                key={key}
+                onClick={() => setCategoryFilter(key)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                  categoryFilter === key
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {cfg.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ACTIONS */}
+        <div className="flex gap-3 pt-3">
+          <button
+            onClick={() => {
+              setActiveFilter("all");
+              setPriorityFilter("all");
+              setCategoryFilter("all");
+            }}
+            className="flex-1 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-xs"
+          >
+            Reset
+          </button>
+
+          <button
+            onClick={() => setShowFilters(false)}
+            className="flex-1 py-2 bg-indigo-600 text-white rounded-xl font-black text-xs"
+          >
+            Apply Filters
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
+
+
+
                 </div>
               </div>
 
-              {/* STATUS TABS (SCROLLABLE ON MOBILE) */}
-              <div className="flex gap-1 p-1 bg-slate-100 rounded-xl mb-6 overflow-x-auto no-scrollbar">
-                {[
-                  "all",
-                  "submitted",
-                  "in_progress",
-                  "resolved",
-                  "rejected",
-                ].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveFilter(tab)}
-                    className={`px-3 lg:px-4 py-2 rounded-lg text-[10px] font-black uppercase whitespace-nowrap transition-all ${
-                      activeFilter === tab
-                        ? "bg-white text-indigo-600 shadow-sm"
-                        : "text-slate-500"
-                    }`}
-                  >
-                    {tab}
-                  </button>
-                ))}
-              </div>
 
               {/* LIST */}
               <div className="space-y-3">
                 {filteredReports.map((report) => {
                   const status = statusConfig[report.status];
-                  const priorityBorder =
-                    {
-                      urgent: "border-l-red-500",
-                      medium: "border-l-orange-500",
-                      standard: "border-l-amber-400",
-                    }[report.priority] || "border-l-slate-200";
+                 const priorityBorder =
+  priorityConfig[report.priority]?.border || "border-l-slate-200";
+
 
                   return (
                     <div
@@ -660,14 +918,13 @@ export default function ReportHistory() {
                   <div>
                     <div className="flex items-center gap-2 mb-1 flex-col sm:flex-row items-start">
                       <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest ${
-                          selectedReport.priority === "high"
-                            ? "bg-red-100 text-red-600"
-                            : "bg-indigo-100 text-indigo-600"
-                        }`}
-                      >
-                        {selectedReport.priority || "Normal"} Priority
-                      </span>
+  className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+    priorityConfig[selectedReport.priority]?.bg
+  } ${priorityConfig[selectedReport.priority]?.color}`}
+>
+  {priorityConfig[selectedReport.priority]?.label} Priority
+</span>
+
                       <span className="text-[10px] font-bold text-slate-400">
                         ID: #{selectedReport.transactionCode}
                       </span>
@@ -748,94 +1005,114 @@ export default function ReportHistory() {
                     {/* Steps */}
                     {selectedReport.status === "rejected"
                       ? // Rejected flow: Submitted → Rejected
-                        ["Submitted", "Rejected"].map((step, i) => {
-                          const isActive =
-                            i === 0 ||
-                            (i === 1 && selectedReport.status === "rejected");
+                       ["Submitted", "Rejected"].map((label, i) => {
+  const statusKey = label.toLowerCase(); // submitted | rejected
 
-                          const color = isActive
-                            ? "bg-red-500 text-white"
-                            : "bg-slate-200 text-slate-400";
+  const isActive =
+    statusKey === "submitted" ||
+    (statusKey === "rejected" && selectedReport.status === "rejected");
 
-                          const icon =
-                            i === 0 ? (
-                              <Clock className="w-4 h-4" />
-                            ) : (
-                              <XCircle className="w-4 h-4" />
-                            );
+  const color = isActive
+    ? "bg-red-500 text-white"
+    : "bg-slate-200 text-slate-400";
 
-                          return (
-                            <div
-                              key={i}
-                              className="relative z-10 flex flex-col items-center gap-2"
-                            >
-                              <div
-                                className={`w-8 h-8 rounded-full border-4 border-white shadow-sm flex items-center justify-center ${color}`}
-                              >
-                                {icon}
-                              </div>
-                              <span
-                                className={`text-[10px] font-bold ${
-                                  isActive ? "text-red-500" : "text-slate-500"
-                                }`}
-                              >
-                                {step}
-                              </span>
-                            </div>
-                          );
-                        })
+  const icon =
+    statusKey === "submitted" ? (
+      <Clock className="w-4 h-4" />
+    ) : (
+      <XCircle className="w-4 h-4" />
+    );
+
+  return (
+    <div
+      key={statusKey}
+      className="relative z-10 flex flex-col items-center gap-1"
+    >
+      <div
+        className={`w-8 h-8 rounded-full border-4 border-white shadow-sm flex items-center justify-center ${color}`}
+      >
+        {icon}
+      </div>
+
+      <span
+        className={`text-[10px] font-bold ${
+          isActive ? "text-red-500" : "text-slate-500"
+        }`}
+      >
+        {label}
+      </span>
+
+      {/* ✅ DATE — THIS WAS MISSING */}
+      {getStatusDate(selectedReport, statusKey) && (
+        <span className="text-[9px] text-slate-400">
+          {getStatusDate(selectedReport, statusKey)}
+        </span>
+      )}
+    </div>
+  );
+})
+
                       : // Normal flow: Submitted → Processing → Resolved
-                        ["Submitted", "Processing", "Resolved", "closed"].map(
-                          (step, i) => {
-                            let isActive = false;
-                            if (i === 0) isActive = true;
-                            // Submitted always active
-                            if (
-                              i === 1 &&
-                              (selectedReport.status === "in_progress" ||
-                                selectedReport.status === "processing" ||
-                                selectedReport.status === "resolved" ||
-                                selectedReport.status === "closed") // ✅ ADD THIS
-                            )
-                              isActive = true;
+                       ["Submitted", "Processing", "Resolved", "Closed"].map((label) => {
+  // ✅ DEFINE statusKey FIRST
+  const statusKey =
+    label === "Processing"
+      ? "in_progress"
+      : label.toLowerCase();
 
-                            if (
-                              i === 2 &&
-                              (selectedReport.status === "resolved" ||
-                                selectedReport.status === "closed") // ✅ ADD THIS
-                            )
-                              isActive = true;
+  let isActive = false;
 
-                            if (i === 3 && selectedReport.status === "closed")
-                              isActive = true;
+  if (statusKey === "submitted") isActive = true;
 
-                            const color = isActive
-                              ? "bg-emerald-500 text-white"
-                              : "bg-slate-200 text-slate-400";
+  if (
+    statusKey === "in_progress" &&
+    ["in_progress", "resolved", "closed"].includes(selectedReport.status)
+  )
+    isActive = true;
 
-                            return (
-                              <div
-                                key={i}
-                                className="relative z-10 flex flex-col items-center gap-2"
-                              >
-                                <div
-                                  className={`w-8 h-8 rounded-full border-4 border-white shadow-sm flex items-center justify-center ${color}`}
-                                >
-                                  <ShieldCheck className="w-4 h-4" />
-                                </div>
-                                <span
-                                  className={`text-[10px] font-bold ${
-                                    isActive
-                                      ? "text-emerald-500"
-                                      : "text-slate-500"
-                                  }`}
-                                >
-                                  {step}
-                                </span>
-                              </div>
-                            );
-                          }
-                        )}
+  if (
+    statusKey === "resolved" &&
+    ["resolved", "closed"].includes(selectedReport.status)
+  )
+    isActive = true;
+
+  if (statusKey === "closed" && selectedReport.status === "closed")
+    isActive = true;
+
+  return (
+    <div
+      key={statusKey}
+      className="relative z-10 flex flex-col items-center gap-1"
+    >
+      <div
+        className={`w-8 h-8 rounded-full border-4 border-white shadow-sm flex items-center justify-center ${
+          isActive
+            ? "bg-emerald-500 text-white"
+            : "bg-slate-200 text-slate-400"
+        }`}
+      >
+        <ShieldCheck className="w-4 h-4" />
+      </div>
+
+      <span
+        className={`text-[10px] font-bold ${
+          isActive ? "text-emerald-500" : "text-slate-500"
+        }`}
+      >
+        {label}
+      </span>
+
+      {/* ✅ SHOW DATE ONLY IF AVAILABLE */}
+      {getStatusDate(selectedReport, statusKey) && (
+        <span className="text-[9px] text-slate-400">
+          {getStatusDate(selectedReport, statusKey)}
+        </span>
+      )}
+    </div>
+  );
+})
+}
+                        
                   </div>
                 </div>
 

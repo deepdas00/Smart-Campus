@@ -236,7 +236,51 @@ export default function CampusIssues() {
   const [isUpdating, setIsUpdating] = useState(false);
   const [statusFilter, setStatusFilter] = useState("all");
   const [studentInfo, setStudentInfo] = useState(null)
+const [showFilters, setShowFilters] = useState(false);
+const [priorityFilter, setPriorityFilter] = useState("all");
+const [categoryFilter, setCategoryFilter] = useState("all");
+const [isEditingPriority, setIsEditingPriority] = useState(false);
+const [tempPriority, setTempPriority] = useState("standard");
 
+useEffect(() => {
+  if (selectedReport?.priority) {
+    setTempPriority(selectedReport.priority);
+  }
+}, [selectedReport]);
+
+const handleUpdatePriority = async () => {
+  try {
+    setIsUpdating(true);
+
+    console.log(tempPriority);
+    const res = await axios.patch(
+      `${API_URL}/api/v1/reports/${selectedReport._id}/priority`,
+      { priority: tempPriority },
+      { withCredentials: true }
+    );
+
+
+
+    console.log(res.data);
+    
+    
+    // Update modal + table instantly
+    setSelectedReport(res.data.data);
+
+    setReports((prev) =>
+      prev.map((r) =>
+        r._id === res.data.data._id ? res.data.data : r
+      )
+    );
+
+    setIsEditingPriority(false);
+  } catch (err) {
+    console.error("PRIORITY UPDATE FAILED:", err);
+    alert(err?.response?.data || "Failed to update priority");
+  } finally {
+    setIsUpdating(false);
+  }
+};
 
   const fetchReports = async () => {
     try {
@@ -244,6 +288,9 @@ export default function CampusIssues() {
       const res = await axios.get(`${API_URL}/api/v1/reports/${range}/all`, {
         withCredentials: true,
       });
+
+
+     
 
  
       
@@ -319,20 +366,40 @@ export default function CampusIssues() {
     }
   };
 
- const filteredReports = useMemo(() => {
+
+
+  const PRIORITIES = ["standard", "medium", "urgent"];
+
+const categoryConfig = {
+  researchandlab: "Research & Labs",
+  housinganddorms: "Housing & Dorms",
+  groundandpublic: "Grounds & Public",
+};
+
+
+const filteredReports = useMemo(() => {
   return reports.filter((r) => {
     const matchesSearch =
       r.title?.toLowerCase().includes(search.toLowerCase()) ||
-      r.studentId?.fullName
-        ?.toLowerCase()
-        .includes(search.toLowerCase());
+      r.studentId?.fullName?.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus =
       statusFilter === "all" || r.status === statusFilter;
 
-    return matchesSearch && matchesStatus;
+    const matchesPriority =
+      priorityFilter === "all" || r.priority === priorityFilter;
+
+    const matchesCategory =
+      categoryFilter === "all" || r.category === categoryFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesPriority &&
+      matchesCategory
+    );
   });
-}, [reports, search, statusFilter]);
+}, [reports, search, statusFilter, priorityFilter, categoryFilter]);
 
   // Helper UI Component for the Modal
   const DetailBadge = ({ label, value, icon: Icon }) => {
@@ -414,20 +481,132 @@ export default function CampusIssues() {
 
     {/* Filter Controls Group */}
     <div className="flex items-center gap-3 w-full ">
-      <div className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-2xl shadow-sm w-full">
-        <Filter size={14} className="text-slate-400" />
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="bg-transparent text-xs font-black uppercase tracking-widest text-slate-600 outline-none cursor-pointer min-w-[120px]"
+      <button
+  onClick={() => setShowFilters(true)}
+  className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm hover:bg-indigo-50 transition"
+>
+  <Filter size={16} className="text-slate-500" />
+</button>
+{showFilters && (
+  <div className="fixed inset-0 z-[180] flex items-center justify-center bg-slate-950/50 backdrop-blur-md p-4">
+    <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl border border-slate-200 p-8 animate-in zoom-in-95 duration-300">
+      
+      {/* HEADER */}
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-sm font-black uppercase tracking-widest text-slate-700">
+          Filter Reports
+        </h3>
+        <button
+          onClick={() => setShowFilters(false)}
+          className="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-500 hover:text-rose-600"
         >
-          <option value="all">All Status</option>
-          <option value="submitted">Submitted</option>
-          <option value="in_progress">In Progress</option>
-          <option value="resolved">Resolved</option>
-          <option value="rejected">Rejected</option>
-        </select>
+          <X size={18} />
+        </button>
       </div>
+
+      {/* STATUS */}
+      <div className="mb-5">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          Status
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {["all", "submitted", "viewed", "in_progress", "resolved", "rejected"].map(
+            (s) => (
+              <button
+                key={s}
+                onClick={() => setStatusFilter(s)}
+                className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                  statusFilter === s
+                    ? "bg-indigo-600 text-white"
+                    : "bg-slate-100 text-slate-600"
+                }`}
+              >
+                {s}
+              </button>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* PRIORITY */}
+      <div className="mb-5">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          Priority
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {["all", ...PRIORITIES].map((p) => (
+            <button
+              key={p}
+              onClick={() => setPriorityFilter(p)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                priorityFilter === p
+                  ? "bg-rose-500 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* CATEGORY */}
+      <div className="mb-8">
+        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+          Category
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setCategoryFilter("all")}
+            className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+              categoryFilter === "all"
+                ? "bg-emerald-500 text-white"
+                : "bg-slate-100 text-slate-600"
+            }`}
+          >
+            All
+          </button>
+
+          {Object.entries(categoryConfig).map(([key, label]) => (
+            <button
+              key={key}
+              onClick={() => setCategoryFilter(key)}
+              className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase ${
+                categoryFilter === key
+                  ? "bg-emerald-500 text-white"
+                  : "bg-slate-100 text-slate-600"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ACTIONS */}
+      <div className="flex gap-3">
+        <button
+          onClick={() => {
+            setStatusFilter("all");
+            setPriorityFilter("all");
+            setCategoryFilter("all");
+          }}
+          className="flex-1 py-3 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold uppercase"
+        >
+          Reset
+        </button>
+
+        <button
+          onClick={() => setShowFilters(false)}
+          className="flex-1 py-3 bg-indigo-600 text-white rounded-xl text-xs font-black uppercase"
+        >
+          Apply Filters
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   </div>
 </div>
@@ -486,7 +665,7 @@ export default function CampusIssues() {
   </span>
 
   <span className="text-slate-600 text-[11px] tracking-wide">
-    Dept: {r.studentId?.department.shortCode}
+    Dept: {r.studentId?.department?.shortCode}
   </span>
 
   <span className="text-slate-500 text-[11px] font-mono">
@@ -744,34 +923,94 @@ export default function CampusIssues() {
                   />
 
                   <div
-                    className={`flex flex-col p-4 rounded-3xl border ${
-                      selectedReport.priority === "high"
-                        ? "bg-rose-50 border-rose-100"
-                        : "bg-slate-50 border-slate-200"
-                    }`}
-                  >
-                    <div
-                      className={`${
-                        selectedReport.priority === "high"
-                          ? "text-rose-500"
-                          : "text-slate-400"
-                      } mb-1 flex items-center gap-2`}
-                    >
-                      <AlertTriangle size={14} />
-                      <span className="text-[10px] font-black uppercase tracking-widest">
-                        Urgency
-                      </span>
-                    </div>
-                    <span
-                      className={`text-xs font-black ${
-                        selectedReport.priority === "high"
-                          ? "text-rose-700"
-                          : "text-slate-900"
-                      }`}
-                    >
-                      {selectedReport.priority?.toUpperCase()}
-                    </span>
-                  </div>
+  className={`flex flex-col p-4 rounded-3xl border relative ${
+    selectedReport.priority === "urgent"
+      ? "bg-rose-50 border-rose-100"
+      : selectedReport.priority === "medium"
+      ? "bg-amber-50 border-amber-100"
+      : "bg-slate-50 border-slate-200"
+  }`}
+>
+  {/* HEADER */}
+  <div
+    className={`mb-2 flex items-center justify-between ${
+      selectedReport.priority === "urgent"
+        ? "text-rose-500"
+        : selectedReport.priority === "medium"
+        ? "text-amber-500"
+        : "text-slate-400"
+    }`}
+  >
+    <div className="flex items-center gap-2">
+      <AlertTriangle size={14} />
+      <span className="text-[10px] font-black uppercase tracking-widest">
+        Urgency
+      </span>
+    </div>
+
+    {/* EDIT BUTTON */}
+  {!isFinalStatus && !isEditingPriority && (
+  <button
+    onClick={() => setIsEditingPriority(true)}
+    className="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded-lg bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 transition"
+  >
+    Edit
+  </button>
+)}
+
+  </div>
+
+  {/* VALUE / EDIT MODE */}
+  {!isEditingPriority ? (
+    <span
+      className={`text-xs font-black ${
+        selectedReport.priority === "urgent"
+          ? "text-rose-700"
+          : selectedReport.priority === "medium"
+          ? "text-amber-700"
+          : "text-slate-900"
+      }`}
+    >
+      {selectedReport.priority?.toUpperCase()}
+    </span>
+  ) : (
+    <div className="space-y-3">
+      {/* SELECT */}
+      <select
+        value={tempPriority}
+        onChange={(e) => setTempPriority(e.target.value)}
+        className="w-full p-2 rounded-xl border border-slate-200 bg-white text-xs font-bold uppercase outline-none focus:ring-2 focus:ring-indigo-500/20"
+      >
+        <option value="standard">Standard</option>
+        <option value="medium">Medium</option>
+        <option value="urgent">Urgent</option>
+      </select>
+
+      {/* ACTIONS */}
+      <div className="flex gap-2">
+        <button
+  onClick={handleUpdatePriority}
+  disabled={isUpdating}
+  className="flex-1 py-1.5 rounded-xl bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-indigo-700 transition disabled:opacity-60"
+>
+  {isUpdating ? "Saving..." : "Save"}
+</button>
+
+
+        <button
+          onClick={() => {
+            setTempPriority(selectedReport.priority);
+            setIsEditingPriority(false);
+          }}
+          className="flex-1 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 transition"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  )}
+</div>
+
                 </div>
 
                 {/* Incident Narrative */}

@@ -29,7 +29,7 @@ const collegeStudentSchema = new Schema(
       enum: ["male", "female", "other"],
       required: true
     },
-    
+
     dob: {
       type: Date,
       required: true
@@ -42,15 +42,15 @@ const collegeStudentSchema = new Schema(
       required: true
     },
 
-    bloodGroup:{
+    bloodGroup: {
       type: String
     },
 
-    nationality:{
+    nationality: {
       type: String
     },
 
-    lastQualification:{
+    lastQualification: {
       board: String,
       examName: String,
       percentage: String
@@ -137,6 +137,12 @@ const collegeStudentSchema = new Schema(
       type: Date,
       default: null
     },
+    fcmToken: {
+      type: String,
+      default: null
+    }
+
+
 
 
     // =======================

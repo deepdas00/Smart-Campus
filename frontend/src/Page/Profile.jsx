@@ -296,7 +296,12 @@ export default function App() {
 
   const LibraryPage = () => {
     return (
-  <div className="space-y-8 sm:space-y-16 animate-in fade-in slide-in-from-bottom-12 duration-1000 mb-9 overflow-x-hidden">
+  <div className="
+  max-w-[1400px] mx-auto
+  space-y-8 sm:space-y-16
+  animate-in fade-in slide-in-from-bottom-12 duration-1000
+  mb-9 overflow-x-hidden
+">
 
   {/* HERO SECTION */}
   <section className="relative">
@@ -354,7 +359,7 @@ export default function App() {
       <div className="h-px flex-1 bg-slate-100" />
     </div>
 
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mt-6 sm:mt-10">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mt-6 sm:mt-10">
       {activeBooks.length > 0 ? (
         activeBooks.map((record, index) => (
         <Link to="/library">
@@ -362,11 +367,19 @@ export default function App() {
           <div
             key={record._id}
             className={`
-              ${index === 0 ? "lg:col-span-7" : "lg:col-span-5"}
+             ${
+  index === 0
+    ? "md:col-span-2 lg:col-span-7"
+    : "md:col-span-1 lg:col-span-5"
+}
+
               group relative overflow-hidden
               rounded-[2rem] sm:rounded-[3.5rem]
               bg-slate-900
-              min-h-[300px] sm:min-h-[400px]
+              min-h-[300px]
+sm:min-h-[380px]
+lg:min-h-[340px]
+
               transition-all duration-700
               hover:shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)]
             `}
@@ -406,7 +419,10 @@ export default function App() {
                     </span>
                   </div>
 
-                  <h3 className="text-xl sm:text-4xl font-black tracking-tight 
+                  <h3 className="text-xl
+sm:text-3xl
+lg:text-4xl
+ font-black tracking-tight 
                     text-white mt-3 max-w-[90%] leading-tight">
                     {record.bookId?.title || "Unknown Title"}
                   </h3>

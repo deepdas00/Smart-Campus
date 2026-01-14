@@ -1,22 +1,36 @@
-// src/notifications.js
 import { getToken } from "firebase/messaging";
 import { messaging } from "./firebase";
-
 import axios from "axios";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const requestPermission = async () => {
   const permission = await Notification.requestPermission();
+  console.log("Permission:", permission);
 
   if (permission === "granted") {
+    const registration = await navigator.serviceWorker.ready;
+
+    console.log("hiihihihihih", registration);
     const token = await getToken(messaging, {
       vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      serviceWorkerRegistration: registration,
     });
 
-    // 🔥 SEND TOKEN TO BACKEND
-    await axios.post("/api/notifications/save-token", {
-      token,
-      platform: "web",
-    });
+    console.log("FCM TOKEN:", token);
+
+    const res = await axios.post(
+      `${API_URL}/api/v1/auth/save-fcm-token`,
+      {
+        token,
+        platform: "web",
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    console.log(res);
+    
   }
 };
-

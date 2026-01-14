@@ -1,5 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
+import { requestPermission } from "../notifications";
+
 import {
   ImageIcon,
   X,
@@ -45,6 +47,12 @@ export default function HomeLogin() {
   const [open, setOpen] = useState(false);
 
   const { user } = useAuth();
+
+useEffect(() => {
+    requestPermission();
+  }, [user]);
+
+
 
   const handleScroll = () => {
     if (scrollRef.current) {

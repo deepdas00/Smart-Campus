@@ -77,6 +77,8 @@ app.use("/api/v1/auth", authRouter);
 // POST /api/v1/auth/change-password  -p
 // POST /api/v1/auth/forgot-password  -p
 
+// POST /api/v1/auth/save-fcm-token 
+
 
 app.use("/api/v1/public/registerCollege",registerCollege);
 //POST /api/v1/public/registerCollege/request      //public api to send college registration request////////////////////////////////////////////////////

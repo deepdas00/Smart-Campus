@@ -8,6 +8,8 @@ import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
 import QRCode from "qrcode";
+import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
+import { sendNotification } from "../../utils/sendNotification.js";
 
 
 
@@ -120,6 +122,11 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   const Order = getCanteenOrderModel(collegeConn);
   const Food = getCanteenFoodModel(collegeConn);
 
+   const Student = getCollegeStudentModel(collegeConn)
+  const student =await Student.findById(userId)
+  console.log(student);
+  
+
   // 4️⃣ Find order
   const order = await Order.findOne({
     razorpayOrderId: razorpay_order_id
@@ -177,7 +184,15 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   await order.save({ validateBeforeSave: false });
 
 
+console.log("/////////////////////////", student.fcmToken);
 
+
+
+  sendNotification(
+    student.fcmToken,
+    "Order Update 🍔",
+    "Your Order placed successfully!"
+  );
 
 
   // 8️⃣ Response

@@ -6,6 +6,7 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { logoutUser } from "../controllers/logout.controller.js";
 import { teacherLogin } from "../controllers/collegeTeacher.controller.js";
 import { changePassword, verifyOldPassword } from "../controllers/auth/password.controller.js";
+import { saveFcmToken } from "../controllers/auth/fcmTokenSave.controller.js";
 
 const router = express.Router();
 
@@ -24,7 +25,8 @@ router.post("/staff/login", staffLogin);
 router.post("/teacher/login", teacherLogin);
 
 
-
+//fcm-toen-save for notification
+router.post("/save-fcm-token", verifyJWT, saveFcmToken);
 
 
 // REFRESH TOKEN

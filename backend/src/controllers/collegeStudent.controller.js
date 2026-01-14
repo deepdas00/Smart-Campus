@@ -103,6 +103,7 @@ export const registerStudent = asyncHandler(async (req, res) => {
     loginId: email,
     createdBy: userId,
   });
+  console.log("working!!11111111111111111111111111111");
 
   let mailStatus = "sent";
 
@@ -110,25 +111,31 @@ export const registerStudent = asyncHandler(async (req, res) => {
     await sendMail({
       to: email,
       subject: `${college.collegeName} - Student Login Credentials`,
-      html: buildStudentCredentialsMailTemplate(college.collegeName, fullName, {
-        loginId: email,
-        password,
-      }),
+      html: buildStudentCredentialsMailTemplate(
+        college.collegeName,
+        fullName,
+        {
+          loginId: email,
+          password,
+        }
+      ),
     });
   } catch (error) {
     mailStatus = "failed";
-    console.error("❌ Email failed:", error.message);
+    console.error("X Email failed:", error.message);
   }
 
-  console.log("ResPONSE FROM THE SMTP....");
+  console.log("RESPONSE FROM MAIL SERVICE:", mailStatus);
 
   res.status(201).json({
     status: 201,
     student: { fullName, rollNo },
-    message: "Student registered successfully",
+    message: mailStatus === "sent"
+      ? "Student registered and credentials sent"
+      : "Student registered but email delivery failed",
+
   });
 });
-
 export const studentLogin = asyncHandler(async (req, res) => {
   console.log(req.body);
 

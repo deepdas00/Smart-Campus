@@ -226,6 +226,7 @@ export default function Library() {
       fetchLibraryHistory();
       setIssuing(false);
     }
+
   };
 
 
@@ -448,7 +449,7 @@ const FullScreenLoader = () => {
       <Toaster position="top-center" reverseOrder={false} />
 
       {/* Profile menu side bar */}
-      <ProfileSidebar
+      <ProfileSidebarmax-w-7xl
         isOpen={showProfileMenu}
         onClose={() => setShowProfileMenu(false)}
       />

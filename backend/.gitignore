@@ -118,3 +118,8 @@ dist
 .pnp.*
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Node
+
+
+
+# Firebase service account key
+smart-campus-dd715-firebase.json

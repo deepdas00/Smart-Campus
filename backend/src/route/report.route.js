@@ -62,13 +62,11 @@ router.patch(
 );
 
 
-
 router.patch(
   "/:reportId/priority",
   verifyJWT,
   authorizeRoles("admin"),
   updateReportPriority
 );
-
 
 export default router;

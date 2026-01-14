@@ -216,6 +216,7 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
 
   const allowedStatus = ["viewed", "in_progress", "resolved", "rejected"];
 
+
   if (!allowedStatus.includes(status)) {
     throw new ApiError(400, "Invalid status value");
   }
@@ -308,28 +309,25 @@ export const submitRating = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, report, "Thank you for your feedback"));
 });
 
+
 /* =========================
    ADMIN CHANGE PRIORITY
 ========================= */
 
 export const updateReportPriority = asyncHandler(async (req, res) => {
-  const { reportId } = req.params;
-  const { priority } = req.body;
-  const { collegeCode } = req.user;
+    const { reportId } = req.params;
+    const { priority } = req.body;
+    const { collegeCode } = req.user;
 
-  console.log(priority);
+    const allowedPriority = ["standard", "medium", "urgent"]
 
-  const allowedPriority = ["standard", "medium", "urgent"];
+    if (allowedPriority.includes(priority)) {
+        return res.status(400).json("Invalid Priority");
+    }
 
-  if (!allowedPriority.includes(priority)) {
-    return res.status(400).json("Invalid Priority");
-  }
 
-  const masterConn = connectMasterDB();
-  const College = getCollegeModel(masterConn);
-
-  const college = await College.findOne({ collegeCode, status: "active" });
-  if (!college) throw new ApiError(404, "College not found");
+    const masterConn = connectMasterDB();
+    const College = getCollegeModel(masterConn);
 
   const collegeConn = getCollegeDB(college.dbName);
   const Report = getReportModel(collegeConn);
@@ -337,10 +335,37 @@ export const updateReportPriority = asyncHandler(async (req, res) => {
   const report = await Report.findById(reportId);
   if (!report) throw new ApiError(404, "Report not found");
 
-  report.priority = priority;
+  // Status → index mapping
+  //   enum: ["submitted", "viewed", "in_progress", "resolved", "rejected", "closed"],
+
+  const statusIndexMap = {
+    submitted: 0,
+    viewed: 1,
+    in_progress: 2,
+    resolved: 3,
+    rejected: 4,
+    closed: 5,
+  };
+
+  const index = statusIndexMap[status];
+
+  while (report.statusDates.length <= index) {
+    report.statusDates.push(null);
+  }
+
+  report.statusDates[index] = new Date();
+
+  if (status === "resolved" && report.statusDates[2] == null)
+    report.statusDates[2] = new Date();
+
+  report.status = status;
+  if (adminNote) report.adminNote = adminNote;
+  if (assignedAdmin) report.assignedAdmin = assignedAdmin;
+
   await report.save();
 
-  return res
+  res
     .status(200)
-    .json(new ApiResponse(200, report, "Report priority updated successfully"));
+    .json(new ApiResponse(200, report, "Report updated successfully"));
 });
+

@@ -40,7 +40,7 @@ self.addEventListener("push", function (event) {
   const title = payload.data?.title || "Smart Campus";
 
   const options = {
-    body,
+    body: payload.data?.body || "New update",
 
     // 🔴 REQUIRED small icon (status bar)
     icon: "/notification-icon.png",

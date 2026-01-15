@@ -26,7 +26,7 @@ onMessage(messaging, (payload) => {
     // Site / app icon (foreground only)
     icon: "/logo.png",
 
-    badge: "/badge.png",
+    badge: "/logo.png",
 
     // Improves UX
     silent: false,

@@ -21,7 +21,7 @@ onMessage(messaging, (payload) => {
     body,
     icon: `/logo.png`,
     badge: `/badge.png`,
-    image: "/logo.png",
+   
   });
 
   notification.onclick = () => {

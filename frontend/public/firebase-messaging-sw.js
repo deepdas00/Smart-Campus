@@ -43,7 +43,7 @@ self.addEventListener("push", function (event) {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
     badge: "/badge.png",
-    image: "/logo.png",
+    
   };
 
 

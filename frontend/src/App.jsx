@@ -10,7 +10,7 @@ import Library from "./Page/Library";
 import CanteenOrders from "./Page/CanteenOrders";
 import OfficeAdminPanel from "./Page/OfficeAdminPanel";
 
-import  CampusIssues  from "./Page/CampusIssues";
+import CampusIssues from "./Page/CampusIssues";
 import { CanteenManager } from "./Page/CanteenManager";
 import { LibraryManager } from "./Page/LibraryManager";
 import Navbar from "./Components/Navbar/Navbar";
@@ -36,6 +36,8 @@ import OfficeOverview from "./Page/OfficeOverview.jsx";
 import Teacher from "./Page/Teacher.jsx";
 import CollegeDept from "./Page/CollegeDept.jsx";
 import ChangePassword from "./Page/ChangePassword.jsx";
+import { useEffect } from "react";
+import { requestPermission } from "./notifications.js";
 // import { Toaster } from "react-hot-toast";
 
 // Layout Wrapper
@@ -43,28 +45,28 @@ const AdminLayout = () => {
   return (
 
     <>
-    <Navbar />
-   
-    <div className="min-h-screen flex flex-col ">
-      {/* Top Navbar */}
-      
-      {/* <CollegeInfo /> */}
+      <Navbar />
 
-      {/* Body */}
-      <div className="flex flex-1">
-        {/* Sidebar */}
-        <Sidebar />
+      <div className="min-h-screen flex flex-col ">
+        {/* Top Navbar */}
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          <Outlet /> {/* Pages render here */}
-        </main>
+        {/* <CollegeInfo /> */}
+
+        {/* Body */}
+        <div className="flex flex-1">
+          {/* Sidebar */}
+          <Sidebar />
+
+          {/* Main Content */}
+          <main className="flex-1 p-6 overflow-y-auto">
+            <Outlet /> {/* Pages render here */}
+          </main>
+        </div>
+
+        {/* Footer */}
+        <Footer />
       </div>
-
-      {/* Footer */}
-      <Footer />
-    </div>
-     </>
+    </>
   );
 };
 export default function App() {
@@ -73,6 +75,23 @@ export default function App() {
   const userRole = user?.role;
   console.log("USER ROLE HAI...", userRole);
   console.log("ENVIRONMENT...", import.meta.env.VITE_API_URL);
+  // ✅ REGISTER SERVICE WORKER HERE (TOP LEVEL)
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/firebase-messaging-sw.js")
+      .then((registration) => {
+        console.log("✅ Service Worker registered:", registration);
+      })
+      .catch((error) => {
+        console.error("❌ Service Worker registration failed:", error);
+      });
+  }
+
+  //request notification permission
+  // const {user} = useAuth()
+  useEffect(() => {
+    requestPermission();
+  }, []);
 
   return (
     <>
@@ -201,7 +220,7 @@ export default function App() {
         {/* <Route path="/collegeHome" element={<CollegeHome />} /> */}
         <Route path="/adminowner" element={<AdminOwner />} />
         <Route path="/founderConsole" element={<FounderConsole />} />
-        
+
         {/* Kitchen Access - Operational Tool Only */}
       </Routes>
     </>

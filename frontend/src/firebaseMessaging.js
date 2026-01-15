@@ -1,16 +1,25 @@
-import { getMessaging, onMessage } from "firebase/messaging";
-import { messaging } from "./firebase";   // your firebase initialization file
-import logo from "./assets/logo.png"
+import { onMessage } from "firebase/messaging";
+import { messaging } from "./firebase";
 
-
-// 🔔 Listen for incoming messages when site is OPEN
-onMessage(messaging, (payload) => {
-  console.log("(frontend/src/firebaseMessaging.js)Notification received:", payload);
-
-  if (Notification.permission === "granted") {
-    new Notification(payload.notification.title, {
-      body: payload.notification.body,
-      icon: logo
-    });
+// 🔔 Request permission once (important for mobile)
+export const requestNotificationPermission = async () => {
+  if (Notification.permission === "default") {
+    await Notification.requestPermission();
   }
+};
+
+// 🔔 Foreground notifications
+onMessage(messaging, (payload) => {
+  console.log("Notification received:", payload);
+
+  if (Notification.permission !== "granted") return;
+
+  const title = payload.data?.title || "Smart Campus";
+  const body = payload.data?.body || "New update";
+
+  new Notification(title, {
+    body,
+    icon: `/logo.png`,
+    badge: `/logo.png`
+  });
 });

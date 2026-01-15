@@ -12,10 +12,12 @@
 
 // const messaging = firebase.messaging();
 
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
-
-import logo from "../src/assets/logo.png"
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"
+);
 
 
 firebase.initializeApp({
@@ -30,15 +32,14 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // 🟢 THIS is the important part
-self.addEventListener("push", function (event) {
-  const payload = event.data.json();
+messaging.onBackgroundMessage((payload) => {
+  console.log("📩 Background message:", payload);
 
-  const title = payload.notification?.title || "Smart Campus";
-  const options = {
-    body: payload.notification?.body || "",
-    icon: logo,
-    badge: logo
-  };
+  const title = payload.data?.title || "Smart Campus";
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  self.registration.showNotification(title, {
+    body: payload.data?.body || "New update",
+    icon: "/logo.png",
+    badge: "/logo.png",
+  });
 });

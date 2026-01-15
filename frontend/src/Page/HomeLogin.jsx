@@ -48,9 +48,6 @@ export default function HomeLogin() {
 
   const { user } = useAuth();
 
-useEffect(() => {
-    requestPermission();
-  }, [user]);
 
 
 

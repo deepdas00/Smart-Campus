@@ -34,24 +34,23 @@ export const sendNotification = async (
   data = {}
 ) => {
 
-  
+
 
   console.log(title, body);
-  
+
   if (!fcmToken) return;
-  console.log( "88484848484844848448");
-  
+
+
   try {
-    console.log( "1st hu ");
+    console.log("1st hu ");
     await admin.messaging().send({
       token: fcmToken,
-      notification: {
+      data: {
         title,
         body,
       },
-      data, // optional custom payload
     });
-    console.log( "2nd hu ");
+    console.log("2nd hu ");
 
   } catch (err) {
     console.log("FCM error:", err.code || err.message);
@@ -61,9 +60,12 @@ export const sendNotification = async (
       err.code === "messaging/registration-token-not-registered" ||
       err.code === "messaging/invalid-registration-token"
     ) {
-      console.log("Invalid FCM token, should be removed from DB");
-      // TODO: delete token from database
+      await Student.updateOne(
+        { fcmToken },
+        { $unset: { fcmToken: "" } }
+      );
     }
+
   }
 };
 

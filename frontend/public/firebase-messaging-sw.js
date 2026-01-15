@@ -32,14 +32,21 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // 🟢 THIS is the important part
-messaging.onBackgroundMessage((payload) => {
-  console.log("📩 Background message:", payload);
+self.addEventListener("push", function (event) {
+  const payload = event.data.json();
+
+  console.log("📩 PUSH RECEIVED:", payload);
 
   const title = payload.data?.title || "Smart Campus";
 
-  self.registration.showNotification(title, {
+  const options = {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
-    badge: "/logo.png",
-  });
+    badge: "/logo.png"
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
+

@@ -45,7 +45,7 @@ export const sendNotification = async (
     console.log( "1st hu ");
     await admin.messaging().send({
       token: fcmToken,
-      notification: {
+      data: {
         title,
         body,
       },

@@ -12,11 +12,14 @@
 
 // const messaging = firebase.messaging();
 
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js");
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"
+);
+importScripts(
+  "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"
+);
 
-import logo from "../src/assets/logo.png"
-
+import logo from "../src/assets/logo.png";
 
 firebase.initializeApp({
   apiKey: "AIzaSyAdxwpFacUGK4XE62RRcskddBxqpTbpn0Y",
@@ -33,11 +36,11 @@ const messaging = firebase.messaging();
 self.addEventListener("push", function (event) {
   const payload = event.data.json();
 
-  const title = payload.notification?.title || "Smart Campus";
+  const title = payload.data?.title || "Smart Campus";
   const options = {
-    body: payload.notification?.body || "",
-    icon: logo,
-    badge: logo
+    body: payload.data?.body,
+    icon: `${window.location.origin}/logo.png`,
+    badge: `${window.location.origin}/logo.png`,
   };
 
   event.waitUntil(self.registration.showNotification(title, options));

@@ -21,8 +21,13 @@ onMessage(messaging, (payload) => {
     body,
     icon: `/logo.png`,
     badge: `/badge.png`,
-    image: "/logo.png",
   });
+
+  notification.onclick = () => {
+    window.focus();
+    window.location.href = "/";
+    notification.close();
+  };
 });
 
 

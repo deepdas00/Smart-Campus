@@ -43,7 +43,7 @@ self.addEventListener("push", function (event) {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
     badge: "/badge.png",
-    image: "/logo.png",
+    
   };
 
   event.waitUntil(
@@ -51,3 +51,23 @@ self.addEventListener("push", function (event) {
   );
 });
 
+
+
+
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+      for (const client of clientsArr) {
+        if (client.url.includes(url)) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});

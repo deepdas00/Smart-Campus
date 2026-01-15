@@ -41,36 +41,27 @@ self.addEventListener("push", function (event) {
 
   const options = {
     body: payload.data?.body || "New update",
-
-    // 🔴 REQUIRED small icon (status bar)
-    icon: "/notification-icon.png",
-
-    // 🟢 Large image (expanded view)
-    image: "/logo.png",
-
+    icon: "/logo.png",
     badge: "/badge.png",
+    image: "/logo.png",
+  };
 
-    // 🔔 Engagement boosters
-    vibrate: [100, 50, 100],
-    tag: "smart-campus",
-    renotify: true,
-    requireInteraction: true,
-    actions: [
-      { action: "open", title: "📍 View Queue" },
-      { action: "dismiss", title: "❌ Dismiss" }
-    ],
 
-    data: {
-      url: "/queue/live"
-    }
-  }
+
+
+
+
 
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
 });
 
-self.addEventListener("notificationclick", (event) => {
+
+
+
+
+  self.addEventListener("notificationclick", (event) => {
   event.notification.close();
 
   if (event.action === "dismiss") return;
@@ -88,3 +79,5 @@ self.addEventListener("notificationclick", (event) => {
     })
   );
 });
+
+

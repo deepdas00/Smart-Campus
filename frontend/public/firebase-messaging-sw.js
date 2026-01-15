@@ -43,41 +43,11 @@ self.addEventListener("push", function (event) {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
     badge: "/badge.png",
-    
+    image: "/logo.png",
   };
-
-
-
-
-
-
 
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
 });
-
-
-
-
-
-  self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  if (event.action === "dismiss") return;
-
-  const url = event.notification.data?.url || "/";
-
-  event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
-      for (const client of list) {
-        if (client.url.includes(url) && "focus" in client) {
-          return client.focus();
-        }
-      }
-      return clients.openWindow(url);
-    })
-  );
-});
-
 

@@ -81,7 +81,7 @@ export const addFood = asyncHandler(async (req, res) => {
 
 
 export const getAllFoods = asyncHandler(async (req, res) => {
-  console.log("ihhihihi");
+
   
   const { collegeCode } = req.user;
 
@@ -124,7 +124,6 @@ export const getAllFoods = asyncHandler(async (req, res) => {
     .select("-__v");
 
 
-    console.log(foods);
     
 
   // 3️⃣ Response
@@ -176,7 +175,6 @@ export const updateFood = asyncHandler(async (req, res) => {
     throw new ApiError(404, "Food item not found");
   }
 
-  // console.log(req.file)
   //   // 2️⃣ Image validation
     if (req.file?.path){
       const imagePath = req.file?.path?.replace(/\\/g, "/");

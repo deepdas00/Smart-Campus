@@ -135,7 +135,6 @@ export const registerStudent = asyncHandler(async (req, res) => {
       : "Student registered but email delivery failed",
 
   });
-
 });
 export const studentLogin = asyncHandler(async (req, res) => {
   console.log(req.body);

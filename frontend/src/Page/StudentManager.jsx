@@ -47,8 +47,8 @@ export function StudentManager() {
           { withCredentials: true }
         );
 
-
-
+        
+        
         setCollegeCode(res.data.collegeCode);
         setStudents(res.data.students || []);
       } catch (err) {
@@ -73,8 +73,7 @@ export function StudentManager() {
       );
 
 
-
-
+    
       setSelectedStudent(res.data); // Stores { student, libraryTransaction, message }
     } catch (err) {
       console.error("Error fetching details", err);
@@ -465,7 +464,6 @@ function CreateStudentModal({ isOpen, onClose, onSuccess }) {
       setLoading(true);
 
 
-      console.log("mummyyyyyyyyyyyyyyyyyyyy");
       
       const res = await axios.post(
         `${import.meta.env.VITE_API_URL}/api/v1/users/student/register`,

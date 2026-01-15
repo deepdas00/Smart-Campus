@@ -36,6 +36,7 @@ export const placeOrder = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
 
   const CanteenPolicyModel = getCanteenPolicyModel(collegeConn);
+ 
   const canteenPolicy = await CanteenPolicyModel.findOne();
   const canteenStatus = canteenPolicy.isActive;
   if (!canteenStatus) {
@@ -91,7 +92,6 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 
 
-
   res.status(201).json(
     new ApiResponse(
       201,
@@ -106,11 +106,6 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 
 
-  sendNotification(
-    student.fcmToken,
-    "Order Update 🍔",
-    "Your Order placed successfully!"
-  );
 });
 
 //order serving by canteen staff
@@ -177,7 +172,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
   // 1️⃣ Decide start date
   const now = new Date();
   let startDate;
-  console.log(range);
+  
 
   switch (range) {
     case "daily":
@@ -226,7 +221,7 @@ export const getCanteenDashboardOrders = asyncHandler(async (req, res) => {
     .select(
       "_id items transactionCode totalAmount orderStatus createdAt paymentStatus razorpayPaymentId"
     );
-  console.log(orders);
+
 
 
   // 4️⃣ Response

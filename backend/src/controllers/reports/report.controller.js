@@ -216,6 +216,7 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
 
   const allowedStatus = ["viewed", "in_progress", "resolved", "rejected"];
 
+
   if (!allowedStatus.includes(status)) {
     throw new ApiError(400, "Invalid status value");
   }
@@ -328,20 +329,43 @@ export const updateReportPriority = asyncHandler(async (req, res) => {
     const masterConn = connectMasterDB();
     const College = getCollegeModel(masterConn);
 
-    const college = await College.findOne({ collegeCode, status: "active" });
-    if (!college) throw new ApiError(404, "College not found");
+  const collegeConn = getCollegeDB(college.dbName);
+  const Report = getReportModel(collegeConn);
 
-    const collegeConn = getCollegeDB(college.dbName);
-    const Report = getReportModel(collegeConn);
+  const report = await Report.findById(reportId);
+  if (!report) throw new ApiError(404, "Report not found");
 
-    const report = await Report.findById(reportId);
-    if (!report) throw new ApiError(404, "Report not found");
+  // Status → index mapping
+  //   enum: ["submitted", "viewed", "in_progress", "resolved", "rejected", "closed"],
 
-    report.priority = priority
-    await report.save();
+  const statusIndexMap = {
+    submitted: 0,
+    viewed: 1,
+    in_progress: 2,
+    resolved: 3,
+    rejected: 4,
+    closed: 5,
+  };
 
-    return res.status(200).json(
-        new ApiResponse(200, report, "Report priority updated successfully")
-    );
-})
+  const index = statusIndexMap[status];
+
+  while (report.statusDates.length <= index) {
+    report.statusDates.push(null);
+  }
+
+  report.statusDates[index] = new Date();
+
+  if (status === "resolved" && report.statusDates[2] == null)
+    report.statusDates[2] = new Date();
+
+  report.status = status;
+  if (adminNote) report.adminNote = adminNote;
+  if (assignedAdmin) report.assignedAdmin = assignedAdmin;
+
+  await report.save();
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, report, "Report updated successfully"));
+});
 

@@ -12,6 +12,7 @@ import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { sendMail } from "../../utils/sendMail.js";
 import { buildBookReturnReminderTemplate } from "../../template/buildBookReturnReminderTemplate.js";
 import { getCollegeInfoModel } from "../../models/colllegeInfo.model.js";
+import { sendNotification } from "../../utils/sendNotification.js";
 
 export const orderBook = asyncHandler(async (req, res) => {
   const { bookId } = req.body;
@@ -28,7 +29,11 @@ export const orderBook = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
   const Book = getLibraryBookModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
+  const Student  = getCollegeStudentModel(collegeConn)
 
+  const student = await Student.findById(userId);
+
+  if(!student) return res.status(400).json({message:"Student not finnd"})
   const book = await Book.findById(bookId);
   if (!book || !book.isActive) throw new ApiError(404, "Book not found");
 
@@ -40,7 +45,6 @@ export const orderBook = asyncHandler(async (req, res) => {
     "L",
     Transaction
   );
-  // console.log(transactionCode);
 
   // Create transaction
   const transaction = await Transaction.create({
@@ -61,6 +65,18 @@ export const orderBook = asyncHandler(async (req, res) => {
   transaction.qrCode = qrCode;
   await transaction.save({ validateBeforeSave: false });
 
+
+
+  console.log("lololololololololololololo",student.fcmToken);
+  
+  sendNotification(
+    student.fcmToken,
+    "Library Update 🍔",
+    "Your Order placed successfully!"
+  );
+
+
+
   res
     .status(201)
     .json(new ApiResponse(201, transaction, "Book ordered successfully"));
@@ -79,7 +95,6 @@ export const issueBook = asyncHandler(async (req, res) => {
   const Student = getCollegeStudentModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
 
-  console.log("TRANSACTION ID  ::: ", transactionId);
 
   const Book = getLibraryBookModel(collegeConn);
   const Policy = getLibraryPolicyModel(collegeConn);
@@ -136,7 +151,6 @@ export const issueBook = asyncHandler(async (req, res) => {
       select: "coverImage isbn shelf author title",
     });
 
-  console.log("THE DTA", responseTransaction);
 
   res
     .status(200)
@@ -151,7 +165,6 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
   const { collegeCode } = req.user;
 
 
-  console.log(transactionId);
 
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
@@ -291,7 +304,6 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
       select: "fullName rollNo mobileNo profilePhoto",
     });
 
-  console.log("TRANSACTION", transaction);
 
 
   res
@@ -300,7 +312,6 @@ export const fetchlibraryTransactionDetails = asyncHandler(async (req, res) => {
 });
 
 export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
-  console.log("helooo");
 
   const { collegeCode, userId } = req.user;
 
@@ -319,7 +330,6 @@ export const getStudentLibraryHistory = asyncHandler(async (req, res) => {
     .populate({ path: "bookId", select: "title author coverImage " })
     .sort({ createdAt: -1 });
 
-  console.log(history);
 
   res
     .status(200)
@@ -342,7 +352,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
 
 
-  
+
   const transactions = await Transaction.find()
     .populate({
       path: "bookId",
@@ -352,8 +362,7 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
     .populate({ path: "studentId", select: "fullName email rollNo" })
     .sort({ createdAt: -1 });
 
-    console.log(transactions);
-    
+
 
   res
     .status(200)
@@ -364,7 +373,6 @@ export const getAllLibraryTransactions = asyncHandler(async (req, res) => {
 
 
 export const notifyReturnReminders = asyncHandler(async (req, res) => {
-  console.log("///////////////")
   const { collegeCode } = req.user;
 
   const masterConn = connectMasterDB();
@@ -377,10 +385,10 @@ export const notifyReturnReminders = asyncHandler(async (req, res) => {
   const Student = getCollegeStudentModel(collegeConn);
   const Book = getLibraryBookModel(collegeConn)
   const LibraryPolicy = getLibraryPolicyModel(collegeConn)
-  
+
   const libraryPolicy = await LibraryPolicy.findOne()
   const fineAmount = libraryPolicy.finePerDay
-  
+
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -405,7 +413,6 @@ export const notifyReturnReminders = asyncHandler(async (req, res) => {
     if (diffDays === 1 || diffDays === 2) {
 
       const student = await Student.findById(tx.studentId);
-      console.log(bookTitle);
 
       if (student?.email) {
         await sendMail({

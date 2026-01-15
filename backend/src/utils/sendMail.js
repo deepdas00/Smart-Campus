@@ -45,19 +45,15 @@ import SibApiV3Sdk from "sib-api-v3-sdk";
 
 export const sendMail = async ({ to, subject, html }) => {
   const client = SibApiV3Sdk.ApiClient.instance;
-console.log("working!!1");
-console.log("BREVO KEY PRESENT:", !!process.env.BREVO_API_KEY);
 
+  client.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 
-client.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
+  const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-
-await apiInstance.sendTransacEmail({
-  sender: { email: "smartcampus.official@gmail.com", name: "Smart Campus" },
-  to: [{ email: to }],
-  subject,
-  htmlContent: html
-});
-console.log("working!!2");
+  await apiInstance.sendTransacEmail({
+    sender: { email: "smartcampus.official@gmail.com", name: "Smart Campus" },
+    to: [{ email: to }],
+    subject,
+    htmlContent: html
+  });
 };

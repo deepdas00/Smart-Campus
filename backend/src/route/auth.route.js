@@ -26,7 +26,7 @@ router.post("/teacher/login", teacherLogin);
 
 
 //fcm-toen-save for notification
-router.post("/save-fcm-token", verifyJWT, saveFcmToken);
+router.post("/save-fcm-token",verifyJWT, saveFcmToken);
 
 
 // REFRESH TOKEN

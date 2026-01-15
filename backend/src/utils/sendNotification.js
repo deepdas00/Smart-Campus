@@ -35,11 +35,7 @@ export const sendNotification = async (
 ) => {
 
 
-
-  console.log(title, body);
-
   if (!fcmToken) return;
-
 
   try {
     console.log("1st hu ");

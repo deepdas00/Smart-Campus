@@ -40,14 +40,51 @@ self.addEventListener("push", function (event) {
   const title = payload.data?.title || "Smart Campus";
 
   const options = {
-    body: payload.data?.body || "New update",
-    icon: "/logo.png",
-    badge: "/badge.png",
+    body,
+
+    // 🔴 REQUIRED small icon (status bar)
+    icon: "/notification-icon.png",
+
+    // 🟢 Large image (expanded view)
     image: "/logo.png",
-  };
+
+    badge: "/badge.png",
+
+    // 🔔 Engagement boosters
+    vibrate: [100, 50, 100],
+    tag: "smart-campus",
+    renotify: true,
+    requireInteraction: true,
+    actions: [
+      { action: "open", title: "📍 View Queue" },
+      { action: "dismiss", title: "❌ Dismiss" }
+    ],
+
+    data: {
+      url: "/queue/live"
+    }
+  }
 
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
 });
 
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+
+  if (event.action === "dismiss") return;
+
+  const url = event.notification.data?.url || "/";
+
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
+      for (const client of list) {
+        if (client.url.includes(url) && "focus" in client) {
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});

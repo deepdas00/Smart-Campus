@@ -17,12 +17,30 @@ onMessage(messaging, (payload) => {
   const title = payload.data?.title || "Smart Campus";
   const body = payload.data?.body || "New update";
 
-  new Notification(title, {
+  new Notification(title,{
     body,
-    icon: `/logo.png`,
-    badge: `/badge.png`,
+
+    // Large image (shows when expanded)
     image: "/logo.png",
+
+    // Site / app icon (foreground only)
+    icon: "/logo.png",
+
+    badge: "/badge.png",
+
+    // Improves UX
+    silent: false,
+    requireInteraction: false,
   });
+
+  // 🔗 Handle click
+  notification.onclick = () => {
+    window.focus();
+    window.location.href = "/queue/live";
+    notification.close();
+  };
 });
+
+
 
 

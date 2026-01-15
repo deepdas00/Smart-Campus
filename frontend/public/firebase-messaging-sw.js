@@ -19,7 +19,7 @@ importScripts(
   "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"
 );
 
-import logo from "../src/assets/logo.png";
+
 
 firebase.initializeApp({
   apiKey: "AIzaSyAdxwpFacUGK4XE62RRcskddBxqpTbpn0Y",

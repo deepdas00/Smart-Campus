@@ -49,7 +49,7 @@ export const sendNotification = async (
         title,
         body,
       },
-      data, // optional custom payload
+    
     });
     console.log( "2nd hu ");
 

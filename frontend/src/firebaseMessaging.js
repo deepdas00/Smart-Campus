@@ -20,7 +20,7 @@ onMessage(messaging, (payload) => {
   new Notification(title, {
     body,
     icon: `/logo.png`,
-    badge: `/logo.png`
+    badge: `/badge.png`
   });
 });
 

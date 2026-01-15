@@ -42,7 +42,7 @@ self.addEventListener("push", function (event) {
   const options = {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
-    badge: "/logo.png"
+    badge: "/badge.png"
   };
 
   event.waitUntil(

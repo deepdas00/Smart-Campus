@@ -19,7 +19,9 @@ onMessage(messaging, (payload) => {
 
   new Notification(title, {
     body,
-    icon: `${window.location.origin}/logo.png`,
-    badge: `${window.location.origin}/logo.png`
+    icon: `/logo.png`,
+    badge: `/logo.png`
   });
 });
+
+

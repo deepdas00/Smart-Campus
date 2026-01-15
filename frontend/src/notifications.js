@@ -29,8 +29,28 @@ export const requestPermission = async () => {
         withCredentials: true,
       }
     );
-
     console.log(res);
-    
+
+  } else if (permission === "denied") {
+    console.log("lalalllalalalalalalalalalalalallalaalalla hoye egeche")
+    await axios.post(
+      `${API_URL}/api/v1/auth/delete-fcm-token`,
+      {},
+      { withCredentials: true }
+    );
   }
+
 };
+
+
+
+
+// onTokenChanged(messaging, async (newToken) => {
+//   if (!newToken) return;
+
+//   await axios.post(
+//     `${API_URL}/api/v1/auth/save-fcm-token`,
+//     { token: newToken, platform: "web" },
+//     { withCredentials: true }
+//   );
+// });

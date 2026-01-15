@@ -20,7 +20,6 @@ importScripts(
 );
 
 
-
 firebase.initializeApp({
   apiKey: "AIzaSyAdxwpFacUGK4XE62RRcskddBxqpTbpn0Y",
   authDomain: "smart-campus-dd715.firebaseapp.com",
@@ -36,12 +35,18 @@ const messaging = firebase.messaging();
 self.addEventListener("push", function (event) {
   const payload = event.data.json();
 
+  console.log("📩 PUSH RECEIVED:", payload);
+
   const title = payload.data?.title || "Smart Campus";
+
   const options = {
-    body: payload.data?.body,
-    icon: `${window.location.origin}/logo.png`,
-    badge: `${window.location.origin}/logo.png`,
+    body: payload.data?.body || "New update",
+    icon: "/logo.png",
+    badge: "/logo.png"
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
 });
+

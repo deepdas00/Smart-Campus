@@ -5,6 +5,7 @@ import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeGalleryModel } from "../models/collegeGallery.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { broadcastToStudents } from "../utils/broadcastNotification.js";
 
 /* ===========================
    ADD IMAGE TO GALLERY
@@ -36,6 +37,14 @@ export const addGalleryImage = asyncHandler(async (req, res) => {
     description,
     uploadedBy: userId
   });
+
+// 🔔 Notify all students
+await broadcastToStudents(                  
+  collegeConn,
+  "📸 New Gallery Photo",
+  "A new photo has been added to the college gallery"
+);
+
 
   res.status(201).json(
     new ApiResponse(201, image, "Gallery image added successfully")

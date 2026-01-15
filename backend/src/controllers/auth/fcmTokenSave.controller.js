@@ -7,16 +7,16 @@ import { getCollegeModel } from "../../models/college.model.js";
 export const saveFcmToken = asyncHandler(async (req, res) => {
   const { token } = req.body;
   const { userId, collegeCode } = req.user;
-  
+
   if (!token) {
     return res.status(400).json({ message: "FCM token required" });
   }
-  
+
   const masterConn = connectMasterDB();
   const College = getCollegeModel(masterConn);
-  
+
   const college = await College.findOne({ collegeCode, status: "active" });
-  console.log("///////Student tokennnnn///////",college);
+  console.log("///////Student tokennnnn///////", college);
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
@@ -26,3 +26,24 @@ export const saveFcmToken = asyncHandler(async (req, res) => {
 
   res.status(200).json({ message: "FCM token saved" });
 });
+
+export const removeFcmToken = async (req, res) => {
+  const { userId, collegeCode } = req.user;
+
+
+  const masterConn = connectMasterDB();
+  const College = getCollegeModel(masterConn);
+
+  const college = await College.findOne({ collegeCode, status: "active" });
+  if (!college) throw new ApiError(404, "College not found");
+
+  const collegeConn = getCollegeDB(college.dbName);
+  const Student = getCollegeStudentModel(collegeConn);
+
+  await Student.findByIdAndUpdate(userId, {
+    $unset: { fcmToken: "" }
+  });
+
+  res.json({ success: true });
+};
+

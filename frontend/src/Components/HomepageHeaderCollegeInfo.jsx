@@ -21,8 +21,11 @@ export default function CollegeInfo({ collegeData }) {
 
   const { user } = useAuth();
 const { collegeInfo } = useCollege();
+const { collegeDept } = useCollege();
   // const [collegeInfo, setCollegeInfo] = useState({});
-  const [collegeDept, setCollegeDept] = useState([]);
+  console.log("hiihihihihhihiascugavcyavcyasb", collegeDept);
+  
+  // const [collegeDept, setCollegeDept] = useState([]);
 
   const data = {
     collegeName: collegeInfo?.collegeName ?? "XYZ Institute of Technology",
@@ -205,7 +208,7 @@ const { collegeInfo } = useCollege();
                       key={idx}
                       className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold text-slate-300 border border-white/5"
                     >
-                      {dept}
+                      {dept.shortCode}
                     </span>
                   ))}
                 </div>

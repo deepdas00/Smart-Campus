@@ -6,6 +6,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const CollegeProvider = ({ children }) => {
   const [collegeInfo, setCollegeInfo] = useState(null);       // navbar
+  const [collegeDept, setCollegeDept] = useState([])
   const [collegeFullInfo, setCollegeFullInfo] = useState(null); // admin
   const [loading, setLoading] = useState(true);
 
@@ -15,9 +16,11 @@ export const CollegeProvider = ({ children }) => {
       `${API_URL}/api/v1/college/info-limit`,
       { withCredentials: true }
     );
-    console.log("//////////////////", res.data.data);
+    console.log("//////////////////", res.data.data.departments);
     
     setCollegeInfo(res.data.data.collegeInfo);
+    setCollegeDept(res.data.data.departments);
+
   };
 
   // 🔹 admin data (full)
@@ -51,6 +54,7 @@ export const CollegeProvider = ({ children }) => {
         collegeInfo,
         collegeFullInfo,
         loading,
+        collegeDept,
         updateCollegeInfo,
       }}
     >

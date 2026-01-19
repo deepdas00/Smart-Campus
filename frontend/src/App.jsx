@@ -1,6 +1,6 @@
 import { Routes, Route, Outlet } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-
+import FullScreenLoader from "./Components/FullScreenLoader";
 import HomePage from "./Page/HomePage";
 import SignupPage from "./Page/SignupPage"; // create this
 import Profile from "./Page/Profile";
@@ -70,7 +70,11 @@ const AdminLayout = () => {
   );
 };
 export default function App() {
-  const { user } = useAuth();
+  const { user, loading  } = useAuth();
+
+  if (loading) {
+    return <FullScreenLoader />;
+  }
 
   const userRole = user?.role;
   console.log("USER ROLE HAI...", userRole);

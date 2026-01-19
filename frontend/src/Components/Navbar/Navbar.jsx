@@ -13,7 +13,7 @@ import ProfileSidebar from "../ProfileSidebar";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { createPortal } from "react-dom";
-
+import { useCollege } from "../../context/CollegeContext";
 const API_URL = import.meta.env.VITE_API_URL;
 import { BookMarked, ChevronRight, ShoppingCart, ChefHat } from "lucide-react";
 
@@ -29,7 +29,7 @@ export default function Navbar({
   bookingSuccess,
   showMyBooks,
   selectedOrder,
-  showIssueModal
+  showIssueModal,
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -38,19 +38,14 @@ export default function Navbar({
   const isCanteenPage = location.pathname === "/canteen";
   const isOrderPage = location.pathname === "/orders";
 
-  const [collegeInfo, setCollegeInfo] = useState("")
-  const [collegeDept, setCollegeDept] = useState([])
   const { user } = useAuth();
   const { logout } = useAuth();
-  
 
+  const { collegeInfo } = useCollege();
 
   function FloatingCartButton({ children }) {
-  return createPortal(children, document.body);
-}
-
-
-
+    return createPortal(children, document.body);
+  }
 
   const handleLogout = async () => {
     try {
@@ -66,7 +61,6 @@ export default function Navbar({
       toast.success("Logged out successfully", { id: "logout" });
 
       navigate("/login", { replace: true });
-
     } catch (error) {
       console.error(error);
       toast.error("Logout failed", { id: "logout" });
@@ -102,35 +96,6 @@ export default function Navbar({
     }
   };
 
-  
-
-
-
-    
-  const fetchCollegeInfo = async () => {
-    try {
-
-      
-      const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
-        withCredentials: true,
-      });
-
-
-      setCollegeInfo(res.data.data.collegeInfo);
-      setCollegeDept(res.data.data.departments);
-     
-    } catch (err) {
-      console.error("Fetch college info failed", err);
-    }
-  };
-
-
-useEffect(() => {
-  if (!user) return;
-   fetchCollegeInfo();
-}, [user]);
-
-  
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 
   return (
@@ -150,20 +115,24 @@ useEffect(() => {
                     <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
                       <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
-                        Powered by <span className="font-semibold ">
-                          Smart Campus
-                        </span>
+                        Powered by{" "}
+                        <span className="font-semibold ">Smart Campus</span>
                       </p>
                     </span>
                   </Link>
                 </div>
 
                 <div className="flex items-center space-x-4">
-{isLibraryPage && !showIssueModal && !showMyBooks && !bookingSuccess && !bookReceived && !showProfileMenu && (
-  <FloatingCartButton>
-    <button
-      onClick={onMyBooksClick}
-      className="
+                  {isLibraryPage &&
+                    !showIssueModal &&
+                    !showMyBooks &&
+                    !bookingSuccess &&
+                    !bookReceived &&
+                    !showProfileMenu && (
+                      <FloatingCartButton>
+                        <button
+                          onClick={onMyBooksClick}
+                          className="
         fixed bottom-7 right-6 z-[9999]
         flex items-center justify-center
         w-12 h-12 rounded-full
@@ -171,47 +140,48 @@ useEffect(() => {
         hover:bg-blue-700 transition
         sm:hidden
       "
-    >
-      <BookMarked className="w-5 h-5" />
+                        >
+                          <BookMarked className="w-5 h-5" />
 
-      {myBooksCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-          {myBooksCount}
-        </span>
-      )}
-    </button>
-  </FloatingCartButton>
-)}
+                          {myBooksCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              {myBooksCount}
+                            </span>
+                          )}
+                        </button>
+                      </FloatingCartButton>
+                    )}
 
-
-{isLibraryPage && (
-  <button
-    onClick={onMyBooksClick}
-    className="
+                  {isLibraryPage && (
+                    <button
+                      onClick={onMyBooksClick}
+                      className="
       hidden sm:flex
       relative items-center gap-2
       px-3 py-1.5
       bg-blue-600 text-white rounded-lg
       hover:bg-blue-700 transition
     "
-  >
-    <BookMarked className="w-4 h-4" />
-    <span>My Books</span>
+                    >
+                      <BookMarked className="w-4 h-4" />
+                      <span>My Books</span>
 
-    {myBooksCount > 0 && (
-      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-        {myBooksCount}
-      </span>
-    )}
-  </button>
-)}
+                      {myBooksCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          {myBooksCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
 
-
-{isCanteenPage && !showCart && !orderPlaced && !showProfileMenu && (
-  <FloatingCartButton>
-    <button
-      onClick={onCartClick}
-      className="
+                  {isCanteenPage &&
+                    !showCart &&
+                    !orderPlaced &&
+                    !showProfileMenu && (
+                      <FloatingCartButton>
+                        <button
+                          onClick={onCartClick}
+                          className="
         fixed bottom-7 right-6 z-[9999]
         flex items-center justify-center
         w-12 h-12 rounded-full
@@ -219,22 +189,22 @@ useEffect(() => {
         hover:bg-blue-700 transition
         sm:hidden
       "
-    >
-      <ShoppingCart className="w-5 h-5" />
+                        >
+                          <ShoppingCart className="w-5 h-5" />
 
-      {cartCount > 0 && (
-        <span className="absolute -top-1 -right-1 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-          {cartCount}
-        </span>
-      )}
-    </button>
-  </FloatingCartButton>
-)}
+                          {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                              {cartCount}
+                            </span>
+                          )}
+                        </button>
+                      </FloatingCartButton>
+                    )}
 
-{isCanteenPage && (
-  <button
-    onClick={onCartClick}
-    className="
+                  {isCanteenPage && (
+                    <button
+                      onClick={onCartClick}
+                      className="
       hidden sm:flex
       items-center gap-2
       px-3 py-1.5
@@ -242,23 +212,23 @@ useEffect(() => {
       hover:bg-blue-700 transition
       relative
     "
-  >
-    <ShoppingCart className="w-4 h-4" />
-    <span>Cart</span>
+                    >
+                      <ShoppingCart className="w-4 h-4" />
+                      <span>Cart</span>
 
-    {cartCount > 0 && (
-      <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
-        {cartCount}
-      </span>
-    )}
-  </button>
-)}
+                      {cartCount > 0 && (
+                        <span className="absolute -top-2 -right-2 bg-blue-900 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                          {cartCount}
+                        </span>
+                      )}
+                    </button>
+                  )}
 
-{isOrderPage && !showProfileMenu && !selectedOrder && (
-  <FloatingCartButton>
-    <Link
-      to="/canteen"
-      className="
+                  {isOrderPage && !showProfileMenu && !selectedOrder && (
+                    <FloatingCartButton>
+                      <Link
+                        to="/canteen"
+                        className="
         fixed bottom-7 right-6 z-[9999]
         flex items-center justify-center
         w-12 h-12 rounded-full
@@ -266,30 +236,27 @@ useEffect(() => {
         hover:bg-blue-700 transition
         sm:hidden
       "
-    >
-      <ChefHat className="w-5 h-5" />
-    </Link>
-  </FloatingCartButton>
-)}
+                      >
+                        <ChefHat className="w-5 h-5" />
+                      </Link>
+                    </FloatingCartButton>
+                  )}
 
-
-{isOrderPage && (
-  <Link
-    to="/canteen"
-    className="
+                  {isOrderPage && (
+                    <Link
+                      to="/canteen"
+                      className="
       hidden sm:flex
       relative items-center gap-2
       px-3 py-1.5
       bg-blue-600 text-white rounded-lg
       hover:bg-blue-700 transition
     "
-  >
-    <ChefHat className="w-4 h-4" />
-    <span>Canteen</span>
-  </Link>
-)}
-
-
+                    >
+                      <ChefHat className="w-4 h-4" />
+                      <span>Canteen</span>
+                    </Link>
+                  )}
 
                   <span
                     onClick={handleLogout}
@@ -324,9 +291,8 @@ useEffect(() => {
                     <span className="md:text-xl sm:text-lg text-[3.4vw] font-bold bg-blue-700  bg-clip-text text-transparent ">
                       {collegeInfo?.collegeName || "Smart Campus"}
                       <p className="sm:text-[11px] text-[8px] font-normal bg-gray-500 bg-clip-text text-transparent ">
-                        Powered by <span className="font-semibold ">
-                          Smart Campus
-                        </span>
+                        Powered by{" "}
+                        <span className="font-semibold ">Smart Campus</span>
                       </p>
                     </span>
                   </Link>
@@ -343,15 +309,14 @@ useEffect(() => {
                   <Link className="flex items-center space-x-2">
                     <img
                       src={
-      user?.role === "librarian"
-        ? librarian
-        : user?.role === "canteen"
-        ? canteen
-        : user?.role === "admin"
-        ? admin
-        : user?.profilePhoto // fallback for regular users
-    }
-
+                        user?.role === "librarian"
+                          ? librarian
+                          : user?.role === "canteen"
+                          ? canteen
+                          : user?.role === "admin"
+                          ? admin
+                          : user?.profilePhoto // fallback for regular users
+                      }
                       alt="Profile"
                       onClick={() => setShowProfileMenu(true)}
                       className="md:w-13.5 lg:w-13.5 lg:h-13.5 md:h-13.5 w-10 h-10 rounded-full object-cover bg-white/60 backdrop-blur border-2 border-black/90 shadow"

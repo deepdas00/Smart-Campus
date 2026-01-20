@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
+import { socket } from "../socket";
 // import CollegeInfo from "../Components/CollegeInfo";
 
 export function KitchenKDS() {
@@ -506,6 +507,41 @@ const handleRelease = () => {
       setAddingFood(false);
     }
   };
+
+
+
+
+
+  useEffect(() => {
+  const handleCanteenFoodUpdate = (data) => {
+    if (!data?.food?._id) return;
+
+    setMenuItems((prev) => {
+      const index = prev.findIndex((f) => f._id === data.food._id);
+
+      // 🆕 New food added
+      if (index === -1) {
+        return [data.food, ...prev];
+      }
+
+      // ✏️ Existing food updated
+      const updated = [...prev];
+      updated[index] = data.food;
+      return updated;
+    });
+  };
+
+  socket.on("foodUpdated", handleCanteenFoodUpdate);
+
+  return () => {
+    socket.off("foodUpdated", handleCanteenFoodUpdate);
+  };
+}, []);
+
+
+
+
+
 
   useEffect(() => {
     const fetchDashboardOrders = async () => {

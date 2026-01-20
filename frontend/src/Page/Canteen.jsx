@@ -62,35 +62,28 @@ export default function Canteen() {
 
   const API_URL = import.meta.env.VITE_API_URL;
 
-
-
-
   const fetchCanteenStatus = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/v1/canteen/canteenStatus`, {
-          withCredentials: true,
-        });
+    try {
+      const res = await axios.get(`${API_URL}/api/v1/canteen/canteenStatus`, {
+        withCredentials: true,
+      });
 
-     
+      // assuming backend returns { data: { isActive: true/false } }
+      setIsCanteenOpen(res.data?.data);
+    } catch (err) {
+      console.error("Failed to fetch canteen status", err);
+      setIsCanteenOpen(false); // safest fallback
+    }
+  };
 
-        // assuming backend returns { data: { isActive: true/false } }
-        setIsCanteenOpen(res.data?.data);
+  const [canteenPolicy, setCanteenPolicy] = useState(null);
 
-      
-      } catch (err) {
-        console.error("Failed to fetch canteen status", err);
-        setIsCanteenOpen(false); // safest fallback
-      }
-    };
-
-    const [canteenPolicy, setCanteenPolicy] = useState(null);
-
-const fetchCanteenPolicy = async () => {
+  const fetchCanteenPolicy = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/v1/canteen/fetchpolicy`, {
         withCredentials: true,
       });
- 
+
       setCanteenPolicy(res.data?.data || ""); // default to 5 if not provided
     } catch (err) {
       console.error("Failed to fetch canteen policy", err);
@@ -98,9 +91,7 @@ const fetchCanteenPolicy = async () => {
     }
   };
 
-
   useEffect(() => {
-    
     fetchCanteenStatus();
     fetchCanteenPolicy();
 
@@ -110,24 +101,70 @@ const fetchCanteenPolicy = async () => {
     // return () => clearInterval(intervalId);
   }, []);
 
+  useEffect(() => {
+    // Listen for canteen open / close updates
+    const handleCanteenStatus = (data) => {
+      if (typeof data?.isActive === "boolean") {
+        setIsCanteenOpen(data.isActive);
+      }
+    };
 
-useEffect(() => {
-  // Listen for canteen open / close updates
-  const handleCanteenStatus = (data) => {
-    if (typeof data?.isActive === "boolean") {
-      setIsCanteenOpen(data.isActive);
-    }
-  };
+    socket.on("canteenStatus", handleCanteenStatus);
 
-  socket.on("canteenStatus", handleCanteenStatus);
+    return () => {
+      socket.off("canteenStatus", handleCanteenStatus);
+    };
+  }, []);
 
-  return () => {
-    socket.off("canteenStatus", handleCanteenStatus);
-  };
-}, []);
+  useEffect(() => {
+    const handleCanteenUpdate = (data) => {
+      if (!data?.food?._id) return;
 
+      console.log(data);
+      
 
-  
+      setMenuItems((prev) => {
+        const index = prev.findIndex((f) => f._id === data.food._id);
+
+        // ➕ New food
+        if (index === -1) {
+          return [data.food, ...prev];
+        }
+
+        // ✏️ Update existing food
+        const updated = [...prev];
+        updated[index] = data.food;
+        return updated;
+      });
+    };
+
+    socket.on("foodUpdated", handleCanteenUpdate);
+
+    return () => {
+      socket.off("foodUpdated", handleCanteenUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleCanteenDelete = (data) => {
+      if (!data?._id) return;
+
+      setMenuItems((prev) => prev.filter((food) => food._id !== data._id));
+
+      // 🧹 Also remove from cart if present
+      setCart((prev) => {
+        if (!prev[data._id]) return prev;
+        const { [data._id]: _, ...rest } = prev;
+        return rest;
+      });
+    };
+
+    socket.on("foodDeleted", handleCanteenDelete);
+
+    return () => {
+      socket.off("foodDeleted", handleCanteenDelete);
+    };
+  }, []);
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -143,7 +180,7 @@ useEffect(() => {
 
         const res = await axios.get(
           `${API_URL}/api/v1/canteen/foods`,
-          { withCredentials: true } // if auth cookies are used
+          { withCredentials: true }, // if auth cookies are used
         );
 
         setMenuItems(res.data.data.foods); // adjust if response structure differs
@@ -201,27 +238,18 @@ useEffect(() => {
   const getTotalItems = () => {
     return Object.values(cart).reduce(
       (total, item) => total + item.quantity,
-      0
+      0,
     );
   };
 
   const getTotalPrice = () => {
     return Object.values(cart).reduce(
       (total, item) => total + item.price * item.quantity,
-      0
+      0,
     );
   };
 
   const placeOrder = async () => {
-
-
-    
-
-
-
-      
- 
-
     try {
       if (Object.keys(cart).length === 0) {
         toast.error("Your cart is empty");
@@ -235,15 +263,11 @@ useEffect(() => {
         quantity: item.quantity,
       }));
 
-
-
       const res = await axios.post(
         `${API_URL}/api/v1/canteen/orders`,
         { items },
-        { withCredentials: true }
+        { withCredentials: true },
       );
-
-    
 
       toast.success("Order created! Redirecting to payment…", {
         id: "place-order",
@@ -257,18 +281,16 @@ useEffect(() => {
       toast.error(err.response?.data?.message || "Failed to place order", {
         id: "place-order",
       });
+    } finally {
+      isCanteenOpen(null); // still runs
     }
-    finally {
-  isCanteenOpen(null); // still runs
-}
-
   };
 
   const startPayment = async (orderId) => {
     const res = await axios.post(
       `${API_URL}/api/v1/canteen/orders/${orderId}/pay`,
       {},
-      { withCredentials: true }
+      { withCredentials: true },
     );
 
     const { razorpayOrderId, amount, currency, key } = res.data.data;
@@ -314,8 +336,6 @@ useEffect(() => {
     const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
       response;
 
-    
-
     const res = await axios.post(
       `${API_URL}/api/v1/canteen/orders/verify-payment`,
       {
@@ -323,10 +343,8 @@ useEffect(() => {
         razorpay_payment_id,
         razorpay_signature,
       },
-      { withCredentials: true }
+      { withCredentials: true },
     );
-
-   
 
     const {
       qrCode,
@@ -343,7 +361,7 @@ useEffect(() => {
     setQrCodeForDetails(qrCode);
     setRazorpayPaymentId(razorpayPaymentId);
     setOrderId(orderId);
-    setTransactionCode(transactionCode)
+    setTransactionCode(transactionCode);
     setOrderStatus(orderStatus);
     setPaymentStatus(paymentStatus);
 
@@ -353,8 +371,6 @@ useEffect(() => {
       total: totalAmount,
       time: new Date(createdAt).toLocaleTimeString(),
     });
-
-  
 
     setCart({});
     setShowCart(false);
@@ -389,8 +405,8 @@ useEffect(() => {
       <Navbar
         onCartClick={() => setShowCart(true)}
         showCart={showCart}
-        orderReceived = {orderReceived}
-        orderPlaced = {orderPlaced}
+        orderReceived={orderReceived}
+        orderPlaced={orderPlaced}
         cartCount={getTotalItems()}
       />
 
@@ -463,8 +479,8 @@ useEffect(() => {
                         paymentStatus === "paid"
                           ? "text-green-800"
                           : paymentStatus === "failed"
-                          ? "text-red-700"
-                          : "text-orange-600"
+                            ? "text-red-700"
+                            : "text-orange-600"
                       }`}
                     >
                       {paymentStatus?.toUpperCase()}
@@ -483,14 +499,16 @@ useEffect(() => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Order Status:</span>
-                  <span className="font-semibold">{orderStatus === "order_receive" ? "Order Placed" : orderStatus}
-</span>
+                  <span className="font-semibold">
+                    {orderStatus === "order_receive"
+                      ? "Order Placed"
+                      : orderStatus}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Time:</span>
                   <span className="font-semibold">{orderDetails?.time}</span>
                 </div>
-                
 
                 <div className="flex justify-between text-lg pt-2 border-t border-gray-200">
                   <span className="font-semibold">Total:</span>
@@ -523,17 +541,17 @@ useEffect(() => {
       )}
 
       {/* Cart Sidebar */}
-     {showCart && (
-  <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]">
-    {/* BACKDROP */}
-    <div
-      onClick={() => setShowCart(false)}
-      className="absolute inset-0"
-    />
+      {showCart && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[90]">
+          {/* BACKDROP */}
+          <div
+            onClick={() => setShowCart(false)}
+            className="absolute inset-0"
+          />
 
-    {/* CART PANEL */}
-    <div
-      className="
+          {/* CART PANEL */}
+          <div
+            className="
         fixed
         bottom-0 sm:bottom-auto
         right-0
@@ -548,86 +566,86 @@ useEffect(() => {
         slide-in-from-bottom sm:slide-in-from-right
         duration-300
       "
-    >
-      {/* HEADER */}
-      <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 sm:p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg sm:text-2xl font-bold">Your Cart</h2>
-          <button
-            onClick={() => setShowCart(false)}
-            className="text-white hover:bg-white/20 rounded-full p-2 transition"
           >
-            <X className="w-5 h-5 sm:w-6 sm:h-6" />
-          </button>
-        </div>
-        <p className="text-orange-100 mt-1 sm:mt-2 text-sm sm:text-base">
-          {getTotalItems()} items
-        </p>
-      </div>
-
-      {/* ITEMS */}
-      <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-3 sm:space-y-4">
-        {Object.keys(cart).length === 0 ? (
-          <div className="text-center py-16">
-            <div className="text-6xl mb-4">🛒</div>
-            <p className="text-gray-500">Your cart is empty</p>
-          </div>
-        ) : (
-          Object.entries(cart).map(([id, item]) => (
-            <div
-              key={id}
-              className="bg-gray-50 rounded-xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4"
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-xl"
-              />
-
-              <div className="flex-1">
-                <h3 className="font-semibold text-sm sm:text-base text-gray-900">
-                  {item.name}
-                </h3>
-                <p className="text-orange-600 font-bold text-sm sm:text-base">
-                  ₹{item.price}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
+            {/* HEADER */}
+            <div className="bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 sm:p-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg sm:text-2xl font-bold">Your Cart</h2>
                 <button
-                  onClick={() => removeFromCart(id)}
-                  className="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center"
+                  onClick={() => setShowCart(false)}
+                  className="text-white hover:bg-white/20 rounded-full p-2 transition"
                 >
-                  <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
-                </button>
-
-                <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">
-                  {item.quantity}
-                </span>
-
-                <button
-                  onClick={() => addToCart(item)}
-                  className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"
-                >
-                  <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
+              <p className="text-orange-100 mt-1 sm:mt-2 text-sm sm:text-base">
+                {getTotalItems()} items
+              </p>
             </div>
-          ))
-        )}
-      </div>
 
-      {/* FOOTER */}
-      {Object.keys(cart).length > 0 && (
-        <div className="border-t border-gray-200 p-4 sm:p-6 space-y-3">
-          <div className="flex justify-between text-lg sm:text-xl font-bold">
-            <span>Total:</span>
-            <span className="text-orange-600">₹{getTotalPrice()}</span>
-          </div>
+            {/* ITEMS */}
+            <div className="flex-1 overflow-y-auto px-3 sm:px-6 py-4 space-y-3 sm:space-y-4">
+              {Object.keys(cart).length === 0 ? (
+                <div className="text-center py-16">
+                  <div className="text-6xl mb-4">🛒</div>
+                  <p className="text-gray-500">Your cart is empty</p>
+                </div>
+              ) : (
+                Object.entries(cart).map(([id, item]) => (
+                  <div
+                    key={id}
+                    className="bg-gray-50 rounded-xl p-3 sm:p-4 flex items-center gap-3 sm:gap-4"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      className="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded-xl"
+                    />
 
-          <button
-            onClick={placeOrder}
-            className="
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-sm sm:text-base text-gray-900">
+                        {item.name}
+                      </h3>
+                      <p className="text-orange-600 font-bold text-sm sm:text-base">
+                        ₹{item.price}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => removeFromCart(id)}
+                        className="w-7 h-7 sm:w-8 sm:h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center"
+                      >
+                        <Minus className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </button>
+
+                      <span className="w-6 sm:w-8 text-center font-semibold text-sm sm:text-base">
+                        {item.quantity}
+                      </span>
+
+                      <button
+                        onClick={() => addToCart(item)}
+                        className="w-7 h-7 sm:w-8 sm:h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"
+                      >
+                        <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* FOOTER */}
+            {Object.keys(cart).length > 0 && (
+              <div className="border-t border-gray-200 p-4 sm:p-6 space-y-3">
+                <div className="flex justify-between text-lg sm:text-xl font-bold">
+                  <span>Total:</span>
+                  <span className="text-orange-600">₹{getTotalPrice()}</span>
+                </div>
+
+                <button
+                  onClick={placeOrder}
+                  className="
               w-full
               py-3 sm:py-4
               bg-gradient-to-r from-orange-600 to-red-600
@@ -637,15 +655,14 @@ useEffect(() => {
               hover:shadow-xl
               transition
             "
-          >
-            Place Order
-          </button>
+                >
+                  Place Order
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       )}
-    </div>
-  </div>
-)}
-
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-2 sm:py-8">
@@ -657,10 +674,11 @@ useEffect(() => {
               <Clock className="w-4 h-4 text-gray-500" />
               <span className="font-medium">Open</span>
               <span className="text-gray-400">|</span>
-              <span>{canteenPolicy?.openingTime}  –  {canteenPolicy?.closingTime}</span>
+              <span>
+                {canteenPolicy?.openingTime} – {canteenPolicy?.closingTime}
+              </span>
             </div>
           </div>
-
         </div>
 
         <SearchAndCategory

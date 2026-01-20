@@ -6,6 +6,8 @@ import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
 import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
+
 
 export const addFood = asyncHandler(async (req, res) => {
 
@@ -68,6 +70,12 @@ export const addFood = asyncHandler(async (req, res) => {
     isAvailable: true,
     createdBy: userId
   });
+
+    broadcastViaSocket(collegeCode, ["student", "canteen", "admin"], {
+    event: "foodUpdated",
+    food
+  });
+  
 
   // 6️⃣ Response
   res.status(201).json(
@@ -142,13 +150,13 @@ export const updateFood = asyncHandler(async (req, res) => {
   const { foodId } = req.params;
   const { collegeCode } = req.user;
 
-  const { quantityAvailable, isAvailable } = req.body;
+  const { quantityAvailable, isAvailable, price } = req.body;
 
   // 1️⃣ Validate input
-  if (quantityAvailable === undefined && isAvailable === undefined) {
+  if (quantityAvailable === undefined && isAvailable === undefined && price === undefined) {
     throw new ApiError(
       400,
-      "At least one field (quantityAvailable or isAvailable) is required"
+      "At least one field (quantityAvailable or isAvailable or price) is required"
     );
   }
 
@@ -169,9 +177,9 @@ export const updateFood = asyncHandler(async (req, res) => {
   const CanteenFood = getCanteenFoodModel(collegeConn);
 
   // 3️⃣ Find food item
-  const food = await CanteenFood.findById(foodId);
+  const canteenFood = await CanteenFood.findById(foodId);
 
-  if (!food) {
+  if (!canteenFood) {
     throw new ApiError(404, "Food item not found");
   }
 
@@ -179,7 +187,7 @@ export const updateFood = asyncHandler(async (req, res) => {
     if (req.file?.path){
       const imagePath = req.file?.path?.replace(/\\/g, "/");
       const uploadResult = await uploadOnCloudinary(imagePath);
-      food.image  = uploadResult.url
+      canteenFood.image  = uploadResult.url
     }
 
 
@@ -188,19 +196,29 @@ export const updateFood = asyncHandler(async (req, res) => {
     if (quantityAvailable < 0) {
       throw new ApiError(400, "Quantity cannot be negative");
     }
-    food.quantityAvailable = quantityAvailable;
+    canteenFood.quantityAvailable = quantityAvailable;
 
     // Auto-disable if quantity = 0
     if (quantityAvailable === 0) {
-      food.isAvailable = false;
+      canteenFood.isAvailable = false;
     }
   }
 
   if (isAvailable !== undefined) {
-    food.isAvailable = isAvailable;
+    canteenFood.isAvailable = isAvailable;
+  }
+  if (price !== undefined) {
+    canteenFood.price = price;
   }
 
-  await food.save();
+  const food = await canteenFood.save();
+
+
+  broadcastViaSocket(collegeCode, ["student", "canteen", "admin"], {
+    event: "foodUpdated",
+    food
+  });
+  
 
   // 5️⃣ Response
   res.status(200).json(
@@ -242,6 +260,14 @@ export const deleteFood = asyncHandler(async (req, res) => {
 
   // 🗑️ 3️⃣ Permanently delete food
   await food.deleteOne();
+
+
+
+  broadcastViaSocket(collegeCode, ["student", "canteen", "admin"], {
+    event: "foodDeleted",
+    _id:foodId
+  });
+
 
   // 4️⃣ Response
   return res.status(200).json(

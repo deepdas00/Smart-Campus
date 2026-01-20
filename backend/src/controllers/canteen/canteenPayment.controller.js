@@ -10,6 +10,7 @@ import { getCanteenFoodModel } from "../../models/canteenFood.model.js";
 import QRCode from "qrcode";
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { sendNotification } from "../../utils/sendNotification.js";
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
 
 
 
@@ -154,17 +155,29 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
 
   // 7️⃣ 🔥 REDUCE STOCK (VERY IMPORTANT)
   for (const item of order.items) {
-    const food = await Food.findById(item.foodId);
+    const canteenFood = await Food.findById(item.foodId);
 
-    if (food) {
-      food.quantityAvailable -= item.quantity;
+    if (canteenFood) {
+      canteenFood.quantityAvailable -= item.quantity;
 
-      if (food.quantityAvailable <= 0) {
-        food.quantityAvailable = 0;
-        food.isAvailable = false;
+      if (canteenFood.quantityAvailable <= 0) {
+        canteenFood.quantityAvailable = 0;
+        canteenFood.isAvailable = false;
       }
+      
 
-      await food.save({ validateBeforeSave: false });
+      const food = await canteenFood.save({ validateBeforeSave: false });
+
+
+      console.log(food);
+      
+
+      broadcastViaSocket(collegeCode, ["student", "canteen", "admin"], {
+      event: "foodUpdated",
+      food
+    });
+
+
     }
   }
 
@@ -184,7 +197,6 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   await order.save({ validateBeforeSave: false });
 
 
-console.log("/////////////////////////", student.fcmToken);
 
 
 
@@ -193,6 +205,10 @@ console.log("/////////////////////////", student.fcmToken);
     "Order Update 🍔",
     "Your Order placed successfully!"
   );
+
+
+  
+    
 
 
   // 8️⃣ Response

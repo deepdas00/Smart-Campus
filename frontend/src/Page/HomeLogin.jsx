@@ -109,7 +109,7 @@ export default function HomeLogin() {
       return [data.newImage, ...prev];
     });
 
-    toast.success("📸 New campus photo added");
+ 
   };
 
   socket.on("galleryUpdated", handleGalleryUpdate);

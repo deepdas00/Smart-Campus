@@ -12,6 +12,7 @@ import {
   User,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import { useCollege } from "../context/CollegeContext";
 
 const API_URL = import.meta.env.VITE_API_URL;
 // Assuming "collegeData" is passed as a prop or fetched from your MongoDB
@@ -19,9 +20,12 @@ export default function CollegeInfo({ collegeData }) {
   // Fallback values for development if data is missing
 
   const { user } = useAuth();
-
-  const [collegeInfo, setCollegeInfo] = useState({});
-  const [collegeDept, setCollegeDept] = useState([]);
+const { collegeInfo } = useCollege();
+const { collegeDept } = useCollege();
+  // const [collegeInfo, setCollegeInfo] = useState({});
+  console.log("hiihihihihhihiascugavcyavcyasb", collegeDept);
+  
+  // const [collegeDept, setCollegeDept] = useState([]);
 
   const data = {
     collegeName: collegeInfo?.collegeName ?? "XYZ Institute of Technology",
@@ -38,25 +42,25 @@ export default function CollegeInfo({ collegeData }) {
     registrationNumber: collegeInfo?.registrationNumber ?? "N/A",
   };
 
-  const fetchCollegeInfo = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
-        withCredentials: true,
-      });
+  // const fetchCollegeInfo = async () => {
+  //   try {
+  //     const res = await axios.get(`${API_URL}/api/v1/college/info-limit`, {
+  //       withCredentials: true,
+  //     });
 
-      const dept = res.data.data.departments.map((d) => d.shortCode);
+  //     const dept = res.data.data.departments.map((d) => d.shortCode);
 
-      setCollegeInfo(res.data.data.collegeInfo);
-      setCollegeDept(dept);
-    } catch (err) {
-      console.error("Fetch college info failed", err);
-    }
-  };
+  //     setCollegeInfo(res.data.data.collegeInfo);
+  //     setCollegeDept(dept);
+  //   } catch (err) {
+  //     console.error("Fetch college info failed", err);
+  //   }
+  // };
 
-  useEffect(() => {
-    if (!user) return;
-    fetchCollegeInfo();
-  }, [user]);
+  // useEffect(() => {
+  //   if (!user) return;
+  //   fetchCollegeInfo();
+  // }, [user]);
 
   return (
     <section className="relative min-h-[600px] flex items-center overflow-hidden bg-white">
@@ -204,7 +208,7 @@ export default function CollegeInfo({ collegeData }) {
                       key={idx}
                       className="px-3 py-1 bg-white/10 rounded-full text-[10px] font-bold text-slate-300 border border-white/5"
                     >
-                      {dept}
+                      {dept.shortCode}
                     </span>
                   ))}
                 </div>

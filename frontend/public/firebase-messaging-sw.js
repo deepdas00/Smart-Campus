@@ -42,15 +42,8 @@ self.addEventListener("push", function (event) {
   const options = {
     body: payload.data?.body || "New update",
     icon: "/logo.png",
-    badge: "/badge.png",
-    
+    badge: "/badge.png",2004
   };
-
-
-
-
-
-
 
   event.waitUntil(
     self.registration.showNotification(title, options)
@@ -61,17 +54,15 @@ self.addEventListener("push", function (event) {
 
 
 
-  self.addEventListener("notificationclick", (event) => {
+self.addEventListener("notificationclick", (event) => {
   event.notification.close();
-
-  if (event.action === "dismiss") return;
 
   const url = event.notification.data?.url || "/";
 
   event.waitUntil(
-    clients.matchAll({ type: "window", includeUncontrolled: true }).then((list) => {
-      for (const client of list) {
-        if (client.url.includes(url) && "focus" in client) {
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientsArr) => {
+      for (const client of clientsArr) {
+        if (client.url.includes(url)) {
           return client.focus();
         }
       }
@@ -79,5 +70,3 @@ self.addEventListener("push", function (event) {
     })
   );
 });
-
-

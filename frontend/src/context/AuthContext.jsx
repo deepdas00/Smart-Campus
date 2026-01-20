@@ -5,7 +5,8 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   // const API_URL = import.meta.env.VITE_API_URL;
-  
+  const MIN_LOADING_TIME = 1; // 3 seconds
+  const startTime = Date.now();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -34,9 +35,12 @@ const fetchUser = async () => {
   } catch (err) {
     console.error("Auth check failed:", err);
     setUser(null);
-  } finally {
-    setLoading(false);
-  }
+  } const elapsed = Date.now() - startTime;
+    const remaining = Math.max(MIN_LOADING_TIME - elapsed, 0);
+
+    setTimeout(() => {
+      setLoading(false);
+    }, remaining);
 };
 
 

@@ -21,7 +21,6 @@ onMessage(messaging, (payload) => {
     body,
     icon: `/logo.png`,
     badge: `/badge.png`,
-   
   });
 
   notification.onclick = () => {
@@ -29,8 +28,6 @@ onMessage(messaging, (payload) => {
     window.location.href = "/";
     notification.close();
   };
-
-  
 });
 
 

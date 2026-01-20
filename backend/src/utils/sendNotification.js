@@ -1,31 +1,5 @@
-// import admin from "../config/firebaseNotification.js";
-
-// export const sendNotification = (fcmToken, title, body) => {
-//   if (!fcmToken) return;
-
-
-
-//   setImmediate(async () => {
-//     try {
-//       await admin.messaging().send({
-//         token: fcmToken,
-//         notification: {
-//           title,
-//           body
-//         }
-//       });
-//     } catch (err) {
-//       console.error("FCM error:", err.message);
-//     }
-//   });
-// };
-
-
-
-
-
-
 import admin from "../config/firebaseNotification.js";
+import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 
 export const sendNotification = async (
   fcmToken,
@@ -56,6 +30,7 @@ export const sendNotification = async (
       err.code === "messaging/registration-token-not-registered" ||
       err.code === "messaging/invalid-registration-token"
     ) {
+
       await Student.updateOne(
         { fcmToken },
         { $unset: { fcmToken: "" } }

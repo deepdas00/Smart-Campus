@@ -20,7 +20,7 @@ onMessage(messaging, (payload) => {
   const notification = new Notification(title, {
     body,
     icon: `/logo.png`,
-    badge: `/badge.png`,
+    badge: `/icon.png`,
   });
 
   notification.onclick = () => {

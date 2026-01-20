@@ -110,6 +110,13 @@ export const deleteGalleryImage = asyncHandler(async (req, res) => {
 
   const image = await Gallery.findByIdAndDelete(imageId);
 
+  broadcastViaSocket(collegeCode, "student", {
+    event: "galleryDeleted",
+    newImage: {
+      _id: image._id,
+    }
+  });
+  
   if (!image) throw new ApiError(404, "Gallery image not found");
 
   res.status(200).json(

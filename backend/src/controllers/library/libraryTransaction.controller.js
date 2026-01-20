@@ -71,7 +71,7 @@ export const orderBook = asyncHandler(async (req, res) => {
   
   sendNotification(
     student.fcmToken,
-    "Library Update 🍔",
+    "Library Update 📖",
     "Your Order placed successfully!"
   );
 

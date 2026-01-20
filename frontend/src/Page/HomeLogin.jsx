@@ -142,6 +142,44 @@ export default function HomeLogin() {
     fetchNotifications();
   }, [user]);
 
+
+  useEffect(() => {
+  if (!user) return;
+
+  /* 🔔 CREATE / UPDATE notification */
+  const handleNotificationUpdated = (data) => {
+    setNotices((prev) => {
+      const exists = prev.find(n => n._id === data.notification._id);
+
+      // UPDATE
+      if (exists) {
+        return prev.map(n =>
+          n._id === data.notification._id ? data.notification : n
+        );
+      }
+
+      // CREATE (prepend)
+      return [data.notification, ...prev];
+    });
+  };
+
+  /* 🗑 DELETE notification */
+  const handleNotificationDeleted = (data) => {
+    setNotices((prev) =>
+      prev.filter(n => n._id !== data._id)
+    );
+  };
+
+  socket.on("notificationUpdated", handleNotificationUpdated);
+  socket.on("notificationDeleted", handleNotificationDeleted);
+
+  return () => {
+    socket.off("notificationUpdated", handleNotificationUpdated);
+    socket.off("notificationDeleted", handleNotificationDeleted);
+  };
+}, [user]);
+
+
   return (
     <>
       <Navbar />

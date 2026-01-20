@@ -5,6 +5,8 @@ import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeNotificationModel } from "../models/collegeNotification.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { broadcastViaSocket } from "../utils/websocketBroadcast.js";
+import { broadcastToStudents } from "../utils/notificationBroadcast.js";
 
 /* =========================
    CREATE NOTIFICATION
@@ -43,6 +45,19 @@ export const createNotification = asyncHandler(async (req, res) => {
     pic: picUrl,
     expireAt: expireAt || null
   });
+
+  broadcastViaSocket(collegeCode,["student","admin","canteen","teacher","librarian"], {
+    event: "notificationUpdated",
+    notification
+  });
+
+  // 🔔 Notify all students
+  await broadcastToStudents(
+    collegeConn,
+    "📢 New College Notice Published",
+    "A new official notice has been published by the college administration. Please check the notice section for full details and necessary action."
+  );
+
 
   res.status(201).json(
     new ApiResponse(201, notification, "Notification created successfully")
@@ -88,8 +103,7 @@ export const getNotifications = asyncHandler(async (req, res) => {
 export const updateNotification = asyncHandler(async (req, res) => {
 
 
-  console.log("uuhhuhu");
-  
+
   const { collegeCode } = req.user;
   const { notificationId } = req.params;
 
@@ -116,7 +130,14 @@ export const updateNotification = asyncHandler(async (req, res) => {
     { new: true, runValidators: true }
   );
 
+
   if (!updated) throw new ApiError(404, "Notification not found");
+
+  const notification = updated;
+  broadcastViaSocket(collegeCode,["student","admin","canteen","teacher","librarian"], {
+    event: "notificationUpdated",
+    notification
+  });
 
   res.status(200).json(
     new ApiResponse(200, updated, "Notification updated successfully")
@@ -145,6 +166,13 @@ export const deleteNotification = asyncHandler(async (req, res) => {
   const deleted = await Notification.findByIdAndDelete(notificationId);
 
   if (!deleted) throw new ApiError(404, "Notification not found");
+
+
+
+  broadcastViaSocket(collegeCode, ["student","admin","canteen","teacher","librarian"], {
+    event: "notificationDeleted",
+    _id: deleted._id
+  });
 
   res.status(200).json(
     new ApiResponse(200, null, "Notification deleted successfully")

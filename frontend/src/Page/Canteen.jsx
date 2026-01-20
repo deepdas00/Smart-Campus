@@ -27,6 +27,7 @@ import FoodGrid from "../Components/Canteen/FoodGrid";
 import SearchAndCategory from "../Components/Canteen/SearchAndCategory";
 import Navbar from "../Components/Navbar/Navbar";
 import { Toaster } from "react-hot-toast";
+import { socket } from "../socket";
 
 export default function Canteen() {
   const [cart, setCart] = useState({});
@@ -103,11 +104,30 @@ const fetchCanteenPolicy = async () => {
     fetchCanteenStatus();
     fetchCanteenPolicy();
 
-    const intervalId = setInterval(fetchCanteenStatus, 5 * 60 * 1000);
+    // const intervalId = setInterval(fetchCanteenStatus, 5 * 60 * 1000);
 
-    // 🧹 Cleanup
-    return () => clearInterval(intervalId);
+    // // 🧹 Cleanup
+    // return () => clearInterval(intervalId);
   }, []);
+
+
+useEffect(() => {
+  // Listen for canteen open / close updates
+  const handleCanteenStatus = (data) => {
+    if (typeof data?.isActive === "boolean") {
+      setIsCanteenOpen(data.isActive);
+    }
+  };
+
+  socket.on("canteenStatus", handleCanteenStatus);
+
+  return () => {
+    socket.off("canteenStatus", handleCanteenStatus);
+  };
+}, []);
+
+
+  
 
   useEffect(() => {
     const script = document.createElement("script");
@@ -196,15 +216,11 @@ const fetchCanteenPolicy = async () => {
 
 
     
-      fetchCanteenStatus()
+
 
 
       
-    if (!isCanteenOpen) {
-      toast.error("Canteen is currently closed");
-    
-      return;
-    }
+ 
 
     try {
       if (Object.keys(cart).length === 0) {

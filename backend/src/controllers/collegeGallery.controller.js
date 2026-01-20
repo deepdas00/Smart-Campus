@@ -40,7 +40,7 @@ export const addGalleryImage = asyncHandler(async (req, res) => {
   });
 
   // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
-  broadcastViaSocket(collegeCode, "student", {
+  broadcastViaSocket(collegeCode,  ["student","admin","canteen","teacher","librarian"], {
     event: "galleryUpdated",
     newImage: {
       _id: image._id,
@@ -110,7 +110,7 @@ export const deleteGalleryImage = asyncHandler(async (req, res) => {
 
   const image = await Gallery.findByIdAndDelete(imageId);
 
-  broadcastViaSocket(collegeCode, "student", {
+  broadcastViaSocket(collegeCode,  ["student","admin","canteen","teacher","librarian"], {
     event: "galleryDeleted",
     newImage: {
       _id: image._id,

@@ -10,6 +10,8 @@ import { getCanteenPolicyModel } from "../../models/canteenPolicy.model.js";
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { log } from "console";
 import { sendNotification } from "../../utils/sendNotification.js";
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
+import { broadcastToStudents } from "../../utils/notificationBroadcast.js";
 
 //order placing by student
 export const placeOrder = asyncHandler(async (req, res) => {
@@ -336,6 +338,30 @@ export const canteenIsActive = asyncHandler(async (req, res) => {
   canteenPolicy.isActive = isActive;
 
   await canteenPolicy.save({ validateBeforeSave: false });
+
+
+
+
+  broadcastViaSocket(collegeCode, ["student","canteen","admin"], {
+    event: "canteenStatus",
+    isActive: canteenPolicy.isActive
+  });
+
+
+if (canteenPolicy.isActive) {
+    await broadcastToStudents(
+      collegeConn,
+      "🍽️ Canteen is Now Open",
+      "The college canteen has started its services. You may visit now."
+    )
+  }
+  else {
+    await broadcastToStudents(
+      collegeConn,
+      "🍽️ Canteen is Closed",
+      "The college canteen is currently closed. Please check again later."
+    )
+  }
 
   res
     .status(200)

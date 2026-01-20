@@ -26,7 +26,7 @@ onMessage(messaging, (payload) => {
 
   notification.onclick = () => {
     window.focus();
-    window.location.href = "/queue/live";
+    window.location.href = "/";
     notification.close();
   };
 

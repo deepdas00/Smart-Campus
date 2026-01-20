@@ -5,7 +5,8 @@ import { connectMasterDB, getCollegeDB } from "../db/db.index.js";
 import { getCollegeModel } from "../models/college.model.js";
 import { getCollegeGalleryModel } from "../models/collegeGallery.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { broadcastToStudents } from "../utils/broadcastNotification.js";
+import { broadcastToStudents } from "../utils/notificationBroadcast.js";
+import { broadcastViaSocket } from "../utils/websocketBroadcast.js";
 
 /* ===========================
    ADD IMAGE TO GALLERY
@@ -38,12 +39,24 @@ export const addGalleryImage = asyncHandler(async (req, res) => {
     uploadedBy: userId
   });
 
-// 🔔 Notify all students
-await broadcastToStudents(                  
-  collegeConn,
-  "📸 New Gallery Photo",
-  "A new photo has been added to the college gallery"
-);
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, "student", {
+    event: "galleryUpdated",
+    newImage: {
+      _id: image._id,
+      image: image.image,
+      description: image.description,
+      uploadedBy: userId,
+      createdAt: image.createdAt
+    }
+  });
+
+  // 🔔 Notify all students
+  await broadcastToStudents(
+    collegeConn,
+    "📸 New Gallery Photo",
+    "A new photo has been added to the college gallery"
+  );
 
 
   res.status(201).json(

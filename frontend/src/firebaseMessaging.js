@@ -17,7 +17,7 @@ onMessage(messaging, (payload) => {
   const title = payload.data?.title || "Smart Campus";
   const body = payload.data?.body || "New update";
 
-  new Notification(title, {
+  const notification = new Notification(title, {
     body,
     icon: `/logo.png`,
     badge: `/badge.png`,

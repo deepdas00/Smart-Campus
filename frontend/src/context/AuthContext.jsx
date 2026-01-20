@@ -1,5 +1,8 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import API from "../api/axios";   // adjust path if needed
+import { connectSocket } from "../socket/connectSocket";
+import { socket } from "../socket";
+
 
 const AuthContext = createContext();
 
@@ -45,8 +48,12 @@ const fetchUser = async () => {
 
 
 const logout = () => {
-    setUser(null);
-  };
+  if (socket.connected) {
+    socket.disconnect();
+  }
+  setUser(null);
+};
+
 
 
   useEffect(() => {
@@ -54,6 +61,16 @@ const logout = () => {
 
     fetchUser();
   }, []);
+
+  useEffect(() => {
+  if (user?.collegeCode && user?.role) {
+    connectSocket({
+      collegeCode: user.collegeCode,
+      role: user.role, // "student" | "staff" | "admin"
+    });
+  }
+}, [user]);
+
 
   return (
     <AuthContext.Provider value={{ user, setUser, loading, logout }}>

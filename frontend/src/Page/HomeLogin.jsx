@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { requestPermission } from "../notifications";
+import { socket } from "../socket"; // adjust path if needed
+
 
 import {
   ImageIcon,
@@ -93,6 +95,33 @@ export default function HomeLogin() {
     if (!user) return;
     fetchGallery();
   }, [user]);
+
+
+  useEffect(() => {
+  if (!user) return;
+
+  const handleGalleryUpdate = (data) => {
+    setGallery((prev) => {
+      // prevent duplicate insert (important on refresh / reconnect)
+      const exists = prev.some((img) => img._id === data.newImage._id);
+      if (exists) return prev;
+
+      return [data.newImage, ...prev];
+    });
+
+    toast.success("📸 New campus photo added");
+  };
+
+  socket.on("galleryUpdated", handleGalleryUpdate);
+
+  return () => {
+    socket.off("galleryUpdated", handleGalleryUpdate);
+  };
+}, [user]);
+
+
+
+
 
   const [notices, setNotices] = useState([]);
   const fetchNotifications = async () => {

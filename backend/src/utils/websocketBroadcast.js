@@ -1,16 +1,26 @@
-import { wss } from "../index.js";   // adjust path if needed
+import { io } from "../index.js";
 
-export const broadcastViaSocket = (collegeCode, role, data) => {
-  wss.clients.forEach((client) => {
-    if (
-      client.readyState === 1 &&        // OPEN connection
-      client.collegeCode === collegeCode &&
-      client.role === role
-    ) {
-      client.send(JSON.stringify(data));
-    }
+/**
+ * Broadcast event to one or multiple roles in a college
+ *
+ * @param {string} collegeCode
+ * @param {string | string[]} roles - "student" | ["student","staff"]
+ * @param {object} data - { event: "eventName", ...payload }
+ */
+
+
+export const broadcastViaSocket = (collegeCode, roles, data) => {
+  if (!collegeCode || !data?.event) return;
+
+  // normalize roles to array
+  const roleList = Array.isArray(roles) ? roles : [roles];
+
+  roleList.forEach((role) => {
+    const room = `${collegeCode}:${role}`;
+    io.to(room).emit(data.event, data);
   });
 };
+
 
 
 

@@ -52,8 +52,7 @@ export const orderBook = asyncHandler(async (req, res) => {
     studentId: userId,
     bookId,
     transactionCode,
-  });
-
+  })
   // Generate QR
   const qrData = JSON.stringify({
     transactionId: transaction._id,
@@ -66,6 +65,10 @@ export const orderBook = asyncHandler(async (req, res) => {
   transaction.qrCode = qrCode;
   await transaction.save({ validateBeforeSave: false });
 
+  const populateTransaction = await Transaction.findById(transaction._id).populate("bookId").populate("studentId", "fullName rollNo")
+
+
+
 
   sendNotification(
     collegeConn,
@@ -77,7 +80,7 @@ export const orderBook = asyncHandler(async (req, res) => {
   // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
     broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
       event: "libTransactionUpdated",
-      transaction
+      transaction: populateTransaction
     });
 
 

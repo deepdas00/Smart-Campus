@@ -36,6 +36,7 @@ import LibraryHeader from "../Components/LibraryHeader";
 import LibrarySidebar from "../Components/LibrarySidebar";
 import StatsGrid from "../Components/StatsGrid";
 import TransactionsTable from "../Components/TransactionsTable";
+import { socket } from "../socket";
 
 export default function LibraryTeacherHandle() {
   const [isReturnMode, setIsReturnMode] = useState(false);
@@ -839,6 +840,65 @@ export default function LibraryTeacherHandle() {
       </div>
     );
   };
+
+
+
+
+
+
+
+  useEffect(() => {
+  // 📚 BOOK INVENTORY UPDATED
+  const handleBookUpdated = (data) => {
+    const updatedBook = data?.book;
+    if (!updatedBook?._id) return;
+
+    setBooks((prev) => {
+      const exists = prev.some((b) => b._id === updatedBook._id);
+
+      // update existing book
+      if (exists) {
+        return prev.map((b) =>
+          b._id === updatedBook._id ? updatedBook : b
+        );
+      }
+
+      // new book added
+      return [updatedBook, ...prev];
+    });
+  };
+
+  // 🔄 LIBRARY TRANSACTION UPDATED
+  const handleTransactionUpdated = (data) => {
+    const tx = data?.transaction;
+    if (!tx?._id) return;
+
+    const normalized = normalizeTransaction(tx);
+
+    setTransactions((prev) => {
+      const exists = prev.some((t) => t.id === normalized.id);
+
+      if (exists) {
+        return prev.map((t) =>
+          t.id === normalized.id ? normalized : t
+        );
+      }
+
+      return [normalized, ...prev];
+    });
+  };
+
+  socket.on("bookUpdated", handleBookUpdated);
+  socket.on("libTransactionUpdated", handleTransactionUpdated);
+
+  return () => {
+    socket.off("bookUpdated", handleBookUpdated);
+    socket.off("libTransactionUpdated", handleTransactionUpdated);
+  };
+}, []);
+
+
+
 
   return (
     <>

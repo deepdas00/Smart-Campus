@@ -5,6 +5,7 @@ import { uploadOnCloudinary } from "../../utils/cloudinary.js";
 import { ApiError } from "../../utils/apiError.js";
 import { ApiResponse } from "../../utils/apiResponse.js";
 import { asyncHandler } from "../../utils/asyncHandler.js";
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
 
 /* =========================
    ADD BOOK (Librarian/Admin)
@@ -66,6 +67,15 @@ export const addBook = asyncHandler(async (req, res) => {
     coverImage: uploadedCover.url,
     description
   });
+
+
+
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "bookUpdated",
+      book
+    });
+
 
   res.status(201).json(new ApiResponse(201, book, "Book added successfully"));
 });
@@ -151,6 +161,13 @@ export const updateBook = asyncHandler(async (req, res) => {
   //   updates,
   //   { new: true }
   // );
+
+
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "bookUpdated",
+      book
+    });
 
 
   res.status(200).json(new ApiResponse(200, existingBook, "Book updated"));

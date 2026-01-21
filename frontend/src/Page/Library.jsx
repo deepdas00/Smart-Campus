@@ -30,6 +30,7 @@ import { Link } from "react-router-dom";
 import ProfileSidebar from "../Components/ProfileSidebar";
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
+import { socket } from "../socket";
 
 export default function Library() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -231,6 +232,10 @@ export default function Library() {
 
 
 
+
+
+
+
 const FullScreenLoader = () => {
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/80 backdrop-blur-2xl transition-all duration-500">
@@ -396,6 +401,67 @@ const FullScreenLoader = () => {
 
     fetchBooks();
   }, []);
+
+
+
+  useEffect(() => {
+  const handleBookUpdated = (data) => {
+    if (!data?.book?._id) return;
+
+    setBooks((prev) => {
+      const index = prev.findIndex(
+        (b) => b.id === data.book._id
+      );
+
+      const normalizedBook = {
+        id: data.book._id,
+        title: data.book.title,
+        author: data.book.author,
+        category: data.book.category.toLowerCase(),
+        rating: data.book.rating,
+        available: data.book.availableCopies,
+        total: data.book.totalCopies,
+        shelf: data.book.shelf,
+        isbn: data.book.isbn,
+        publisher: data.book.publisher,
+        year: data.book.publishedYear,
+        description: data.book.description,
+        coverImage: data.book.coverImage,
+      };
+
+      // ➕ NEW BOOK
+      if (index === -1) {
+        return [normalizedBook, ...prev];
+      }
+
+      // ✏️ UPDATE EXISTING BOOK
+      const updated = [...prev];
+      updated[index] = normalizedBook;
+      return updated;
+    });
+  };
+
+  const handleBookDeleted = (data) => {
+    if (!data?.bookId) return;
+
+    setBooks((prev) =>
+      prev.filter((b) => b.id !== data.bookId)
+    );
+  };
+
+  socket.on("bookUpdated", handleBookUpdated);
+  socket.on("bookDeleted", handleBookDeleted);
+
+  return () => {
+    socket.off("bookUpdated", handleBookUpdated);
+    socket.off("bookDeleted", handleBookDeleted);
+  };
+}, []);
+
+
+
+
+
 
   const [showProfileMenu, setShowProfileMenu] = useState(false);
 

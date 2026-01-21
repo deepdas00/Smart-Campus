@@ -1260,119 +1260,296 @@ export default function LibraryTeacherHandle() {
           )}
 
           {/* --- MODAL: ADD AND EDITE NEW BOOK --- */}
-{showAddBookModal && (
-  <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-xl flex items-center justify-center p-2 sm:p-4 z-[110] animate-in fade-in zoom-in duration-300">
-    
-    {/* Main Container: Added max-h-[95vh] and removed fixed h-auto to prevent overflow */}
-    <div className="bg-white rounded-xl md:rounded-[1.5rem] w-full max-w-5xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/20 flex flex-col md:flex-row max-h-[95vh] md:max-h-[90vh]">
-      
-      {/* LEFT ACCENT PANEL: Changed to md:h-auto to match right panel */}
-      <div className="md:w-72 bg-gradient-to-b from-blue-600 via-blue-900 to-black p-4 md:p-10 flex flex-row md:flex-col justify-between text-white relative shrink-0">
-        <div className="absolute inset-0 opacity-30 mix-blend-overlay pointer-events-none">
-          <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_50%_50%,#fff_0%,transparent_50%)] animate-pulse"></div>
-        </div>
+  {showAddBookModal && (
+            <div className="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-xl flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300 z-110">
+              {/* Main Container with subtle glass border */}
+              <div className="bg-white rounded-[3.5rem] w-full max-w-4xl shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden border border-white/20 flex flex-col md:flex-row min-h-[650px]">
+                {/* LEFT ACCENT PANEL: Visual Identity */}
+                <div className="md:w-72 bg-gradient-to-b from-blue-600 via-blue-900 to-black p-10 flex flex-col justify-between text-white relative">
+                  {/* Animated Mesh Gradient Overlay */}
+                  <div className="absolute inset-0 opacity-30 mix-blend-overlay">
+                    <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[120%] bg-[radial-gradient(circle_at_50%_50%,#fff_0%,transparent_50%)] animate-pulse"></div>
+                  </div>
 
-        <div className="relative z-10 flex gap-5 sm:flex-col items-center md:items-start">
-          <div className="w-8 h-8 md:w-14 md:h-14 bg-white/20 backdrop-blur-md rounded-xl md:rounded-[1.5rem] flex items-center justify-center mb-0 md:mb-8 border border-white/30 shadow-xl">
-            <BookOpen size={20} className="md:w-7 md:h-7" strokeWidth={2.5} />
-          </div>
-          <h3 className="text-xl md:text-3xl lg:text-4xl font-black leading-tight md:leading-[0.9] tracking-tighter italic">
-            {isEditMode ? <>UPDATE <br className="hidden md:block"/> BOOK</> : <>ADD <br className="hidden md:block"/> NEW BOOK</>}
-          </h3>
-        </div>
+                  <div className="relative z-10">
+                    <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-[1.5rem] flex items-center justify-center mb-8 border border-white/30 shadow-xl">
+                      <BookOpen size={28} strokeWidth={2.5} />
+                    </div>
+                    <h3 className="text-4xl font-black leading-[0.9] tracking-tighter italic">
+                      {" "}
+                      {isEditMode ? (
+                        <>
+                          UPDATE <br /> BOOK
+                        </>
+                      ) : (
+                        <>
+                          ADD <br /> NEW BOOK
+                        </>
+                      )}
+                    </h3>
+                    <div className="h-1 w-12 bg-indigo-300 mt-6 rounded-full"></div>
+                  </div>
 
-        <div className="relative z-10 hidden sm:flex flex-col mt-auto">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em]">Live Registry</span>
-            </div>
-            <p className="hidden md:block text-indigo-100/60 text-[10px] leading-relaxed font-medium">
-              Ensure all mandatory fields are verified before authorizing the database entry.
-            </p>
-          </div>
-        </div>
-      </div>
+                  <div className="relative z-10">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 opacity-100">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></div>
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em]">
+                          Live Registry
+                        </span>
+                      </div>
+                      <p className="text-indigo-100/60 text-[10px] leading-relaxed font-medium">
+                        Ensure all mandatory fields are verified before
+                        authorizing the database entry.
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-      {/* RIGHT CONTENT PANEL: overflow-hidden is key here */}
-      <div className="flex-1 bg-[#f8fafc] flex flex-col relative overflow-hidden">
-        
-        {/* Elegant Close Button */}
-        <div className="absolute top-4 right-3 md:top-4 md:right-3 z-20">
-          <button
-            onClick={() => { setShowAddBookModal(false); handleCloseModal(); }}
-            className="p-2 md:p-3 bg-white/80 backdrop-blur-md text-slate-400 hover:text-indigo-600 hover:shadow-xl rounded-xl md:rounded-2xl transition-all border border-slate-100"
-          >
-            <X size={18} strokeWidth={3} />
-          </button>
-        </div>
+                {/* RIGHT CONTENT PANEL: Interactive Form */}
+                <div className="flex-1 bg-[#f8fafc] flex flex-col relative">
+                  {/* Elegant Close Button */}
+                  <div className="absolute top-8 right-8 z-20">
+                    <button
+                      onClick={() => {
+                        setShowAddBookModal(false);
+                        handleCloseModal();
+                      }}
+                      className="p-3 bg-white text-slate-400 hover:text-indigo-600 hover:shadow-2xl hover:shadow-indigo-100 rounded-2xl transition-all duration-300 active:scale-90 border border-slate-100"
+                    >
+                      <X size={20} strokeWidth={3} />
+                    </button>
+                  </div>
 
-        {/* Scrollable Container: This is the only part that scrolls now */}
-        <div className="px-4 sm:px-6 md:px-12 pt-10 md:pt-12 pb-6 space-y-6 md:space-y-8 overflow-y-auto custom-scrollbar flex-1">
-          {/* Group 1: Identity */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-0.5 bg-indigo-600 text-white text-[10px] font-black rounded-lg">01</span>
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Identity & Origin</h4>
-            </div>
-            <div className="grid gap-4">
-              <input type="text" placeholder="Official Publication Title *" className="w-full bg-white border-2 border-slate-100 rounded-2xl px-5 py-4 outline-none focus:border-indigo-500 font-bold text-slate-700 text-sm md:text-base" value={newBook.title} onChange={(e) => setNewBook({ ...newBook, title: e.target.value })} />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input type="text" placeholder="Primary Author *" className="bg-white border-2 border-slate-100 rounded-xl px-5 py-3 outline-none focus:border-indigo-500 font-bold text-slate-700 text-sm" value={newBook.author} onChange={(e) => setNewBook({ ...newBook, author: e.target.value })} />
-                <input type="text" placeholder="Category *" className="bg-white border-2 border-slate-100 rounded-xl px-5 py-3 outline-none focus:border-indigo-500 font-bold text-slate-700 text-sm" value={newBook.category} onChange={(e) => setNewBook({ ...newBook, category: e.target.value })} />
+                  {/* Scrollable Container */}
+                  <div className="px-12 pt-16 pb-10 space-y-10 max-h-[75vh] overflow-y-auto custom-scrollbar">
+                    {/* Group 1: Identity */}
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-indigo-600 text-white text-[10px] font-black rounded-lg">
+                          01
+                        </span>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                          Identity & Origin
+                        </h4>
+                      </div>
+
+                      <div className="grid gap-6">
+                        <div className="relative group">
+                          <input
+                            type="text"
+                            placeholder="Official Publication Title *"
+                            className="w-full bg-white border-2 border-slate-100 rounded-[1.5rem] px-8 py-5 outline-none transition-all focus:border-indigo-500 focus:shadow-[0_15px_30px_-10px_rgba(79,70,229,0.15)] font-bold text-slate-700 placeholder:text-slate-300"
+                            value={newBook.title}
+                            onChange={(e) =>
+                              setNewBook({ ...newBook, title: e.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <input
+                            type="text"
+                            placeholder="Primary Author *"
+                            className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none transition-all focus:border-indigo-500 font-bold text-slate-700"
+                            value={newBook.author}
+                            onChange={(e) =>
+                              setNewBook({ ...newBook, author: e.target.value })
+                            }
+                          />
+                          <input
+                            type="text"
+                            placeholder="Department/Category *"
+                            className="bg-white border-2 border-slate-100 rounded-2xl px-6 py-4 outline-none transition-all focus:border-indigo-500 font-bold text-slate-700"
+                            value={newBook.category}
+                            onChange={(e) =>
+                              setNewBook({
+                                ...newBook,
+                                category: e.target.value,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Group 2: Quantitative Data */}
+                    <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 space-y-6">
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1 bg-emerald-500 text-white text-[10px] font-black rounded-lg">
+                          02
+                        </span>
+                        <h4 className="text-[11px] font-black text-slate-400 uppercase tracking-[0.3em]">
+                          Logistics & Stock
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {[
+                          {
+                            label: "Total Stock",
+                            val: newBook.totalCopies,
+                            key: "totalCopies",
+                            type: "number",
+                          },
+                          {
+                            label: "Available",
+                            val: newBook.availableCopies,
+                            key: "availableCopies",
+                            type: "number",
+                          },
+                          {
+                            label: "Shelf Ref",
+                            val: newBook.shelf,
+                            key: "shelf",
+                            type: "text",
+                          },
+                        ].map((field) => (
+                          <div key={field.key} className="group flex flex-col">
+                            <span className="text-[9px] font-black text-indigo-500 uppercase tracking-widest ml-4 mb-2">
+                              {field.label}
+                            </span>
+                            <input
+                              type={field.type}
+                              className="w-full bg-slate-50 border-2 border-transparent group-hover:bg-slate-100 rounded-2xl px-5 py-3 outline-none focus:bg-white focus:border-indigo-500 transition-all font-black text-slate-700"
+                              value={field.val}
+                              onChange={(e) =>
+                                setNewBook({
+                                  ...newBook,
+                                  [field.key]: e.target.value,
+                                })
+                              }
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Group 3: Archival Details */}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      <input
+                        type="number"
+                        placeholder="Rating (1-5)"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.rating}
+                        onChange={(e) =>
+                          setNewBook({ ...newBook, rating: e.target.value })
+                        }
+                      />
+                      <input
+                        type="text"
+                        placeholder="ISBN"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.isbn}
+                        onChange={(e) =>
+                          setNewBook({ ...newBook, isbn: e.target.value })
+                        }
+                      />
+                      <input
+                        type="number"
+                        placeholder="Pub. Year"
+                        className="bg-slate-100/50 border-none rounded-2xl px-5 py-4 text-sm font-bold text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500"
+                        value={newBook.publishedYear}
+                        onChange={(e) =>
+                          setNewBook({
+                            ...newBook,
+                            publishedYear: e.target.value,
+                          })
+                        }
+                      />
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Publisher Name"
+                      className="w-full bg-white border-2 border-slate-100 rounded-2xl px-8 py-4 outline-none focus:border-indigo-500 font-bold text-slate-700"
+                      value={newBook.publisher}
+                      onChange={(e) =>
+                        setNewBook({ ...newBook, publisher: e.target.value })
+                      }
+                    />
+
+                    <textarea
+                      placeholder="Technical Abstract / Description..."
+                      rows={3}
+                      className="w-full bg-white border-2 border-slate-100 rounded-[2rem] px-8 py-6 outline-none focus:border-indigo-500 font-medium text-slate-600 transition-all resize-none shadow-sm"
+                      value={newBook.description}
+                      onChange={(e) =>
+                        setNewBook({ ...newBook, description: e.target.value })
+                      }
+                    />
+
+                    {/* Upload Interactive Card */}
+                    <label className="relative group flex flex-col items-center justify-center w-full h-40 bg-indigo-50/30 border-2 border-dashed border-indigo-200 rounded-[2.5rem] cursor-pointer hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-300">
+                      <div className="flex flex-col items-center justify-center">
+                        <div className="p-3 bg-white rounded-xl shadow-md group-hover:scale-110 transition-transform duration-300 mb-3">
+                          <Upload size={20} className="text-indigo-600" />
+                        </div>
+                        <p className="text-[10px] font-black text-indigo-500 uppercase tracking-widest">
+                          {newBook.coverImage
+                            ? newBook.coverImage.name
+                            : "Drop Cover Asset"}
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) =>
+                          setNewBook({
+                            ...newBook,
+                            coverImage: e.target.files[0],
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  {/* Action Footer */}
+                  <div className="p-10 bg-gradient-to-b from-black to-black border-t border-slate-50 flex items-center justify-between">
+                    <div className="hidden sm:block">
+                      <span className="text-[9px] font-black text-slate-300 uppercase tracking-[0.4em]">
+                        Auth Level: Librarian
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        if (isEditMode) {
+                          handleUpdateBook();
+                        } else {
+                          handleAddBook();
+                        }
+                        handleCloseModal(); // now properly called
+                      }}
+                      disabled={isAddingBook || isUpdatingBook}
+                      className={`w-full sm:w-auto px-14 py-5 rounded-[2rem] font-black uppercase text-xs tracking-[0.2em] transition-all 
+    ${
+      isEditMode
+        ? "bg-emerald-600 hover:bg-emerald-700"
+        : "bg-[#30299c] text-white hover:bg-indigo-600"
+    }
+    ${(isAddingBook || isUpdatingBook) && "bg-slate-400 cursor-not-allowed"}
+  `}
+                    >
+                      {isAddingBook || isUpdatingBook ? (
+                        <span className="flex items-center gap-3">
+                          <svg
+                            className="w-4 h-4 animate-spin"
+                            viewBox="0 0 24 24"
+                          />
+                          {isEditMode ? "Updating…" : "Registering…"}
+                        </span>
+                      ) : isEditMode ? (
+                        "Update Book"
+                      ) : (
+                        "Register Entry"
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Group 2: Logistics */}
-          <div className="bg-white p-5 md:p-7 rounded-3xl shadow-sm border border-slate-100 space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="px-2 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-lg">02</span>
-              <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Logistics & Stock</h4>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-              {[
-                { label: "Total", val: newBook.totalCopies, key: "totalCopies", type: "number" },
-                { label: "Avail.", val: newBook.availableCopies, key: "availableCopies", type: "number" },
-                { label: "Shelf", val: newBook.shelf, key: "shelf", type: "text" },
-              ].map((field) => (
-                <div key={field.key} className="flex flex-col">
-                  <span className="text-[8px] font-black text-indigo-500 uppercase tracking-widest ml-1 mb-1">{field.label}</span>
-                  <input type={field.type} className="bg-slate-50 border-2 border-transparent rounded-xl px-3 py-2 outline-none focus:bg-white focus:border-indigo-500 transition-all font-black text-slate-700 text-xs md:text-sm" value={field.val} onChange={(e) => {/* your logic */}} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Group 3: Secondary Info */}
-          <div className="space-y-4">
-             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-               <input type="number" placeholder="Rating" className="bg-slate-100/50 rounded-xl px-4 py-3 text-sm font-bold" />
-               <input type="text" placeholder="ISBN" className="bg-slate-100/50 rounded-xl px-4 py-3 text-sm font-bold" />
-               <input type="number" placeholder="Year" className="bg-slate-100/50 rounded-xl px-4 py-3 text-sm font-bold col-span-2 md:col-span-1" />
-             </div>
-             <textarea placeholder="Description..." rows={2} className="w-full bg-white border-2 border-slate-100 rounded-2xl px-5 py-3 outline-none text-sm" />
-          </div>
-        </div>
-
-        {/* Action Footer: Now remains visible at the bottom of the modal */}
-        <div className="p-4 md:p-6 bg-white border-t border-slate-100 flex items-center justify-between shrink-0">
-          <div className="hidden sm:block">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.4em]">Auth: Librarian</span>
-          </div>
-          <button
-            onClick={() => { /* logic */ }}
-            className={`w-full sm:w-auto px-10 py-4 rounded-2xl font-black uppercase text-[10px] tracking-[0.2em] transition-all shadow-lg active:scale-95 ${
-              isEditMode ? "bg-emerald-600 text-white" : "bg-indigo-700 text-white"
-            }`}
-          >
-            {isEditMode ? "Update Book" : "Register Entry"}
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+          )}
 
           {/* --- CONFIRMATION WINDOW (RETURN) --- */}
           {showReturnConfirm && (

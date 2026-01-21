@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import axios from "axios";
 import { requestPermission } from "../notifications";
 import { socket } from "../socket"; // adjust path if needed
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import {
   ImageIcon,
@@ -46,6 +47,19 @@ export default function HomeLogin() {
   const [gallery, setGallery] = useState([]);
   const [loadingGallery, setLoadingGallery] = useState(true);
   const [open, setOpen] = useState(false);
+  const [activeImage, setActiveImage] = useState(null);
+
+  useEffect(() => {
+    if (activeImage) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [activeImage]);
 
   const { user } = useAuth();
 
@@ -105,18 +119,16 @@ export default function HomeLogin() {
       });
     };
 
-
     const handleGalleryDeleted = (data) => {
       setGallery((prev) => prev.filter((img) => img._id !== data.newImage._id));
     };
-
 
     socket.on("galleryUpdated", handleGalleryUpdate);
     socket.on("galleryDeleted", handleGalleryDeleted);
 
     return () => {
       socket.off("galleryUpdated", handleGalleryUpdate);
-     socket.off("galleryDeleted", handleGalleryDeleted);
+      socket.off("galleryDeleted", handleGalleryDeleted);
     };
   }, [user]);
 
@@ -142,43 +154,39 @@ export default function HomeLogin() {
     fetchNotifications();
   }, [user]);
 
-
   useEffect(() => {
-  if (!user) return;
+    if (!user) return;
 
-  /* 🔔 CREATE / UPDATE notification */
-  const handleNotificationUpdated = (data) => {
-    setNotices((prev) => {
-      const exists = prev.find(n => n._id === data.notification._id);
+    /* 🔔 CREATE / UPDATE notification */
+    const handleNotificationUpdated = (data) => {
+      setNotices((prev) => {
+        const exists = prev.find((n) => n._id === data.notification._id);
 
-      // UPDATE
-      if (exists) {
-        return prev.map(n =>
-          n._id === data.notification._id ? data.notification : n
-        );
-      }
+        // UPDATE
+        if (exists) {
+          return prev.map((n) =>
+            n._id === data.notification._id ? data.notification : n,
+          );
+        }
 
-      // CREATE (prepend)
-      return [data.notification, ...prev];
-    });
-  };
+        // CREATE (prepend)
+        return [data.notification, ...prev];
+      });
+    };
 
-  /* 🗑 DELETE notification */
-  const handleNotificationDeleted = (data) => {
-    setNotices((prev) =>
-      prev.filter(n => n._id !== data._id)
-    );
-  };
+    /* 🗑 DELETE notification */
+    const handleNotificationDeleted = (data) => {
+      setNotices((prev) => prev.filter((n) => n._id !== data._id));
+    };
 
-  socket.on("notificationUpdated", handleNotificationUpdated);
-  socket.on("notificationDeleted", handleNotificationDeleted);
+    socket.on("notificationUpdated", handleNotificationUpdated);
+    socket.on("notificationDeleted", handleNotificationDeleted);
 
-  return () => {
-    socket.off("notificationUpdated", handleNotificationUpdated);
-    socket.off("notificationDeleted", handleNotificationDeleted);
-  };
-}, [user]);
-
+    return () => {
+      socket.off("notificationUpdated", handleNotificationUpdated);
+      socket.off("notificationDeleted", handleNotificationDeleted);
+    };
+  }, [user]);
 
   return (
     <>
@@ -873,6 +881,10 @@ export default function HomeLogin() {
                           key={img._id}
                           className="relative aspect-[4/5] rounded-[1rem] sm:rounded-[2rem] overflow-hidden bg-slate-50 
                 hover:scale-110 hover:z-20 transition-all duration-700 shadow-xl"
+                          onClick={(e) => {
+                            e.stopPropagation(); // 🔥 VERY IMPORTANT
+                            setActiveImage(img.image);
+                          }}
                         >
                           <img
                             src={img.image}
@@ -912,6 +924,44 @@ export default function HomeLogin() {
             </div>
           ) : null}
         </>
+
+        {activeImage && (
+          <div className="fixed inset-0 z-[9999] bg-black flex items-center justify-center">
+            {/* CLOSE */}
+            <button
+              onClick={() => setActiveImage(null)}
+              className="absolute top-4 right-4 z-50 bg-white/20 text-white px-3 py-2 rounded-full"
+            >
+              ✕
+            </button>
+
+            {/* DOWNLOAD */}
+            <a
+              href={activeImage}
+              download
+              className="absolute top-4 left-4 z-50 bg-white/20 text-white px-3 py-2 rounded-full"
+            >
+              Download
+            </a>
+
+            <TransformWrapper
+              initialScale={1}
+              minScale={1}
+              maxScale={4}
+              doubleClick={{ mode: "zoomIn" }}
+              pinch={{ step: 5 }}
+              wheel={{ step: 0.2 }}
+            >
+              <TransformComponent>
+                <img
+                  src={activeImage}
+                  alt="zoom"
+                  className="max-w-full max-h-full object-contain"
+                />
+              </TransformComponent>
+            </TransformWrapper>
+          </div>
+        )}
 
         <Footer />
       </div>

@@ -18,6 +18,7 @@ import Navbar from "../Components/Navbar/Navbar";
 import ProfileSidebar from "../Components/ProfileSidebar";
 // import CollegeInfo from "../Components/CollegeInfo";
 import Footer from "../Components/Footer";
+import { socket } from "../socket";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -76,6 +77,52 @@ export default function CanteenOrders() {
     };
     fetchOrderHistory();
   }, []);
+
+
+
+
+
+
+useEffect(() => {
+  const handleOrderUpdated = (data) => {
+    if (!data?.order?._id) return;
+
+    setOrders((prev) => {
+      const index = prev.findIndex(o => o._id === data.order._id);
+
+      // ➕ New order
+      if (index === -1) {
+        return [data.order, ...prev];
+      }
+
+      // ✏️ Update order
+      const updated = [...prev];
+      updated[index] = data.order;
+      return updated;
+    });
+  };
+
+  socket.on("orderUpdated", handleOrderUpdated);
+
+  return () => {
+    socket.off("orderUpdated", handleOrderUpdated);
+  };
+}, []);
+
+
+
+
+useEffect(() => {
+  if (!selectedOrder) return;
+
+  const updated = orders.find(o => o._id === selectedOrder._id);
+
+  if (updated) {
+    setSelectedOrder(updated);
+  }
+}, [orders]);
+
+
 
   const totalSpent = orders.reduce(
     (sum, order) => sum + Number(order.totalAmount || 0),

@@ -70,6 +70,9 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
     }
   });
   
+
+
+
   // 7️⃣ Send data to frontend
   res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
 
@@ -197,7 +200,11 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   await order.save({ validateBeforeSave: false });
 
 
-
+// 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, ["student", "admin", "canteen"], {
+    event: "orderUpdated",
+    order
+  });
 
 
   sendNotification(

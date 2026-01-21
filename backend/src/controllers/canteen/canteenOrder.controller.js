@@ -94,6 +94,13 @@ export const placeOrder = asyncHandler(async (req, res) => {
 
 
 
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, ["student", "admin", "canteen"], {
+    event: "orderUpdated",
+    order
+  });
+
+
   res.status(201).json(
     new ApiResponse(
       201,
@@ -163,6 +170,17 @@ export const serveOrder = asyncHandler(async (req, res) => {
   order.orderStatus = "served";
   await order.save({ validateBeforeSave: false });
 
+
+
+
+  
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, ["student", "admin", "canteen"], {
+    event: "orderUpdated",
+    order
+  });
+
+  
   res.status(200).json(new ApiResponse(200, null, "Order served successfully"));
 });
 

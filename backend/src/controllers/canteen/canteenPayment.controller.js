@@ -208,6 +208,7 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
 
 
   sendNotification(
+    collegeConn,
     student.fcmToken,
     "Order Update 🍔",
     "Your Order placed successfully!"

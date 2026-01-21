@@ -1,3 +1,6 @@
+// for chunsks of student notification
+
+
 
 import admin from "../config/firebaseNotification.js";
 import { getCollegeStudentModel } from "../models/collegeStudent.model.js";

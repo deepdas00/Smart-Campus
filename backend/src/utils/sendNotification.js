@@ -1,7 +1,11 @@
+// for single student notification
+
+
 import admin from "../config/firebaseNotification.js";
 import { getCollegeStudentModel } from "../models/collegeStudent.model.js";
 
 export const sendNotification = async (
+  collegeConn,
   fcmToken,
   title,
   body,
@@ -31,6 +35,7 @@ export const sendNotification = async (
       err.code === "messaging/invalid-registration-token"
     ) {
 
+      const Student = getCollegeStudentModel(collegeConn)
       await Student.updateOne(
         { fcmToken },
         { $unset: { fcmToken: "" } }

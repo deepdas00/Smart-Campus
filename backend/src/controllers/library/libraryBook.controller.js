@@ -192,6 +192,14 @@ export const deleteBook = asyncHandler(async (req, res) => {
 
   if (!book) throw new ApiError(404, "Book not found");
 
+
+
+    // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "bookDeleted",
+      _id:bookId
+    });
+
   res.status(200).json(new ApiResponse(200, null, "Book removed"));
 });
 

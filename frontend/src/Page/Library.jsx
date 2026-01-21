@@ -341,6 +341,76 @@ const FullScreenLoader = () => {
     fetchLibraryHistory();
   }, []);
 
+
+  // 🔴 LIVE UPDATE FOR BOOKING SUCCESS POPUP
+useEffect(() => {
+  if (!socket || !bookingDetails) return;
+
+  const handleTransactionUpdate = (payload) => {
+    const updatedTx = payload.transaction;
+
+    // 🔒 Update ONLY the currently open popup transaction
+    if (updatedTx._id !== bookingDetails.id) return;
+
+    console.log("🔄 Popup transaction updated via socket");
+
+    // Normalize backend transaction → frontend format
+    const normalized = normalizeTransaction(updatedTx);
+
+    setBookingDetails((prev) => ({
+      ...prev,
+      ...normalized,
+    }));
+
+    // // 🎉 Auto-show success screen if returned
+    // if (updatedTx.transactionStatus === "returned") {
+    //   setBookReceived(true);
+    // }
+  };
+
+  socket.on("libTransactionUpdated", handleTransactionUpdate);
+
+  // 🧹 CLEANUP (very important)
+  return () => {
+    socket.off("libTransactionUpdated", handleTransactionUpdate);
+  };
+}, [socket, bookingDetails]);
+
+
+  useEffect(() => {
+  if (!socket) return;
+
+  const handleLibraryUpdate = (payload) => {
+    console.log("📚 Library transaction updated:", payload);
+
+    const newTransaction = payload.transaction;
+
+    setHistory((prevHistory) => {
+      // If transaction already exists → replace it
+      const exists = prevHistory.find(
+        (item) => item._id === newTransaction._id
+      );
+
+      if (exists) {
+        return prevHistory.map((item) =>
+          item._id === newTransaction._id ? newTransaction : item
+        );
+      }
+
+      // Otherwise → add new transaction on top
+      return [newTransaction, ...prevHistory];
+    });
+  };
+
+  socket.on("libTransactionUpdated", handleLibraryUpdate);
+
+  // 🧹 Cleanup (VERY IMPORTANT)
+  return () => {
+    socket.off("libTransactionUpdated", handleLibraryUpdate);
+  };
+}, [socket]);
+
+
   const categories = [
     { id: "all", name: "All Books" }, // default "All Books"
     ...Array.from(new Set(books.map((b) => b.category))).map((cat) => ({
@@ -442,10 +512,10 @@ const FullScreenLoader = () => {
   };
 
   const handleBookDeleted = (data) => {
-    if (!data?.bookId) return;
+    if (!data?._id) return;
 
     setBooks((prev) =>
-      prev.filter((b) => b.id !== data.bookId)
+      prev.filter((b) => b.id !== data._id)
     );
   };
 
@@ -915,6 +985,7 @@ const FullScreenLoader = () => {
           </div>
         </div>
       )}
+      
 
       {/* My Books Sidebar */}
      {showMyBooks && (

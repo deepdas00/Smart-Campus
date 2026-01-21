@@ -1,3 +1,28 @@
+galleryUpdated
+gallerydeleted
+
+foodUpdated
+foodDeleted
+canteenStatus
+orderUpdated
+
+bookUpdated
+bookDeleted 
+libTransactionUpdated 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /api/v1/college/data => all college name and ccollge code will send in the response  [DONE]
 

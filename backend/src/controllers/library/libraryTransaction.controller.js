@@ -13,6 +13,7 @@ import { sendMail } from "../../utils/sendMail.js";
 import { buildBookReturnReminderTemplate } from "../../template/buildBookReturnReminderTemplate.js";
 import { getCollegeInfoModel } from "../../models/colllegeInfo.model.js";
 import { sendNotification } from "../../utils/sendNotification.js";
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
 
 export const orderBook = asyncHandler(async (req, res) => {
   const { bookId } = req.body;
@@ -29,11 +30,11 @@ export const orderBook = asyncHandler(async (req, res) => {
   const collegeConn = getCollegeDB(college.dbName);
   const Book = getLibraryBookModel(collegeConn);
   const Transaction = getLibraryTransactionModel(collegeConn);
-  const Student  = getCollegeStudentModel(collegeConn)
+  const Student = getCollegeStudentModel(collegeConn)
 
   const student = await Student.findById(userId);
 
-  if(!student) return res.status(400).json({message:"Student not finnd"})
+  if (!student) return res.status(400).json({ message: "Student not finnd" })
   const book = await Book.findById(bookId);
   if (!book || !book.isActive) throw new ApiError(404, "Book not found");
 
@@ -66,15 +67,17 @@ export const orderBook = asyncHandler(async (req, res) => {
   await transaction.save({ validateBeforeSave: false });
 
 
-
-  console.log("lololololololololololololo",student.fcmToken);
-  
   sendNotification(
     student.fcmToken,
     "Library Update 📖",
     "Your Order placed successfully!"
   );
 
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "libTransactionUpdated",
+      transaction
+    });
 
 
   res
@@ -99,7 +102,9 @@ export const issueBook = asyncHandler(async (req, res) => {
   const Book = getLibraryBookModel(collegeConn);
   const Policy = getLibraryPolicyModel(collegeConn);
 
-  const transaction = await Transaction.findById(transactionId);
+  const transaction = await Transaction.findById(transactionId)
+    .populate({ path: "bookId", select: "title author coverImage shelf" })
+    .populate({ path: "studentId", select: "fullName" });
   if (!transaction) throw new ApiError(404, "Transaction not found");
 
   if (transaction.transactionStatus === "issued")
@@ -151,6 +156,17 @@ export const issueBook = asyncHandler(async (req, res) => {
       select: "coverImage isbn shelf author title",
     });
 
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+    event: "bookUpdated",
+    book
+  });
+
+    // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "libTransactionUpdated",
+      transaction
+    });
 
   res
     .status(200)
@@ -229,6 +245,12 @@ export const finalizeReturn = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "!!OVERDUE: Pay the fine first!!" })
 
 
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "libTransactionUpdated",
+      transaction
+    });
+
   res
     .status(200)
     .json(
@@ -257,7 +279,10 @@ export const returnBook = asyncHandler(async (req, res) => {
   const Book = getLibraryBookModel(collegeConn);
   const Student = getCollegeStudentModel(collegeConn);
 
-  const transaction = await Transaction.findById(transactionId);
+  const transaction = await Transaction.findById(transactionId)
+    .populate({ path: "bookId", select: "title author coverImage shelf" })
+    .populate({ path: "studentId", select: "fullName" });
+
   if (!transaction) throw new ApiError(404, "Transaction not found");
 
   const book = await Book.findById(transaction.bookId);
@@ -277,6 +302,30 @@ export const returnBook = asyncHandler(async (req, res) => {
   await book.save({ validateBeforeSave: false });
   await student.save({ validateBeforeSave: false });
   await transaction.save({ validateBeforeSave: false });
+
+
+    // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "libTransactionUpdated",
+      transaction
+    });
+
+    // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "studentUpdated",
+      transaction
+    });
+
+
+
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+    broadcastViaSocket(collegeCode, ["student", "admin", "librarian"], {
+      event: "bookUpdated",
+      book
+    });
+
+
+
   res.status(200).json({ message: `#${transaction.transactionCode} book return succesfully` })
 });
 

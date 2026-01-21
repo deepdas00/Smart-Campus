@@ -125,6 +125,7 @@ console.log(dbName);
     await CollegeUserModel.create({
       loginId,
       role,
+      collegeCode,
       password: hashedPassword,
       createdBySystem: true
     });

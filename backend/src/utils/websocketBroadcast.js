@@ -10,15 +10,18 @@ import { io } from "../index.js";
 
 
 export const broadcastViaSocket = (collegeCode, roles, data) => {
+  console.log("ihhihi");
+  
   if (!collegeCode || !data?.event) return;
-
+  
   // normalize roles to array
   const roleList = Array.isArray(roles) ? roles : [roles];
-
+  
   roleList.forEach((role) => {
     const room = `${collegeCode}:${role}`;
     io.to(room).emit(data.event, data);
   });
+  console.log("byeyeyyeyeye");
 };
 
 

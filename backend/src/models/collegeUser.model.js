@@ -8,6 +8,11 @@ const collegeUserSchema = new mongoose.Schema(
       unique: true,
     },
 
+    collegeCode:{
+      type:String,
+      required:true
+    },
+
     role: {
       type: String,
       enum: ["admin", "librarian", "canteen"],

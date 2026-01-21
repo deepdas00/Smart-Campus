@@ -1,5 +1,7 @@
-
-import { createRazorpayOrderUtil, verifyRazorpayPaymentUtil } from "../../utils/razorpayPayment.js";
+import {
+  createRazorpayOrderUtil,
+  verifyRazorpayPaymentUtil,
+} from "../../utils/razorpayPayment.js";
 import { connectMasterDB, getCollegeDB } from "../../db/db.index.js";
 import { getCollegeModel } from "../../models/college.model.js";
 import { getCanteenOrderModel } from "../../models/canteenOrder.model.js";
@@ -12,15 +14,9 @@ import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { sendNotification } from "../../utils/sendNotification.js";
 import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
 
-
-
 export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
-
   const { orderId } = req.params;
   const { collegeCode, userId } = req.user;
-
- 
-  
 
   // 1️⃣ Resolve college DB
   const masterConn = connectMasterDB();
@@ -28,7 +24,7 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -40,9 +36,6 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
 
   // 2️⃣ Fetch order
   const order = await Order.findById(orderId);
-
-
-  
 
   if (!order) {
     throw new ApiError(404, "Order not found");
@@ -58,8 +51,6 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Order already paid");
   }
 
-
-
   // 5️⃣ Create Razorpay order
   const paymentData = await createRazorpayOrderUtil({
     amount: order.totalAmount,
@@ -67,29 +58,23 @@ export const canteen_createRazorpayOrder = asyncHandler(async (req, res) => {
     saveOrderIdFn: async (orderId) => {
       order.razorpayOrderId = orderId;
       await order.save({ validateBeforeSave: false });
-    }
+    },
   });
-  
-
-
 
   // 7️⃣ Send data to frontend
-  res.status(200).json(new ApiResponse(200, paymentData, "Razorpay order created"));
-
+  res
+    .status(200)
+    .json(new ApiResponse(200, paymentData, "Razorpay order created"));
 });
 
 export const canteen_verifyPayment = asyncHandler(async (req, res) => {
-
-  const {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature
-  } = req.body;
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+    req.body;
 
   await verifyRazorpayPaymentUtil({
     razorpay_order_id,
     razorpay_payment_id,
-    razorpay_signature
+    razorpay_signature,
   }); //it will return true then only farther code will be run
 
   const { collegeCode, userId } = req.user;
@@ -115,7 +100,7 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
 
   const college = await College.findOne({
     collegeCode,
-    status: "active"
+    status: "active",
   });
 
   if (!college) {
@@ -126,14 +111,12 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
   const Order = getCanteenOrderModel(collegeConn);
   const Food = getCanteenFoodModel(collegeConn);
 
-   const Student = getCollegeStudentModel(collegeConn)
-  const student =await Student.findById(userId)
-  console.log(student);
-  
+  const Student = getCollegeStudentModel(collegeConn);
+  const student = await Student.findById(userId);
 
   // 4️⃣ Find order
   const order = await Order.findOne({
-    razorpayOrderId: razorpay_order_id
+    razorpayOrderId: razorpay_order_id,
   });
 
   if (!order) {
@@ -167,45 +150,43 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
         canteenFood.quantityAvailable = 0;
         canteenFood.isAvailable = false;
       }
-      
 
       const food = await canteenFood.save({ validateBeforeSave: false });
 
-
       console.log(food);
-      
 
       broadcastViaSocket(collegeCode, ["student", "canteen", "admin"], {
-      event: "foodUpdated",
-      food
-    });
-
-
+        event: "foodUpdated",
+        food,
+      });
     }
   }
-
 
   // 8️⃣ Generate QR code
   const qrPayload = JSON.stringify({
     orderId: order._id,
     transactionId: order.transactionCode,
-    collegeCode
+    collegeCode,
   });
 
   const qrCodeBase64 = await QRCode.toDataURL(qrPayload);
 
   // 9️⃣ Save QR code in order
   order.qrCode = qrCodeBase64;
-  order.orderStatus = "order_received"
+  order.orderStatus = "order_received";
   await order.save({ validateBeforeSave: false });
 
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  const populatedOrder = await Order.findById(order._id)
+    .populate("studentId", "fullName rollNo")
+    .lean();
 
-// 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  console.log("{{{{}}}}}<<<<<>>>>>>{{{{{}}}}}}", populatedOrder);
+
   broadcastViaSocket(collegeCode, ["student", "admin", "canteen"], {
     event: "orderUpdated",
-    order
+    order: populatedOrder,
   });
-
 
   sendNotification(
     collegeConn,
@@ -214,28 +195,26 @@ export const canteen_verifyPayment = asyncHandler(async (req, res) => {
     "Your Order placed successfully!"
   );
 
-
-  
-    
-
-
   // 8️⃣ Response
   res.status(200).json(
     new ApiResponse(
       200,
       {
         orderId: order._id,
-        transactionCode:order.transactionCode,
+        transactionCode: order.transactionCode,
         orderStatus: order.orderStatus,
-        createdAt:order.createdAt,
-        totalAmount:order.totalAmount,
+        createdAt: order.createdAt,
+        totalAmount: order.totalAmount,
         paymentStatus: order.paymentStatus,
         razorpayPaymentId: order.razorpayPaymentId,
         qrCode: order.qrCode,
-
-
       },
       "Payment verified successfully"
     )
   );
 });
+
+
+
+
+

@@ -63,7 +63,9 @@ const logout = () => {
   }, []);
 
   useEffect(() => {
-  if (user?.collegeCode && user?.role) {
+    
+    console.log("IHIHIIHIH", user?.collegeCode, user?.role, user);
+    if (user?.collegeCode && user?.role) {
     connectSocket({
       collegeCode: user.collegeCode,
       role: user.role, // "student" | "staff" | "admin"

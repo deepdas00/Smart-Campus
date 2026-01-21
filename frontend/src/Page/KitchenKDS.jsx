@@ -29,9 +29,21 @@ import {
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
 import { socket } from "../socket";
+import { useAuth } from "../context/AuthContext";
+import orderSound from "../assets/orderRecieve.mp3";
+
 // import CollegeInfo from "../Components/CollegeInfo";
 
+
+
+
+
+
+
+
 export function KitchenKDS() {
+  
+    const { user } = useAuth();
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showQRScanner, setShowQRScanner] = useState(false);
@@ -77,15 +89,15 @@ export function KitchenKDS() {
   const [scannedOrder, setScannedOrder] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [loadingOrder, setLoadingOrder] = useState(false);
-const handleRelease = () => {
-  isDragging.current = false; // Transition starts here
-  if (swipeProgress < 95) {
-    setSwipeProgress(0); // This will now animate smoothly because of the CSS transition
-  } else {
-    setSwipeProgress(100);
-    handleConfirmOrder(); // Your function to serve the order
-  }
-};
+  const handleRelease = () => {
+    isDragging.current = false; // Transition starts here
+    if (swipeProgress < 95) {
+      setSwipeProgress(0); // This will now animate smoothly because of the CSS transition
+    } else {
+      setSwipeProgress(100);
+      handleConfirmOrder(); // Your function to serve the order
+    }
+  };
   const updateSwipe = (clientX) => {
     if (!trackRef.current) return;
 
@@ -102,6 +114,8 @@ const handleRelease = () => {
       if (navigator.vibrate) navigator.vibrate(40);
     }
   };
+
+  
 
   const startDrag = () => {
     if (!isProcessing) isDragging.current = true;
@@ -261,7 +275,7 @@ const handleRelease = () => {
     try {
       const res = await axios.get(
         `${API_URL}/api/v1/canteen/orders/details/${orderId}`,
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       setScannedOrder(res.data.data);
@@ -279,7 +293,7 @@ const handleRelease = () => {
       await axios.post(
         `${API_URL}/api/v1/canteen/orders/serve`,
         { orderId: scannedOrder._id },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       // 1. Close the Confirmation/Swipe window
@@ -290,6 +304,8 @@ const handleRelease = () => {
       setShowSuccessModal(true);
       toast.success("Order served successfully");
 
+      
+
       // 3. Optional: Auto-close success window after 3 seconds
       setTimeout(() => {
         setShowSuccessModal(false);
@@ -297,7 +313,7 @@ const handleRelease = () => {
       }, 3000);
     } catch (err) {
       toast.error(
-        err.response?.data?.message || err.message || "Failed to serve order"
+        err.response?.data?.message || err.message || "Failed to serve order",
       );
       setSwipeProgress(0);
     } finally {
@@ -311,7 +327,7 @@ const handleRelease = () => {
 
   const toggleOnlineStatus = async () => {
     if (toggleLoading) return;
-
+   
     const nextStatus = !isOpen;
 
     try {
@@ -325,7 +341,7 @@ const handleRelease = () => {
         const res = await axios.post(
           `${API_URL}/api/v1/canteen/isActive`,
           { isActive: nextStatus },
-          { withCredentials: true }
+          { withCredentials: true },
         );
       } catch (err) {
         console.error("❌ ERROR:", err?.response || err.message);
@@ -333,7 +349,7 @@ const handleRelease = () => {
       }
 
       toast.success(
-        nextStatus ? "Canteen is now OPEN" : "Canteen is now CLOSED"
+        nextStatus ? "Canteen is now OPEN" : "Canteen is now CLOSED",
       );
     } catch (err) {
       // 3️⃣ Rollback if API fails
@@ -350,7 +366,7 @@ const handleRelease = () => {
         `${API_URL}/api/v1/canteen/food/${foodId}`,
         {
           withCredentials: true, // sends cookies automatically
-        }
+        },
       );
 
       toast.success("Food deleted successfully!");
@@ -368,7 +384,7 @@ const handleRelease = () => {
       await deleteFood(deleteTarget._id);
 
       setMenuItems((prev) =>
-        prev.filter((item) => item._id !== deleteTarget._id)
+        prev.filter((item) => item._id !== deleteTarget._id),
       );
 
       toast.success("Food item deleted");
@@ -390,7 +406,7 @@ const handleRelease = () => {
 
         const res = await axios.get(
           `${API_URL}/api/v1/canteen/foods`,
-          { withCredentials: true } // if auth cookies are used
+          { withCredentials: true }, // if auth cookies are used
         );
 
         setMenuItems(res.data?.data?.foods); // adjust if response structure differs
@@ -410,14 +426,14 @@ const handleRelease = () => {
       const res = await axios.patch(
         `${API_URL}/api/v1/canteen/foods/${item._id}`, // <-- 'foods' plural
         { isAvailable: !item.isAvailable },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       // Update UI
       setMenuItems(
         menuItems.map((m) =>
-          m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m
-        )
+          m._id === item._id ? { ...m, isAvailable: !m.isAvailable } : m,
+        ),
       );
     } catch (err) {
       console.error("Failed to update availability:", err);
@@ -426,8 +442,8 @@ const handleRelease = () => {
       // Revert UI
       setMenuItems(
         menuItems.map((m) =>
-          m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m
-        )
+          m._id === item._id ? { ...m, isAvailable: item.isAvailable } : m,
+        ),
       );
     }
   };
@@ -469,14 +485,14 @@ const handleRelease = () => {
             headers: {
               "Content-Type": "multipart/form-data",
             },
-          }
+          },
         );
 
         // Update menuItems locally
         setMenuItems(
           menuItems.map((item) =>
-            item._id === editingFood._id ? res.data.data : item
-          )
+            item._id === editingFood._id ? res.data.data : item,
+          ),
         );
         toast.success("Food updated successfully!");
       } else {
@@ -508,35 +524,9 @@ const handleRelease = () => {
     }
   };
 
+  
 
 
-
-
-  useEffect(() => {
-  const handleCanteenFoodUpdate = (data) => {
-    if (!data?.food?._id) return;
-
-    setMenuItems((prev) => {
-      const index = prev.findIndex((f) => f._id === data.food._id);
-
-      // 🆕 New food added
-      if (index === -1) {
-        return [data.food, ...prev];
-      }
-
-      // ✏️ Existing food updated
-      const updated = [...prev];
-      updated[index] = data.food;
-      return updated;
-    });
-  };
-
-  socket.on("foodUpdated", handleCanteenFoodUpdate);
-
-  return () => {
-    socket.off("foodUpdated", handleCanteenFoodUpdate);
-  };
-}, []);
 
 
 
@@ -544,13 +534,41 @@ const handleRelease = () => {
 
 
   useEffect(() => {
-    const fetchDashboardOrders = async () => {
+    const handleCanteenFoodUpdate = (data) => {
+      if (!data?.food?._id) return;
+
+      setMenuItems((prev) => {
+        const index = prev.findIndex((f) => f._id === data.food._id);
+
+        // 🆕 New food added
+        if (index === -1) {
+          return [data.food, ...prev];
+        }
+
+        // ✏️ Existing food updated
+        const updated = [...prev];
+        updated[index] = data.food;
+        return updated;
+      });
+    };
+
+    socket.on("foodUpdated", handleCanteenFoodUpdate);
+
+    return () => {
+      socket.off("foodUpdated", handleCanteenFoodUpdate);
+    };
+  }, []);
+
+
+
+
+  const fetchDashboardOrders = async () => {
       try {
         setLoading(true);
 
         const res = await axios.get(
           `${API_URL}/api/v1/canteen/orders/dashboard?range=${RANGE_MAP[range]}`,
-          { withCredentials: true }
+          { withCredentials: true },
         );
 
         // console.log(res);
@@ -572,10 +590,7 @@ const handleRelease = () => {
             ? o.items.map((i) => `${i.foodName || i.name} x${i.quantity || 1}`)
             : [],
           total: o.totalAmount || 0,
-          waitTime: Math.max(
-            1,
-            Math.floor((Date.now() - new Date(o.createdAt)) / 60000)
-          ),
+         createdAt: o.createdAt,
           // "order_received",
           //       "preparing",
           //       "ready",
@@ -584,7 +599,15 @@ const handleRelease = () => {
           paymentStatus: o.paymentStatus,
         }));
 
-        setOrders(formattedOrders);
+        setOrders((prev) => {
+          const map = new Map(prev.map((o) => [o.id, o]));
+
+          formattedOrders.forEach((o) => {
+            map.set(o.id, { ...map.get(o.id), ...o });
+          });
+
+          return Array.from(map.values());
+        });
 
         setStats(res.data?.stats || null);
       } catch (err) {
@@ -595,13 +618,140 @@ const handleRelease = () => {
       }
     };
 
+
+
+
+  useEffect(() => {
+    
+
     fetchDashboardOrders();
   }, [range]);
+
+
+
+
+
+
+
+
+
+
+
+
+ const normalizeStatus = (status) => {
+  if (status === "order_received" || status === "preparing") return "preparing";
+  if (status === "ready") return "ready";
+  if (status === "served") return "served";
+  return "preparing";
+};
+
+
+const orderAudioRef = useRef(null);
+
+useEffect(() => {
+  orderAudioRef.current = new Audio(orderSound);
+  orderAudioRef.current.volume = 1; // full volume
+}, []);
+
+
+const playOrderReceivedSound = () => {
+  const audio = orderAudioRef.current;
+  if (!audio) return;
+
+  audio.currentTime = 0;
+  audio.play();
+};
+
+
+useEffect(() => {
+  const unlockAudio = () => {
+    const audio = orderAudioRef.current;
+    if (!audio) return;
+
+    audio.play().then(() => {
+      audio.pause();
+      audio.currentTime = 0;
+    }).catch(() => {});
+
+    window.removeEventListener("click", unlockAudio);
+    window.removeEventListener("touchstart", unlockAudio);
+  };
+
+  window.addEventListener("click", unlockAudio);
+  window.addEventListener("touchstart", unlockAudio);
+
+  return () => {
+    window.removeEventListener("click", unlockAudio);
+    window.removeEventListener("touchstart", unlockAudio);
+  };
+}, []);
+
+
+
+
+useEffect(() => {
+  const handleOrderUpdated = (data) => {
+
+    const order = data?.order;
+    if (!order?.transactionCode) return;
+    if (order?.orderStatus == "Not-Placed") return;
+
+    const formatted = {
+      id: order.transactionCode,
+      student: order.studentId?.fullName || "Student",
+      rollNo: order.studentId?.rollNo || "---",
+      items: order.items.map(
+        (i) => `${i.foodName ?? i.name ?? "Item"} x${i.quantity ?? 1}`
+      ),
+      total: order.totalAmount,
+      waitTime: (() => {
+  const mins = Math.max(
+    1,
+    Math.floor((Date.now() - new Date(order.createdAt)) / 60000)
+  );
+
+  if (mins < 60) return `${mins}m`;
+
+  if (mins < 1440)
+    return `${Math.floor(mins / 60)}h ${mins % 60}m`;
+
+  return `${Math.floor(mins / 1440)}d ${Math.floor((mins % 1440) / 60)}h`;
+})(),
+
+      status: normalizeStatus(order.orderStatus),
+      paymentStatus: order.paymentStatus,
+    };
+
+    setOrders((prev) => {
+      const exists = prev.some((o) => o.id === formatted.id);
+      if (exists) {
+        return prev.map((o) =>
+          o.id === formatted.id ? { ...o, ...formatted } : o
+        );
+      }
+
+      // ✅ NEW ORDER → ADD TO TOP
+      return [formatted, ...prev];
+    });
+
+
+    playOrderReceivedSound();
+
+    
+  };
+
+
+
+
+  socket.on("orderUpdated", handleOrderUpdated);
+  return () => socket.off("orderUpdated", handleOrderUpdated);
+}, []);
+
 
   const totalItems = menuItems.length;
 
   const inStockItems = menuItems.filter(
-    (item) => item.quantityAvailable > 0 && item.isAvailable
+    (item) => item.quantityAvailable > 0 && item.isAvailable,
   ).length;
 
   const inStockPercentage =
@@ -1079,8 +1229,8 @@ const handleRelease = () => {
                                   item.quantityAvailable <= 0
                                     ? "bg-gray-400 cursor-not-allowed"
                                     : item.isAvailable
-                                    ? "bg-emerald-500"
-                                    : "bg-slate-200"
+                                      ? "bg-emerald-500"
+                                      : "bg-slate-200"
                                 }`}
                               >
                                 <span
@@ -1211,8 +1361,8 @@ const handleRelease = () => {
                                 item.quantityAvailable <= 0
                                   ? "bg-gray-300"
                                   : item.isAvailable
-                                  ? "bg-emerald-500"
-                                  : "bg-slate-300"
+                                    ? "bg-emerald-500"
+                                    : "bg-slate-300"
                               }`}
                             >
                               <span
@@ -1227,8 +1377,8 @@ const handleRelease = () => {
                               {item.quantityAvailable <= 0
                                 ? "Out"
                                 : item.isAvailable
-                                ? "Live"
-                                : "Off"}
+                                  ? "Live"
+                                  : "Off"}
                             </span>
                           </div>
                         </div>
@@ -1273,7 +1423,7 @@ const handleRelease = () => {
                       orders.filter(
                         (o) =>
                           o.status ===
-                          (tab === "pending" ? "preparing" : "ready")
+                          (tab === "pending" ? "preparing" : "ready"),
                       ).length
                     })`}
                 </button>
@@ -1316,7 +1466,8 @@ const handleRelease = () => {
             {orders
               .filter(
                 (o) =>
-                  o.status === (activeTab === "pending" ? "preparing" : "ready")
+                  o.status ===
+                  (activeTab === "pending" ? "preparing" : "ready"),
               )
               .map((order) => (
                 <div
@@ -1334,8 +1485,8 @@ const handleRelease = () => {
                         order.status === "ready"
                           ? "bg-green-500"
                           : order.waitTime > 20
-                          ? "bg-red-500"
-                          : "bg-blue-500"
+                            ? "bg-red-500"
+                            : "bg-blue-500"
                       }`}
                       style={{
                         width: `${
@@ -1373,13 +1524,13 @@ const handleRelease = () => {
                           <Clock size={12} />
                           {order.waitTime >= 1440
                             ? `${Math.floor(
-                                order.waitTime / 1440
+                                order.waitTime / 1440,
                               )}d ${Math.floor((order.waitTime % 1440) / 60)}h`
                             : order.waitTime >= 60
-                            ? `${Math.floor(order.waitTime / 60)}h ${
-                                order.waitTime % 60
-                              }m`
-                            : `${order.waitTime}m`}
+                              ? `${Math.floor(order.waitTime / 60)}h ${
+                                  order.waitTime % 60
+                                }m`
+                              : `${order.waitTime}m`}
                         </div>
                       )}
                     </div>
@@ -1589,8 +1740,8 @@ const handleRelease = () => {
                               item.quantityAvailable <= 0
                                 ? "bg-gray-400"
                                 : item.isAvailable
-                                ? "bg-emerald-500 shadow-lg shadow-emerald-200"
-                                : "bg-slate-200"
+                                  ? "bg-emerald-500 shadow-lg shadow-emerald-200"
+                                  : "bg-slate-200"
                             }
         ${
           item.quantityAvailable === 0
@@ -1611,15 +1762,15 @@ const handleRelease = () => {
                               item.quantityAvailable <= 0
                                 ? "text-gray-400"
                                 : item.isAvailable
-                                ? "text-emerald-600"
-                                : "text-slate-400"
+                                  ? "text-emerald-600"
+                                  : "text-slate-400"
                             }`}
                           >
                             {item.quantityAvailable <= 0
                               ? "Stock Out"
                               : item.isAvailable
-                              ? "Available"
-                              : "Not Available"}
+                                ? "Available"
+                                : "Not Available"}
                           </span>
                         </div>
                       </td>
@@ -2076,56 +2227,58 @@ const handleRelease = () => {
 
               {/* --- THE MODERN SWIPE SLIDER --- */}
 
-             {scannedOrder.orderStatus !== "served" && (
-  <div
-    ref={trackRef}
-    id="swipe-track"
-    className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden touch-none border border-slate-200"
-  >
-    {/* Animated Background Progress */}
-    <div
-      className={`absolute left-0 top-0 h-full bg-emerald-500/70 ${
-        !isDragging.current ? "transition-all duration-500 ease-out" : "transition-none"
-      }`}
-      style={{ width: `${swipeProgress}%` }}
-    />
+              {scannedOrder.orderStatus !== "served" && (
+                <div
+                  ref={trackRef}
+                  id="swipe-track"
+                  className="relative h-16 bg-slate-100 rounded-full p-2 flex items-center select-none overflow-hidden touch-none border border-slate-200"
+                >
+                  {/* Animated Background Progress */}
+                  <div
+                    className={`absolute left-0 top-0 h-full bg-emerald-500/70 ${
+                      !isDragging.current
+                        ? "transition-all duration-500 ease-out"
+                        : "transition-none"
+                    }`}
+                    style={{ width: `${swipeProgress}%` }}
+                  />
 
-    {/* Hint Text */}
-    <p
-      className={`absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] pointer-events-none transition-all duration-300 
+                  {/* Hint Text */}
+                  <p
+                    className={`absolute inset-0 flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] pointer-events-none transition-all duration-300 
       ${swipeProgress > 20 ? "opacity-0 translate-x-4" : "opacity-40 text-slate-600"}`}
-    >
-      Swipe to Confirm
-    </p>
+                  >
+                    Swipe to Confirm
+                  </p>
 
-    {/* Handle (The Knob) */}
-    <div
-      onMouseDown={startDrag}
-      onTouchStart={startDrag}
-      className={`relative z-10 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-95 ${
-        isProcessing
-          ? "bg-slate-200 cursor-wait"
-          : "bg-white cursor-grab active:cursor-grabbing border border-slate-100"
-      }`}
-      style={{
-        transform: `translateX(${((trackRef.current?.offsetWidth - 56) * swipeProgress) / 100}px)`,
-        transition: isDragging.current
-          ? "none" 
-          : "transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)", // Elastic snap-back
-      }}
-    >
-      {isProcessing ? (
-        <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-      ) : (
-        <ChevronRight
-          size={24}
-          strokeWidth={3}
-          className={`transition-colors ${swipeProgress > 90 ? "text-emerald-600" : "text-slate-400"}`}
-        />
-      )}
-    </div>
-  </div>
-)}
+                  {/* Handle (The Knob) */}
+                  <div
+                    onMouseDown={startDrag}
+                    onTouchStart={startDrag}
+                    className={`relative z-10 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition-transform active:scale-95 ${
+                      isProcessing
+                        ? "bg-slate-200 cursor-wait"
+                        : "bg-white cursor-grab active:cursor-grabbing border border-slate-100"
+                    }`}
+                    style={{
+                      transform: `translateX(${((trackRef.current?.offsetWidth - 56) * swipeProgress) / 100}px)`,
+                      transition: isDragging.current
+                        ? "none"
+                        : "transform 0.5s cubic-bezier(0.18, 0.89, 0.32, 1.28)", // Elastic snap-back
+                    }}
+                  >
+                    {isProcessing ? (
+                      <div className="w-5 h-5 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <ChevronRight
+                        size={24}
+                        strokeWidth={3}
+                        className={`transition-colors ${swipeProgress > 90 ? "text-emerald-600" : "text-slate-400"}`}
+                      />
+                    )}
+                  </div>
+                </div>
+              )}
 
               {scannedOrder.orderStatus === "served" && (
                 <div

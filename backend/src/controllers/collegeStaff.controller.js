@@ -101,6 +101,10 @@ export const currentStaff = asyncHandler(async (req, res) => {
         .json({ success: false, message: "Staff not found" });
     }
 
+
+    console.log(currentStaff);
+    
+
     // Change 'data' to 'user' to match your React AuthContext expectations
     res.status(200).json(new ApiResponse(200, currentStaff, "GOT STUDENT"));
   } catch (err) {

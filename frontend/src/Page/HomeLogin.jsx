@@ -930,7 +930,7 @@ export default function HomeLogin() {
             {/* CLOSE */}
             <button
               onClick={() => setActiveImage(null)}
-              className="absolute top-4 right-4 z-50 bg-white/20 text-white px-3 py-2 rounded-full"
+              className="absolute top-4 right-4 z-50 bg-white/20 text-white sm:px-3 sm:py-2 rounded-full sm:text-md text-xs px-2 py-1"
             >
               ✕
             </button>
@@ -939,7 +939,7 @@ export default function HomeLogin() {
             <a
               href={activeImage}
               download
-              className="absolute top-4 left-4 z-50 bg-white/20 text-white px-3 py-2 rounded-full"
+              className="absolute top-4 left-4 z-50 bg-white/20 text-white sm::px-3 sm::py-2 rounded-full px-2 py-1 text-xs sm::text-md"
             >
               Download
             </a>

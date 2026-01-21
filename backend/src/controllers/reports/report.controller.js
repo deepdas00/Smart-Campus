@@ -9,7 +9,8 @@ import { generateTransactionCode } from "../../utils/generateTransactionCode.js"
 import { getCollegeStudentModel } from "../../models/collegeStudent.model.js";
 import { getCollegeDepartmentModel } from "../../models/collegeDepartment.model.js";
 import { populate } from "dotenv";
-
+import { broadcastViaSocket } from "../../utils/websocketBroadcast.js";
+import { sendNotification } from "../../utils/sendNotification.js";
 /* =========================
    CREATE REPORT (Student)
 ========================= */
@@ -228,10 +229,19 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
   if (!college) throw new ApiError(404, "College not found");
 
   const collegeConn = getCollegeDB(college.dbName);
+  const Student = getCollegeStudentModel(collegeConn)
+  
   const Report = getReportModel(collegeConn);
+
+  
 
   const report = await Report.findById(reportId);
   if (!report) throw new ApiError(404, "Report not found");
+
+
+  const student = await Student.findById(report.studentId)
+
+  
 
   // Status → index mapping
   //   enum: ["submitted", "viewed", "in_progress", "resolved", "rejected", "closed"],
@@ -261,6 +271,48 @@ export const updateReportStatus = asyncHandler(async (req, res) => {
   if (assignedAdmin) report.assignedAdmin = assignedAdmin;
 
   await report.save();
+
+
+
+
+
+  // 🔄 REAL-TIME UPDATE VIA WEBSOCKET (YOUR WAY)
+  broadcastViaSocket(collegeCode, ["student", "admin"], {
+    event: "reportUpdated",
+    report
+  });
+
+
+const reportNotificationMap = {
+    viewed: {
+      title: "📄 Report Viewed",
+      body: "Your report has been reviewed by the administration. We are currently assessing the issue."
+    },
+    in_progress: {
+      title: "🛠️ Report In Progress",
+      body: "Action has started on your report. Our team is actively working to resolve the issue."
+    },
+    resolved: {
+      title: "✅ Report Resolved",
+      body: "Good news! Your reported issue has been successfully resolved. Thank you for your patience."
+    },
+    rejected: {
+      title: "❌ Report Rejected",
+      body: "Your report could not be processed. Please check the admin note for more details or submit again with correct information."
+    },
+  };
+
+  const notification = reportNotificationMap[status];
+
+  console.log("//////",notification);
+  
+  await sendNotification(
+    collegeConn,
+    student.fcmToken,
+    notification.title,
+    notification.body
+  );
+
 
   res
     .status(200)

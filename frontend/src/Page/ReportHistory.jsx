@@ -26,6 +26,7 @@ import {
 import Navbar from "../Components/Navbar/Navbar";
 import Footer from "../Components/Footer";
 import { Link } from "react-router-dom";
+import { socket } from "../socket";
 
 export default function ReportHistory() {
   const API_URL = import.meta.env.VITE_API_URL;
@@ -183,6 +184,53 @@ const PRIORITIES = [ "standard", "medium", "urgent"];
       setLoading(false);
     }
   };
+
+
+
+
+  useEffect(() => {
+  const handleReportUpdated = (data) => {
+    console.log("📡 reportUpdated:", data);
+
+    if (!data?.report?._id) return;
+
+    setReports((prev) => {
+      const index = prev.findIndex(
+        (r) => r._id === data.report._id
+      );
+
+      // 🆕 New report (edge case)
+      if (index === -1) {
+        return [data.report, ...prev];
+      }
+
+      // ✏️ Update existing report
+      const updated = [...prev];
+      updated[index] = {
+        ...updated[index],
+        ...data.report,
+      };
+      return updated;
+    });
+
+    // 🔄 Keep side panel (selectedReport) in sync
+    setSelectedReport((prev) =>
+      prev && prev._id === data.report._id
+        ? { ...prev, ...data.report }
+        : prev
+    );
+  };
+
+  socket.on("reportUpdated", handleReportUpdated);
+
+  return () => {
+    socket.off("reportUpdated", handleReportUpdated);
+  };
+}, []);
+
+
+
+
 
   const statusConfig = {
     submitted: {
